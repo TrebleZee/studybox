@@ -27,16 +27,23 @@ You can add your own topics to each subject and mark them off as you revise.
 
 ## How it works
 
-StudyBox has two main views:
+StudyBox has three main views:
 
 - `Planner` for managing subjects, topics, and the timer
 - `Log` for reviewing session history and study-time totals
-- `Settings` for switching themes and adding/removing custom subjects
 - `Settings` for switching themes and editing or deleting any subject
 
 The timer is based on timestamps rather than a simple interval counter, so it stays accurate even if the tab is backgrounded or the app is opened in standalone mode.
 
 All data is stored locally in `localStorage`. Nothing is synced to a server.
+
+## Quick Start
+
+- Go to [studybox-sigma.vercel.app](https://studybox-sigma.vercel.app) for a fully working version with no set up required
+- Click the "Add Subject" button to add a new subject
+- Click the "Add Topic" button to add a new topic to the subject
+- Click the "Start Timer" button to start a new study session
+- Study away!
 
 ## Getting started
 
