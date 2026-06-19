@@ -7,27 +7,37 @@ const openSettings = async (user) => {
   await user.click(screen.getByRole("button", { name: "Settings" }));
 };
 
+const openPlanner = async (user) => {
+  await user.click(screen.getByRole("button", { name: "Planner" }));
+};
+
 describe("StudyBox customization", () => {
-  it("adds and removes custom subjects", async () => {
+  it("edits and deletes default subjects", async () => {
     const user = userEvent.setup();
     render(<App />);
 
     await openSettings(user);
 
-    await user.type(screen.getByPlaceholderText("Subject name"), "Art History");
-    await user.type(screen.getByPlaceholderText("Exam board"), "AQA");
-    fireEvent.change(screen.getByTitle("Subject colour"), {
+    const physicsName = screen.getByLabelText("Subject name physics");
+    await user.clear(physicsName);
+    await user.type(physicsName, "Advanced Physics");
+    const physicsExam = screen.getByLabelText("Subject exam physics");
+    await user.clear(physicsExam);
+    await user.type(physicsExam, "AQA");
+    fireEvent.change(screen.getByLabelText("Subject colour physics"), {
       target: { value: "#ff7a59" },
     });
-    await user.click(screen.getByRole("button", { name: "Create subject" }));
+    await openPlanner(user);
 
-    await screen.findByText("Art History");
-    expect(screen.getByRole("button", { name: /Remove subject Art History/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Advanced Physics" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Physics" })).toBeNull();
 
     await openSettings(user);
-    await user.click(screen.getByRole("button", { name: /Remove subject Art History/ }));
+    await user.click(screen.getByRole("button", { name: "Delete subject maths" }));
 
-    expect(screen.queryByText("Art History")).toBeNull();
+    await openPlanner(user);
+    expect(screen.queryByRole("button", { name: "Maths" })).toBeNull();
+    expect(localStorage.getItem("sb-subjects")).toContain("Advanced Physics");
   });
 
   it("switches themes and persists the selected theme", async () => {

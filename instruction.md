@@ -22,8 +22,8 @@ This file documents the app structure so future changes stay consistent.
 
 ## Customization rules
 
-- Default subjects should stay locked.
-- Custom subjects can be added and removed from Settings.
+- Any subject can be edited or deleted from Settings, including the built-in defaults.
+- Custom subjects can still be added from Settings.
 - Theme changes should update the app surfaces and borders without changing subject colors.
 - Session tags should be entered freely and also support quick suggestions such as `Past papers`, `Blurting`, and `Recap`.
 
@@ -32,4 +32,3 @@ This file documents the app structure so future changes stay consistent.
 - Keep the planner layout focused on subjects, topics, and the timer.
 - Keep history entries compact, with tags shown as chips.
 - Preserve the existing PWA support and local-only data model.
-

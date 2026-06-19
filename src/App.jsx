@@ -192,7 +192,11 @@ const defaultSubjects = () =>
   }));
 
 const normalizeSubjects = (input) => {
-  if (!Array.isArray(input) || input.length === 0) {
+  if (input == null) {
+    return defaultSubjects();
+  }
+
+  if (!Array.isArray(input)) {
     return defaultSubjects();
   }
 
@@ -299,9 +303,9 @@ export default function StudyBox() {
     document.title = startedAt !== null ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
   }, [startedAt, displaySecs]);
 
-  const sub = subjects.find((subject) => subject.id === sel) || subjects[0];
+  const sub = subjects.find((subject) => subject.id === sel) || subjects[0] || null;
   const tSubData = subjects.find((subject) => subject.id === tSub);
-  const currentSubjectId = sub?.id || sel;
+  const currentSubjectId = sub?.id || null;
   const pct = (subject) =>
     subject.topics.length
       ? Math.round(
@@ -316,8 +320,6 @@ export default function StudyBox() {
       .reduce((sum, session) => sum + session.duration, 0);
   const grandTotal = sessions.reduce((sum, session) => sum + session.duration, 0);
   const timerColor = tSubData?.color || sub?.color || "#888888";
-  const customSubjects = subjects.filter((subject) => !subject.locked);
-
   const toggleTopic = (sid, tid) =>
     setSubjects((prev) =>
       prev.map((subject) =>
@@ -331,6 +333,12 @@ export default function StudyBox() {
           : subject
       )
     );
+
+  const updateSubject = (id, patch) => {
+    setSubjects((prev) =>
+      prev.map((subject) => (subject.id === id ? { ...subject, ...patch } : subject))
+    );
+  };
 
   const addTopic = () => {
     const topicName = newTopic.trim();
@@ -389,7 +397,7 @@ export default function StudyBox() {
     const next = subjects.filter((subject) => subject.id !== id);
     setSubjects(next);
     if (sel === id) {
-      setSel(next[0]?.id || "physics");
+      setSel(next[0]?.id || null);
     }
     if (tSub === id) {
       setTSub(null);
@@ -410,6 +418,7 @@ export default function StudyBox() {
   const clearTags = () => setSessionTags([]);
 
   const start = () => {
+    if (!sub) return;
     if (!tSub) setTSub(currentSubjectId);
     setStartedAt(Date.now() - elapsed * 1000);
   };
@@ -569,12 +578,16 @@ export default function StudyBox() {
             </div>
             <div style={{ flex: 1, overflowY: "auto" }}>
               {subjects.map((subject) => (
-                <div
+                <button
                   key={subject.id}
                   className="sub-btn"
+                  type="button"
                   onClick={() => setSel(subject.id)}
                   aria-label={subject.name}
                   style={{
+                    width: "100%",
+                    textAlign: "left",
+                    border: "none",
                     padding: "9px 13px",
                     cursor: "pointer",
                     background:
@@ -627,7 +640,7 @@ export default function StudyBox() {
                       }}
                     />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
             <div style={{ padding: "10px 13px", borderTop: `1px solid ${C.bdr}` }}>
@@ -872,16 +885,17 @@ export default function StudyBox() {
                 <button
                   className="nb"
                   onClick={start}
+                  disabled={!sub}
                   style={{
                     flex: 2,
                     padding: "8px 0",
                     borderRadius: "6px",
                     border: "none",
-                    cursor: "pointer",
+                    cursor: sub ? "pointer" : "not-allowed",
                     fontWeight: 700,
                     fontSize: "12px",
-                    background: timerColor,
-                    color: "#000",
+                    background: sub ? timerColor : C.s3,
+                    color: sub ? "#000" : C.muted,
                   }}
                 >
                   {displaySecs > 0 ? "Resume" : "Start"}
@@ -1074,17 +1088,17 @@ export default function StudyBox() {
             <button
               className="nb"
               onClick={logSess}
-              disabled={!displaySecs}
+              disabled={!displaySecs || !sub}
               style={{
                 margin: "0 13px 13px",
                 padding: "9px 0",
-                background: displaySecs ? timerColor : C.s3,
+                background: displaySecs && sub ? timerColor : C.s3,
                 border: "none",
                 borderRadius: "6px",
-                color: displaySecs ? "#000" : C.muted,
+                color: displaySecs && sub ? "#000" : C.muted,
                 fontWeight: 700,
                 fontSize: "12px",
-                cursor: displaySecs ? "pointer" : "not-allowed",
+                cursor: displaySecs && sub ? "pointer" : "not-allowed",
                 transition: "all 0.15s",
               }}
             >
@@ -1616,22 +1630,25 @@ export default function StudyBox() {
                     marginBottom: "10px",
                   }}
                 >
-                  Custom Subjects
+                  Edit Subjects
                 </div>
-                {customSubjects.length === 0 ? (
+                <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.5, marginBottom: "12px" }}>
+                  Edit the built-in subjects directly or delete any subject you no longer want.
+                </div>
+                {subjects.length === 0 ? (
                   <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.5 }}>
-                    Add your own subjects here. Default subjects stay locked in place, but
-                    any subject you create can be removed later.
+                    No subjects yet. Add one on the left to get started again.
                   </div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    {customSubjects.map((subject) => (
+                    {subjects.map((subject) => (
                       <div
                         key={subject.id}
                         style={{
-                          display: "flex",
-                          alignItems: "center",
+                          display: "grid",
+                          gridTemplateColumns: "auto minmax(0, 1fr) 52px auto",
                           gap: "10px",
+                          alignItems: "center",
                           padding: "10px 11px",
                           borderRadius: "10px",
                           background: C.s2,
@@ -1647,28 +1664,55 @@ export default function StudyBox() {
                             flexShrink: 0,
                           }}
                         />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 600, fontSize: "13px" }}>
-                            {subject.name}
-                          </div>
-                          <div style={{ fontSize: "11px", color: C.muted, marginTop: "2px" }}>
-                            {subject.exam || "Custom"}
-                          </div>
+                        <div style={{ display: "grid", gap: "6px", minWidth: 0 }}>
+                          <input
+                            aria-label={`Subject name ${subject.id}`}
+                            value={subject.name}
+                            onChange={(e) => updateSubject(subject.id, { name: e.target.value })}
+                            style={{
+                              width: "100%",
+                              background: C.s1,
+                              border: `1px solid ${C.bdr2}`,
+                              borderRadius: "8px",
+                              padding: "8px 9px",
+                              color: C.txt,
+                              outline: "none",
+                            }}
+                          />
+                          <input
+                            aria-label={`Subject exam ${subject.id}`}
+                            value={subject.exam}
+                            onChange={(e) => updateSubject(subject.id, { exam: e.target.value })}
+                            style={{
+                              width: "100%",
+                              background: C.s1,
+                              border: `1px solid ${C.bdr2}`,
+                              borderRadius: "8px",
+                              padding: "8px 9px",
+                              color: C.txt,
+                              outline: "none",
+                            }}
+                          />
                         </div>
-                        <div
+                        <input
+                          type="color"
+                          aria-label={`Subject colour ${subject.id}`}
+                          value={subject.color}
+                          onChange={(e) => updateSubject(subject.id, { color: e.target.value })}
                           style={{
-                            width: "12px",
-                            height: "12px",
-                            borderRadius: "3px",
-                            background: subject.color,
+                            width: "52px",
+                            height: "38px",
+                            padding: 0,
                             border: `1px solid ${C.bdr2}`,
-                            flexShrink: 0,
+                            borderRadius: "8px",
+                            background: "transparent",
+                            cursor: "pointer",
                           }}
                         />
                         <button
                           className="nb"
                           onClick={() => removeSubject(subject.id)}
-                          aria-label={`Remove subject ${subject.name}`}
+                          aria-label={`Delete subject ${subject.id}`}
                           style={{
                             border: "none",
                             background: "transparent",
