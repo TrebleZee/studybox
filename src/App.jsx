@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { extractPdfText, generateSubjectDraftFromPdfText } from "./specImport.js";
 
 const DEFAULT_SUBJECT_IDS = new Set(["physics", "maths", "further", "cs"]);
 const STORAGE_KEYS = {
@@ -268,6 +269,18 @@ export default function StudyBox() {
   const [subjectName, setSubjectName] = useState("");
   const [subjectExam, setSubjectExam] = useState("");
   const [subjectColor, setSubjectColor] = useState("#4F9CF9");
+  const [specFileName, setSpecFileName] = useState("");
+  const [specImporting, setSpecImporting] = useState(false);
+  const [specError, setSpecError] = useState("");
+  const [specTopics, setSpecTopics] = useState([]);
+  const [editingSession, setEditingSession] = useState(null);
+  const [editSubjectId, setEditSubjectId] = useState("");
+  const [editDurationHours, setEditDurationHours] = useState(0);
+  const [editDurationMinutes, setEditDurationMinutes] = useState(0);
+  const [editDate, setEditDate] = useState("");
+  const [editTags, setEditTags] = useState([]);
+  const [editTagInput, setEditTagInput] = useState("");
+  const [editNote, setEditNote] = useState("");
   const itvRef = useRef();
 
   const theme = THEMES.find((item) => item.id === themeId) || THEMES[0];
@@ -384,13 +397,47 @@ export default function StudyBox() {
         color: subjectColor,
         locked: false,
         custom: true,
-        topics: [],
+        topics: specTopics.map((topic, i) => ({
+          id: `${id}-topic-${i}`,
+          name: topic,
+          done: false,
+        })),
       },
     ]);
     setSel(id);
     setSubjectName("");
     setSubjectExam("");
     setSubjectColor("#4F9CF9");
+    setSpecFileName("");
+    setSpecError("");
+    setSpecTopics([]);
+  };
+
+  const handleSpecUpload = async (file) => {
+    if (!file) return;
+
+    setSpecImporting(true);
+    setSpecError("");
+    setSpecFileName(file.name);
+
+    try {
+      const text = await extractPdfText(file);
+      const draft = generateSubjectDraftFromPdfText(text, file.name);
+
+      setSubjectName(draft.subjectName);
+      setSubjectExam(draft.examBoard);
+      setSpecTopics(draft.topics || []);
+    } catch (error) {
+      setSpecError(error instanceof Error ? error.message : "Unable to read PDF spec.");
+    } finally {
+      setSpecImporting(false);
+    }
+  };
+
+  const clearSpecImport = () => {
+    setSpecFileName("");
+    setSpecError("");
+    setSpecTopics([]);
   };
 
   const removeSubject = (id) => {
@@ -438,9 +485,10 @@ export default function StudyBox() {
     if (!displaySecs || !sub) return;
 
     const subjectToLog = tSubData || sub;
+    const nid = `sess-${Date.now().toString(36)}`;
     setSessions((prev) => [
       {
-        id: Date.now().toString(),
+        id: nid,
         subjectId: subjectToLog.id,
         subjectName: subjectToLog.name,
         subjectColor: subjectToLog.color,
@@ -451,16 +499,77 @@ export default function StudyBox() {
       },
       ...prev,
     ]);
+
     setNote("");
-    setSessionTags([]);
-    setTagDraft("");
-    setElapsed(0);
-    setStartedAt(null);
-    setTSub(null);
+    clearTags();
+    reset();
   };
 
   const deleteSession = (id) => {
     setSessions((prev) => prev.filter((session) => session.id !== id));
+  };
+
+  const startEditSession = (session) => {
+    setEditingSession(session);
+    setEditSubjectId(session.subjectId);
+    setEditDurationHours(Math.floor(session.duration / 3600));
+    setEditDurationMinutes(Math.floor((session.duration % 3600) / 60));
+
+    const d = new Date(session.date);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    setEditDate(`${yyyy}-${mm}-${dd}`);
+
+    setEditTags(session.tags || []);
+    setEditTagInput("");
+    setEditNote(session.note || "");
+  };
+
+  const saveEditSession = () => {
+    if (!editingSession) return;
+
+    const targetSubject = subjects.find((s) => s.id === editSubjectId) || {
+      id: editSubjectId,
+      name: editingSession.subjectName,
+      color: editingSession.subjectColor,
+    };
+
+    const totalSeconds = editDurationHours * 3600 + editDurationMinutes * 60;
+
+    let finalDate = editingSession.date;
+    if (editDate) {
+      const originalDate = new Date(editingSession.date);
+      const [y, m, d] = editDate.split("-").map(Number);
+      const newD = new Date(
+        y,
+        m - 1,
+        d,
+        originalDate.getHours(),
+        originalDate.getMinutes(),
+        originalDate.getSeconds()
+      );
+      finalDate = newD.toISOString();
+    }
+
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === editingSession.id
+          ? {
+              ...s,
+              subjectId: targetSubject.id,
+              subjectName: targetSubject.name,
+              subjectColor: targetSubject.color,
+              duration: totalSeconds,
+              date: finalDate,
+              tags: editTags,
+              note: editNote.trim(),
+            }
+          : s
+      )
+    );
+
+    setEditingSession(null);
   };
 
   const CSS = `
@@ -477,6 +586,9 @@ export default function StudyBox() {
     .nb:hover { opacity: 0.85; }
     .nb:active { transform: scale(0.97); }
     .sess-row:hover .del-sess { opacity: 0.6 !important; }
+    .sess-row:hover .edit-sess { opacity: 0.6 !important; }
+    .edit-sess:hover { opacity: 1 !important; color: ${C.txt} !important; background: ${C.s3} !important; }
+    .del-sess:hover { opacity: 1 !important; color: #f87171 !important; }
     .theme-card:hover { background: ${C.hover} !important; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .ticking { animation: blink 2s ease-in-out infinite; }
@@ -1360,25 +1472,46 @@ export default function StudyBox() {
                       {fmtDate(session.date)}
                     </div>
                   </div>
-                  <button
-                    className="del-sess nb"
-                    onClick={() => deleteSession(session.id)}
-                    aria-label={`Delete session ${session.subjectName}`}
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      color: C.muted,
-                      cursor: "pointer",
-                      fontSize: "17px",
-                      lineHeight: 1,
-                      opacity: 0,
-                      transition: "opacity 0.1s",
-                      padding: "0 2px",
-                      flexShrink: 0,
-                    }}
-                  >
-                    x
-                  </button>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                    <button
+                      className="edit-sess nb"
+                      onClick={() => startEditSession(session)}
+                      aria-label={`Edit session ${session.subjectName}`}
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        color: C.muted,
+                        cursor: "pointer",
+                        fontSize: "11px",
+                        fontWeight: 500,
+                        opacity: 0,
+                        transition: "opacity 0.1s",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="del-sess nb"
+                      onClick={() => deleteSession(session.id)}
+                      aria-label={`Delete session ${session.subjectName}`}
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        color: C.muted,
+                        cursor: "pointer",
+                        fontSize: "17px",
+                        lineHeight: 1,
+                        opacity: 0,
+                        transition: "opacity 0.1s",
+                        padding: "0 2px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      x
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -1610,6 +1743,93 @@ export default function StudyBox() {
                     </button>
                   ))}
                 </div>
+                <div
+                  style={{
+                    marginTop: "12px",
+                    padding: "12px",
+                    borderRadius: "10px",
+                    border: `1px solid ${C.bdr}`,
+                    background: C.s2,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 600,
+                      color: C.muted,
+                      textTransform: "uppercase",
+                      letterSpacing: "1px",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    Import Spec PDF
+                  </div>
+                  <input
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    aria-label="Import subject specification PDF"
+                    onChange={(e) => handleSpecUpload(e.target.files?.[0])}
+                    style={{
+                      width: "100%",
+                      color: C.muted,
+                      fontSize: "12px",
+                    }}
+                  />
+                  <div style={{ marginTop: "8px", color: C.muted, fontSize: "11px", lineHeight: 1.5 }}>
+                    Upload a specification PDF to auto-fill the subject name and exam board.
+                  </div>
+                  {specImporting && (
+                    <div style={{ marginTop: "8px", fontSize: "11px", color: C.txt }}>
+                      Reading PDF...
+                    </div>
+                  )}
+                  {!specImporting && specFileName && !specError && (
+                    <div style={{ marginTop: "8px", fontSize: "11px", color: C.txt }}>
+                      Loaded {specFileName}.
+                      {specTopics.length > 0 && (
+                        <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                          {specTopics.map((topic, idx) => (
+                            <span
+                              key={idx}
+                              style={{
+                                background: C.s3,
+                                color: C.txt,
+                                padding: "2px 6px",
+                                borderRadius: "4px",
+                                fontSize: "10px",
+                              }}
+                            >
+                              {topic}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {specError && (
+                    <div style={{ marginTop: "8px", fontSize: "11px", color: "#f87171" }}>
+                      {specError}
+                    </div>
+                  )}
+                  {specFileName && (
+                    <button
+                      className="nb"
+                      type="button"
+                      onClick={clearSpecImport}
+                      style={{
+                        marginTop: "10px",
+                        border: "none",
+                        background: "transparent",
+                        color: C.txt,
+                        cursor: "pointer",
+                        fontSize: "11px",
+                        padding: 0,
+                      }}
+                      >
+                      Clear imported PDF
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div
@@ -1759,6 +1979,317 @@ export default function StudyBox() {
                 separate so you can keep subjects visually distinct while switching the
                 overall feel of the app.
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {editingSession && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "16px",
+          }}
+        >
+          <div
+            style={{
+              background: C.s1,
+              border: `1px solid ${C.bdr}`,
+              borderRadius: "16px",
+              padding: "20px",
+              width: "100%",
+              maxWidth: "380px",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "14px",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontWeight: 700, fontSize: "14px" }}>Edit Study Session</span>
+              <button
+                type="button"
+                onClick={() => setEditingSession(null)}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  color: C.muted,
+                  cursor: "pointer",
+                  fontSize: "18px",
+                  padding: 0,
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Subject Select */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+              <label
+                htmlFor="edit-subject-select"
+                style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}
+              >
+                Subject
+              </label>
+              <select
+                id="edit-subject-select"
+                value={editSubjectId}
+                onChange={(e) => setEditSubjectId(e.target.value)}
+                style={{
+                  width: "100%",
+                  background: C.s2,
+                  color: C.txt,
+                  border: `1px solid ${C.bdr2}`,
+                  borderRadius: "8px",
+                  padding: "8px 10px",
+                  outline: "none",
+                  cursor: "pointer",
+                }}
+              >
+                {subjects.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {sub.name} {sub.exam ? `(${sub.exam})` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Duration Fields */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+              <label style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Duration
+              </label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <div style={{ flex: 1 }}>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editDurationHours}
+                    onChange={(e) => setEditDurationHours(Math.max(0, parseInt(e.target.value) || 0))}
+                    style={{
+                      width: "100%",
+                      background: C.s2,
+                      color: C.txt,
+                      border: `1px solid ${C.bdr2}`,
+                      borderRadius: "8px",
+                      padding: "8px 10px",
+                      outline: "none",
+                    }}
+                  />
+                  <div style={{ fontSize: "9px", color: C.muted, marginTop: "2px" }}>Hours</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={editDurationMinutes}
+                    onChange={(e) => setEditDurationMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                    style={{
+                      width: "100%",
+                      background: C.s2,
+                      color: C.txt,
+                      border: `1px solid ${C.bdr2}`,
+                      borderRadius: "8px",
+                      padding: "8px 10px",
+                      outline: "none",
+                    }}
+                  />
+                  <div style={{ fontSize: "9px", color: C.muted, marginTop: "2px" }}>Minutes</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Date Picker */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+              <label
+                htmlFor="edit-date-input"
+                style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}
+              >
+                Date
+              </label>
+              <input
+                id="edit-date-input"
+                type="date"
+                value={editDate}
+                onChange={(e) => setEditDate(e.target.value)}
+                style={{
+                  width: "100%",
+                  background: C.s2,
+                  color: C.txt,
+                  border: `1px solid ${C.bdr2}`,
+                  borderRadius: "8px",
+                  padding: "8px 10px",
+                  outline: "none",
+                }}
+              />
+            </div>
+
+            {/* Tags list and entry */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+              <label style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Tags (Press Enter to add)
+              </label>
+              <div
+                style={{
+                  border: `1px solid ${C.bdr2}`,
+                  background: C.s2,
+                  borderRadius: "8px",
+                  padding: "8px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}
+              >
+                {editTags.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                    {editTags.map((tag) => (
+                      <span
+                        key={tag}
+                        style={{
+                          fontSize: "10px",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          background: C.s3,
+                          color: C.txt,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => setEditTags(editTags.filter((t) => t !== tag))}
+                          style={{
+                            border: "none",
+                            background: "transparent",
+                            color: C.muted,
+                            cursor: "pointer",
+                            padding: 0,
+                            fontSize: "12px",
+                            lineHeight: 1,
+                          }}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <input
+                    value={editTagInput}
+                    onChange={(e) => setEditTagInput(e.target.value)}
+                    placeholder="Add tag..."
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const tag = editTagInput.trim();
+                        if (tag && !editTags.includes(tag)) {
+                          setEditTags([...editTags, tag]);
+                        }
+                        setEditTagInput("");
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      background: "transparent",
+                      border: "none",
+                      color: C.txt,
+                      outline: "none",
+                      fontSize: "12px",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const tag = editTagInput.trim();
+                      if (tag && !editTags.includes(tag)) {
+                        setEditTags([...editTags, tag]);
+                      }
+                      setEditTagInput("");
+                    }}
+                    style={{
+                      background: C.s3,
+                      border: `1px solid ${C.bdr2}`,
+                      borderRadius: "4px",
+                      padding: "2px 8px",
+                      color: C.txt,
+                      cursor: "pointer",
+                      fontSize: "11px",
+                    }}
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Note text field */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+              <label style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Note
+              </label>
+              <input
+                value={editNote}
+                onChange={(e) => setEditNote(e.target.value)}
+                placeholder="Optional session notes"
+                style={{
+                  width: "100%",
+                  background: C.s2,
+                  color: C.txt,
+                  border: `1px solid ${C.bdr2}`,
+                  borderRadius: "8px",
+                  padding: "8px 10px",
+                  outline: "none",
+                }}
+              />
+            </div>
+
+            {/* Save / Cancel buttons */}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "4px" }}>
+              <button
+                type="button"
+                onClick={() => setEditingSession(null)}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  border: `1px solid ${C.bdr2}`,
+                  background: "transparent",
+                  color: C.txt,
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={saveEditSession}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: subjects.find((s) => s.id === editSubjectId)?.color || "#4F9CF9",
+                  color: "#000",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                }}
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>
