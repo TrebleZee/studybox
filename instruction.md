@@ -13,6 +13,7 @@ This file documents the app structure so future changes stay consistent.
 - `sb-subjects` - subject list, topic completion, and custom subjects
 - `sb-sessions` - logged study sessions
 - `sb-theme` - selected UI theme
+- `sb-subjects` also stores subjects created from uploaded specification PDFs, including inferred exam board and topic checklist
 
 ## Data model
 
@@ -24,6 +25,7 @@ This file documents the app structure so future changes stay consistent.
 
 - Any subject can be edited or deleted from Settings, including the built-in defaults.
 - Custom subjects can still be added from Settings.
+- A subject specification PDF can be uploaded from Settings to prefill the subject form with inferred name, exam board, and topics.
 - Theme changes should update the app surfaces and borders without changing subject colors.
 - Session tags should be entered freely and also support quick suggestions such as `Past papers`, `Blurting`, and `Recap`.
 

@@ -8,6 +8,7 @@ StudyBox is a lightweight A-level study planner and revision timer built with Re
 - Lets you add, complete, and remove topics within each subject
 - Supports custom subjects with your own name, exam board, and colour
 - Lets you edit or delete the built-in subjects as well
+- Lets you upload a subject specification PDF and auto-fill the subject name, exam board, and topic checklist
 - Includes several theme presets so you can change the app's overall look
 - Includes a built-in timer for focused study sessions
 - Logs each session with duration, date, subject, tags, and an optional note
@@ -32,6 +33,7 @@ StudyBox has three main views:
 - `Planner` for managing subjects, topics, and the timer
 - `Log` for reviewing session history and study-time totals
 - `Settings` for switching themes and editing or deleting any subject
+- `Settings` for switching themes, editing or deleting any subject, and importing a subject spec PDF
 
 The timer is based on timestamps rather than a simple interval counter, so it stays accurate even if the tab is backgrounded or the app is opened in standalone mode.
 
@@ -104,5 +106,7 @@ StudyBox saves:
 
 - subject/topic progress
 - logged study sessions
+- theme selection
+- imported subject definitions and custom subjects
 
 Because storage is local to the browser, clearing site data will reset the app.
