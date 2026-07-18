@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { extractPdfText, generateSubjectDraftFromPdfText } from "./specImport.js";
+import AsanaTasksPanel from "./components/AsanaTasksPanel.jsx";
+import { ASANA_DEFAULTS, normalizeAsanaConfig } from "./services/asanaClient.js";
 
 const DEFAULT_SUBJECT_IDS = new Set(["physics", "maths", "further", "cs"]);
 const STORAGE_KEYS = {
   subjects: "sb-subjects",
   sessions: "sb-sessions",
   theme: "sb-theme",
+  asana: "sb-asana",
+  asanaStats: "sb-asana-stats",
 };
 
 const TOPIC_SEED = {
@@ -182,6 +186,7 @@ const topicList = (seed, prefix) =>
     id: `${prefix}${index}`,
     name,
     done: false,
+    subtasks: [],
   }));
 
 const defaultSubjects = () =>
@@ -216,6 +221,13 @@ const normalizeSubjects = (input) => {
         id: topic?.id || `${subject?.id || "sub"}-${topicIndex}`,
         name: topic?.name || "Untitled topic",
         done: Boolean(topic?.done),
+        subtasks: (Array.isArray(topic?.subtasks) ? topic.subtasks : []).map(
+          (subtask, subtaskIndex) => ({
+            id: subtask?.id || `${topic?.id || topicIndex}-st${subtaskIndex}`,
+            name: subtask?.name || "Untitled subtask",
+            done: Boolean(subtask?.done),
+          })
+        ),
       })),
     };
   });
@@ -256,13 +268,23 @@ export default function StudyBox() {
   const [sessions, setSessions] = useState(() =>
     normalizeSessions(loadJson(STORAGE_KEYS.sessions, []))
   );
+  const [asanaCfg, setAsanaCfg] = useState(() =>
+    normalizeAsanaConfig(loadJson(STORAGE_KEYS.asana, null))
+  );
+  const [asanaStats, setAsanaStats] = useState(() =>
+    loadJson(STORAGE_KEYS.asanaStats, null)
+  );
   const [sel, setSel] = useState("physics");
+  const [asanaTask, setAsanaTask] = useState(null);
   const [view, setView] = useState("planner");
   const [elapsed, setElapsed] = useState(0);
   const [startedAt, setStartedAt] = useState(null);
   const [now, setNow] = useState(() => Date.now());
   const [tSub, setTSub] = useState(null);
   const [newTopic, setNewTopic] = useState("");
+  const [expandedTopic, setExpandedTopic] = useState(null);
+  const [subtaskDraft, setSubtaskDraft] = useState("");
+  const [doneTopicsOpen, setDoneTopicsOpen] = useState(false);
   const [note, setNote] = useState("");
   const [sessionTags, setSessionTags] = useState([]);
   const [tagDraft, setTagDraft] = useState("");
@@ -298,6 +320,14 @@ export default function StudyBox() {
     localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(sessions));
   }, [sessions]);
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.asana, JSON.stringify(asanaCfg));
+  }, [asanaCfg]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.asanaStats, JSON.stringify(asanaStats));
+  }, [asanaStats]);
+
   const running = startedAt !== null;
 
   useEffect(() => {
@@ -327,12 +357,31 @@ export default function StudyBox() {
             100
         )
       : 0;
+  const asanaPct =
+    asanaStats && asanaStats.total > 0
+      ? Math.round((asanaStats.completed / asanaStats.total) * 100)
+      : null;
+  const asanaSelected = sel === asanaCfg.id;
+  const asanaAsSubject = {
+    id: asanaCfg.id,
+    name: asanaCfg.name,
+    color: asanaCfg.color,
+  };
+  const timingAsana = tSub === asanaCfg.id;
+  const canTime = asanaSelected || Boolean(sub);
+  const updateAsanaCfg = (patch) => {
+    if ("projectGid" in patch) setAsanaStats(null);
+    setAsanaCfg((prev) => ({ ...prev, ...patch }));
+  };
   const subTotal = (id) =>
     sessions
       .filter((session) => session.subjectId === id)
       .reduce((sum, session) => sum + session.duration, 0);
   const grandTotal = sessions.reduce((sum, session) => sum + session.duration, 0);
-  const timerColor = tSubData?.color || sub?.color || "#888888";
+  const timerColor =
+    (timingAsana ? asanaCfg.color : tSubData?.color) ||
+    (asanaSelected ? asanaCfg.color : sub?.color) ||
+    "#888888";
   const toggleTopic = (sid, tid) =>
     setSubjects((prev) =>
       prev.map((subject) =>
@@ -364,7 +413,7 @@ export default function StudyBox() {
               ...subject,
               topics: [
                 ...subject.topics,
-                { id: Date.now().toString(), name: topicName, done: false },
+                { id: Date.now().toString(), name: topicName, done: false, subtasks: [] },
               ],
             }
           : subject
@@ -380,6 +429,44 @@ export default function StudyBox() {
           ? { ...subject, topics: subject.topics.filter((topic) => topic.id !== tid) }
           : subject
       )
+    );
+
+  const updateTopicSubtasks = (tid, updater) =>
+    setSubjects((prev) =>
+      prev.map((subject) =>
+        subject.id === currentSubjectId
+          ? {
+              ...subject,
+              topics: subject.topics.map((topic) =>
+                topic.id === tid
+                  ? { ...topic, subtasks: updater(topic.subtasks) }
+                  : topic
+              ),
+            }
+          : subject
+      )
+    );
+
+  const toggleSubtask = (tid, stid) =>
+    updateTopicSubtasks(tid, (subtasks) =>
+      subtasks.map((subtask) =>
+        subtask.id === stid ? { ...subtask, done: !subtask.done } : subtask
+      )
+    );
+
+  const addSubtask = (tid) => {
+    const subtaskName = subtaskDraft.trim();
+    if (!subtaskName) return;
+    updateTopicSubtasks(tid, (subtasks) => [
+      ...subtasks,
+      { id: `st-${Date.now().toString(36)}`, name: subtaskName, done: false },
+    ]);
+    setSubtaskDraft("");
+  };
+
+  const delSubtask = (tid, stid) =>
+    updateTopicSubtasks(tid, (subtasks) =>
+      subtasks.filter((subtask) => subtask.id !== stid)
     );
 
   const addSubject = () => {
@@ -401,6 +488,7 @@ export default function StudyBox() {
           id: `${id}-topic-${i}`,
           name: topic,
           done: false,
+          subtasks: [],
         })),
       },
     ]);
@@ -465,8 +553,8 @@ export default function StudyBox() {
   const clearTags = () => setSessionTags([]);
 
   const start = () => {
-    if (!sub) return;
-    if (!tSub) setTSub(currentSubjectId);
+    if (!canTime) return;
+    if (!tSub) setTSub(asanaSelected ? asanaCfg.id : currentSubjectId);
     setStartedAt(Date.now() - elapsed * 1000);
   };
 
@@ -482,9 +570,10 @@ export default function StudyBox() {
   };
 
   const logSess = () => {
-    if (!displaySecs || !sub) return;
+    if (!displaySecs || !canTime) return;
 
-    const subjectToLog = tSubData || sub;
+    const isAsana = timingAsana || (!tSubData && asanaSelected);
+    const subjectToLog = isAsana ? asanaAsSubject : tSubData || sub;
     const nid = `sess-${Date.now().toString(36)}`;
     setSessions((prev) => [
       {
@@ -495,7 +584,10 @@ export default function StudyBox() {
         duration: displaySecs,
         date: new Date().toISOString(),
         note: note.trim(),
-        tags: sessionTags,
+        tags:
+          isAsana && asanaTask
+            ? addUniqueTag(sessionTags, asanaTask.name)
+            : sessionTags,
       },
       ...prev,
     ]);
@@ -529,11 +621,15 @@ export default function StudyBox() {
   const saveEditSession = () => {
     if (!editingSession) return;
 
-    const targetSubject = subjects.find((s) => s.id === editSubjectId) || {
-      id: editSubjectId,
-      name: editingSession.subjectName,
-      color: editingSession.subjectColor,
-    };
+    const targetSubject =
+      subjects.find((s) => s.id === editSubjectId) ||
+      (editSubjectId === asanaCfg.id
+        ? asanaAsSubject
+        : {
+            id: editSubjectId,
+            name: editingSession.subjectName,
+            color: editingSession.subjectColor,
+          });
 
     const totalSeconds = editDurationHours * 3600 + editDurationMinutes * 60;
 
@@ -590,6 +686,7 @@ export default function StudyBox() {
     .edit-sess:hover { opacity: 1 !important; color: ${C.txt} !important; background: ${C.s3} !important; }
     .del-sess:hover { opacity: 1 !important; color: #f87171 !important; }
     .theme-card:hover { background: ${C.hover} !important; }
+    .asana-row:hover { background: ${C.s2} !important; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .ticking { animation: blink 2s ease-in-out infinite; }
   `;
@@ -694,7 +791,11 @@ export default function StudyBox() {
                   key={subject.id}
                   className="sub-btn"
                   type="button"
-                  onClick={() => setSel(subject.id)}
+                  onClick={() => {
+                    setSel(subject.id);
+                    setExpandedTopic(null);
+                    setSubtaskDraft("");
+                  }}
                   aria-label={subject.name}
                   style={{
                     width: "100%",
@@ -755,6 +856,74 @@ export default function StudyBox() {
                 </button>
               ))}
             </div>
+            <button
+              className="sub-btn"
+              type="button"
+              onClick={() => setSel(asanaCfg.id)}
+              aria-label={asanaCfg.name}
+              style={{
+                width: "100%",
+                textAlign: "left",
+                border: "none",
+                borderTop: `1px solid ${C.bdr}`,
+                padding: "9px 13px",
+                cursor: "pointer",
+                background:
+                  sel === asanaCfg.id ? `${asanaCfg.color}18` : "transparent",
+                borderLeft: `3px solid ${
+                  sel === asanaCfg.id ? asanaCfg.color : "transparent"
+                }`,
+                transition: "background 0.1s",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  marginBottom: "1px",
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 600,
+                    fontSize: "12px",
+                    color: sel === asanaCfg.id ? asanaCfg.color : C.txt,
+                  }}
+                >
+                  {asanaCfg.name}
+                </span>
+                {asanaPct !== null && (
+                  <span style={{ fontSize: "10px", color: C.muted }}>
+                    {asanaPct}%
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: "10px", color: C.muted, marginBottom: "5px" }}>
+                {asanaCfg.exam}
+              </div>
+              {asanaPct !== null && (
+                <div
+                  style={{
+                    height: "2px",
+                    background: C.bdr2,
+                    borderRadius: "2px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: `${asanaPct}%`,
+                      background: asanaCfg.color,
+                      borderRadius: "2px",
+                      transition: "width 0.4s",
+                    }}
+                  />
+                </div>
+              )}
+            </button>
             <div style={{ padding: "10px 13px", borderTop: `1px solid ${C.bdr}` }}>
               <div style={{ fontSize: "10px", color: C.muted, marginBottom: "2px" }}>
                 Total study time
@@ -774,7 +943,15 @@ export default function StudyBox() {
               minWidth: 0,
             }}
           >
-            {sub && (
+            {asanaSelected ? (
+              <AsanaTasksPanel
+                C={C}
+                cfg={asanaCfg}
+                onStats={setAsanaStats}
+                selectedGid={asanaTask?.gid || null}
+                onSelectTask={setAsanaTask}
+              />
+            ) : sub && (
               <>
                 <div
                   style={{
@@ -827,82 +1004,327 @@ export default function StudyBox() {
                       No topics yet. Add one below.
                     </div>
                   )}
-                  {sub.topics.map((topic) => (
-                    <div
-                      key={topic.id}
-                      className="topic-row"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "7px 16px",
-                        gap: "10px",
-                        transition: "background 0.1s",
-                        background: "transparent",
-                      }}
-                    >
-                      <div
-                        onClick={() => toggleTopic(sub.id, topic.id)}
-                        style={{
-                          width: "15px",
-                          height: "15px",
-                          borderRadius: "4px",
-                          flexShrink: 0,
-                          border: `1.5px solid ${topic.done ? sub.color : C.dim}`,
-                          background: topic.done ? sub.color : "transparent",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          transition: "all 0.15s",
-                        }}
-                      >
-                        {topic.done && (
-                          <svg
-                            width="9"
-                            height="7"
-                            viewBox="0 0 9 7"
-                            fill="none"
+                  {sub.topics
+                    .filter((topic) => !topic.done)
+                    .map((topic) => (
+                      <div key={topic.id}>
+                        <div
+                          className="topic-row"
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "7px 16px",
+                            gap: "10px",
+                            transition: "background 0.1s",
+                            background:
+                              expandedTopic === topic.id ? C.s2 : "transparent",
+                          }}
+                        >
+                          <div
+                            onClick={() => {
+                              toggleTopic(sub.id, topic.id);
+                              if (expandedTopic === topic.id) setExpandedTopic(null);
+                            }}
+                            aria-label={`Complete topic ${topic.name}`}
+                            role="checkbox"
+                            aria-checked={false}
+                            style={{
+                              width: "15px",
+                              height: "15px",
+                              borderRadius: "4px",
+                              flexShrink: 0,
+                              border: `1.5px solid ${C.dim}`,
+                              background: "transparent",
+                              cursor: "pointer",
+                              transition: "all 0.15s",
+                            }}
+                          />
+                          <span
+                            onClick={() =>
+                              setExpandedTopic((prev) =>
+                                prev === topic.id ? null : topic.id
+                              )
+                            }
+                            style={{
+                              flex: 1,
+                              color: C.txt,
+                              fontSize: "13px",
+                              cursor: "pointer",
+                            }}
                           >
-                            <path
-                              d="M1 3.5l2.5 2.5 4.5-5"
-                              stroke="#000"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
+                            {topic.name}
+                          </span>
+                          {topic.subtasks.length > 0 && (
+                            <span style={{ fontSize: "10px", color: C.muted, flexShrink: 0 }}>
+                              {topic.subtasks.filter((subtask) => subtask.done).length}/
+                              {topic.subtasks.length}
+                            </span>
+                          )}
+                          <span
+                            onClick={() =>
+                              setExpandedTopic((prev) =>
+                                prev === topic.id ? null : topic.id
+                              )
+                            }
+                            style={{
+                              fontSize: "9px",
+                              color: C.muted,
+                              cursor: "pointer",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {expandedTopic === topic.id ? "▾" : "▸"}
+                          </span>
+                          <button
+                            className="del nb"
+                            onClick={() => delTopic(topic.id)}
+                            aria-label={`Delete topic ${topic.name}`}
+                            style={{
+                              border: "none",
+                              background: "transparent",
+                              color: C.muted,
+                              cursor: "pointer",
+                              fontSize: "17px",
+                              lineHeight: 1,
+                              opacity: 0,
+                              transition: "opacity 0.1s",
+                              padding: "0 2px",
+                            }}
+                          >
+                            x
+                          </button>
+                        </div>
+                        {expandedTopic === topic.id && (
+                          <div style={{ padding: "2px 16px 8px 41px" }}>
+                            {topic.subtasks.map((subtask) => (
+                              <div
+                                key={subtask.id}
+                                className="topic-row"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                  padding: "4px 0",
+                                }}
+                              >
+                                <div
+                                  onClick={() => toggleSubtask(topic.id, subtask.id)}
+                                  aria-label={`Complete subtask ${subtask.name}`}
+                                  role="checkbox"
+                                  aria-checked={subtask.done}
+                                  style={{
+                                    width: "13px",
+                                    height: "13px",
+                                    borderRadius: "4px",
+                                    flexShrink: 0,
+                                    border: `1.5px solid ${subtask.done ? sub.color : C.dim}`,
+                                    background: subtask.done ? sub.color : "transparent",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                    transition: "all 0.15s",
+                                  }}
+                                >
+                                  {subtask.done && (
+                                    <svg width="8" height="6" viewBox="0 0 9 7" fill="none">
+                                      <path
+                                        d="M1 3.5l2.5 2.5 4.5-5"
+                                        stroke="#000"
+                                        strokeWidth="1.8"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                  )}
+                                </div>
+                                <span
+                                  style={{
+                                    flex: 1,
+                                    fontSize: "12px",
+                                    color: subtask.done ? C.muted : C.txt,
+                                    textDecoration: subtask.done ? "line-through" : "none",
+                                  }}
+                                >
+                                  {subtask.name}
+                                </span>
+                                <button
+                                  className="del nb"
+                                  onClick={() => delSubtask(topic.id, subtask.id)}
+                                  aria-label={`Delete subtask ${subtask.name}`}
+                                  style={{
+                                    border: "none",
+                                    background: "transparent",
+                                    color: C.muted,
+                                    cursor: "pointer",
+                                    fontSize: "14px",
+                                    lineHeight: 1,
+                                    opacity: 0,
+                                    transition: "opacity 0.1s",
+                                    padding: "0 2px",
+                                  }}
+                                >
+                                  x
+                                </button>
+                              </div>
+                            ))}
+                            <div style={{ display: "flex", gap: "5px", marginTop: "4px" }}>
+                              <input
+                                value={subtaskDraft}
+                                onChange={(e) => setSubtaskDraft(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && addSubtask(topic.id)}
+                                placeholder="Add subtask"
+                                style={{
+                                  flex: 1,
+                                  background: C.s2,
+                                  border: `1px solid ${C.bdr2}`,
+                                  borderRadius: "6px",
+                                  padding: "5px 8px",
+                                  color: C.txt,
+                                  outline: "none",
+                                  fontSize: "12px",
+                                }}
+                              />
+                              <button
+                                className="nb"
+                                onClick={() => addSubtask(topic.id)}
+                                aria-label={`Add subtask to ${topic.name}`}
+                                style={{
+                                  padding: "5px 10px",
+                                  borderRadius: "6px",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  fontWeight: 700,
+                                  fontSize: "11px",
+                                  background: C.s3,
+                                  color: C.txt,
+                                }}
+                              >
+                                Add
+                              </button>
+                            </div>
+                          </div>
                         )}
                       </div>
-                      <span
+                    ))}
+                  {sub.topics.length > 0 &&
+                    sub.topics.every((topic) => topic.done) && (
+                      <div
                         style={{
-                          flex: 1,
-                          color: topic.done ? C.muted : C.txt,
-                          textDecoration: topic.done ? "line-through" : "none",
-                          fontSize: "13px",
+                          padding: "14px 16px",
+                          textAlign: "center",
+                          color: C.muted,
+                          fontSize: "12px",
                         }}
                       >
-                        {topic.name}
-                      </span>
+                        All topics done. Nice.
+                      </div>
+                    )}
+                  {sub.topics.some((topic) => topic.done) && (
+                    <div style={{ borderTop: `1px solid ${C.bdr}`, marginTop: "6px" }}>
                       <button
-                        className="del nb"
-                        onClick={() => delTopic(topic.id)}
-                        aria-label={`Delete topic ${topic.name}`}
+                        className="nb"
+                        onClick={() => setDoneTopicsOpen((prev) => !prev)}
                         style={{
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "9px 16px",
                           border: "none",
                           background: "transparent",
-                          color: C.muted,
                           cursor: "pointer",
-                          fontSize: "17px",
-                          lineHeight: 1,
-                          opacity: 0,
-                          transition: "opacity 0.1s",
-                          padding: "0 2px",
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          color: C.muted,
+                          textTransform: "uppercase",
+                          letterSpacing: "1px",
                         }}
                       >
-                        x
+                        <span>
+                          Completed ({sub.topics.filter((topic) => topic.done).length})
+                        </span>
+                        <span style={{ fontSize: "9px" }}>
+                          {doneTopicsOpen ? "▾" : "▸"}
+                        </span>
                       </button>
+                      {doneTopicsOpen &&
+                        sub.topics
+                          .filter((topic) => topic.done)
+                          .map((topic) => (
+                            <div
+                              key={topic.id}
+                              className="topic-row"
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                padding: "6px 16px",
+                                gap: "10px",
+                                transition: "background 0.1s",
+                                background: "transparent",
+                              }}
+                            >
+                              <div
+                                onClick={() => toggleTopic(sub.id, topic.id)}
+                                aria-label={`Reopen topic ${topic.name}`}
+                                role="checkbox"
+                                aria-checked={true}
+                                style={{
+                                  width: "15px",
+                                  height: "15px",
+                                  borderRadius: "4px",
+                                  flexShrink: 0,
+                                  border: `1.5px solid ${sub.color}`,
+                                  background: sub.color,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  cursor: "pointer",
+                                  transition: "all 0.15s",
+                                }}
+                              >
+                                <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                                  <path
+                                    d="M1 3.5l2.5 2.5 4.5-5"
+                                    stroke="#000"
+                                    strokeWidth="1.8"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </div>
+                              <span
+                                style={{
+                                  flex: 1,
+                                  color: C.muted,
+                                  textDecoration: "line-through",
+                                  fontSize: "13px",
+                                }}
+                              >
+                                {topic.name}
+                              </span>
+                              <button
+                                className="del nb"
+                                onClick={() => delTopic(topic.id)}
+                                aria-label={`Delete topic ${topic.name}`}
+                                style={{
+                                  border: "none",
+                                  background: "transparent",
+                                  color: C.muted,
+                                  cursor: "pointer",
+                                  fontSize: "17px",
+                                  lineHeight: 1,
+                                  opacity: 0,
+                                  transition: "opacity 0.1s",
+                                  padding: "0 2px",
+                                }}
+                              >
+                                x
+                              </button>
+                            </div>
+                          ))}
                     </div>
-                  ))}
+                  )}
                 </div>
                 <div
                   style={{
@@ -988,8 +1410,22 @@ export default function StudyBox() {
               >
                 {fmt(displaySecs)}
               </div>
-              <div style={{ fontSize: "11px", color: C.muted, marginTop: "5px", height: "14px" }}>
-                {tSubData ? tSubData.name : sub?.name || "-"}
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: C.muted,
+                  marginTop: "5px",
+                  height: "14px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {tSubData
+                  ? tSubData.name
+                  : timingAsana || asanaSelected
+                    ? asanaTask?.name || asanaCfg.name
+                    : sub?.name || "-"}
               </div>
             </div>
             <div style={{ display: "flex", gap: "5px", padding: "0 13px", marginBottom: "8px" }}>
@@ -997,17 +1433,17 @@ export default function StudyBox() {
                 <button
                   className="nb"
                   onClick={start}
-                  disabled={!sub}
+                  disabled={!canTime}
                   style={{
                     flex: 2,
                     padding: "8px 0",
                     borderRadius: "6px",
                     border: "none",
-                    cursor: sub ? "pointer" : "not-allowed",
+                    cursor: canTime ? "pointer" : "not-allowed",
                     fontWeight: 700,
                     fontSize: "12px",
-                    background: sub ? timerColor : C.s3,
-                    color: sub ? "#000" : C.muted,
+                    background: canTime ? timerColor : C.s3,
+                    color: canTime ? "#000" : C.muted,
                   }}
                 >
                   {displaySecs > 0 ? "Resume" : "Start"}
@@ -1200,17 +1636,17 @@ export default function StudyBox() {
             <button
               className="nb"
               onClick={logSess}
-              disabled={!displaySecs || !sub}
+              disabled={!displaySecs || !canTime}
               style={{
                 margin: "0 13px 13px",
                 padding: "9px 0",
-                background: displaySecs && sub ? timerColor : C.s3,
+                background: displaySecs && canTime ? timerColor : C.s3,
                 border: "none",
                 borderRadius: "6px",
-                color: displaySecs && sub ? "#000" : C.muted,
+                color: displaySecs && canTime ? "#000" : C.muted,
                 fontWeight: 700,
                 fontSize: "12px",
-                cursor: displaySecs && sub ? "pointer" : "not-allowed",
+                cursor: displaySecs && canTime ? "pointer" : "not-allowed",
                 transition: "all 0.15s",
               }}
             >
@@ -1266,6 +1702,41 @@ export default function StudyBox() {
                   </span>
                 </div>
               ))}
+              {subTotal(asanaCfg.id) > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "5px 13px",
+                    gap: "7px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "6px",
+                      height: "6px",
+                      borderRadius: "50%",
+                      background: asanaCfg.color,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      flex: 1,
+                      fontSize: "12px",
+                      color: asanaSelected ? asanaCfg.color : C.txt,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {asanaCfg.name}
+                  </span>
+                  <span style={{ fontSize: "11px", color: C.muted, fontVariantNumeric: "tabular-nums" }}>
+                    {fmtDur(subTotal(asanaCfg.id))}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1972,6 +2443,142 @@ export default function StudyBox() {
                   marginBottom: "10px",
                 }}
               >
+                NEA Tasks (Asana)
+              </div>
+              <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.5, marginBottom: "12px" }}>
+                Customise the Asana tab shown at the bottom of the Planner sidebar.
+                The access token itself is managed from the tab, and progress is
+                estimated from the fraction of completed tasks in the project.
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "auto minmax(0, 1fr) 52px auto",
+                  gap: "10px",
+                  alignItems: "center",
+                  padding: "10px 11px",
+                  borderRadius: "10px",
+                  background: C.s2,
+                  border: `1px solid ${C.bdr}`,
+                }}
+              >
+                <div
+                  style={{
+                    width: "10px",
+                    height: "10px",
+                    borderRadius: "50%",
+                    background: asanaCfg.color,
+                    flexShrink: 0,
+                  }}
+                />
+                <div style={{ display: "grid", gap: "6px", minWidth: 0 }}>
+                  <input
+                    aria-label="Asana tab name"
+                    value={asanaCfg.name}
+                    onChange={(e) => updateAsanaCfg({ name: e.target.value })}
+                    placeholder="Tab name"
+                    style={{
+                      width: "100%",
+                      background: C.s1,
+                      border: `1px solid ${C.bdr2}`,
+                      borderRadius: "8px",
+                      padding: "8px 9px",
+                      color: C.txt,
+                      outline: "none",
+                    }}
+                  />
+                  <input
+                    aria-label="Asana tab label"
+                    value={asanaCfg.exam}
+                    onChange={(e) => updateAsanaCfg({ exam: e.target.value })}
+                    placeholder="Label"
+                    style={{
+                      width: "100%",
+                      background: C.s1,
+                      border: `1px solid ${C.bdr2}`,
+                      borderRadius: "8px",
+                      padding: "8px 9px",
+                      color: C.txt,
+                      outline: "none",
+                    }}
+                  />
+                  <input
+                    aria-label="Asana project GID"
+                    value={asanaCfg.projectGid}
+                    onChange={(e) => updateAsanaCfg({ projectGid: e.target.value })}
+                    placeholder="Asana project GID"
+                    style={{
+                      width: "100%",
+                      background: C.s1,
+                      border: `1px solid ${C.bdr2}`,
+                      borderRadius: "8px",
+                      padding: "8px 9px",
+                      color: C.txt,
+                      outline: "none",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  />
+                </div>
+                <input
+                  type="color"
+                  aria-label="Asana tab colour"
+                  value={asanaCfg.color}
+                  onChange={(e) => updateAsanaCfg({ color: e.target.value })}
+                  style={{
+                    width: "52px",
+                    height: "38px",
+                    padding: 0,
+                    border: `1px solid ${C.bdr2}`,
+                    borderRadius: "8px",
+                    background: "transparent",
+                    cursor: "pointer",
+                  }}
+                />
+                <button
+                  className="nb"
+                  onClick={() =>
+                    updateAsanaCfg({
+                      name: ASANA_DEFAULTS.name,
+                      exam: ASANA_DEFAULTS.exam,
+                      color: ASANA_DEFAULTS.color,
+                      projectGid: ASANA_DEFAULTS.projectGid,
+                    })
+                  }
+                  aria-label="Reset Asana tab settings"
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: C.muted,
+                    cursor: "pointer",
+                    fontSize: "11px",
+                    padding: "0 2px",
+                    flexShrink: 0,
+                  }}
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: "12px",
+                background: C.s1,
+                border: `1px solid ${C.bdr}`,
+                borderRadius: "12px",
+                padding: "14px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  color: C.muted,
+                  textTransform: "uppercase",
+                  letterSpacing: "1px",
+                  marginBottom: "10px",
+                }}
+              >
                 What changes with themes
               </div>
               <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.6 }}>
@@ -2060,6 +2667,9 @@ export default function StudyBox() {
                     {sub.name} {sub.exam ? `(${sub.exam})` : ""}
                   </option>
                 ))}
+                <option value={asanaCfg.id}>
+                  {asanaCfg.name} ({asanaCfg.exam})
+                </option>
               </select>
             </div>
 
