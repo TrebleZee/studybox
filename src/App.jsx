@@ -1689,7 +1689,7 @@ export default function StudyBox() {
                     style={{
                       flex: 1,
                       fontSize: "12px",
-                      color: subject.id === currentSubjectId ? subject.color : C.txt,
+                      color: !asanaSelected && subject.id === currentSubjectId ? subject.color : C.txt,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
