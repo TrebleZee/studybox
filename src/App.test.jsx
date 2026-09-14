@@ -84,6 +84,27 @@ describe("StudyBox customization", () => {
     expect(localStorage.getItem("sb-sessions")).toContain("Past papers");
   });
 
+  it("adds the expanded normal-subject topic as a session tag", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-19T09:00:00.000Z"));
+
+    render(<App />);
+
+    fireEvent.click(screen.getByText("Practical Skills in Physics"));
+    expect(screen.getByPlaceholderText("Add subtask")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Log Session" }));
+
+    const savedSessions = JSON.parse(localStorage.getItem("sb-sessions"));
+    expect(savedSessions[0].tags).toContain("Practical Skills in Physics");
+
+    vi.useRealTimers();
+  });
+
   it("imports a subject spec pdf into the creation form", async () => {
     const user = userEvent.setup();
     extractPdfText.mockResolvedValueOnce(`

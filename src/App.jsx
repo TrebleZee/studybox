@@ -718,6 +718,10 @@ export default function StudyBox() {
 
     const isAsana = timingAsana || (!tSubData && asanaSelected);
     const subjectToLog = isAsana ? asanaAsSubject : tSubData || sub;
+    const selectedTopic =
+      !isAsana && tSubData
+        ? tSubData.topics.find((topic) => topic.id === expandedTopic)
+        : null;
     const nid = `sess-${Date.now().toString(36)}`;
     setSessions((prev) => [
       {
@@ -731,6 +735,8 @@ export default function StudyBox() {
         tags:
           isAsana && asanaTask
             ? addUniqueTag(sessionTags, asanaTask.name)
+            : selectedTopic
+              ? addUniqueTag(sessionTags, selectedTopic.name)
             : sessionTags,
       },
       ...prev,
