@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  byAlphanumeric,
   getAsanaTasks,
   getSubtasks,
   hasAsanaToken,
@@ -463,7 +464,9 @@ export default function AsanaTasksPanel({ C, cfg, onStats, selectedGid, onSelect
                       )}
                       {sub &&
                         sub.items &&
-                        sub.items.map((st) => (
+                        [...sub.items]
+                          .sort(cfg.subtaskSort === "alpha" ? byAlphanumeric : byDueDate)
+                          .map((st) => (
                           <div
                             key={st.gid}
                             style={{

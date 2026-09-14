@@ -175,4 +175,91 @@ describe("StudyBox customization", () => {
 
     vi.useRealTimers();
   });
+
+  it("navigates to Analysis tab via top nav and More button under total study time", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    // Click top tab row Analysis button (All Time by default)
+    await user.click(screen.getByRole("button", { name: "Analysis" }));
+    expect(screen.getByText("Study Analysis")).toBeTruthy();
+    expect(screen.getByText("All Time Overview")).toBeTruthy();
+    expect(screen.getByText("Time Distribution & Imbalance")).toBeTruthy();
+    expect(screen.getByText("Needs Attention")).toBeTruthy();
+
+    // Switch to Daily timeframe
+    await user.click(screen.getByRole("button", { name: "Daily" }));
+    expect(screen.getByText("Today (So Far)")).toBeTruthy();
+    expect(screen.getByText("Hours Per Day (Last 7 Days)")).toBeTruthy();
+    expect(screen.getByText("Day-of-Week Pattern (In General)")).toBeTruthy();
+
+    // Switch to Weekly timeframe
+    await user.click(screen.getByRole("button", { name: "Weekly" }));
+    expect(screen.getByText("This Week (So Far)")).toBeTruthy();
+    expect(screen.getByText("Weekly Trend (Hours per Week)")).toBeTruthy();
+    expect(screen.getByText("Topic Coverage Gaps")).toBeTruthy();
+
+    // Switch to Monthly timeframe
+    await user.click(screen.getByRole("button", { name: "Monthly" }));
+    expect(screen.getByText("This Month (So Far)")).toBeTruthy();
+    expect(screen.getByText("Weekly Trend in Month")).toBeTruthy();
+    expect(screen.getByText("Study Consistency in Month")).toBeTruthy();
+
+    // Switch to Yearly timeframe
+    await user.click(screen.getByRole("button", { name: "Yearly" }));
+    expect(screen.getByText("This Year (So Far)")).toBeTruthy();
+    expect(screen.getByText("Study Consistency in Year (52-Week Heatmap)")).toBeTruthy();
+
+    // Go back to Planner
+    await openPlanner(user);
+    expect(screen.queryByText("Study Analysis")).toBeNull();
+
+    // Click "More" button under total study time
+    await user.click(screen.getByRole("button", { name: "More study analysis" }));
+    expect(screen.getByText("Study Analysis")).toBeTruthy();
+
+    // Select Physics subject filter
+    const select = screen.getByRole("combobox");
+    await user.selectOptions(select, "physics");
+    expect(screen.getByText(/Physics/)).toBeTruthy();
+  });
+
+  it("handles sb-game streak and XP logic on logging sessions and checking topics", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-14T10:00:00.000Z"));
+
+    render(<App />);
+
+    // Check initial streak UI stats
+    expect(screen.getByText("🔥 0d")).toBeTruthy();
+    expect(screen.getByText("⚡ 0 XP")).toBeTruthy();
+
+    // Log a session of 120 seconds (2 mins = 2 XP)
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    act(() => {
+      vi.advanceTimersByTime(120000);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Log Session" }));
+
+    // Streak should increase to 1d and XP to 2 XP
+    expect(screen.getByText("🔥 1d")).toBeTruthy();
+    expect(screen.getByText("⚡ 2 XP")).toBeTruthy();
+
+    // Check localStorage sb-game
+    const gameObj = JSON.parse(localStorage.getItem("sb-game"));
+    expect(gameObj.currentStreak).toBe(1);
+    expect(gameObj.totalXP).toBe(2);
+    expect(gameObj.lastStudyDate).toBe("2026-09-14");
+
+    // Check a topic to earn +10 XP
+    const checkboxes = screen.getAllByRole("checkbox");
+    if (checkboxes.length > 0) {
+      fireEvent.click(checkboxes[0]);
+      expect(screen.getByText("⚡ 12 XP")).toBeTruthy();
+    }
+
+    vi.useRealTimers();
+  });
 });
+
+

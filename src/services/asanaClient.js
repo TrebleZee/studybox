@@ -8,6 +8,7 @@ export const ASANA_DEFAULTS = {
   exam: "Asana",
   color: "#F06A6A",
   projectGid: "1216591284200162",
+  subtaskSort: "due",
 };
 
 export const normalizeAsanaConfig = (input) => ({
@@ -28,6 +29,8 @@ export const normalizeAsanaConfig = (input) => ({
     typeof input?.projectGid === "string" && input.projectGid.trim()
       ? input.projectGid.trim()
       : ASANA_DEFAULTS.projectGid,
+  subtaskSort:
+    input?.subtaskSort === "alpha" ? "alpha" : ASANA_DEFAULTS.subtaskSort,
 });
 
 const TOKEN_KEY = "studybox_asana_pat";
@@ -120,6 +123,9 @@ export async function getAsanaTasks(projectGid = ASANA_DEFAULTS.projectGid) {
     stats: { completed: completedTasks.length, total: mapped.length },
   };
 }
+
+export const byAlphanumeric = (a, b) =>
+  a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
 
 export async function getSubtasks(taskGid) {
   const fields = ["name", "completed", "due_on", "permalink_url"].join(",");

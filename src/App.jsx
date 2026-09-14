@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { extractPdfText, generateSubjectDraftFromPdfText } from "./specImport.js";
 import AsanaTasksPanel from "./components/AsanaTasksPanel.jsx";
+import AnalysisPanel from "./components/AnalysisPanel.jsx";
 import { ASANA_DEFAULTS, normalizeAsanaConfig } from "./services/asanaClient.js";
 
 const DEFAULT_SUBJECT_IDS = new Set(["physics", "maths", "further", "cs"]);
@@ -10,6 +11,15 @@ const STORAGE_KEYS = {
   theme: "sb-theme",
   asana: "sb-asana",
   asanaStats: "sb-asana-stats",
+  game: "sb-game",
+};
+
+const DEFAULT_GAME = {
+  currentStreak: 0,
+  longestStreak: 0,
+  lastStudyDate: null,
+  totalXP: 0,
+  freezesUsed: 0,
 };
 
 const TOPIC_SEED = {
@@ -303,6 +313,18 @@ export default function StudyBox() {
   const [editTags, setEditTags] = useState([]);
   const [editTagInput, setEditTagInput] = useState("");
   const [editNote, setEditNote] = useState("");
+  const [game, setGame] = useState(() => {
+    const loaded = loadJson(STORAGE_KEYS.game, null);
+    if (!loaded || typeof loaded !== "object") return DEFAULT_GAME;
+    return {
+      currentStreak: Number(loaded.currentStreak) || 0,
+      longestStreak: Number(loaded.longestStreak) || 0,
+      lastStudyDate: loaded.lastStudyDate || null,
+      totalXP: Number(loaded.totalXP) || 0,
+      freezesUsed: Number(loaded.freezesUsed) || 0,
+    };
+  });
+  const [toastMsg, setToastMsg] = useState(null);
   const itvRef = useRef();
 
   const theme = THEMES.find((item) => item.id === themeId) || THEMES[0];
@@ -327,6 +349,40 @@ export default function StudyBox() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.asanaStats, JSON.stringify(asanaStats));
   }, [asanaStats]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.game, JSON.stringify(game));
+  }, [game]);
+
+  const freezesEarned = Math.floor(game.totalXP / 500);
+  const freezesAvailable = Math.min(Math.max(0, freezesEarned - game.freezesUsed), 3);
+  const xpToNextFreeze = 500 - (game.totalXP % 500);
+
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+    setGame((g) => {
+      if (!g.lastStudyDate || g.lastStudyDate >= yesterday) {
+        return g;
+      }
+      const earned = Math.floor(g.totalXP / 500);
+      const available = Math.min(Math.max(0, earned - g.freezesUsed), 3);
+
+      if (available > 0) {
+        setToastMsg("Streak freeze used automatically! ❄️");
+        return {
+          ...g,
+          freezesUsed: g.freezesUsed + 1,
+        };
+      } else {
+        return {
+          ...g,
+          currentStreak: 0,
+        };
+      }
+    });
+  }, []);
 
   const running = startedAt !== null;
 
@@ -384,16 +440,26 @@ export default function StudyBox() {
     "#888888";
   const toggleTopic = (sid, tid) =>
     setSubjects((prev) =>
-      prev.map((subject) =>
-        subject.id === sid
-          ? {
-              ...subject,
-              topics: subject.topics.map((topic) =>
-                topic.id === tid ? { ...topic, done: !topic.done } : topic
-              ),
-            }
-          : subject
-      )
+      prev.map((subject) => {
+        if (subject.id !== sid) return subject;
+
+        const targetTopic = subject.topics.find((t) => t.id === tid);
+        const isTurningDone = targetTopic && !targetTopic.done;
+
+        if (isTurningDone) {
+          setGame((g) => ({
+            ...g,
+            totalXP: g.totalXP + 10,
+          }));
+        }
+
+        return {
+          ...subject,
+          topics: subject.topics.map((topic) =>
+            topic.id === tid ? { ...topic, done: !topic.done } : topic
+          ),
+        };
+      })
     );
 
   const updateSubject = (id, patch) => {
@@ -572,6 +638,31 @@ export default function StudyBox() {
   const logSess = () => {
     if (!displaySecs || !canTime) return;
 
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const minutesStudied = Math.floor(displaySecs / 60);
+    const earnedXP = Math.max(1, minutesStudied);
+
+    setGame((g) => {
+      let newStreak = g.currentStreak;
+
+      if (g.lastStudyDate === today) {
+        // already studied today — just add XP, don't touch streak
+      } else if (g.lastStudyDate === yesterday || g.lastStudyDate === null) {
+        newStreak = g.currentStreak + 1; // extends streak
+      } else {
+        newStreak = 1; // missed days, reset to 1
+      }
+
+      return {
+        ...g,
+        currentStreak: newStreak,
+        longestStreak: Math.max(g.longestStreak, newStreak),
+        lastStudyDate: today,
+        totalXP: g.totalXP + earnedXP,
+      };
+    });
+
     const isAsana = timingAsana || (!tSubData && asanaSelected);
     const subjectToLog = isAsana ? asanaAsSubject : tSubData || sub;
     const nid = `sess-${Date.now().toString(36)}`;
@@ -732,6 +823,7 @@ export default function StudyBox() {
         {[
           ["planner", "Planner"],
           ["log", "Log"],
+          ["analysis", "Analysis"],
           ["settings", "Settings"],
         ].map(([v, label]) => (
           <button
@@ -753,11 +845,83 @@ export default function StudyBox() {
             {label}
           </button>
         ))}
-        {grandTotal > 0 && (
-          <span style={{ marginLeft: "auto", fontSize: "11px", color: C.muted }}>
-            {fmtDur(grandTotal)} total
-          </span>
-        )}
+        <div
+          style={{
+            marginLeft: "auto",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            fontSize: "11px",
+          }}
+        >
+          <button
+            type="button"
+            className="nb"
+            onClick={() => setView("analysis")}
+            title={`Current streak: ${game.currentStreak} day(s)`}
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              fontWeight: 600,
+              color: C.txt,
+              padding: "2px 4px",
+              borderRadius: "4px",
+            }}
+          >
+            <span>🔥 {game.currentStreak}d</span>
+            {freezesAvailable > 0 && <span title={`${freezesAvailable} freeze(s) available`}>❄️</span>}
+          </button>
+
+          <button
+            type="button"
+            className="nb"
+            onClick={() => setView("analysis")}
+            title={`Total XP: ${game.totalXP} XP (${freezesAvailable === 3 ? "Freeze slot full" : `${xpToNextFreeze} XP to next freeze`})`}
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              color: C.muted,
+              padding: "2px 4px",
+              borderRadius: "4px",
+            }}
+          >
+            <span>⚡ {game.totalXP} XP</span>
+          </button>
+
+          <button
+            type="button"
+            className="nb"
+            onClick={() => setView("analysis")}
+            title={`Streak freezes: ${freezesAvailable}/3 available`}
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              color: C.muted,
+              padding: "2px 4px",
+              borderRadius: "4px",
+            }}
+          >
+            <span>❄️ {freezesAvailable}/3</span>
+          </button>
+
+          {grandTotal > 0 && (
+            <span style={{ fontSize: "11px", color: C.muted, borderLeft: `1px solid ${C.bdr2}`, paddingLeft: "8px" }}>
+              {fmtDur(grandTotal)} total
+            </span>
+          )}
+        </div>
       </div>
 
       {view === "planner" && (
@@ -931,6 +1095,31 @@ export default function StudyBox() {
               <div style={{ fontSize: "17px", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
                 {fmtDur(grandTotal)}
               </div>
+              <button
+                className="nb"
+                type="button"
+                onClick={() => setView("analysis")}
+                aria-label="More study analysis"
+                style={{
+                  marginTop: "8px",
+                  width: "100%",
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  border: `1px solid ${C.bdr2}`,
+                  background: C.s2,
+                  color: C.txt,
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  transition: "background 0.1s",
+                }}
+              >
+                <span>More</span>
+                <span style={{ color: C.muted }}>→</span>
+              </button>
             </div>
           </div>
 
@@ -1990,6 +2179,21 @@ export default function StudyBox() {
         </div>
       )}
 
+      {view === "analysis" && (
+        <AnalysisPanel
+          subjects={subjects}
+          sessions={sessions}
+          asanaCfg={asanaCfg}
+          asanaStats={asanaStats}
+          game={game}
+          C={C}
+          onSelectSubject={(id) => {
+            setSel(id);
+            setView("planner");
+          }}
+        />
+      )}
+
       {view === "settings" && (
         <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
           <div
@@ -2558,6 +2762,35 @@ export default function StudyBox() {
                   Reset
                 </button>
               </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: "10px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 14px",
+                background: C.s2,
+                border: `1px solid ${C.bdr}`,
+                borderRadius: "10px",
+              }}
+            >
+              <span style={{ fontSize: "12px", color: C.txt, flex: 1 }}>
+                Sort subtasks alphanumerically
+                <span style={{ display: "block", fontSize: "10px", color: C.muted, marginTop: "2px" }}>
+                  Keeps TASK-01, TASK-02... in order instead of by due date. Main tasks stay sorted by due date.
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                aria-label="Sort subtasks alphanumerically"
+                checked={asanaCfg.subtaskSort === "alpha"}
+                onChange={(e) =>
+                  updateAsanaCfg({ subtaskSort: e.target.checked ? "alpha" : "due" })
+                }
+                style={{ width: "16px", height: "16px", cursor: "pointer", flexShrink: 0 }}
+              />
             </div>
 
             <div
