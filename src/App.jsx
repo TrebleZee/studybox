@@ -354,6 +354,59 @@ export default function StudyBox() {
     localStorage.setItem(STORAGE_KEYS.game, JSON.stringify(game));
   }, [game]);
 
+  // Initialize game stats from historical data on first load
+  useEffect(() => {
+    // Calculate total XP from past sessions (1 XP per minute) and completed topics (+10 XP each)
+    const minutesStudied = sessions.reduce((sum, s) => sum + Math.floor(s.duration / 60), 0);
+    const topicXP = subjects.reduce((sum, sub) => sum + sub.topics.filter(t => t.done).length * 10, 0);
+    const totalXP = minutesStudied + topicXP;
+
+    // Compute streak information based on session dates
+    const dateStrings = sessions.map(s => s.date.slice(0, 10)).sort();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const toYYYYMMDD = (d) => {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+    // Current streak
+    let currentStreak = 0;
+    let day = new Date(todayStr);
+    const dateSet = new Set(dateStrings);
+    while (dateSet.has(toYYYYMMDD(day))) {
+      currentStreak++;
+      day.setDate(day.getDate() - 1);
+    }
+    // Longest streak calculation
+    let longestStreak = 0;
+    let streak = 0;
+    let prevDate = null;
+    dateStrings.forEach(ds => {
+      if (prevDate) {
+        const diff = (new Date(ds) - new Date(prevDate)) / (1000 * 60 * 60 * 24);
+        if (diff === 1) {
+          streak++;
+        } else if (diff > 1) {
+          streak = 1;
+        }
+      } else {
+        streak = 1;
+      }
+      longestStreak = Math.max(longestStreak, streak);
+      prevDate = ds;
+    });
+
+    setGame(g => ({
+      ...g,
+      totalXP,
+      currentStreak,
+      longestStreak: Math.max(g.longestStreak, longestStreak),
+      lastStudyDate: dateStrings[dateStrings.length - 1] || null,
+    }));
+  }, []);
+
+
   const freezesEarned = Math.floor(game.totalXP / 500);
   const freezesAvailable = Math.min(Math.max(0, freezesEarned - game.freezesUsed), 3);
   const xpToNextFreeze = 500 - (game.totalXP % 500);
