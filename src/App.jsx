@@ -18,8 +18,171 @@ const DEFAULT_GAME = {
   currentStreak: 0,
   longestStreak: 0,
   lastStudyDate: null,
+  streakProtectedUntil: null,
   totalXP: 0,
   freezesUsed: 0,
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const dateKey = (value) => {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const normalizeDateKey = (value) => {
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+  return dateKey(value);
+};
+
+// A missed day is not considered a broken streak until 24 hours after
+// 23:59:59 on the last day studied. This deliberately does not use a
+// calendar-day comparison, so closing the app cannot reset a streak early.
+const streakExpiry = (lastStudyDate) => {
+  const [year, month, day] = lastStudyDate.split("-").map(Number);
+  return new Date(year, month - 1, day, 23, 59, 59, 999).getTime() + DAY_MS;
+};
+
+const calendarDayDistance = (from, to) => {
+  const [fromYear, fromMonth, fromDay] = from.split("-").map(Number);
+  const [toYear, toMonth, toDay] = to.split("-").map(Number);
+  return (
+    Date.UTC(toYear, toMonth - 1, toDay) -
+    Date.UTC(fromYear, fromMonth - 1, fromDay)
+  ) / DAY_MS;
+};
+
+const getStreakForDates = (dateStrings) => {
+  let streak = 0;
+  let previous = null;
+
+  dateStrings.forEach((date) => {
+    if (previous === null || calendarDayDistance(previous, date) !== 1) {
+      streak = 1;
+    } else {
+      streak += 1;
+    }
+    previous = date;
+  });
+
+  return streak;
+};
+
+const getLongestStreak = (dateStrings) => {
+  let longest = 0;
+  let streak = 0;
+  let previous = null;
+
+  dateStrings.forEach((date) => {
+    if (previous === null || calendarDayDistance(previous, date) !== 1) {
+      streak = 1;
+    } else {
+      streak += 1;
+    }
+    longest = Math.max(longest, streak);
+    previous = date;
+  });
+
+  return longest;
+};
+
+const normalizeGame = (loaded) => {
+  if (!loaded || typeof loaded !== "object") return { ...DEFAULT_GAME };
+  return {
+    currentStreak: Number(loaded.currentStreak) || 0,
+    longestStreak: Number(loaded.longestStreak) || 0,
+    lastStudyDate: normalizeDateKey(loaded.lastStudyDate),
+    streakProtectedUntil: Number(loaded.streakProtectedUntil) || null,
+    totalXP: Number(loaded.totalXP) || 0,
+    freezesUsed: Number(loaded.freezesUsed) || 0,
+  };
+};
+
+const validateStreak = (game, nowMs = Date.now()) => {
+  if (!game.lastStudyDate || game.currentStreak <= 0) return game;
+
+  let nextCheckAt = Math.max(
+    streakExpiry(game.lastStudyDate),
+    Number(game.streakProtectedUntil) || 0
+  );
+  if (nowMs < nextCheckAt) return game;
+
+  let freezesUsed = game.freezesUsed;
+  let freezesAvailable = Math.min(
+    Math.max(0, Math.floor(game.totalXP / 500) - freezesUsed),
+    3
+  );
+
+  // Each available freeze protects one further 24-hour period. This loop
+  // also makes launch validation correct after several days offline.
+  while (nowMs >= nextCheckAt && freezesAvailable > 0) {
+    freezesUsed += 1;
+    freezesAvailable -= 1;
+    nextCheckAt += DAY_MS;
+  }
+
+  if (nowMs >= nextCheckAt) {
+    return {
+      ...game,
+      currentStreak: 0,
+      streakProtectedUntil: null,
+      freezesUsed,
+    };
+  }
+
+  return {
+    ...game,
+    freezesUsed,
+    streakProtectedUntil: nextCheckAt,
+  };
+};
+
+const buildInitialGame = (loaded, sessions, subjects, nowMs = Date.now()) => {
+  const storedGame = normalizeGame(loaded);
+  const dateStrings = Array.from(
+    new Set(
+      sessions
+        .map((session) => dateKey(session.date))
+        .filter(Boolean)
+    )
+  ).sort();
+  const lastStudyDate = dateStrings[dateStrings.length - 1] || storedGame.lastStudyDate;
+  const minutesStudied = sessions.reduce(
+    (sum, session) => sum + Math.floor(session.duration / 60),
+    0
+  );
+  const topicXP = subjects.reduce(
+    (sum, subject) => sum + subject.topics.filter((topic) => topic.done).length * 10,
+    0
+  );
+  const historicalStreak = dateStrings.length
+    ? getStreakForDates(dateStrings)
+    : storedGame.currentStreak;
+  const historicalLongest = dateStrings.length
+    ? getLongestStreak(dateStrings)
+    : storedGame.longestStreak;
+  const calculatedTotalXP = minutesStudied + topicXP;
+
+  return validateStreak(
+    {
+      ...storedGame,
+      currentStreak: historicalStreak,
+      longestStreak: Math.max(storedGame.longestStreak, historicalLongest),
+      lastStudyDate,
+      // XP is earned progress, so keep persisted XP even if a session was
+      // later deleted from the history.
+      totalXP: Math.max(storedGame.totalXP, calculatedTotalXP),
+      streakProtectedUntil: storedGame.streakProtectedUntil,
+    },
+    nowMs
+  );
 };
 
 const TOPIC_SEED = {
@@ -314,17 +477,12 @@ export default function StudyBox() {
   const [editTagInput, setEditTagInput] = useState("");
   const [editNote, setEditNote] = useState("");
   const [game, setGame] = useState(() => {
-    const loaded = loadJson(STORAGE_KEYS.game, null);
-    if (!loaded || typeof loaded !== "object") return DEFAULT_GAME;
-    return {
-      currentStreak: Number(loaded.currentStreak) || 0,
-      longestStreak: Number(loaded.longestStreak) || 0,
-      lastStudyDate: loaded.lastStudyDate || null,
-      totalXP: Number(loaded.totalXP) || 0,
-      freezesUsed: Number(loaded.freezesUsed) || 0,
-    };
+    return buildInitialGame(
+      loadJson(STORAGE_KEYS.game, null),
+      normalizeSessions(loadJson(STORAGE_KEYS.sessions, [])),
+      normalizeSubjects(loadJson(STORAGE_KEYS.subjects, null))
+    );
   });
-  const [toastMsg, setToastMsg] = useState(null);
   const itvRef = useRef();
 
   const theme = THEMES.find((item) => item.id === themeId) || THEMES[0];
@@ -354,88 +512,32 @@ export default function StudyBox() {
     localStorage.setItem(STORAGE_KEYS.game, JSON.stringify(game));
   }, [game]);
 
-  // Initialize game stats from historical data on first load
-  useEffect(() => {
-    // Calculate total XP from past sessions (1 XP per minute) and completed topics (+10 XP each)
-    const minutesStudied = sessions.reduce((sum, s) => sum + Math.floor(s.duration / 60), 0);
-    const topicXP = subjects.reduce((sum, sub) => sum + sub.topics.filter(t => t.done).length * 10, 0);
-    const totalXP = minutesStudied + topicXP;
-
-    // Compute streak information based on session dates
-    const dateStrings = sessions.map(s => s.date.slice(0, 10)).sort();
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const toYYYYMMDD = (d) => {
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${yyyy}-${mm}-${dd}`;
-    };
-    // Current streak
-    let currentStreak = 0;
-    let day = new Date(todayStr);
-    const dateSet = new Set(dateStrings);
-    while (dateSet.has(toYYYYMMDD(day))) {
-      currentStreak++;
-      day.setDate(day.getDate() - 1);
-    }
-    // Longest streak calculation
-    let longestStreak = 0;
-    let streak = 0;
-    let prevDate = null;
-    dateStrings.forEach(ds => {
-      if (prevDate) {
-        const diff = (new Date(ds) - new Date(prevDate)) / (1000 * 60 * 60 * 24);
-        if (diff === 1) {
-          streak++;
-        } else if (diff > 1) {
-          streak = 1;
-        }
-      } else {
-        streak = 1;
-      }
-      longestStreak = Math.max(longestStreak, streak);
-      prevDate = ds;
-    });
-
-    setGame(g => ({
-      ...g,
-      totalXP,
-      currentStreak,
-      longestStreak: Math.max(g.longestStreak, longestStreak),
-      lastStudyDate: dateStrings[dateStrings.length - 1] || null,
-    }));
-  }, []);
-
-
   const freezesEarned = Math.floor(game.totalXP / 500);
   const freezesAvailable = Math.min(Math.max(0, freezesEarned - game.freezesUsed), 3);
   const xpToNextFreeze = 500 - (game.totalXP % 500);
 
+  // Validate again when the persisted streak window expires while the app is open.
+  // The same validator runs in buildInitialGame, so reopening the app also gets
+  // the correct result before the first render.
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    if (!game.lastStudyDate || game.currentStreak <= 0) return undefined;
 
-    setGame((g) => {
-      if (!g.lastStudyDate || g.lastStudyDate >= yesterday) {
-        return g;
-      }
-      const earned = Math.floor(g.totalXP / 500);
-      const available = Math.min(Math.max(0, earned - g.freezesUsed), 3);
+    const nextCheckAt = Math.max(
+      streakExpiry(game.lastStudyDate),
+      Number(game.streakProtectedUntil) || 0
+    );
+    const delay = Math.max(0, nextCheckAt - Date.now());
+    const timeout = setTimeout(() => {
+      setGame((current) => validateStreak(current, Date.now()));
+    }, delay);
 
-      if (available > 0) {
-        setToastMsg("Streak freeze used automatically! ❄️");
-        return {
-          ...g,
-          freezesUsed: g.freezesUsed + 1,
-        };
-      } else {
-        return {
-          ...g,
-          currentStreak: 0,
-        };
-      }
-    });
-  }, []);
+    return () => clearTimeout(timeout);
+  }, [
+    game.currentStreak,
+    game.freezesUsed,
+    game.lastStudyDate,
+    game.streakProtectedUntil,
+  ]);
 
   const running = startedAt !== null;
 
@@ -691,28 +793,33 @@ export default function StudyBox() {
   const logSess = () => {
     if (!displaySecs || !canTime) return;
 
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const loggedAt = new Date();
+    const today = dateKey(loggedAt);
     const minutesStudied = Math.floor(displaySecs / 60);
     const earnedXP = Math.max(1, minutesStudied);
 
     setGame((g) => {
-      let newStreak = g.currentStreak;
+      const validatedGame = validateStreak(g, loggedAt.getTime());
+      let newStreak = validatedGame.currentStreak;
+      const previousStudyDate = validatedGame.lastStudyDate;
 
-      if (g.lastStudyDate === today) {
+      if (previousStudyDate === today) {
         // already studied today — just add XP, don't touch streak
-      } else if (g.lastStudyDate === yesterday || g.lastStudyDate === null) {
-        newStreak = g.currentStreak + 1; // extends streak
+      } else if (previousStudyDate && newStreak > 0) {
+        // A still-valid streak can be extended on the next study day. If a
+        // freeze was used, this also correctly bridges its protected day.
+        newStreak += 1;
       } else {
-        newStreak = 1; // missed days, reset to 1
+        newStreak = 1;
       }
 
       return {
-        ...g,
+        ...validatedGame,
         currentStreak: newStreak,
-        longestStreak: Math.max(g.longestStreak, newStreak),
+        longestStreak: Math.max(validatedGame.longestStreak, newStreak),
         lastStudyDate: today,
-        totalXP: g.totalXP + earnedXP,
+        streakProtectedUntil: null,
+        totalXP: validatedGame.totalXP + earnedXP,
       };
     });
 

@@ -281,6 +281,48 @@ describe("StudyBox customization", () => {
 
     vi.useRealTimers();
   });
+
+  it("does not reset a streak before the post-23:59 24-hour deadline", () => {
+    vi.useFakeTimers();
+    const expiry = new Date(2026, 8, 14, 23, 59, 59, 999).getTime() + 86400000;
+    vi.setSystemTime(expiry - 1);
+    localStorage.setItem(
+      "sb-game",
+      JSON.stringify({ currentStreak: 3, lastStudyDate: "2026-09-14" })
+    );
+
+    render(<App />);
+    expect(screen.getByTitle("Current streak: 3 day(s)")).toBeTruthy();
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.getByTitle("Current streak: 0 day(s)")).toBeTruthy();
+  });
+
+  it("persists a streak freeze across a restart and resets only after it is used", () => {
+    vi.useFakeTimers();
+    const expiry = new Date(2026, 8, 14, 23, 59, 59, 999).getTime() + 86400000;
+    vi.setSystemTime(expiry);
+    localStorage.setItem(
+      "sb-game",
+      JSON.stringify({
+        currentStreak: 3,
+        lastStudyDate: "2026-09-14",
+        totalXP: 500,
+        freezesUsed: 0,
+      })
+    );
+
+    const firstLaunch = render(<App />);
+    expect(screen.getByTitle("Current streak: 3 day(s)")).toBeTruthy();
+    expect(JSON.parse(localStorage.getItem("sb-game")).freezesUsed).toBe(1);
+
+    firstLaunch.unmount();
+    vi.setSystemTime(expiry + 86400000);
+    render(<App />);
+    expect(screen.getByTitle("Current streak: 0 day(s)")).toBeTruthy();
+  });
 });
 
 
