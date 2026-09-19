@@ -1,6 +1,6 @@
 # StudyBox
 
-StudyBox is a lightweight A-level study planner and revision timer built with React and Vite. It is designed to help you track topics, mark progress, time revision sessions, and keep a simple local history of your study work.
+StudyBox is a lightweight study planner and revision timer built with React and Vite. It is designed to help you track topics, mark progress, time revision sessions, and keep a simple local history of your study work.
 
 ## What it does
 
@@ -15,29 +15,28 @@ StudyBox is a lightweight A-level study planner and revision timer built with Re
 - Shows progress and time summaries per subject
 - Works offline as a PWA once installed
 
-## Current subjects
+## Getting started
 
-The app starts with four subject areas:
+The first time you open StudyBox you choose how to begin:
 
-- Physics
-- Maths
-- Further Maths
-- Computer Science
-
-You can add your own topics to each subject and mark them off as you revise.
+- **Start blank** and add your own subjects and topics
+- **Use example subjects** (Physics, Maths, Further Maths and Computer Science with sample A-level topics) as a template you can freely edit or delete
+- **Restore from file** if you already have a backup
 
 ## How it works
 
-StudyBox has three main views:
+StudyBox has four main views:
 
-- `Planner` for managing subjects, topics, and the timer
-- `Log` for reviewing session history and study-time totals
-- `Settings` for switching themes and editing or deleting any subject
-- `Settings` for switching themes, editing or deleting any subject, and importing a subject spec PDF
+- `Planner` for managing subjects, topics, and the timer (press Space to start or pause)
+- `Log` for reviewing and editing session history and study-time totals
+- `Analysis` for streaks, XP and time breakdowns
+- `Settings` for themes, editing or deleting subjects, importing a subject spec PDF, backup and restore, and the optional Asana integration
 
 The timer is based on timestamps rather than a simple interval counter, so it stays accurate even if the tab is backgrounded or the app is opened in standalone mode.
 
-All data is stored locally in `localStorage`. Nothing is synced to a server.
+All data is stored locally in `localStorage`. Nothing is synced to a server. Use **Settings > Backup & Restore** to download a JSON backup, since browsers can clear site data.
+
+Asana is an optional integration, off until you choose **Connect Asana** in Settings.
 
 ## Quick Start
 
@@ -47,7 +46,7 @@ All data is stored locally in `localStorage`. Nothing is synced to a server.
 - Click the "Start Timer" button to start a new study session
 - Study away!
 
-## Getting started
+## Development
 
 ### Requirements
 
@@ -78,10 +77,11 @@ npm run build
 npm run preview
 ```
 
-### Lint the code
+### Lint and test
 
 ```bash
 npm run lint
+npm test
 ```
 
 ## Install as an app
@@ -96,8 +96,11 @@ StudyBox includes PWA support through `vite-plugin-pwa`. On a supported browser,
 
 ## Project structure
 
-- `src/App.jsx` - main StudyBox UI and app state
-- `src/main.jsx` - React entry point
+- `src/App.jsx` - app shell: state, persistence effects, handlers and the view switch
+- `src/components/` - `PlannerView`, `LogView`, `SettingsView` (with `settings/` cards), `Onboarding`, `TopBar`, `AnalysisPanel`, `AsanaTasksPanel` and smaller pieces
+- `src/hooks/useTimer.js` - timestamp-anchored study timer
+- `src/utils/` - formatting, storage, subject normalisation, streak/XP logic, backup and themes
+- `src/services/asanaClient.js` - optional Asana API client
 - `public/` - icons and favicon assets
 
 ## Data persistence
@@ -108,5 +111,7 @@ StudyBox saves:
 - logged study sessions
 - theme selection
 - imported subject definitions and custom subjects
+- streak and XP progress
+- whether first-run setup has been completed
 
 Because storage is local to the browser, clearing site data will reset the app.

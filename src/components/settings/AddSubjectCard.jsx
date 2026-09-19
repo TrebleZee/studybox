@@ -101,7 +101,7 @@ export default function AddSubjectCard({ C, onAddSubject }) {
         <input
           value={subjectExam}
           onChange={(e) => setSubjectExam(e.target.value)}
-          placeholder="Exam board"
+          placeholder="Exam board / level"
           style={{
             background: C.s2,
             border: `1px solid ${C.bdr2}`,

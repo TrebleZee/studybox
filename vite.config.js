@@ -13,7 +13,7 @@ export default defineConfig({
       manifest: {
         name: 'StudyBox',
         short_name: 'StudyBox',
-        description: 'A-Level study planner and revision timer',
+        description: 'Study planner and revision timer',
         theme_color: '#131313',
         background_color: '#0C0C0C',
         display: 'standalone',
