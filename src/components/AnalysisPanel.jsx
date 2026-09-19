@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 
 // Helper duration formatters
 const fmtDur = (s) => {
@@ -48,7 +48,6 @@ export default function AnalysisPanel({
   asanaStats,
   game,
   C,
-  onSelectSubject,
 }) {
   const [timeframe, setTimeframe] = useState("all"); // 'all' | 'daily' | 'weekly' | 'monthly' | 'yearly'
   const [selectedSubjectFilter, setSelectedSubjectFilter] = useState("all");
@@ -115,15 +114,9 @@ export default function AnalysisPanel({
       const pct = grandTotal > 0 ? Math.round((dur / grandTotal) * 100) : 0;
       const avgLengthSecs = count > 0 ? Math.round(dur / count) : 0;
 
-      let doneTopics = 0;
-      let totalTopics = 0;
-      if (sub.isAsana) {
-        doneTopics = asanaStats?.completed || 0;
-        totalTopics = asanaStats?.total || 0;
-      } else {
-        doneTopics = sub.topics.filter((t) => t.done).length;
-        totalTopics = sub.topics.length;
-      }
+      const [doneTopics, totalTopics] = sub.isAsana
+        ? [asanaStats?.completed || 0, asanaStats?.total || 0]
+        : [sub.topics.filter((t) => t.done).length, sub.topics.length];
 
       const topicPct = totalTopics > 0 ? Math.round((doneTopics / totalTopics) * 100) : 0;
 
@@ -139,7 +132,7 @@ export default function AnalysisPanel({
         untouchedTopics: sub.isAsana ? [] : sub.topics.filter((t) => !t.done),
       };
     });
-  }, [allSubjects, sessions, asanaStats]);
+  }, [allSubjects, filteredSessions, asanaStats]);
 
   // Imbalance Insight
   const imbalanceInsight = useMemo(() => {
@@ -423,7 +416,7 @@ export default function AnalysisPanel({
           color = "#F59E0B";
         }
 
-        let reason = "";
+        let reason;
         if (sub.topicPct < 40 && sub.pct < 20) {
           reason = `Behind on topics (${sub.topicPct}%) and low time investment (${sub.pct}% share)`;
         } else if (sub.topicPct < 50) {
@@ -449,8 +442,8 @@ export default function AnalysisPanel({
       const d = parseDate(s.date);
       if (!d) return;
 
-      let key = "";
-      let label = "";
+      let key;
+      let label;
 
       if (timeframe === "daily") {
         key = toYYYYMMDD(d);

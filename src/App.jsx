@@ -1,440 +1,45 @@
-import { useEffect, useRef, useState } from "react";
-import { extractPdfText, generateSubjectDraftFromPdfText } from "./specImport.js";
-import AsanaTasksPanel from "./components/AsanaTasksPanel.jsx";
+import { useEffect, useState } from "react";
 import AnalysisPanel from "./components/AnalysisPanel.jsx";
-import { ASANA_DEFAULTS, normalizeAsanaConfig } from "./services/asanaClient.js";
+import EditSessionModal from "./components/EditSessionModal.jsx";
+import LogView from "./components/LogView.jsx";
+import Onboarding from "./components/Onboarding.jsx";
+import PlannerView from "./components/PlannerView.jsx";
+import SettingsView from "./components/SettingsView.jsx";
+import TopBar from "./components/TopBar.jsx";
+import useTimer from "./hooks/useTimer.js";
+import { normalizeAsanaConfig } from "./services/asanaClient.js";
+import { buildCss } from "./utils/appCss.js";
+import { backupFileName, buildBackup, parseBackup } from "./utils/backup.js";
+import { fmt } from "./utils/format.js";
+import {
+  applyLoggedSession,
+  buildInitialGame,
+  streakExpiry,
+  validateStreak,
+} from "./utils/gameLogic.js";
+import { loadJson, STORAGE_KEYS } from "./utils/storage.js";
+import {
+  addUniqueTag,
+  defaultSubjects,
+  isUntouchedDefaultSubjects,
+  normalizeSessions,
+  normalizeSubjects,
+} from "./utils/subjects.js";
+import { THEMES } from "./utils/themes.js";
 
-const DEFAULT_SUBJECT_IDS = new Set(["physics", "maths", "further", "cs"]);
-const STORAGE_KEYS = {
-  subjects: "sb-subjects",
-  sessions: "sb-sessions",
-  theme: "sb-theme",
-  asana: "sb-asana",
-  asanaStats: "sb-asana-stats",
-  game: "sb-game",
-};
-
-const DEFAULT_GAME = {
-  currentStreak: 0,
-  longestStreak: 0,
-  lastStudyDate: null,
-  streakProtectedUntil: null,
-  totalXP: 0,
-  freezesUsed: 0,
-};
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const dateKey = (value) => {
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-};
-
-const normalizeDateKey = (value) => {
-  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return value;
-  }
-  return dateKey(value);
-};
-
-// A missed day is not considered a broken streak until 24 hours after
-// 23:59:59 on the last day studied. This deliberately does not use a
-// calendar-day comparison, so closing the app cannot reset a streak early.
-const streakExpiry = (lastStudyDate) => {
-  const [year, month, day] = lastStudyDate.split("-").map(Number);
-  return new Date(year, month - 1, day, 23, 59, 59, 999).getTime() + DAY_MS;
-};
-
-const calendarDayDistance = (from, to) => {
-  const [fromYear, fromMonth, fromDay] = from.split("-").map(Number);
-  const [toYear, toMonth, toDay] = to.split("-").map(Number);
-  return (
-    Date.UTC(toYear, toMonth - 1, toDay) -
-    Date.UTC(fromYear, fromMonth - 1, fromDay)
-  ) / DAY_MS;
-};
-
-const getStreakForDates = (dateStrings) => {
-  let streak = 0;
-  let previous = null;
-
-  dateStrings.forEach((date) => {
-    if (previous === null || calendarDayDistance(previous, date) !== 1) {
-      streak = 1;
-    } else {
-      streak += 1;
-    }
-    previous = date;
+const readFileText = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = () => reject(new Error("Unable to read backup file."));
+    reader.readAsText(file);
   });
 
-  return streak;
-};
-
-const getLongestStreak = (dateStrings) => {
-  let longest = 0;
-  let streak = 0;
-  let previous = null;
-
-  dateStrings.forEach((date) => {
-    if (previous === null || calendarDayDistance(previous, date) !== 1) {
-      streak = 1;
-    } else {
-      streak += 1;
-    }
-    longest = Math.max(longest, streak);
-    previous = date;
-  });
-
-  return longest;
-};
-
-const normalizeGame = (loaded) => {
-  if (!loaded || typeof loaded !== "object") return { ...DEFAULT_GAME };
-  return {
-    currentStreak: Number(loaded.currentStreak) || 0,
-    longestStreak: Number(loaded.longestStreak) || 0,
-    lastStudyDate: normalizeDateKey(loaded.lastStudyDate),
-    streakProtectedUntil: Number(loaded.streakProtectedUntil) || null,
-    totalXP: Number(loaded.totalXP) || 0,
-    freezesUsed: Number(loaded.freezesUsed) || 0,
-  };
-};
-
-const validateStreak = (game, nowMs = Date.now()) => {
-  if (!game.lastStudyDate || game.currentStreak <= 0) return game;
-
-  let nextCheckAt = Math.max(
-    streakExpiry(game.lastStudyDate),
-    Number(game.streakProtectedUntil) || 0
-  );
-  if (nowMs < nextCheckAt) return game;
-
-  let freezesUsed = game.freezesUsed;
-  let freezesAvailable = Math.min(
-    Math.max(0, Math.floor(game.totalXP / 500) - freezesUsed),
-    3
-  );
-
-  // Each available freeze protects one further 24-hour period. This loop
-  // also makes launch validation correct after several days offline.
-  while (nowMs >= nextCheckAt && freezesAvailable > 0) {
-    freezesUsed += 1;
-    freezesAvailable -= 1;
-    nextCheckAt += DAY_MS;
-  }
-
-  if (nowMs >= nextCheckAt) {
-    return {
-      ...game,
-      currentStreak: 0,
-      streakProtectedUntil: null,
-      freezesUsed,
-    };
-  }
-
-  return {
-    ...game,
-    freezesUsed,
-    streakProtectedUntil: nextCheckAt,
-  };
-};
-
-const buildInitialGame = (loaded, sessions, subjects, nowMs = Date.now()) => {
-  const storedGame = normalizeGame(loaded);
-  const dateStrings = Array.from(
-    new Set(
-      sessions
-        .map((session) => dateKey(session.date))
-        .filter(Boolean)
-    )
-  ).sort();
-  const lastStudyDate = dateStrings[dateStrings.length - 1] || storedGame.lastStudyDate;
-  const minutesStudied = sessions.reduce(
-    (sum, session) => sum + Math.floor(session.duration / 60),
-    0
-  );
-  const topicXP = subjects.reduce(
-    (sum, subject) => sum + subject.topics.filter((topic) => topic.done).length * 10,
-    0
-  );
-  const historicalStreak = dateStrings.length
-    ? getStreakForDates(dateStrings)
-    : storedGame.currentStreak;
-  const historicalLongest = dateStrings.length
-    ? getLongestStreak(dateStrings)
-    : storedGame.longestStreak;
-  const calculatedTotalXP = minutesStudied + topicXP;
-
-  return validateStreak(
-    {
-      ...storedGame,
-      currentStreak: historicalStreak,
-      longestStreak: Math.max(storedGame.longestStreak, historicalLongest),
-      lastStudyDate,
-      // XP is earned progress, so keep persisted XP even if a session was
-      // later deleted from the history.
-      totalXP: Math.max(storedGame.totalXP, calculatedTotalXP),
-      streakProtectedUntil: storedGame.streakProtectedUntil,
-    },
-    nowMs
-  );
-};
-
-const TOPIC_SEED = {
-  physics: [
-    "Practical Skills in Physics",
-    "Foundations of Physics",
-    "Forces and Motion",
-    "Electrons, Waves and Photons",
-    "Newtonian World and Astrophysics",
-    "Particles and Medical Physics",
-  ],
-  maths: [
-    "Algebra and Functions",
-    "Coordinate Geometry",
-    "Sequences and Series",
-    "Trigonometry",
-    "Exponentials and Logarithms",
-    "Differentiation",
-    "Integration",
-    "Vectors",
-    "Statistical Sampling",
-    "Probability and Distributions",
-    "Hypothesis Testing",
-    "Kinematics",
-    "Forces and Newton's Laws",
-    "Projectiles and Moments",
-  ],
-  further: [
-    "Complex Numbers",
-    "Argand Diagrams",
-    "Matrices",
-    "Linear Transformations",
-    "Further Algebra",
-    "Series and Sums",
-    "Further Calculus",
-    "Polar Coordinates",
-    "Hyperbolic Functions",
-    "Differential Equations",
-    "Further Vectors",
-    "Proof by Induction",
-  ],
-  cs: [
-    "Components of a Computer",
-    "Software and Software Development",
-    "Exchanging Data",
-    "Data Types, Structures and Algorithms",
-    "Legal, Moral and Ethical Issues",
-    "Elements of Computational Thinking",
-    "Problem Solving and Programming",
-    "Algorithms",
-    "Theory of Computation",
-    "NEA Programming Project",
-  ],
-};
-
-const SUBJECT_PRESETS = [
-  { id: "physics", name: "Physics", exam: "OCR A", color: "#4F9CF9" },
-  { id: "maths", name: "Maths", exam: "Edexcel", color: "#34D399" },
-  { id: "further", name: "Further Maths", exam: "Edexcel", color: "#A78BFA" },
-  { id: "cs", name: "Computer Science", exam: "OCR", color: "#FBBF24" },
-];
-
-const THEMES = [
-  {
-    id: "midnight",
-    name: "Midnight",
-    description: "The current dark palette, tuned for low-distraction study.",
-    colors: {
-      bg: "#0C0C0C",
-      s1: "#131313",
-      s2: "#1A1A1A",
-      s3: "#222222",
-      bdr: "#272727",
-      bdr2: "#333333",
-      txt: "#F0F0F0",
-      muted: "#5A5A5A",
-      dim: "#353535",
-      hover: "rgba(255,255,255,0.04)",
-    },
-  },
-  {
-    id: "paper",
-    name: "Paper",
-    description: "A bright workspace with warm surfaces and soft borders.",
-    colors: {
-      bg: "#F5F1E8",
-      s1: "#FFFCF6",
-      s2: "#F1EBDE",
-      s3: "#E7E0CF",
-      bdr: "#DDD5C5",
-      bdr2: "#CEC5B4",
-      txt: "#1A1A1A",
-      muted: "#6E6658",
-      dim: "#B0A796",
-      hover: "rgba(0,0,0,0.035)",
-    },
-  },
-  {
-    id: "forest",
-    name: "Forest",
-    description: "Deep green surfaces with a calmer editorial feel.",
-    colors: {
-      bg: "#0B1410",
-      s1: "#111D17",
-      s2: "#17261F",
-      s3: "#203129",
-      bdr: "#23372E",
-      bdr2: "#2D473C",
-      txt: "#ECF6F1",
-      muted: "#7D988B",
-      dim: "#355043",
-      hover: "rgba(255,255,255,0.05)",
-    },
-  },
-  {
-    id: "slate",
-    name: "Slate",
-    description: "Cool, balanced greys with a slightly brighter contrast.",
-    colors: {
-      bg: "#0E1116",
-      s1: "#151A21",
-      s2: "#1B212B",
-      s3: "#242C38",
-      bdr: "#2A3442",
-      bdr2: "#394555",
-      txt: "#F2F5FA",
-      muted: "#7F8A99",
-      dim: "#384454",
-      hover: "rgba(255,255,255,0.045)",
-    },
-  },
-];
-
-const SESSION_TAG_SUGGESTIONS = [
-  "Past papers",
-  "Blurting",
-  "Recap",
-  "Flashcards",
-  "Practice questions",
-  "Timed set",
-];
-
-const fmt = (s) => {
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  return h
-    ? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
-    : `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
-};
-
-const fmtDur = (s) => {
-  if (!s) return "-";
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
-};
-
-const fmtDate = (iso) =>
-  new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-
-const loadJson = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-};
-
-const topicList = (seed, prefix) =>
-  seed.map((name, index) => ({
-    id: `${prefix}${index}`,
-    name,
-    done: false,
-    subtasks: [],
-  }));
-
-const defaultSubjects = () =>
-  SUBJECT_PRESETS.map((subject) => ({
-    ...subject,
-    locked: true,
-    custom: false,
-    topics: topicList(TOPIC_SEED[subject.id] || [], subject.id.slice(0, 2)),
-  }));
-
-const normalizeSubjects = (input) => {
-  if (input == null) {
-    return defaultSubjects();
-  }
-
-  if (!Array.isArray(input)) {
-    return defaultSubjects();
-  }
-
-  return input.map((subject, index) => {
-    const preset = SUBJECT_PRESETS.find((item) => item.id === subject?.id);
-    const sourceTopics = Array.isArray(subject?.topics) ? subject.topics : [];
-
-    return {
-      id: subject?.id || `sub-${Date.now().toString(36)}-${index}`,
-      name: subject?.name || preset?.name || "Untitled subject",
-      exam: subject?.exam || preset?.exam || "Custom",
-      color: subject?.color || preset?.color || "#4F9CF9",
-      locked: DEFAULT_SUBJECT_IDS.has(subject?.id),
-      custom: !DEFAULT_SUBJECT_IDS.has(subject?.id),
-      topics: sourceTopics.map((topic, topicIndex) => ({
-        id: topic?.id || `${subject?.id || "sub"}-${topicIndex}`,
-        name: topic?.name || "Untitled topic",
-        done: Boolean(topic?.done),
-        subtasks: (Array.isArray(topic?.subtasks) ? topic.subtasks : []).map(
-          (subtask, subtaskIndex) => ({
-            id: subtask?.id || `${topic?.id || topicIndex}-st${subtaskIndex}`,
-            name: subtask?.name || "Untitled subtask",
-            done: Boolean(subtask?.done),
-          })
-        ),
-      })),
-    };
-  });
-};
-
-const normalizeSessions = (input) => {
-  if (!Array.isArray(input)) return [];
-
-  return input.map((session, index) => ({
-    id: session?.id || `sess-${Date.now().toString(36)}-${index}`,
-    subjectId: session?.subjectId || "",
-    subjectName: session?.subjectName || "",
-    subjectColor: session?.subjectColor || "#888888",
-    duration: Number(session?.duration) || 0,
-    date: session?.date || new Date().toISOString(),
-    note: session?.note || "",
-    tags: Array.isArray(session?.tags) ? session.tags.filter(Boolean) : [],
-  }));
-};
-
-const addUniqueTag = (current, nextTag) => {
-  const cleaned = nextTag.trim().replace(/\s+/g, " ");
-  if (!cleaned) return current;
-
-  const exists = current.some(
-    (tag) => tag.toLowerCase() === cleaned.toLowerCase()
-  );
-  return exists ? current : [...current, cleaned];
-};
+const mapSubject = (subjects, id, fn) =>
+  subjects.map((subject) => (subject.id === id ? fn(subject) : subject));
 
 export default function StudyBox() {
-  const [themeId, setThemeId] = useState(() =>
-    loadJson(STORAGE_KEYS.theme, "midnight")
-  );
+  const [themeId, setThemeId] = useState(() => loadJson(STORAGE_KEYS.theme, "midnight"));
   const [subjects, setSubjects] = useState(() =>
     normalizeSubjects(loadJson(STORAGE_KEYS.subjects, null))
   );
@@ -444,47 +49,23 @@ export default function StudyBox() {
   const [asanaCfg, setAsanaCfg] = useState(() =>
     normalizeAsanaConfig(loadJson(STORAGE_KEYS.asana, null))
   );
-  const [asanaStats, setAsanaStats] = useState(() =>
-    loadJson(STORAGE_KEYS.asanaStats, null)
-  );
-  const [sel, setSel] = useState("physics");
-  const [asanaTask, setAsanaTask] = useState(null);
-  const [view, setView] = useState("planner");
-  const [elapsed, setElapsed] = useState(0);
-  const [startedAt, setStartedAt] = useState(null);
-  const [now, setNow] = useState(() => Date.now());
-  const [tSub, setTSub] = useState(null);
-  const [newTopic, setNewTopic] = useState("");
-  const [expandedTopic, setExpandedTopic] = useState(null);
-  const [subtaskDraft, setSubtaskDraft] = useState("");
-  const [doneTopicsOpen, setDoneTopicsOpen] = useState(false);
-  const [note, setNote] = useState("");
-  const [sessionTags, setSessionTags] = useState([]);
-  const [tagDraft, setTagDraft] = useState("");
-  const [subjectName, setSubjectName] = useState("");
-  const [subjectExam, setSubjectExam] = useState("");
-  const [subjectColor, setSubjectColor] = useState("#4F9CF9");
-  const [specFileName, setSpecFileName] = useState("");
-  const [specImporting, setSpecImporting] = useState(false);
-  const [specError, setSpecError] = useState("");
-  const [specTopics, setSpecTopics] = useState([]);
-  const [editingSession, setEditingSession] = useState(null);
-  const [editSubjectId, setEditSubjectId] = useState("");
-  const [editDurationHours, setEditDurationHours] = useState(0);
-  const [editDurationMinutes, setEditDurationMinutes] = useState(0);
-  const [editDate, setEditDate] = useState("");
-  const [editTags, setEditTags] = useState([]);
-  const [editTagInput, setEditTagInput] = useState("");
-  const [editNote, setEditNote] = useState("");
-  const [backupMessage, setBackupMessage] = useState(null);
-  const [game, setGame] = useState(() => {
-    return buildInitialGame(
+  const [asanaStats, setAsanaStats] = useState(() => loadJson(STORAGE_KEYS.asanaStats, null));
+  const [game, setGame] = useState(() =>
+    buildInitialGame(
       loadJson(STORAGE_KEYS.game, null),
       normalizeSessions(loadJson(STORAGE_KEYS.sessions, [])),
       normalizeSubjects(loadJson(STORAGE_KEYS.subjects, null))
-    );
-  });
-  const itvRef = useRef();
+    )
+  );
+  const [onboarded, setOnboarded] = useState(() => loadJson(STORAGE_KEYS.onboarded, false));
+  const [sel, setSel] = useState(() => subjects[0]?.id ?? null);
+  const [view, setView] = useState("planner");
+  const [asanaTask, setAsanaTask] = useState(null);
+  const [expandedTopic, setExpandedTopic] = useState(null);
+  const [note, setNote] = useState("");
+  const [sessionTags, setSessionTags] = useState([]);
+  const [editingSession, setEditingSession] = useState(null);
+  const [backupMessage, setBackupMessage] = useState(null);
 
   const theme = THEMES.find((item) => item.id === themeId) || THEMES[0];
   const C = theme.colors;
@@ -492,34 +73,27 @@ export default function StudyBox() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.theme, JSON.stringify(themeId));
   }, [themeId]);
-
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.subjects, JSON.stringify(subjects));
   }, [subjects]);
-
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(sessions));
   }, [sessions]);
-
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.asana, JSON.stringify(asanaCfg));
   }, [asanaCfg]);
-
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.asanaStats, JSON.stringify(asanaStats));
   }, [asanaStats]);
-
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.game, JSON.stringify(game));
   }, [game]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.onboarded, JSON.stringify(onboarded));
+  }, [onboarded]);
 
-  const freezesEarned = Math.floor(game.totalXP / 500);
-  const freezesAvailable = Math.min(Math.max(0, freezesEarned - game.freezesUsed), 3);
-  const xpToNextFreeze = 500 - (game.totalXP % 500);
-
-  // Validate again when the persisted streak window expires while the app is open.
-  // The same validator runs in buildInitialGame, so reopening the app also gets
-  // the correct result before the first render.
+  // Re-validate when the persisted streak window expires while the app is open;
+  // buildInitialGame runs the same validator on launch.
   useEffect(() => {
     if (!game.lastStudyDate || game.currentStreak <= 0) return undefined;
 
@@ -527,311 +101,39 @@ export default function StudyBox() {
       streakExpiry(game.lastStudyDate),
       Number(game.streakProtectedUntil) || 0
     );
-    const delay = Math.max(0, nextCheckAt - Date.now());
-    const timeout = setTimeout(() => {
-      setGame((current) => validateStreak(current, Date.now()));
-    }, delay);
-
+    const timeout = setTimeout(
+      () => setGame((current) => validateStreak(current, Date.now())),
+      Math.max(0, nextCheckAt - Date.now())
+    );
     return () => clearTimeout(timeout);
-  }, [
-    game.currentStreak,
-    game.freezesUsed,
-    game.lastStudyDate,
-    game.streakProtectedUntil,
-  ]);
-
-  const running = startedAt !== null;
-
-  useEffect(() => {
-    if (startedAt !== null) {
-      itvRef.current = setInterval(() => setNow(Date.now()), 500);
-    } else {
-      clearInterval(itvRef.current);
-    }
-
-    return () => clearInterval(itvRef.current);
-  }, [startedAt]);
-
-  const displaySecs = startedAt !== null ? Math.floor((now - startedAt) / 1000) : elapsed;
-
-  useEffect(() => {
-    document.title = startedAt !== null ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
-  }, [startedAt, displaySecs]);
+  }, [game.currentStreak, game.freezesUsed, game.lastStudyDate, game.streakProtectedUntil]);
 
   const sub = subjects.find((subject) => subject.id === sel) || subjects[0] || null;
-  const tSubData = subjects.find((subject) => subject.id === tSub);
-  const currentSubjectId = sub?.id || null;
-  const pct = (subject) =>
-    subject.topics.length
-      ? Math.round(
-          (subject.topics.filter((topic) => topic.done).length /
-            subject.topics.length) *
-            100
-        )
-      : 0;
+  const asanaEnabled = asanaCfg.enabled;
+  const asanaSelected = asanaEnabled && sel === asanaCfg.id;
   const asanaPct =
     asanaStats && asanaStats.total > 0
       ? Math.round((asanaStats.completed / asanaStats.total) * 100)
       : null;
-  const asanaSelected = sel === asanaCfg.id;
-  const asanaAsSubject = {
-    id: asanaCfg.id,
-    name: asanaCfg.name,
-    color: asanaCfg.color,
-  };
-  const timingAsana = tSub === asanaCfg.id;
   const canTime = asanaSelected || Boolean(sub);
-  const updateAsanaCfg = (patch) => {
-    if ("projectGid" in patch) setAsanaStats(null);
-    setAsanaCfg((prev) => ({ ...prev, ...patch }));
-  };
-  const subTotal = (id) =>
-    sessions
-      .filter((session) => session.subjectId === id)
-      .reduce((sum, session) => sum + session.duration, 0);
-  const grandTotal = sessions.reduce((sum, session) => sum + session.duration, 0);
-  const timerColor =
-    (timingAsana ? asanaCfg.color : tSubData?.color) ||
-    (asanaSelected ? asanaCfg.color : sub?.color) ||
-    "#888888";
-  const toggleTopic = (sid, tid) =>
-    setSubjects((prev) =>
-      prev.map((subject) => {
-        if (subject.id !== sid) return subject;
 
-        const targetTopic = subject.topics.find((t) => t.id === tid);
-        const isTurningDone = targetTopic && !targetTopic.done;
+  const timer = useTimer({
+    canTime,
+    defaultSubjectId: asanaSelected ? asanaCfg.id : sub?.id ?? null,
+  });
+  const { running, displaySecs, timedSubjectId } = timer;
+  const timedSubject = subjects.find((subject) => subject.id === timedSubjectId);
+  const timingAsana = asanaEnabled && timedSubjectId === asanaCfg.id;
 
-        if (isTurningDone) {
-          setGame((g) => ({
-            ...g,
-            totalXP: g.totalXP + 10,
-          }));
-        }
+  useEffect(() => {
+    document.title = running ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
+  }, [running, displaySecs]);
 
-        return {
-          ...subject,
-          topics: subject.topics.map((topic) =>
-            topic.id === tid ? { ...topic, done: !topic.done } : topic
-          ),
-        };
-      })
-    );
-
-  const updateSubject = (id, patch) => {
-    setSubjects((prev) =>
-      prev.map((subject) => (subject.id === id ? { ...subject, ...patch } : subject))
-    );
-  };
-
-  const addTopic = () => {
-    const topicName = newTopic.trim();
-    if (!topicName || !sub) return;
-
-    setSubjects((prev) =>
-      prev.map((subject) =>
-        subject.id === currentSubjectId
-          ? {
-              ...subject,
-              topics: [
-                ...subject.topics,
-                { id: Date.now().toString(), name: topicName, done: false, subtasks: [] },
-              ],
-            }
-          : subject
-      )
-    );
-    setNewTopic("");
-  };
-
-  const delTopic = (tid) =>
-    setSubjects((prev) =>
-      prev.map((subject) =>
-        subject.id === currentSubjectId
-          ? { ...subject, topics: subject.topics.filter((topic) => topic.id !== tid) }
-          : subject
-      )
-    );
-
-  const updateTopicSubtasks = (tid, updater) =>
-    setSubjects((prev) =>
-      prev.map((subject) =>
-        subject.id === currentSubjectId
-          ? {
-              ...subject,
-              topics: subject.topics.map((topic) =>
-                topic.id === tid
-                  ? { ...topic, subtasks: updater(topic.subtasks) }
-                  : topic
-              ),
-            }
-          : subject
-      )
-    );
-
-  const toggleSubtask = (tid, stid) =>
-    updateTopicSubtasks(tid, (subtasks) =>
-      subtasks.map((subtask) =>
-        subtask.id === stid ? { ...subtask, done: !subtask.done } : subtask
-      )
-    );
-
-  const addSubtask = (tid) => {
-    const subtaskName = subtaskDraft.trim();
-    if (!subtaskName) return;
-    updateTopicSubtasks(tid, (subtasks) => [
-      ...subtasks,
-      { id: `st-${Date.now().toString(36)}`, name: subtaskName, done: false },
-    ]);
-    setSubtaskDraft("");
-  };
-
-  const delSubtask = (tid, stid) =>
-    updateTopicSubtasks(tid, (subtasks) =>
-      subtasks.filter((subtask) => subtask.id !== stid)
-    );
-
-  const addSubject = () => {
-    const cleanName = subjectName.trim();
-    const cleanExam = subjectExam.trim();
-    if (!cleanName) return;
-
-    const id = `custom-${Date.now().toString(36)}`;
-    setSubjects((prev) => [
-      ...prev,
-      {
-        id,
-        name: cleanName,
-        exam: cleanExam || "Custom",
-        color: subjectColor,
-        locked: false,
-        custom: true,
-        topics: specTopics.map((topic, i) => ({
-          id: `${id}-topic-${i}`,
-          name: topic,
-          done: false,
-          subtasks: [],
-        })),
-      },
-    ]);
-    setSel(id);
-    setSubjectName("");
-    setSubjectExam("");
-    setSubjectColor("#4F9CF9");
-    setSpecFileName("");
-    setSpecError("");
-    setSpecTopics([]);
-  };
-
-  const handleSpecUpload = async (file) => {
-    if (!file) return;
-
-    setSpecImporting(true);
-    setSpecError("");
-    setSpecFileName(file.name);
-
-    try {
-      const text = await extractPdfText(file);
-      const draft = generateSubjectDraftFromPdfText(text, file.name);
-
-      setSubjectName(draft.subjectName);
-      setSubjectExam(draft.examBoard);
-      setSpecTopics(draft.topics || []);
-    } catch (error) {
-      setSpecError(error instanceof Error ? error.message : "Unable to read PDF spec.");
-    } finally {
-      setSpecImporting(false);
-    }
-  };
-
-  const clearSpecImport = () => {
-    setSpecFileName("");
-    setSpecError("");
-    setSpecTopics([]);
-  };
-
-  const exportData = () => {
-    const data = { subjects, sessions, theme: themeId, game, version: 1 };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `studybox-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setBackupMessage({ type: "success", text: "Backup downloaded." });
-  };
-
-  const importData = (file) => {
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
-        if (!data || typeof data !== "object") {
-          throw new Error("That file doesn't look like a StudyBox backup.");
-        }
-
-        if (data.subjects) setSubjects(normalizeSubjects(data.subjects));
-        if (data.sessions) setSessions(normalizeSessions(data.sessions));
-        if (data.theme) setThemeId(data.theme);
-        if (data.game) setGame(normalizeGame(data.game));
-        setBackupMessage({ type: "success", text: "Backup restored." });
-      } catch (error) {
-        setBackupMessage({
-          type: "error",
-          text: error instanceof Error ? error.message : "Unable to read backup file.",
-        });
-      }
-    };
-    reader.onerror = () => {
-      setBackupMessage({ type: "error", text: "Unable to read backup file." });
-    };
-    reader.readAsText(file);
-  };
-
-  const removeSubject = (id) => {
-    const next = subjects.filter((subject) => subject.id !== id);
-    setSubjects(next);
-    if (sel === id) {
-      setSel(next[0]?.id || null);
-    }
-    if (tSub === id) {
-      setTSub(null);
-    }
-  };
-
-  const addTag = (raw) => {
-    const next = raw.trim();
-    if (!next) return;
-    setSessionTags((prev) => addUniqueTag(prev, next));
-    setTagDraft("");
-  };
-
-  const removeTag = (tag) => {
-    setSessionTags((prev) => prev.filter((item) => item !== tag));
-  };
-
-  const clearTags = () => setSessionTags([]);
-
-  const start = () => {
-    if (!canTime) return;
-    if (!tSub) setTSub(asanaSelected ? asanaCfg.id : currentSubjectId);
-    setStartedAt(Date.now() - elapsed * 1000);
-  };
-
-  const pause = () => {
-    setElapsed(displaySecs);
-    setStartedAt(null);
-  };
-
-  // Space toggles the timer, unless the user is typing into a field or a
-  // modal is open (session edit dialog uses its own inputs/buttons).
+  // Space toggles the timer unless the user is typing or a dialog is open.
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.code !== "Space") return;
-      if (editingSession) return;
+      if (document.querySelector('[role="dialog"]')) return;
 
       const target = e.target;
       const tag = target?.tagName;
@@ -840,180 +142,216 @@ export default function StudyBox() {
       }
 
       e.preventDefault();
-      if (running) {
-        pause();
-      } else {
-        start();
-      }
+      if (running) timer.pause();
+      else timer.start();
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [running, start, pause, editingSession]);
+  });
 
-  const reset = () => {
-    setElapsed(0);
-    setStartedAt(null);
-    setTSub(null);
+  const subTotal = (id) =>
+    sessions
+      .filter((session) => session.subjectId === id)
+      .reduce((sum, session) => sum + session.duration, 0);
+  const grandTotal = sessions.reduce((sum, session) => sum + session.duration, 0);
+
+  const timerColor =
+    (timingAsana ? asanaCfg.color : timedSubject?.color) ||
+    (asanaSelected ? asanaCfg.color : sub?.color) ||
+    "#888888";
+  const timerLabel = timedSubject
+    ? timedSubject.name
+    : timingAsana || asanaSelected
+      ? asanaTask?.name || asanaCfg.name
+      : sub?.name || "-";
+
+  const updateCurrentSubject = (fn) => {
+    if (sub) setSubjects((prev) => mapSubject(prev, sub.id, fn));
   };
 
-  const logSess = () => {
-    if (!displaySecs || !canTime) return;
+  const updateTopicSubtasks = (topicId, updater) =>
+    updateCurrentSubject((subject) => ({
+      ...subject,
+      topics: subject.topics.map((topic) =>
+        topic.id === topicId ? { ...topic, subtasks: updater(topic.subtasks) } : topic
+      ),
+    }));
 
-    const loggedAt = new Date();
-    const today = dateKey(loggedAt);
-    const minutesStudied = Math.floor(displaySecs / 60);
-    const earnedXP = Math.max(1, minutesStudied);
+  const actions = {
+    selectSubject: (id) => {
+      setSel(id);
+      setExpandedTopic(null);
+    },
+    selectAsana: () => setSel(asanaCfg.id),
+    openAnalysis: () => setView("analysis"),
+    openSettings: () => setView("settings"),
 
-    setGame((g) => {
-      const validatedGame = validateStreak(g, loggedAt.getTime());
-      let newStreak = validatedGame.currentStreak;
-      const previousStudyDate = validatedGame.lastStudyDate;
-
-      if (previousStudyDate === today) {
-        // already studied today — just add XP, don't touch streak
-      } else if (previousStudyDate && newStreak > 0) {
-        // A still-valid streak can be extended on the next study day. If a
-        // freeze was used, this also correctly bridges its protected day.
-        newStreak += 1;
-      } else {
-        newStreak = 1;
-      }
-
-      return {
-        ...validatedGame,
-        currentStreak: newStreak,
-        longestStreak: Math.max(validatedGame.longestStreak, newStreak),
-        lastStudyDate: today,
-        streakProtectedUntil: null,
-        totalXP: validatedGame.totalXP + earnedXP,
-      };
-    });
-
-    const isAsana = timingAsana || (!tSubData && asanaSelected);
-    const subjectToLog = isAsana ? asanaAsSubject : tSubData || sub;
-    const selectedTopic =
-      !isAsana && tSubData
-        ? tSubData.topics.find((topic) => topic.id === expandedTopic)
-        : null;
-    const nid = `sess-${Date.now().toString(36)}`;
-    setSessions((prev) => [
-      {
-        id: nid,
-        subjectId: subjectToLog.id,
-        subjectName: subjectToLog.name,
-        subjectColor: subjectToLog.color,
-        duration: displaySecs,
-        date: new Date().toISOString(),
-        note: note.trim(),
-        tags:
-          isAsana && asanaTask
-            ? addUniqueTag(sessionTags, asanaTask.name)
-            : selectedTopic
-              ? addUniqueTag(sessionTags, selectedTopic.name)
-            : sessionTags,
-      },
-      ...prev,
-    ]);
-
-    setNote("");
-    clearTags();
-    reset();
-  };
-
-  const deleteSession = (id) => {
-    setSessions((prev) => prev.filter((session) => session.id !== id));
-  };
-
-  const startEditSession = (session) => {
-    setEditingSession(session);
-    setEditSubjectId(session.subjectId);
-    setEditDurationHours(Math.floor(session.duration / 3600));
-    setEditDurationMinutes(Math.floor((session.duration % 3600) / 60));
-
-    const d = new Date(session.date);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    setEditDate(`${yyyy}-${mm}-${dd}`);
-
-    setEditTags(session.tags || []);
-    setEditTagInput("");
-    setEditNote(session.note || "");
-  };
-
-  const saveEditSession = () => {
-    if (!editingSession) return;
-
-    const targetSubject =
-      subjects.find((s) => s.id === editSubjectId) ||
-      (editSubjectId === asanaCfg.id
-        ? asanaAsSubject
-        : {
-            id: editSubjectId,
-            name: editingSession.subjectName,
-            color: editingSession.subjectColor,
-          });
-
-    const totalSeconds = editDurationHours * 3600 + editDurationMinutes * 60;
-
-    let finalDate = editingSession.date;
-    if (editDate) {
-      const originalDate = new Date(editingSession.date);
-      const [y, m, d] = editDate.split("-").map(Number);
-      const newD = new Date(
-        y,
-        m - 1,
-        d,
-        originalDate.getHours(),
-        originalDate.getMinutes(),
-        originalDate.getSeconds()
+    toggleTopic: (subjectId, topicId) => {
+      const topic = subjects.find((s) => s.id === subjectId)?.topics.find((t) => t.id === topicId);
+      if (topic && !topic.done) setGame((g) => ({ ...g, totalXP: g.totalXP + 10 }));
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) => ({
+          ...subject,
+          topics: subject.topics.map((t) => (t.id === topicId ? { ...t, done: !t.done } : t)),
+        }))
       );
-      finalDate = newD.toISOString();
+    },
+    addTopic: (name) => {
+      const topicName = name.trim();
+      if (!topicName) return;
+      updateCurrentSubject((subject) => ({
+        ...subject,
+        topics: [
+          ...subject.topics,
+          { id: Date.now().toString(), name: topicName, done: false, subtasks: [] },
+        ],
+      }));
+    },
+    deleteTopic: (topicId) =>
+      updateCurrentSubject((subject) => ({
+        ...subject,
+        topics: subject.topics.filter((topic) => topic.id !== topicId),
+      })),
+    toggleSubtask: (topicId, subtaskId) =>
+      updateTopicSubtasks(topicId, (subtasks) =>
+        subtasks.map((st) => (st.id === subtaskId ? { ...st, done: !st.done } : st))
+      ),
+    addSubtask: (topicId, name) => {
+      const subtaskName = name.trim();
+      if (!subtaskName) return;
+      updateTopicSubtasks(topicId, (subtasks) => [
+        ...subtasks,
+        { id: `st-${Date.now().toString(36)}`, name: subtaskName, done: false },
+      ]);
+    },
+    deleteSubtask: (topicId, subtaskId) =>
+      updateTopicSubtasks(topicId, (subtasks) => subtasks.filter((st) => st.id !== subtaskId)),
+
+    logSession: () => {
+      if (!displaySecs || !canTime) return;
+
+      setGame((g) => applyLoggedSession(g, displaySecs, new Date()));
+
+      const isAsana = timingAsana || (!timedSubject && asanaSelected);
+      const subjectToLog = isAsana
+        ? { id: asanaCfg.id, name: asanaCfg.name, color: asanaCfg.color }
+        : timedSubject || sub;
+      const selectedTopic =
+        !isAsana && timedSubject
+          ? timedSubject.topics.find((topic) => topic.id === expandedTopic)
+          : null;
+      const extraTag = isAsana ? asanaTask?.name : selectedTopic?.name;
+
+      setSessions((prev) => [
+        {
+          id: `sess-${Date.now().toString(36)}`,
+          subjectId: subjectToLog.id,
+          subjectName: subjectToLog.name,
+          subjectColor: subjectToLog.color,
+          duration: displaySecs,
+          date: new Date().toISOString(),
+          note: note.trim(),
+          tags: extraTag ? addUniqueTag(sessionTags, extraTag) : sessionTags,
+        },
+        ...prev,
+      ]);
+
+      setNote("");
+      setSessionTags([]);
+      timer.reset();
+    },
+  };
+
+  const addSubject = ({ name, exam, color, topics }) => {
+    const id = `custom-${Date.now().toString(36)}`;
+    setSubjects((prev) => [
+      ...prev,
+      {
+        id,
+        name,
+        exam,
+        color,
+        topics: topics.map((topic, i) => ({
+          id: `${id}-topic-${i}`,
+          name: topic,
+          done: false,
+          subtasks: [],
+        })),
+      },
+    ]);
+    setSel(id);
+  };
+
+  const removeSubject = (id) => {
+    const next = subjects.filter((subject) => subject.id !== id);
+    setSubjects(next);
+    if (sel === id) setSel(next[0]?.id || null);
+    if (timedSubjectId === id) timer.setTimedSubjectId(null);
+  };
+
+  const updateAsanaCfg = (patch) => {
+    if ("projectGid" in patch || patch.enabled === false) setAsanaStats(null);
+    if (patch.enabled === false) {
+      setAsanaTask(null);
+      if (sel === asanaCfg.id) setSel(subjects[0]?.id ?? null);
     }
+    setAsanaCfg((prev) => ({ ...prev, ...patch }));
+  };
 
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === editingSession.id
-          ? {
-              ...s,
-              subjectId: targetSubject.id,
-              subjectName: targetSubject.name,
-              subjectColor: targetSubject.color,
-              duration: totalSeconds,
-              date: finalDate,
-              tags: editTags,
-              note: editNote.trim(),
-            }
-          : s
-      )
-    );
-
+  const saveSession = (id, patch) => {
+    setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
     setEditingSession(null);
   };
 
-  const CSS = `
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: ${C.bdr2}; border-radius: 3px; }
-    input, textarea { font-family: inherit; font-size: 13px; }
-    input::placeholder, textarea::placeholder { color: ${C.muted}; }
-    .sub-btn:hover { background: ${C.hover} !important; }
-    .topic-row:hover { background: ${C.s2} !important; }
-    .topic-row:hover .del { opacity: 0.5 !important; }
-    .del:hover { opacity: 1 !important; color: ${C.txt} !important; }
-    .nb:hover { opacity: 0.85; }
-    .nb:active { transform: scale(0.97); }
-    .sess-row:hover .del-sess { opacity: 0.6 !important; }
-    .sess-row:hover .edit-sess { opacity: 0.6 !important; }
-    .edit-sess:hover { opacity: 1 !important; color: ${C.txt} !important; background: ${C.s3} !important; }
-    .del-sess:hover { opacity: 1 !important; color: #f87171 !important; }
-    .theme-card:hover { background: ${C.hover} !important; }
-    .asana-row:hover { background: ${C.s2} !important; }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .ticking { animation: blink 2s ease-in-out infinite; }
-  `;
+  const exportData = () => {
+    const backup = buildBackup({ subjects, sessions, themeId, game });
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = backupFileName();
+    a.click();
+    URL.revokeObjectURL(url);
+    setBackupMessage({ type: "success", text: "Backup downloaded." });
+  };
+
+  const importData = async (file) => {
+    if (!file) return { ok: false };
+    try {
+      const restored = parseBackup(await readFileText(file));
+      if (restored.subjects) {
+        setSubjects(restored.subjects);
+        setSel(restored.subjects[0]?.id ?? null);
+      }
+      if (restored.sessions) setSessions(restored.sessions);
+      if (restored.themeId) setThemeId(restored.themeId);
+      if (restored.game) setGame(restored.game);
+      setOnboarded(true);
+      setBackupMessage({ type: "success", text: "Backup restored." });
+      return { ok: true };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to read backup file.";
+      setBackupMessage({ type: "error", text: message });
+      return { ok: false, error: message };
+    }
+  };
+
+  const startBlank = () => {
+    setSubjects([]);
+    setSel(null);
+    setOnboarded(true);
+  };
+
+  const useTemplate = () => {
+    const template = defaultSubjects();
+    setSubjects(template);
+    setSel(template[0].id);
+    setOnboarded(true);
+  };
+
+  const needsOnboarding =
+    !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
 
   return (
     <div
@@ -1028,2433 +366,114 @@ export default function StudyBox() {
         overflow: "hidden",
       }}
     >
-      <style>{CSS}</style>
+      <style>{buildCss(C)}</style>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "0 14px",
-          height: "46px",
-          borderBottom: `1px solid ${C.bdr}`,
-          background: C.s1,
-          gap: "3px",
-          flexShrink: 0,
-        }}
-      >
-        <span
-          style={{
-            fontWeight: 700,
-            fontSize: "14px",
-            letterSpacing: "-0.3px",
-            marginRight: "10px",
-            color: C.txt,
-          }}
-        >
-          StudyBox
-        </span>
-        {[
-          ["planner", "Planner"],
-          ["log", "Log"],
-          ["analysis", "Analysis"],
-          ["settings", "Settings"],
-        ].map(([v, label]) => (
-          <button
-            key={v}
-            className="nb"
-            onClick={() => setView(v)}
-            style={{
-              padding: "5px 11px",
-              borderRadius: "6px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "12px",
-              fontWeight: 500,
-              background: view === v ? C.s3 : "transparent",
-              color: view === v ? C.txt : C.muted,
-              transition: "background 0.1s",
-            }}
-          >
-            {label}
-          </button>
-        ))}
-        <div
-          style={{
-            marginLeft: "auto",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            fontSize: "11px",
-          }}
-        >
-          <button
-            type="button"
-            className="nb"
-            onClick={() => setView("analysis")}
-            title={`Current streak: ${game.currentStreak} day(s)`}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              fontWeight: 600,
-              color: C.txt,
-              padding: "2px 4px",
-              borderRadius: "4px",
-            }}
-          >
-            <span>🔥 {game.currentStreak}d</span>
-            {freezesAvailable > 0 && <span title={`${freezesAvailable} freeze(s) available`}>❄️</span>}
-          </button>
-
-          <button
-            type="button"
-            className="nb"
-            onClick={() => setView("analysis")}
-            title={`Total XP: ${game.totalXP} XP (${freezesAvailable === 3 ? "Freeze slot full" : `${xpToNextFreeze} XP to next freeze`})`}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              color: C.muted,
-              padding: "2px 4px",
-              borderRadius: "4px",
-            }}
-          >
-            <span>⚡ {game.totalXP} XP</span>
-          </button>
-
-          <button
-            type="button"
-            className="nb"
-            onClick={() => setView("analysis")}
-            title={`Streak freezes: ${freezesAvailable}/3 available`}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              color: C.muted,
-              padding: "2px 4px",
-              borderRadius: "4px",
-            }}
-          >
-            <span>❄️ {freezesAvailable}/3</span>
-          </button>
-
-          <span style={{ fontSize: "11px", color: C.muted, borderLeft: `1px solid ${C.bdr2}`, paddingLeft: "8px" }}>
-            {grandTotal > 0 ? fmtDur(grandTotal) : "0m"} total
-          </span>
-        </div>
-      </div>
-
-      {view === "planner" && (
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <div
-            style={{
-              width: "188px",
-              borderRight: `1px solid ${C.bdr}`,
-              background: C.s1,
-              display: "flex",
-              flexDirection: "column",
-              flexShrink: 0,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "11px 13px 5px",
-                fontSize: "10px",
-                fontWeight: 600,
-                color: C.muted,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-              }}
-            >
-              Subjects
-            </div>
-            <div style={{ flex: 1, overflowY: "auto" }}>
-              {subjects.map((subject) => (
-                <button
-                  key={subject.id}
-                  className="sub-btn"
-                  type="button"
-                  onClick={() => {
-                    setSel(subject.id);
-                    setExpandedTopic(null);
-                    setSubtaskDraft("");
-                  }}
-                  aria-label={subject.name}
-                  style={{
-                    width: "100%",
-                    textAlign: "left",
-                    border: "none",
-                    padding: "9px 13px",
-                    cursor: "pointer",
-                    background:
-                      sel === subject.id ? `${subject.color}18` : "transparent",
-                    borderLeft: `3px solid ${
-                      sel === subject.id ? subject.color : "transparent"
-                    }`,
-                    transition: "background 0.1s",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                      marginBottom: "1px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        fontSize: "12px",
-                        color: sel === subject.id ? subject.color : C.txt,
-                      }}
-                    >
-                      {subject.name}
-                    </span>
-                    <span style={{ fontSize: "10px", color: C.muted }}>
-                      {pct(subject)}%
-                    </span>
-                  </div>
-                  <div style={{ fontSize: "10px", color: C.muted, marginBottom: "5px" }}>
-                    {subject.exam}
-                  </div>
-                  <div
-                    style={{
-                      height: "2px",
-                      background: C.bdr2,
-                      borderRadius: "2px",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      style={{
-                        height: "100%",
-                        width: `${pct(subject)}%`,
-                        background: subject.color,
-                        borderRadius: "2px",
-                        transition: "width 0.4s",
-                      }}
-                    />
-                  </div>
-                </button>
-              ))}
-            </div>
-            <button
-              className="sub-btn"
-              type="button"
-              onClick={() => setSel(asanaCfg.id)}
-              aria-label={asanaCfg.name}
-              style={{
-                width: "100%",
-                textAlign: "left",
-                border: "none",
-                borderTop: `1px solid ${C.bdr}`,
-                padding: "9px 13px",
-                cursor: "pointer",
-                background:
-                  sel === asanaCfg.id ? `${asanaCfg.color}18` : "transparent",
-                borderLeft: `3px solid ${
-                  sel === asanaCfg.id ? asanaCfg.color : "transparent"
-                }`,
-                transition: "background 0.1s",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "baseline",
-                  marginBottom: "1px",
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: 600,
-                    fontSize: "12px",
-                    color: sel === asanaCfg.id ? asanaCfg.color : C.txt,
-                  }}
-                >
-                  {asanaCfg.name}
-                </span>
-                {asanaPct !== null && (
-                  <span style={{ fontSize: "10px", color: C.muted }}>
-                    {asanaPct}%
-                  </span>
-                )}
-              </div>
-              <div style={{ fontSize: "10px", color: C.muted, marginBottom: "5px" }}>
-                {asanaCfg.exam}
-              </div>
-              {asanaPct !== null && (
-                <div
-                  style={{
-                    height: "2px",
-                    background: C.bdr2,
-                    borderRadius: "2px",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: "100%",
-                      width: `${asanaPct}%`,
-                      background: asanaCfg.color,
-                      borderRadius: "2px",
-                      transition: "width 0.4s",
-                    }}
-                  />
-                </div>
-              )}
-            </button>
-            <div style={{ padding: "10px 13px", borderTop: `1px solid ${C.bdr}` }}>
-              <div style={{ fontSize: "10px", color: C.muted, marginBottom: "2px" }}>
-                Total study time
-              </div>
-              <div style={{ fontSize: "17px", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-                {fmtDur(grandTotal)}
-              </div>
-              <button
-                className="nb"
-                type="button"
-                onClick={() => setView("analysis")}
-                aria-label="More study analysis"
-                style={{
-                  marginTop: "8px",
-                  width: "100%",
-                  padding: "6px 10px",
-                  borderRadius: "6px",
-                  border: `1px solid ${C.bdr2}`,
-                  background: C.s2,
-                  color: C.txt,
-                  fontSize: "11px",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  transition: "background 0.1s",
-                }}
-              >
-                <span>More</span>
-                <span style={{ color: C.muted }}>→</span>
-              </button>
-            </div>
-          </div>
-
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-              minWidth: 0,
-            }}
-          >
-            {asanaSelected ? (
-              <AsanaTasksPanel
-                C={C}
-                cfg={asanaCfg}
-                onStats={setAsanaStats}
-                selectedGid={asanaTask?.gid || null}
-                onSelectTask={setAsanaTask}
-              />
-            ) : sub && (
-              <>
-                <div
-                  style={{
-                    padding: "11px 16px",
-                    borderBottom: `1px solid ${C.bdr}`,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    flexShrink: 0,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "7px",
-                      height: "7px",
-                      borderRadius: "50%",
-                      background: sub.color,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span style={{ fontWeight: 700, fontSize: "14px" }}>{sub.name}</span>
-                  <span
-                    style={{
-                      fontSize: "10px",
-                      color: C.muted,
-                      padding: "2px 7px",
-                      background: C.s2,
-                      borderRadius: "4px",
-                      border: `1px solid ${C.bdr2}`,
-                    }}
-                  >
-                    {sub.exam}
-                  </span>
-                  <span style={{ fontSize: "11px", color: C.muted, marginLeft: "auto" }}>
-                    {sub.topics.filter((topic) => topic.done).length}/{sub.topics.length} done
-                    {" · "}
-                    {fmtDur(subTotal(sub.id))} logged
-                  </span>
-                </div>
-                <div style={{ flex: 1, overflowY: "auto" }}>
-                  {sub.topics.length === 0 && (
-                    <div
-                      style={{
-                        padding: "40px 16px",
-                        textAlign: "center",
-                        color: C.muted,
-                        fontSize: "12px",
-                      }}
-                    >
-                      No topics yet. Add one below.
-                    </div>
-                  )}
-                  {sub.topics
-                    .filter((topic) => !topic.done)
-                    .map((topic) => (
-                      <div key={topic.id}>
-                        <div
-                          className="topic-row"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "7px 16px",
-                            gap: "10px",
-                            transition: "background 0.1s",
-                            background:
-                              expandedTopic === topic.id ? C.s2 : "transparent",
-                          }}
-                        >
-                          <div
-                            onClick={() => {
-                              toggleTopic(sub.id, topic.id);
-                              if (expandedTopic === topic.id) setExpandedTopic(null);
-                            }}
-                            aria-label={`Complete topic ${topic.name}`}
-                            role="checkbox"
-                            aria-checked={false}
-                            style={{
-                              width: "15px",
-                              height: "15px",
-                              borderRadius: "4px",
-                              flexShrink: 0,
-                              border: `1.5px solid ${C.dim}`,
-                              background: "transparent",
-                              cursor: "pointer",
-                              transition: "all 0.15s",
-                            }}
-                          />
-                          <span
-                            onClick={() =>
-                              setExpandedTopic((prev) =>
-                                prev === topic.id ? null : topic.id
-                              )
-                            }
-                            style={{
-                              flex: 1,
-                              color: C.txt,
-                              fontSize: "13px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            {topic.name}
-                          </span>
-                          {topic.subtasks.length > 0 && (
-                            <span style={{ fontSize: "10px", color: C.muted, flexShrink: 0 }}>
-                              {topic.subtasks.filter((subtask) => subtask.done).length}/
-                              {topic.subtasks.length}
-                            </span>
-                          )}
-                          <span
-                            onClick={() =>
-                              setExpandedTopic((prev) =>
-                                prev === topic.id ? null : topic.id
-                              )
-                            }
-                            style={{
-                              fontSize: "9px",
-                              color: C.muted,
-                              cursor: "pointer",
-                              flexShrink: 0,
-                            }}
-                          >
-                            {expandedTopic === topic.id ? "▾" : "▸"}
-                          </span>
-                          <button
-                            className="del nb"
-                            onClick={() => delTopic(topic.id)}
-                            aria-label={`Delete topic ${topic.name}`}
-                            style={{
-                              border: "none",
-                              background: "transparent",
-                              color: C.muted,
-                              cursor: "pointer",
-                              fontSize: "17px",
-                              lineHeight: 1,
-                              opacity: 0,
-                              transition: "opacity 0.1s",
-                              padding: "0 2px",
-                            }}
-                          >
-                            x
-                          </button>
-                        </div>
-                        {expandedTopic === topic.id && (
-                          <div style={{ padding: "2px 16px 8px 41px" }}>
-                            {topic.subtasks.map((subtask) => (
-                              <div
-                                key={subtask.id}
-                                className="topic-row"
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "8px",
-                                  padding: "4px 0",
-                                }}
-                              >
-                                <div
-                                  onClick={() => toggleSubtask(topic.id, subtask.id)}
-                                  aria-label={`Complete subtask ${subtask.name}`}
-                                  role="checkbox"
-                                  aria-checked={subtask.done}
-                                  style={{
-                                    width: "13px",
-                                    height: "13px",
-                                    borderRadius: "4px",
-                                    flexShrink: 0,
-                                    border: `1.5px solid ${subtask.done ? sub.color : C.dim}`,
-                                    background: subtask.done ? sub.color : "transparent",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    cursor: "pointer",
-                                    transition: "all 0.15s",
-                                  }}
-                                >
-                                  {subtask.done && (
-                                    <svg width="8" height="6" viewBox="0 0 9 7" fill="none">
-                                      <path
-                                        d="M1 3.5l2.5 2.5 4.5-5"
-                                        stroke="#000"
-                                        strokeWidth="1.8"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      />
-                                    </svg>
-                                  )}
-                                </div>
-                                <span
-                                  style={{
-                                    flex: 1,
-                                    fontSize: "12px",
-                                    color: subtask.done ? C.muted : C.txt,
-                                    textDecoration: subtask.done ? "line-through" : "none",
-                                  }}
-                                >
-                                  {subtask.name}
-                                </span>
-                                <button
-                                  className="del nb"
-                                  onClick={() => delSubtask(topic.id, subtask.id)}
-                                  aria-label={`Delete subtask ${subtask.name}`}
-                                  style={{
-                                    border: "none",
-                                    background: "transparent",
-                                    color: C.muted,
-                                    cursor: "pointer",
-                                    fontSize: "14px",
-                                    lineHeight: 1,
-                                    opacity: 0,
-                                    transition: "opacity 0.1s",
-                                    padding: "0 2px",
-                                  }}
-                                >
-                                  x
-                                </button>
-                              </div>
-                            ))}
-                            <div style={{ display: "flex", gap: "5px", marginTop: "4px" }}>
-                              <input
-                                value={subtaskDraft}
-                                onChange={(e) => setSubtaskDraft(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && addSubtask(topic.id)}
-                                placeholder="Add subtask"
-                                style={{
-                                  flex: 1,
-                                  background: C.s2,
-                                  border: `1px solid ${C.bdr2}`,
-                                  borderRadius: "6px",
-                                  padding: "5px 8px",
-                                  color: C.txt,
-                                  outline: "none",
-                                  fontSize: "12px",
-                                }}
-                              />
-                              <button
-                                className="nb"
-                                onClick={() => addSubtask(topic.id)}
-                                aria-label={`Add subtask to ${topic.name}`}
-                                style={{
-                                  padding: "5px 10px",
-                                  borderRadius: "6px",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  fontWeight: 700,
-                                  fontSize: "11px",
-                                  background: C.s3,
-                                  color: C.txt,
-                                }}
-                              >
-                                Add
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  {sub.topics.length > 0 &&
-                    sub.topics.every((topic) => topic.done) && (
-                      <div
-                        style={{
-                          padding: "14px 16px",
-                          textAlign: "center",
-                          color: C.muted,
-                          fontSize: "12px",
-                        }}
-                      >
-                        All topics done. Nice.
-                      </div>
-                    )}
-                  {sub.topics.some((topic) => topic.done) && (
-                    <div style={{ borderTop: `1px solid ${C.bdr}`, marginTop: "6px" }}>
-                      <button
-                        className="nb"
-                        onClick={() => setDoneTopicsOpen((prev) => !prev)}
-                        style={{
-                          width: "100%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          padding: "9px 16px",
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                          fontSize: "10px",
-                          fontWeight: 600,
-                          color: C.muted,
-                          textTransform: "uppercase",
-                          letterSpacing: "1px",
-                        }}
-                      >
-                        <span>
-                          Completed ({sub.topics.filter((topic) => topic.done).length})
-                        </span>
-                        <span style={{ fontSize: "9px" }}>
-                          {doneTopicsOpen ? "▾" : "▸"}
-                        </span>
-                      </button>
-                      {doneTopicsOpen &&
-                        sub.topics
-                          .filter((topic) => topic.done)
-                          .map((topic) => (
-                            <div
-                              key={topic.id}
-                              className="topic-row"
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                padding: "6px 16px",
-                                gap: "10px",
-                                transition: "background 0.1s",
-                                background: "transparent",
-                              }}
-                            >
-                              <div
-                                onClick={() => toggleTopic(sub.id, topic.id)}
-                                aria-label={`Reopen topic ${topic.name}`}
-                                role="checkbox"
-                                aria-checked={true}
-                                style={{
-                                  width: "15px",
-                                  height: "15px",
-                                  borderRadius: "4px",
-                                  flexShrink: 0,
-                                  border: `1.5px solid ${sub.color}`,
-                                  background: sub.color,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  cursor: "pointer",
-                                  transition: "all 0.15s",
-                                }}
-                              >
-                                <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                                  <path
-                                    d="M1 3.5l2.5 2.5 4.5-5"
-                                    stroke="#000"
-                                    strokeWidth="1.8"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              </div>
-                              <span
-                                style={{
-                                  flex: 1,
-                                  color: C.muted,
-                                  textDecoration: "line-through",
-                                  fontSize: "13px",
-                                }}
-                              >
-                                {topic.name}
-                              </span>
-                              <button
-                                className="del nb"
-                                onClick={() => delTopic(topic.id)}
-                                aria-label={`Delete topic ${topic.name}`}
-                                style={{
-                                  border: "none",
-                                  background: "transparent",
-                                  color: C.muted,
-                                  cursor: "pointer",
-                                  fontSize: "17px",
-                                  lineHeight: 1,
-                                  opacity: 0,
-                                  transition: "opacity 0.1s",
-                                  padding: "0 2px",
-                                }}
-                              >
-                                x
-                              </button>
-                            </div>
-                          ))}
-                    </div>
-                  )}
-                </div>
-                <div
-                  style={{
-                    padding: "9px 16px",
-                    borderTop: `1px solid ${C.bdr}`,
-                    display: "flex",
-                    gap: "6px",
-                    flexShrink: 0,
-                  }}
-                >
-                  <input
-                    style={{
-                      flex: 1,
-                      background: C.s2,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "6px",
-                      padding: "7px 10px",
-                      color: C.txt,
-                      outline: "none",
-                    }}
-                    placeholder={`Add topic to ${sub.name}...`}
-                    value={newTopic}
-                    onChange={(e) => setNewTopic(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addTopic()}
-                  />
-                  <button
-                    className="nb"
-                    onClick={addTopic}
-                    aria-label="Add topic"
-                    style={{
-                      padding: "7px 14px",
-                      background: sub.color,
-                      border: "none",
-                      borderRadius: "6px",
-                      color: "#000",
-                      fontWeight: 700,
-                      fontSize: "12px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Add
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-
-          <div
-            style={{
-              width: "250px",
-              borderLeft: `1px solid ${C.bdr}`,
-              background: C.s1,
-              display: "flex",
-              flexDirection: "column",
-              flexShrink: 0,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "11px 13px 8px",
-                fontSize: "10px",
-                fontWeight: 600,
-                color: C.muted,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-                borderBottom: `1px solid ${C.bdr}`,
-              }}
-            >
-              Timer
-            </div>
-            <div style={{ padding: "18px 13px 12px", textAlign: "center" }}>
-              <div
-                className={running ? "ticking" : ""}
-                style={{
-                  fontSize: "40px",
-                  fontWeight: 700,
-                  fontVariantNumeric: "tabular-nums",
-                  letterSpacing: "-2px",
-                  color: timerColor,
-                  lineHeight: 1,
-                }}
-              >
-                {fmt(displaySecs)}
-              </div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  color: C.muted,
-                  marginTop: "5px",
-                  height: "14px",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {tSubData
-                  ? tSubData.name
-                  : timingAsana || asanaSelected
-                    ? asanaTask?.name || asanaCfg.name
-                    : sub?.name || "-"}
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: "5px", padding: "0 13px", marginBottom: "8px" }}>
-              {!running ? (
-                <button
-                  className="nb"
-                  onClick={start}
-                  disabled={!canTime}
-                  style={{
-                    flex: 2,
-                    padding: "8px 0",
-                    borderRadius: "6px",
-                    border: "none",
-                    cursor: canTime ? "pointer" : "not-allowed",
-                    fontWeight: 700,
-                    fontSize: "12px",
-                    background: canTime ? timerColor : C.s3,
-                    color: canTime ? "#000" : C.muted,
-                  }}
-                >
-                  {displaySecs > 0 ? "Resume" : "Start"}
-                </button>
-              ) : (
-                <button
-                  className="nb"
-                  onClick={pause}
-                  style={{
-                    flex: 2,
-                    padding: "8px 0",
-                    borderRadius: "6px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontWeight: 700,
-                    fontSize: "12px",
-                    background: timerColor,
-                    color: "#000",
-                  }}
-                >
-                  Pause
-                </button>
-              )}
-              <button
-                className="nb"
-                onClick={reset}
-                style={{
-                  flex: 1,
-                  padding: "8px 0",
-                  borderRadius: "6px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 500,
-                  fontSize: "12px",
-                  background: C.s3,
-                  color: C.muted,
-                }}
-              >
-                Reset
-              </button>
-            </div>
-            <textarea
-              rows={2}
-              placeholder="Session note (optional)"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              style={{
-                margin: "0 13px 8px",
-                background: C.s2,
-                border: `1px solid ${C.bdr2}`,
-                borderRadius: "6px",
-                padding: "7px 9px",
-                color: C.txt,
-                outline: "none",
-                resize: "none",
-                fontFamily: "inherit",
-                fontSize: "12px",
-                lineHeight: 1.5,
-              }}
-            />
-
-            <div style={{ padding: "0 13px 8px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "6px",
-                  gap: "8px",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "10px",
-                    fontWeight: 600,
-                    color: C.muted,
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                  }}
-                >
-                  Session Tags
-                </span>
-                <button
-                  className="nb"
-                  onClick={clearTags}
-                  disabled={!sessionTags.length}
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    color: sessionTags.length ? C.txt : C.muted,
-                    cursor: sessionTags.length ? "pointer" : "not-allowed",
-                    fontSize: "11px",
-                    padding: 0,
-                  }}
-                >
-                  Clear
-                </button>
-              </div>
-
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
-                {sessionTags.length === 0 ? (
-                  <span style={{ color: C.muted, fontSize: "11px", lineHeight: 1.5 }}>
-                    Add tags like past papers, blurting, or recap.
-                  </span>
-                ) : (
-                  sessionTags.map((tag) => (
-                    <button
-                      key={tag}
-                      className="nb"
-                      onClick={() => removeTag(tag)}
-                      aria-label={`Remove tag ${tag}`}
-                      style={{
-                        border: `1px solid ${C.bdr2}`,
-                        background: C.s2,
-                        color: C.txt,
-                        borderRadius: "999px",
-                        padding: "4px 8px",
-                        cursor: "pointer",
-                        fontSize: "11px",
-                      }}
-                    >
-                      {tag} x
-                    </button>
-                  ))
-                )}
-              </div>
-
-              <div style={{ display: "flex", gap: "5px", marginTop: "8px" }}>
-                <input
-                  value={tagDraft}
-                  onChange={(e) => setTagDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === ",") {
-                      e.preventDefault();
-                      addTag(tagDraft);
-                    }
-                  }}
-                  placeholder="Add tag"
-                  style={{
-                    flex: 1,
-                    background: C.s2,
-                    border: `1px solid ${C.bdr2}`,
-                    borderRadius: "6px",
-                    padding: "7px 9px",
-                    color: C.txt,
-                    outline: "none",
-                  }}
-                />
-                <button
-                  className="nb"
-                  onClick={() => addTag(tagDraft)}
-                  aria-label="Add session tag"
-                  style={{
-                    padding: "7px 11px",
-                    borderRadius: "6px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontWeight: 700,
-                    fontSize: "12px",
-                    background: C.s3,
-                    color: C.txt,
-                  }}
-                >
-                  Add
-                </button>
-              </div>
-
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginTop: "8px" }}>
-                {SESSION_TAG_SUGGESTIONS.map((tag) => (
-                  <button
-                    key={tag}
-                    className="nb"
-                    onClick={() => setSessionTags((prev) => addUniqueTag(prev, tag))}
-                    style={{
-                      padding: "4px 8px",
-                      borderRadius: "999px",
-                      border: `1px solid ${C.bdr2}`,
-                      background: C.s2,
-                      color: C.muted,
-                      cursor: "pointer",
-                      fontSize: "11px",
-                    }}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button
-              className="nb"
-              onClick={logSess}
-              disabled={!displaySecs || !canTime}
-              style={{
-                margin: "0 13px 13px",
-                padding: "9px 0",
-                background: displaySecs && canTime ? timerColor : C.s3,
-                border: "none",
-                borderRadius: "6px",
-                color: displaySecs && canTime ? "#000" : C.muted,
-                fontWeight: 700,
-                fontSize: "12px",
-                cursor: displaySecs && canTime ? "pointer" : "not-allowed",
-                transition: "all 0.15s",
-              }}
-            >
-              Log Session
-            </button>
-
-            <div
-              style={{
-                padding: "6px 13px 4px",
-                fontSize: "10px",
-                fontWeight: 600,
-                color: C.muted,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-              }}
-            >
-              Hours by Subject
-            </div>
-            <div style={{ flex: 1, overflowY: "auto", paddingBottom: "8px" }}>
-              {subjects.map((subject) => (
-                <div
-                  key={subject.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "5px 13px",
-                    gap: "7px",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "6px",
-                      height: "6px",
-                      borderRadius: "50%",
-                      background: subject.color,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span
-                    style={{
-                      flex: 1,
-                      fontSize: "12px",
-                      color: !asanaSelected && subject.id === currentSubjectId ? subject.color : C.txt,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {subject.name}
-                  </span>
-                  <span style={{ fontSize: "11px", color: C.muted, fontVariantNumeric: "tabular-nums" }}>
-                    {fmtDur(subTotal(subject.id))}
-                  </span>
-                </div>
-              ))}
-              {subTotal(asanaCfg.id) > 0 && (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "5px 13px",
-                    gap: "7px",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "6px",
-                      height: "6px",
-                      borderRadius: "50%",
-                      background: asanaCfg.color,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span
-                    style={{
-                      flex: 1,
-                      fontSize: "12px",
-                      color: asanaSelected ? asanaCfg.color : C.txt,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {asanaCfg.name}
-                  </span>
-                  <span style={{ fontSize: "11px", color: C.muted, fontVariantNumeric: "tabular-nums" }}>
-                    {fmtDur(subTotal(asanaCfg.id))}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {view === "log" && (
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <div
-            style={{
-              width: "188px",
-              borderRight: `1px solid ${C.bdr}`,
-              background: C.s1,
-              display: "flex",
-              flexDirection: "column",
-              flexShrink: 0,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "11px 13px 8px",
-                fontSize: "10px",
-                fontWeight: 600,
-                color: C.muted,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-              }}
-            >
-              Overview
-            </div>
-            <div style={{ padding: "0 13px 12px", borderBottom: `1px solid ${C.bdr}` }}>
-              <div
-                style={{
-                  fontSize: "26px",
-                  fontWeight: 800,
-                  letterSpacing: "-1px",
-                  lineHeight: 1,
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
-                {fmtDur(grandTotal)}
-              </div>
-              <div style={{ fontSize: "11px", color: C.muted, marginTop: "3px" }}>
-                {sessions.length} session{sessions.length !== 1 ? "s" : ""}
-              </div>
-            </div>
-            <div
-              style={{
-                padding: "9px 13px 4px",
-                fontSize: "10px",
-                fontWeight: 600,
-                color: C.muted,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-              }}
-            >
-              By Subject
-            </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: "3px 0 8px" }}>
-              {[...subjects]
-                .sort((a, b) => subTotal(b.id) - subTotal(a.id))
-                .map((subject) => {
-                  const total = subTotal(subject.id);
-                  const max = Math.max(...subjects.map((item) => subTotal(item.id)), 1);
-
-                  return (
-                    <div key={subject.id} style={{ padding: "5px 13px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          marginBottom: "3px",
-                        }}
-                      >
-                        <span style={{ fontSize: "12px", fontWeight: 500, color: C.txt }}>
-                          {subject.name}
-                        </span>
-                        <span style={{ fontSize: "11px", color: C.muted }}>
-                          {fmtDur(total)}
-                        </span>
-                      </div>
-                      <div
-                        style={{
-                          height: "3px",
-                          background: C.bdr2,
-                          borderRadius: "2px",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: "100%",
-                            width: `${(total / max) * 100}%`,
-                            background: subject.color,
-                            borderRadius: "2px",
-                            transition: "width 0.4s",
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-
-          <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px" }}>
-            <div
-              style={{
-                fontSize: "10px",
-                fontWeight: 600,
-                color: C.muted,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-                marginBottom: "10px",
-              }}
-            >
-              Session History
-            </div>
-            {sessions.length === 0 ? (
-              <div style={{ textAlign: "center", color: C.muted, padding: "60px 0" }}>
-                <div style={{ fontSize: "28px", marginBottom: "8px", opacity: 0.4 }}>
-                  ⏱
-                </div>
-                <div style={{ fontSize: "13px" }}>No sessions yet.</div>
-                <div style={{ fontSize: "12px", marginTop: "4px" }}>
-                  Start the timer and log your first session.
-                </div>
-              </div>
-            ) : (
-              sessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="sess-row"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "11px",
-                    padding: "10px 13px",
-                    background: C.s2,
-                    borderRadius: "8px",
-                    marginBottom: "5px",
-                    border: `1px solid ${C.bdr}`,
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "7px",
-                      height: "7px",
-                      borderRadius: "50%",
-                      background: session.subjectColor,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: "13px" }}>
-                      {session.subjectName}
-                    </div>
-                    {session.note && (
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: C.muted,
-                          marginTop: "2px",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {session.note}
-                      </div>
-                    )}
-                    {session.tags?.length ? (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}>
-                        {session.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            style={{
-                              fontSize: "10px",
-                              padding: "3px 7px",
-                              borderRadius: "999px",
-                              border: `1px solid ${C.bdr2}`,
-                              background: C.s1,
-                              color: C.muted,
-                            }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: "14px",
-                        color: session.subjectColor,
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      {fmtDur(session.duration)}
-                    </div>
-                    <div style={{ fontSize: "11px", color: C.muted }}>
-                      {fmtDate(session.date)}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                    <button
-                      className="edit-sess nb"
-                      onClick={() => startEditSession(session)}
-                      aria-label={`Edit session ${session.subjectName}`}
-                      style={{
-                        border: "none",
-                        background: "transparent",
-                        color: C.muted,
-                        cursor: "pointer",
-                        fontSize: "11px",
-                        fontWeight: 500,
-                        opacity: 0,
-                        transition: "opacity 0.1s",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="del-sess nb"
-                      onClick={() => deleteSession(session.id)}
-                      aria-label={`Delete session ${session.subjectName}`}
-                      style={{
-                        border: "none",
-                        background: "transparent",
-                        color: C.muted,
-                        cursor: "pointer",
-                        fontSize: "17px",
-                        lineHeight: 1,
-                        opacity: 0,
-                        transition: "opacity 0.1s",
-                        padding: "0 2px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      x
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {view === "analysis" && (
-        <AnalysisPanel
-          subjects={subjects}
-          sessions={sessions}
-          asanaCfg={asanaCfg}
-          asanaStats={asanaStats}
-          game={game}
+      {needsOnboarding ? (
+        <Onboarding
           C={C}
-          onSelectSubject={(id) => {
-            setSel(id);
-            setView("planner");
-          }}
+          onStartBlank={startBlank}
+          onUseTemplate={useTemplate}
+          onRestore={importData}
         />
-      )}
+      ) : (
+        <>
+          <TopBar C={C} view={view} onChangeView={setView} game={game} grandTotal={grandTotal} />
 
-      {view === "settings" && (
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-          <div
-            style={{
-              width: "228px",
-              borderRight: `1px solid ${C.bdr}`,
-              background: C.s1,
-              display: "flex",
-              flexDirection: "column",
-              flexShrink: 0,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "11px 13px 8px",
-                fontSize: "10px",
-                fontWeight: 600,
-                color: C.muted,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
+          {view === "planner" && (
+            <PlannerView
+              C={C}
+              subjects={subjects}
+              sub={sub}
+              sel={sel}
+              loggedSecs={sub ? subTotal(sub.id) : 0}
+              grandTotal={grandTotal}
+              subTotal={subTotal}
+              asana={{
+                enabled: asanaEnabled,
+                cfg: asanaCfg,
+                pct: asanaPct,
+                selected: asanaSelected,
+                task: asanaTask,
+                setTask: setAsanaTask,
+                setStats: setAsanaStats,
               }}
-            >
-              Themes
-            </div>
-            <div style={{ flex: 1, overflowY: "auto", padding: "0 8px 8px" }}>
-              {THEMES.map((candidate) => {
-                const active = candidate.id === themeId;
-                return (
-                  <button
-                    key={candidate.id}
-                    className="theme-card nb"
-                    onClick={() => setThemeId(candidate.id)}
-                    aria-pressed={active}
-                    data-theme={candidate.id}
-                    style={{
-                      width: "100%",
-                      textAlign: "left",
-                      display: "block",
-                      border: `1px solid ${active ? candidate.colors.s3 : C.bdr}`,
-                      background: active ? C.s2 : "transparent",
-                      color: C.txt,
-                      borderRadius: "10px",
-                      padding: "10px",
-                      marginBottom: "8px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "8px",
-                        marginBottom: "8px",
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: "13px" }}>
-                          {candidate.name}
-                        </div>
-                        <div style={{ fontSize: "11px", color: C.muted, marginTop: "2px" }}>
-                          {candidate.description}
-                        </div>
-                      </div>
-                      {active ? (
-                        <span
-                          style={{
-                            fontSize: "10px",
-                            color: C.txt,
-                            border: `1px solid ${C.bdr2}`,
-                            background: C.s3,
-                            borderRadius: "999px",
-                            padding: "3px 7px",
-                          }}
-                        >
-                          Active
-                        </span>
-                      ) : null}
-                    </div>
-                    <div style={{ display: "flex", gap: "4px" }}>
-                      {[
-                        candidate.colors.bg,
-                        candidate.colors.s1,
-                        candidate.colors.s2,
-                        candidate.colors.txt,
-                      ].map((swatch) => (
-                        <div
-                          key={swatch}
-                          style={{
-                            width: "16px",
-                            height: "16px",
-                            borderRadius: "5px",
-                            background: swatch,
-                            border: `1px solid ${C.bdr2}`,
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px" }}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(0, 1.3fr) minmax(180px, 1fr)",
-                gap: "12px",
+              timer={{
+                running,
+                displaySecs,
+                canTime,
+                color: timerColor,
+                label: timerLabel,
+                highlightedSubjectId: asanaSelected ? null : sub?.id ?? null,
+                start: timer.start,
+                pause: timer.pause,
+                reset: timer.reset,
               }}
-            >
-              <div
-                style={{
-                  background: C.s1,
-                  border: `1px solid ${C.bdr}`,
-                  borderRadius: "12px",
-                  padding: "14px",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "10px",
-                    fontWeight: 600,
-                    color: C.muted,
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    marginBottom: "10px",
-                  }}
-                >
-                  Add Subject
-                </div>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr) 52px auto",
-                    gap: "8px",
-                    alignItems: "center",
-                  }}
-                >
-                  <input
-                    value={subjectName}
-                    onChange={(e) => setSubjectName(e.target.value)}
-                    placeholder="Subject name"
-                    style={{
-                      background: C.s2,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "8px",
-                      padding: "9px 10px",
-                      color: C.txt,
-                      outline: "none",
-                    }}
-                  />
-                  <input
-                    value={subjectExam}
-                    onChange={(e) => setSubjectExam(e.target.value)}
-                    placeholder="Exam board"
-                    style={{
-                      background: C.s2,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "8px",
-                      padding: "9px 10px",
-                      color: C.txt,
-                      outline: "none",
-                    }}
-                  />
-                  <input
-                    type="color"
-                    value={subjectColor}
-                    onChange={(e) => setSubjectColor(e.target.value)}
-                    title="Subject colour"
-                    style={{
-                      width: "52px",
-                      height: "38px",
-                      padding: 0,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "8px",
-                      background: "transparent",
-                      cursor: "pointer",
-                    }}
-                  />
-                  <button
-                    className="nb"
-                    onClick={addSubject}
-                    aria-label="Create subject"
-                    style={{
-                      padding: "9px 14px",
-                      borderRadius: "8px",
-                      border: "none",
-                      background: subjectColor,
-                      color: "#000",
-                      fontWeight: 700,
-                      fontSize: "12px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Add
-                  </button>
-                </div>
-                <div style={{ marginTop: "10px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                  {SUBJECT_PRESETS.map((preset) => (
-                    <button
-                      key={preset.id}
-                      className="nb"
-                      onClick={() => {
-                        setSubjectName(preset.name);
-                        setSubjectExam(preset.exam);
-                        setSubjectColor(preset.color);
-                      }}
-                      style={{
-                        border: `1px solid ${C.bdr2}`,
-                        background: C.s2,
-                        color: C.txt,
-                        borderRadius: "999px",
-                        padding: "5px 9px",
-                        cursor: "pointer",
-                        fontSize: "11px",
-                      }}
-                    >
-                      {preset.name}
-                    </button>
-                  ))}
-                </div>
-                <div
-                  style={{
-                    marginTop: "12px",
-                    padding: "12px",
-                    borderRadius: "10px",
-                    border: `1px solid ${C.bdr}`,
-                    background: C.s2,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "10px",
-                      fontWeight: 600,
-                      color: C.muted,
-                      textTransform: "uppercase",
-                      letterSpacing: "1px",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    Import Spec PDF
-                  </div>
-                  <input
-                    type="file"
-                    accept="application/pdf,.pdf"
-                    aria-label="Import subject specification PDF"
-                    onChange={(e) => handleSpecUpload(e.target.files?.[0])}
-                    style={{
-                      width: "100%",
-                      color: C.muted,
-                      fontSize: "12px",
-                    }}
-                  />
-                  <div style={{ marginTop: "8px", color: C.muted, fontSize: "11px", lineHeight: 1.5 }}>
-                    Upload a specification PDF to auto-fill the subject name and exam board.
-                  </div>
-                  {specImporting && (
-                    <div style={{ marginTop: "8px", fontSize: "11px", color: C.txt }}>
-                      Reading PDF...
-                    </div>
-                  )}
-                  {!specImporting && specFileName && !specError && (
-                    <div style={{ marginTop: "8px", fontSize: "11px", color: C.txt }}>
-                      Loaded {specFileName}.
-                      {specTopics.length > 0 && (
-                        <>
-                          <div style={{ marginTop: "6px", fontSize: "10px", color: C.muted }}>
-                            {specTopics.length} topic{specTopics.length === 1 ? "" : "s"} found
-                          </div>
-                          <div style={{ marginTop: "4px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                          {specTopics.map((topic, idx) => (
-                            <span
-                              key={idx}
-                              style={{
-                                background: C.s3,
-                                color: C.txt,
-                                padding: "2px 6px",
-                                borderRadius: "4px",
-                                fontSize: "10px",
-                              }}
-                            >
-                              {topic}
-                            </span>
-                          ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  {specError && (
-                    <div style={{ marginTop: "8px", fontSize: "11px", color: "#f87171" }}>
-                      {specError}
-                    </div>
-                  )}
-                  {specFileName && (
-                    <button
-                      className="nb"
-                      type="button"
-                      onClick={clearSpecImport}
-                      style={{
-                        marginTop: "10px",
-                        border: "none",
-                        background: "transparent",
-                        color: C.txt,
-                        cursor: "pointer",
-                        fontSize: "11px",
-                        padding: 0,
-                      }}
-                      >
-                      Clear imported PDF
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  background: C.s1,
-                  border: `1px solid ${C.bdr}`,
-                  borderRadius: "12px",
-                  padding: "14px",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "10px",
-                    fontWeight: 600,
-                    color: C.muted,
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    marginBottom: "10px",
-                  }}
-                >
-                  Edit Subjects
-                </div>
-                <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.5, marginBottom: "12px" }}>
-                  Edit the built-in subjects directly or delete any subject you no longer want.
-                </div>
-                {subjects.length === 0 ? (
-                  <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.5 }}>
-                    No subjects yet. Add one on the left to get started again.
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    {subjects.map((subject) => (
-                      <div
-                        key={subject.id}
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "auto minmax(0, 1fr) 52px auto",
-                          gap: "10px",
-                          alignItems: "center",
-                          padding: "10px 11px",
-                          borderRadius: "10px",
-                          background: C.s2,
-                          border: `1px solid ${C.bdr}`,
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "10px",
-                            height: "10px",
-                            borderRadius: "50%",
-                            background: subject.color,
-                            flexShrink: 0,
-                          }}
-                        />
-                        <div style={{ display: "grid", gap: "6px", minWidth: 0 }}>
-                          <input
-                            aria-label={`Subject name ${subject.id}`}
-                            value={subject.name}
-                            onChange={(e) => updateSubject(subject.id, { name: e.target.value })}
-                            style={{
-                              width: "100%",
-                              background: C.s1,
-                              border: `1px solid ${C.bdr2}`,
-                              borderRadius: "8px",
-                              padding: "8px 9px",
-                              color: C.txt,
-                              outline: "none",
-                            }}
-                          />
-                          <input
-                            aria-label={`Subject exam ${subject.id}`}
-                            value={subject.exam}
-                            onChange={(e) => updateSubject(subject.id, { exam: e.target.value })}
-                            style={{
-                              width: "100%",
-                              background: C.s1,
-                              border: `1px solid ${C.bdr2}`,
-                              borderRadius: "8px",
-                              padding: "8px 9px",
-                              color: C.txt,
-                              outline: "none",
-                            }}
-                          />
-                        </div>
-                        <input
-                          type="color"
-                          aria-label={`Subject colour ${subject.id}`}
-                          value={subject.color}
-                          onChange={(e) => updateSubject(subject.id, { color: e.target.value })}
-                          style={{
-                            width: "52px",
-                            height: "38px",
-                            padding: 0,
-                            border: `1px solid ${C.bdr2}`,
-                            borderRadius: "8px",
-                            background: "transparent",
-                            cursor: "pointer",
-                          }}
-                        />
-                        <button
-                          className="nb"
-                          onClick={() => removeSubject(subject.id)}
-                          aria-label={`Delete subject ${subject.id}`}
-                          style={{
-                            border: "none",
-                            background: "transparent",
-                            color: C.muted,
-                            cursor: "pointer",
-                            fontSize: "17px",
-                            lineHeight: 1,
-                            padding: "0 2px",
-                            flexShrink: 0,
-                          }}
-                        >
-                          x
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: "12px",
-                background: C.s1,
-                border: `1px solid ${C.bdr}`,
-                borderRadius: "12px",
-                padding: "14px",
+              session={{
+                note,
+                setNote,
+                tags: sessionTags,
+                setTags: setSessionTags,
+                expandedTopic,
+                setExpandedTopic,
               }}
-            >
-              <div
-                style={{
-                  fontSize: "10px",
-                  fontWeight: 600,
-                  color: C.muted,
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  marginBottom: "10px",
-                }}
-              >
-                NEA Tasks (Asana)
-              </div>
-              <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.5, marginBottom: "12px" }}>
-                Customise the Asana tab shown at the bottom of the Planner sidebar.
-                The access token itself is managed from the tab, and progress is
-                estimated from the fraction of completed tasks in the project.
-              </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "auto minmax(0, 1fr) 52px auto",
-                  gap: "10px",
-                  alignItems: "center",
-                  padding: "10px 11px",
-                  borderRadius: "10px",
-                  background: C.s2,
-                  border: `1px solid ${C.bdr}`,
-                }}
-              >
-                <div
-                  style={{
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "50%",
-                    background: asanaCfg.color,
-                    flexShrink: 0,
-                  }}
-                />
-                <div style={{ display: "grid", gap: "6px", minWidth: 0 }}>
-                  <input
-                    aria-label="Asana tab name"
-                    value={asanaCfg.name}
-                    onChange={(e) => updateAsanaCfg({ name: e.target.value })}
-                    placeholder="Tab name"
-                    style={{
-                      width: "100%",
-                      background: C.s1,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "8px",
-                      padding: "8px 9px",
-                      color: C.txt,
-                      outline: "none",
-                    }}
-                  />
-                  <input
-                    aria-label="Asana tab label"
-                    value={asanaCfg.exam}
-                    onChange={(e) => updateAsanaCfg({ exam: e.target.value })}
-                    placeholder="Label"
-                    style={{
-                      width: "100%",
-                      background: C.s1,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "8px",
-                      padding: "8px 9px",
-                      color: C.txt,
-                      outline: "none",
-                    }}
-                  />
-                  <input
-                    aria-label="Asana project GID"
-                    value={asanaCfg.projectGid}
-                    onChange={(e) => updateAsanaCfg({ projectGid: e.target.value })}
-                    placeholder="Asana project GID"
-                    style={{
-                      width: "100%",
-                      background: C.s1,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "8px",
-                      padding: "8px 9px",
-                      color: C.txt,
-                      outline: "none",
-                      fontVariantNumeric: "tabular-nums",
-                    }}
-                  />
-                </div>
-                <input
-                  type="color"
-                  aria-label="Asana tab colour"
-                  value={asanaCfg.color}
-                  onChange={(e) => updateAsanaCfg({ color: e.target.value })}
-                  style={{
-                    width: "52px",
-                    height: "38px",
-                    padding: 0,
-                    border: `1px solid ${C.bdr2}`,
-                    borderRadius: "8px",
-                    background: "transparent",
-                    cursor: "pointer",
-                  }}
-                />
-                <button
-                  className="nb"
-                  onClick={() =>
-                    updateAsanaCfg({
-                      name: ASANA_DEFAULTS.name,
-                      exam: ASANA_DEFAULTS.exam,
-                      color: ASANA_DEFAULTS.color,
-                      projectGid: ASANA_DEFAULTS.projectGid,
-                    })
-                  }
-                  aria-label="Reset Asana tab settings"
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    color: C.muted,
-                    cursor: "pointer",
-                    fontSize: "11px",
-                    padding: "0 2px",
-                    flexShrink: 0,
-                  }}
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
+              actions={actions}
+            />
+          )}
 
-            <div
-              style={{
-                marginTop: "10px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 14px",
-                background: C.s2,
-                border: `1px solid ${C.bdr}`,
-                borderRadius: "10px",
-              }}
-            >
-              <span style={{ fontSize: "12px", color: C.txt, flex: 1 }}>
-                Sort subtasks alphanumerically
-                <span style={{ display: "block", fontSize: "10px", color: C.muted, marginTop: "2px" }}>
-                  Keeps TASK-01, TASK-02... in order instead of by due date. Main tasks stay sorted by due date.
-                </span>
-              </span>
-              <input
-                type="checkbox"
-                aria-label="Sort subtasks alphanumerically"
-                checked={asanaCfg.subtaskSort === "alpha"}
-                onChange={(e) =>
-                  updateAsanaCfg({ subtaskSort: e.target.checked ? "alpha" : "due" })
-                }
-                style={{ width: "16px", height: "16px", cursor: "pointer", flexShrink: 0 }}
-              />
-            </div>
+          {view === "log" && (
+            <LogView
+              C={C}
+              subjects={subjects}
+              sessions={sessions}
+              grandTotal={grandTotal}
+              subTotal={subTotal}
+              onEditSession={setEditingSession}
+              onDeleteSession={(id) => setSessions((prev) => prev.filter((s) => s.id !== id))}
+            />
+          )}
 
-            <div
-              style={{
-                marginTop: "12px",
-                background: C.s1,
-                border: `1px solid ${C.bdr}`,
-                borderRadius: "12px",
-                padding: "14px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "10px",
-                  fontWeight: 600,
-                  color: C.muted,
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  marginBottom: "10px",
-                }}
-              >
-                Backup & Restore
-              </div>
-              <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.6, marginBottom: "12px" }}>
-                Your data lives only in this browser's local storage. Download a backup
-                regularly, especially before clearing site data — Chrome sometimes prompts
-                for this and iOS Safari can evict storage on its own.
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
-                <button
-                  type="button"
-                  className="nb"
-                  onClick={exportData}
-                  style={{
-                    border: "none",
-                    background: C.s3,
-                    color: C.txt,
-                    borderRadius: "8px",
-                    padding: "9px 14px",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  Download backup
-                </button>
-                <label
-                  className="nb"
-                  style={{
-                    border: `1px solid ${C.bdr2}`,
-                    background: "transparent",
-                    color: C.txt,
-                    borderRadius: "8px",
-                    padding: "9px 14px",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  Restore from file
-                  <input
-                    type="file"
-                    accept="application/json,.json"
-                    aria-label="Restore backup file"
-                    onChange={(e) => {
-                      importData(e.target.files?.[0]);
-                      e.target.value = "";
-                    }}
-                    style={{ display: "none" }}
-                  />
-                </label>
-              </div>
-              {backupMessage && (
-                <div
-                  style={{
-                    marginTop: "10px",
-                    fontSize: "11px",
-                    color: backupMessage.type === "error" ? "#f87171" : C.txt,
-                  }}
-                >
-                  {backupMessage.text}
-                </div>
-              )}
-            </div>
+          {view === "analysis" && (
+            <AnalysisPanel
+              subjects={subjects}
+              sessions={sessions}
+              asanaCfg={asanaCfg}
+              asanaStats={asanaStats}
+              game={game}
+              C={C}
+            />
+          )}
 
-            <div
-              style={{
-                marginTop: "12px",
-                background: C.s1,
-                border: `1px solid ${C.bdr}`,
-                borderRadius: "12px",
-                padding: "14px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "10px",
-                  fontWeight: 600,
-                  color: C.muted,
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  marginBottom: "10px",
-                }}
-              >
-                What changes with themes
-              </div>
-              <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.6 }}>
-                Themes update the app surfaces, borders, and contrast. Subject colours stay
-                separate so you can keep subjects visually distinct while switching the
-                overall feel of the app.
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {editingSession && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.4)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-            padding: "16px",
-          }}
-        >
-          <div
-            style={{
-              background: C.s1,
-              border: `1px solid ${C.bdr}`,
-              borderRadius: "16px",
-              padding: "20px",
-              width: "100%",
-              maxWidth: "380px",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontWeight: 700, fontSize: "14px" }}>Edit Study Session</span>
-              <button
-                type="button"
-                onClick={() => setEditingSession(null)}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  color: C.muted,
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  padding: 0,
-                }}
-              >
-                ×
-              </button>
-            </div>
+          {view === "settings" && (
+            <SettingsView
+              C={C}
+              themeId={themeId}
+              onChangeTheme={setThemeId}
+              subjects={subjects}
+              onAddSubject={addSubject}
+              onUpdateSubject={(id, patch) =>
+                setSubjects((prev) => mapSubject(prev, id, (s) => ({ ...s, ...patch })))
+              }
+              onRemoveSubject={removeSubject}
+              asanaCfg={asanaCfg}
+              onUpdateAsana={updateAsanaCfg}
+              backupMessage={backupMessage}
+              onExport={exportData}
+              onImport={importData}
+            />
+          )}
 
-            {/* Subject Select */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <label
-                htmlFor="edit-subject-select"
-                style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}
-              >
-                Subject
-              </label>
-              <select
-                id="edit-subject-select"
-                value={editSubjectId}
-                onChange={(e) => setEditSubjectId(e.target.value)}
-                style={{
-                  width: "100%",
-                  background: C.s2,
-                  color: C.txt,
-                  border: `1px solid ${C.bdr2}`,
-                  borderRadius: "8px",
-                  padding: "8px 10px",
-                  outline: "none",
-                  cursor: "pointer",
-                }}
-              >
-                {subjects.map((sub) => (
-                  <option key={sub.id} value={sub.id}>
-                    {sub.name} {sub.exam ? `(${sub.exam})` : ""}
-                  </option>
-                ))}
-                <option value={asanaCfg.id}>
-                  {asanaCfg.name} ({asanaCfg.exam})
-                </option>
-              </select>
-            </div>
-
-            {/* Duration Fields */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <label style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                Duration
-              </label>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <div style={{ flex: 1 }}>
-                  <input
-                    type="number"
-                    min="0"
-                    value={editDurationHours}
-                    onChange={(e) => setEditDurationHours(Math.max(0, parseInt(e.target.value) || 0))}
-                    style={{
-                      width: "100%",
-                      background: C.s2,
-                      color: C.txt,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "8px",
-                      padding: "8px 10px",
-                      outline: "none",
-                    }}
-                  />
-                  <div style={{ fontSize: "9px", color: C.muted, marginTop: "2px" }}>Hours</div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={editDurationMinutes}
-                    onChange={(e) => setEditDurationMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
-                    style={{
-                      width: "100%",
-                      background: C.s2,
-                      color: C.txt,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "8px",
-                      padding: "8px 10px",
-                      outline: "none",
-                    }}
-                  />
-                  <div style={{ fontSize: "9px", color: C.muted, marginTop: "2px" }}>Minutes</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Date Picker */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <label
-                htmlFor="edit-date-input"
-                style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}
-              >
-                Date
-              </label>
-              <input
-                id="edit-date-input"
-                type="date"
-                value={editDate}
-                onChange={(e) => setEditDate(e.target.value)}
-                style={{
-                  width: "100%",
-                  background: C.s2,
-                  color: C.txt,
-                  border: `1px solid ${C.bdr2}`,
-                  borderRadius: "8px",
-                  padding: "8px 10px",
-                  outline: "none",
-                }}
-              />
-            </div>
-
-            {/* Tags list and entry */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <label style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                Tags (Press Enter to add)
-              </label>
-              <div
-                style={{
-                  border: `1px solid ${C.bdr2}`,
-                  background: C.s2,
-                  borderRadius: "8px",
-                  padding: "8px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "6px",
-                }}
-              >
-                {editTags.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                    {editTags.map((tag) => (
-                      <span
-                        key={tag}
-                        style={{
-                          fontSize: "10px",
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                          background: C.s3,
-                          color: C.txt,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => setEditTags(editTags.filter((t) => t !== tag))}
-                          style={{
-                            border: "none",
-                            background: "transparent",
-                            color: C.muted,
-                            cursor: "pointer",
-                            padding: 0,
-                            fontSize: "12px",
-                            lineHeight: 1,
-                          }}
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div style={{ display: "flex", gap: "6px" }}>
-                  <input
-                    value={editTagInput}
-                    onChange={(e) => setEditTagInput(e.target.value)}
-                    placeholder="Add tag..."
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const tag = editTagInput.trim();
-                        if (tag && !editTags.includes(tag)) {
-                          setEditTags([...editTags, tag]);
-                        }
-                        setEditTagInput("");
-                      }
-                    }}
-                    style={{
-                      flex: 1,
-                      background: "transparent",
-                      border: "none",
-                      color: C.txt,
-                      outline: "none",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const tag = editTagInput.trim();
-                      if (tag && !editTags.includes(tag)) {
-                        setEditTags([...editTags, tag]);
-                      }
-                      setEditTagInput("");
-                    }}
-                    style={{
-                      background: C.s3,
-                      border: `1px solid ${C.bdr2}`,
-                      borderRadius: "4px",
-                      padding: "2px 8px",
-                      color: C.txt,
-                      cursor: "pointer",
-                      fontSize: "11px",
-                    }}
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Note text field */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-              <label style={{ fontSize: "10px", fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                Note
-              </label>
-              <input
-                value={editNote}
-                onChange={(e) => setEditNote(e.target.value)}
-                placeholder="Optional session notes"
-                style={{
-                  width: "100%",
-                  background: C.s2,
-                  color: C.txt,
-                  border: `1px solid ${C.bdr2}`,
-                  borderRadius: "8px",
-                  padding: "8px 10px",
-                  outline: "none",
-                }}
-              />
-            </div>
-
-            {/* Save / Cancel buttons */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "4px" }}>
-              <button
-                type="button"
-                onClick={() => setEditingSession(null)}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                  border: `1px solid ${C.bdr2}`,
-                  background: "transparent",
-                  color: C.txt,
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={saveEditSession}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                  border: "none",
-                  background: subjects.find((s) => s.id === editSubjectId)?.color || "#4F9CF9",
-                  color: "#000",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                }}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
+          {editingSession && (
+            <EditSessionModal
+              key={editingSession.id}
+              C={C}
+              session={editingSession}
+              subjects={subjects}
+              asanaCfg={asanaCfg}
+              onSave={saveSession}
+              onClose={() => setEditingSession(null)}
+            />
+          )}
+        </>
       )}
     </div>
   );

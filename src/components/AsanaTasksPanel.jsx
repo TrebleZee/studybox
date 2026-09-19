@@ -37,10 +37,11 @@ export default function AsanaTasksPanel({ C, cfg, onStats, selectedGid, onSelect
   const [completedOpen, setCompletedOpen] = useState(false);
   const [busyGid, setBusyGid] = useState(null);
 
-  const loading = connected && tasks === null && !error;
+  const missingProject = !cfg.projectGid;
+  const loading = connected && !missingProject && tasks === null && !error;
 
   useEffect(() => {
-    if (!connected) return;
+    if (!connected || !cfg.projectGid) return;
     let cancelled = false;
     getAsanaTasks(cfg.projectGid)
       .then((result) => {
@@ -283,8 +284,8 @@ export default function AsanaTasksPanel({ C, cfg, onStats, selectedGid, onSelect
                 textAlign: "center",
               }}
             >
-              Paste an Asana personal access token to see open NEA tracker tasks
-              here, ordered by due date. It's stored only in this browser.
+              Paste an Asana personal access token to see the open tasks in your
+              project here, ordered by due date. It's stored only in this browser.
             </div>
             <div style={{ display: "flex", gap: "6px" }}>
               <input
@@ -322,6 +323,12 @@ export default function AsanaTasksPanel({ C, cfg, onStats, selectedGid, onSelect
                 Connect
               </button>
             </div>
+          </div>
+        )}
+
+        {connected && missingProject && (
+          <div style={{ padding: "40px 16px", textAlign: "center", color: C.muted, fontSize: "12px" }}>
+            Add your Asana project GID in Settings to load tasks.
           </div>
         )}
 

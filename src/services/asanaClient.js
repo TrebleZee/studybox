@@ -4,14 +4,24 @@ const ASANA_API_BASE = "https://app.asana.com/api/1.0";
 
 export const ASANA_DEFAULTS = {
   id: "asana",
-  name: "NEA Tasks",
+  name: "Asana Tasks",
   exam: "Asana",
   color: "#F06A6A",
-  projectGid: "1216591284200162",
+  projectGid: "",
   subtaskSort: "due",
+  enabled: false,
 };
 
-export const normalizeAsanaConfig = (input) => ({
+// Configs saved before the opt-in flag existed are only kept enabled when the
+// user had actually connected a token; everyone else starts with Asana off.
+export const normalizeAsanaConfig = (input) => {
+  const hasFlag = typeof input?.enabled === "boolean";
+  if (input && !hasFlag && !hasAsanaToken()) return { ...ASANA_DEFAULTS };
+  return normalizeAsanaFields(input, hasFlag ? input.enabled : Boolean(input));
+};
+
+const normalizeAsanaFields = (input, enabled) => ({
+  enabled,
   id: ASANA_DEFAULTS.id,
   name:
     typeof input?.name === "string" && input.name.trim()
@@ -94,12 +104,12 @@ const byDueDate = (a, b) => {
   return 0;
 };
 
-// Only returns top-level tasks in the project — subtasks (the granular
-// TASK-nn items attached under each milestone by a separate planning tool)
-// are excluded automatically, so this stays readable as the backlog grows.
+// Only returns top-level tasks in the project — subtasks are excluded
+// automatically, so this stays readable as the backlog grows.
 // Completed tasks are fetched too (no completed_since filter) so progress
 // can be estimated from the completed/total fraction.
-export async function getAsanaTasks(projectGid = ASANA_DEFAULTS.projectGid) {
+export async function getAsanaTasks(projectGid) {
+  if (!projectGid) throw new Error("No Asana project GID set");
   const fields = [
     "name",
     "completed",
