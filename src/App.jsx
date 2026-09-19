@@ -476,6 +476,7 @@ export default function StudyBox() {
   const [editTags, setEditTags] = useState([]);
   const [editTagInput, setEditTagInput] = useState("");
   const [editNote, setEditNote] = useState("");
+  const [backupMessage, setBackupMessage] = useState(null);
   const [game, setGame] = useState(() => {
     return buildInitialGame(
       loadJson(STORAGE_KEYS.game, null),
@@ -749,6 +750,47 @@ export default function StudyBox() {
     setSpecTopics([]);
   };
 
+  const exportData = () => {
+    const data = { subjects, sessions, theme: themeId, game, version: 1 };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `studybox-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setBackupMessage({ type: "success", text: "Backup downloaded." });
+  };
+
+  const importData = (file) => {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data || typeof data !== "object") {
+          throw new Error("That file doesn't look like a StudyBox backup.");
+        }
+
+        if (data.subjects) setSubjects(normalizeSubjects(data.subjects));
+        if (data.sessions) setSessions(normalizeSessions(data.sessions));
+        if (data.theme) setThemeId(data.theme);
+        if (data.game) setGame(normalizeGame(data.game));
+        setBackupMessage({ type: "success", text: "Backup restored." });
+      } catch (error) {
+        setBackupMessage({
+          type: "error",
+          text: error instanceof Error ? error.message : "Unable to read backup file.",
+        });
+      }
+    };
+    reader.onerror = () => {
+      setBackupMessage({ type: "error", text: "Unable to read backup file." });
+    };
+    reader.readAsText(file);
+  };
+
   const removeSubject = (id) => {
     const next = subjects.filter((subject) => subject.id !== id);
     setSubjects(next);
@@ -783,6 +825,31 @@ export default function StudyBox() {
     setElapsed(displaySecs);
     setStartedAt(null);
   };
+
+  // Space toggles the timer, unless the user is typing into a field or a
+  // modal is open (session edit dialog uses its own inputs/buttons).
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.code !== "Space") return;
+      if (editingSession) return;
+
+      const target = e.target;
+      const tag = target?.tagName;
+      if (target?.isContentEditable || tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
+        return;
+      }
+
+      e.preventDefault();
+      if (running) {
+        pause();
+      } else {
+        start();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [running, start, pause, editingSession]);
 
   const reset = () => {
     setElapsed(0);
@@ -1082,11 +1149,9 @@ export default function StudyBox() {
             <span>❄️ {freezesAvailable}/3</span>
           </button>
 
-          {grandTotal > 0 && (
-            <span style={{ fontSize: "11px", color: C.muted, borderLeft: `1px solid ${C.bdr2}`, paddingLeft: "8px" }}>
-              {fmtDur(grandTotal)} total
-            </span>
-          )}
+          <span style={{ fontSize: "11px", color: C.muted, borderLeft: `1px solid ${C.bdr2}`, paddingLeft: "8px" }}>
+            {grandTotal > 0 ? fmtDur(grandTotal) : "0m"} total
+          </span>
         </div>
       </div>
 
@@ -2628,7 +2693,11 @@ export default function StudyBox() {
                     <div style={{ marginTop: "8px", fontSize: "11px", color: C.txt }}>
                       Loaded {specFileName}.
                       {specTopics.length > 0 && (
-                        <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                        <>
+                          <div style={{ marginTop: "6px", fontSize: "10px", color: C.muted }}>
+                            {specTopics.length} topic{specTopics.length === 1 ? "" : "s"} found
+                          </div>
+                          <div style={{ marginTop: "4px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
                           {specTopics.map((topic, idx) => (
                             <span
                               key={idx}
@@ -2643,7 +2712,8 @@ export default function StudyBox() {
                               {topic}
                             </span>
                           ))}
-                        </div>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
@@ -2957,6 +3027,89 @@ export default function StudyBox() {
                 }
                 style={{ width: "16px", height: "16px", cursor: "pointer", flexShrink: 0 }}
               />
+            </div>
+
+            <div
+              style={{
+                marginTop: "12px",
+                background: C.s1,
+                border: `1px solid ${C.bdr}`,
+                borderRadius: "12px",
+                padding: "14px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  color: C.muted,
+                  textTransform: "uppercase",
+                  letterSpacing: "1px",
+                  marginBottom: "10px",
+                }}
+              >
+                Backup & Restore
+              </div>
+              <div style={{ color: C.muted, fontSize: "12px", lineHeight: 1.6, marginBottom: "12px" }}>
+                Your data lives only in this browser's local storage. Download a backup
+                regularly, especially before clearing site data — Chrome sometimes prompts
+                for this and iOS Safari can evict storage on its own.
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+                <button
+                  type="button"
+                  className="nb"
+                  onClick={exportData}
+                  style={{
+                    border: "none",
+                    background: C.s3,
+                    color: C.txt,
+                    borderRadius: "8px",
+                    padding: "9px 14px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Download backup
+                </button>
+                <label
+                  className="nb"
+                  style={{
+                    border: `1px solid ${C.bdr2}`,
+                    background: "transparent",
+                    color: C.txt,
+                    borderRadius: "8px",
+                    padding: "9px 14px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Restore from file
+                  <input
+                    type="file"
+                    accept="application/json,.json"
+                    aria-label="Restore backup file"
+                    onChange={(e) => {
+                      importData(e.target.files?.[0]);
+                      e.target.value = "";
+                    }}
+                    style={{ display: "none" }}
+                  />
+                </label>
+              </div>
+              {backupMessage && (
+                <div
+                  style={{
+                    marginTop: "10px",
+                    fontSize: "11px",
+                    color: backupMessage.type === "error" ? "#f87171" : C.txt,
+                  }}
+                >
+                  {backupMessage.text}
+                </div>
+              )}
             </div>
 
             <div
