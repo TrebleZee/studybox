@@ -1,0 +1,154 @@
+{
+  "id": "ocr-j560",
+  "qualification": "gcse",
+  "board": "OCR",
+  "spec": "J560",
+  "subject": "Mathematics",
+  "specName": "Mathematics",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/168982-specification-gcse-mathematics.pdf",
+  "tiers": [
+    "foundation",
+    "higher"
+  ],
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1 or 4 (calculator)"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2 or 5 (non-calculator)"
+    },
+    {
+      "id": "p3",
+      "name": "Paper 3 or 6 (calculator)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-j560-t01",
+      "name": "Number operations and integers",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t02",
+      "name": "Fractions, decimals and percentages",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t03",
+      "name": "Indices and surds",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t04",
+      "name": "Approximation and estimation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t05",
+      "name": "Ratio, proportion and rates of change",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t06",
+      "name": "Algebra",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t07",
+      "name": "Graphs of equations and functions",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t08",
+      "name": "Basic geometry",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t09",
+      "name": "Congruence and similarity",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t10",
+      "name": "Mensuration",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t11",
+      "name": "Probability",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t12",
+      "name": "Statistics",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

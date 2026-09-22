@@ -1,0 +1,154 @@
+{
+  "id": "ocr-j250",
+  "qualification": "gcse",
+  "board": "OCR",
+  "spec": "J250",
+  "subject": "Combined Science",
+  "specName": "Combined Science A (Gateway)",
+  "specVersion": "2016",
+  "firstExam": 2018,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/234596-specification-accredited-gcse-gateway-science-suite-combined-science-a-j250.pdf",
+  "tiers": [
+    "foundation",
+    "higher"
+  ],
+  "papers": [
+    {
+      "id": "b1",
+      "name": "Biology (Paper 1 or 7)"
+    },
+    {
+      "id": "b2",
+      "name": "Biology (Paper 2 or 8)"
+    },
+    {
+      "id": "c1",
+      "name": "Chemistry (Paper 3 or 9)"
+    },
+    {
+      "id": "c2",
+      "name": "Chemistry (Paper 4 or 10)"
+    },
+    {
+      "id": "p1",
+      "name": "Physics (Paper 5 or 11)"
+    },
+    {
+      "id": "p2",
+      "name": "Physics (Paper 6 or 12)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-j250-t01",
+      "name": "Cell level systems",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t02",
+      "name": "Scaling up",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t03",
+      "name": "Organism level systems",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t04",
+      "name": "Community level systems",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t05",
+      "name": "Genes, inheritance and selection",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t06",
+      "name": "Global challenges (biology)",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t07",
+      "name": "Particles",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t08",
+      "name": "Elements, compounds and mixtures",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t09",
+      "name": "Chemical reactions",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t10",
+      "name": "Predicting and identifying reactions and products",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t11",
+      "name": "Monitoring and controlling chemical reactions",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t12",
+      "name": "Global challenges (chemistry)",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t13",
+      "name": "Matter",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t14",
+      "name": "Forces",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t15",
+      "name": "Electricity and magnetism",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t16",
+      "name": "Waves and radioactivity",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t17",
+      "name": "Energy",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t18",
+      "name": "Global challenges (physics)",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

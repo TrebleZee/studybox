@@ -52,8 +52,8 @@ describe("catalogue files", () => {
   });
 
   it("includes the re-expressed presets and the split GCSE English specs", () => {
-    expect(SPECS.map((spec) => spec.id).sort()).toEqual(
-      [
+    expect(SPECS.map((spec) => spec.id)).toEqual(
+      expect.arrayContaining([
         "aqa-8300",
         "aqa-8464",
         "aqa-8700",
@@ -62,8 +62,21 @@ describe("catalogue files", () => {
         "edexcel-9ma0",
         "ocr-h446",
         "ocr-h556",
-      ].sort()
+      ])
     );
+  });
+
+  // Wave 1: the four core GCSEs on each of the three big boards.
+  it.each(["AQA", "Edexcel", "OCR"])("offers every core GCSE on %s", (board) => {
+    const gcse = SPECS.filter((spec) => spec.board === board && spec.qualification === "gcse");
+    ["Mathematics", "English Language", "English Literature", "Combined Science"].forEach((subject) => {
+      const specs = gcse.filter((spec) => spec.subject === subject);
+      expect(specs.length, `${board} GCSE ${subject}`).toBeGreaterThan(0);
+      specs.forEach((spec) => {
+        const tiered = ["Mathematics", "Combined Science"].includes(subject);
+        expect(spec.tiers).toEqual(tiered ? ["foundation", "higher"] : null);
+      });
+    });
   });
 });
 
@@ -174,7 +187,8 @@ describe("listSpecs", () => {
     expect(listSpecs({ query: "physics" }).map((s) => s.id)).toEqual(["ocr-h556"]);
     expect(listSpecs({ query: "9ma0" }).map((s) => s.id)).toEqual(["edexcel-9ma0"]);
     expect(listSpecs({ query: "aqa english" }).map((s) => s.id).sort()).toEqual(["aqa-8700", "aqa-8702"]);
-    expect(listSpecs({ query: "ocr english" })).toEqual([]);
+    expect(listSpecs({ query: "ocr english" }).map((s) => s.id).sort()).toEqual(["ocr-j351", "ocr-j352"]);
+    expect(listSpecs({ query: "aqa french" })).toEqual([]);
   });
 
   it("hides deprecated specs unless asked", () => {

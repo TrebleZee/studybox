@@ -1,4 +1,4 @@
-# StudyBox - v1.4.0
+# StudyBox - v1.5.0
 
 StudyBox is a lightweight study planner and revision timer built with React and Vite. It is designed to help you track topics, mark progress, time revision sessions, and keep a simple local history of your study work.
 
@@ -9,7 +9,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Supports custom subjects with your own name, colour, qualification (GCSE, A-level, AS or other), exam board (AQA, Edexcel, OCR, Eduqas, WJEC, CCEA or custom), optional spec code and, for GCSE, foundation or higher tier
 - Labels each subject clearly, e.g. "OCR A-level Physics A" or "AQA GCSE Maths (Higher)"
 - Lets you edit or delete the built-in subjects as well
-- Ships a built-in catalogue of real exam specifications (AQA, Pearson Edexcel and OCR), with each spec's topic headings, papers and set-text options, bundled with the app so it works offline
+- Ships a built-in catalogue of real exam specifications (AQA, Pearson Edexcel and OCR), with each spec's topic headings, papers and set-text options, bundled with the app so it works offline. It covers GCSE Maths, English Language, English Literature and Combined Science on AQA, Edexcel and OCR (both OCR Combined Science suites), plus A-level Physics A (OCR), Computer Science (OCR), Maths and Further Maths (Edexcel)
 - Lets you upload a subject specification PDF and auto-fill the subject name, exam board, and topic checklist
 - Includes several theme presets so you can change the app's overall look
 - Includes a built-in timer for focused study sessions
