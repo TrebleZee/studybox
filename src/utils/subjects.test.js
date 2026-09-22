@@ -457,6 +457,24 @@ describe("papers and higher-tier topics", () => {
     expect(groupTopicsByPaper({ papers: subject.papers, topics: [{ id: "a", name: "A" }] })).toEqual([]);
   });
 
+  it("orders paper combinations sharing a first paper by their remaining papers", () => {
+    const subject = {
+      papers: [{ id: "p1", name: "P1" }, { id: "p2", name: "P2" }, { id: "p3", name: "P3" }, { id: "p4", name: "P4" }],
+      topics: [
+        { id: "a", name: "A", paper: ["p1", "p3"] },
+        { id: "b", name: "B", paper: ["p1", "p2"] },
+        { id: "c", name: "C", paper: ["p1", "p2", "p4"] },
+        { id: "d", name: "D", paper: ["p1", "p2", "p3"] },
+      ],
+    };
+    expect(groupTopicsByPaper(subject).map((g) => g.name)).toEqual([
+      "P1 & P2",
+      "P1 & P3",
+      "P1 & P2 & P3",
+      "P1 & P2 & P4",
+    ]);
+  });
+
   it("normalizes papers, paper tags and higherOnly as optional, idempotent fields", () => {
     const [subject] = normalizeSubjects([
       {

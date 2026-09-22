@@ -420,6 +420,10 @@ export const groupTopicsByPaper = (subject, topics = subject.topics) => {
   return [...groups.values()].sort((a, b) => {
     if (!a.paperIds.length) return 1;
     if (!b.paperIds.length) return -1;
-    return order.get(a.paperIds[0]) - order.get(b.paperIds[0]) || a.paperIds.length - b.paperIds.length;
+    const byFirst = order.get(a.paperIds[0]) - order.get(b.paperIds[0]);
+    if (byFirst || a.paperIds.length !== b.paperIds.length) return byFirst || a.paperIds.length - b.paperIds.length;
+    // Same first paper and size: compare the remaining papers in order.
+    const diff = a.paperIds.findIndex((id, i) => id !== b.paperIds[i]);
+    return diff < 0 ? 0 : order.get(a.paperIds[diff]) - order.get(b.paperIds[diff]);
   });
 };
