@@ -213,6 +213,12 @@ export default function StudyBox() {
         ],
       }));
     },
+    // Patch a topic's own fields (e.g. paper, higherOnly); `undefined` removes one.
+    updateTopic: (topicId, patch) =>
+      updateCurrentSubject((subject) => ({
+        ...subject,
+        topics: subject.topics.map((topic) => (topic.id === topicId ? { ...topic, ...patch } : topic)),
+      })),
     deleteTopic: (topicId) =>
       updateCurrentSubject((subject) => ({
         ...subject,

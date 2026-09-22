@@ -222,6 +222,45 @@
       "name": "Forces and matter",
       "paper": "p2",
       "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t30",
+      "name": "Glucagon and blood glucose regulation",
+      "paper": "b2",
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t31",
+      "name": "Moles and limiting reactants",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t32",
+      "name": "Electrolysis half equations, oxidation and reduction",
+      "paper": "c1",
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t33",
+      "name": "Circular motion and inertial mass",
+      "paper": "p1",
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t34",
+      "name": "The motor effect and Fleming's left-hand rule",
+      "paper": "p2",
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t35",
+      "name": "Transformers and induced potential difference",
+      "paper": "p2",
+      "higherOnly": true
     }
   ],
   "optionGroups": [],

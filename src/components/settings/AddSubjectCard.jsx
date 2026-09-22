@@ -61,8 +61,16 @@ export default function AddSubjectCard({ C, onAddSubject }) {
       specName: matchApplies ? catalogueMatch.subject.specName : catalogueMatch ? null : subjectMeta.specName,
       exam: subjectMeta.exam.trim() || "Custom",
       color: subjectColor,
+      // Catalogue topics keep their paper and higher-only tags, and bring the
+      // spec's papers with them.
+      ...(useCatalogueTopics ? { papers: catalogueMatch.subject.papers } : {}),
       topics: useCatalogueTopics
-        ? catalogueMatch.subject.topics.map(({ name, catalogueTopicId }) => ({ name, catalogueTopicId }))
+        ? catalogueMatch.subject.topics.map(({ name, catalogueTopicId, paper, higherOnly }) => ({
+            name,
+            catalogueTopicId,
+            paper,
+            higherOnly,
+          }))
         : specTopics,
     });
     setSubjectName("");

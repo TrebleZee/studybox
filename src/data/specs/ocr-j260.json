@@ -204,6 +204,105 @@
         "all"
       ],
       "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t20",
+      "name": "Photosynthesis: limiting factors and the inverse square law",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t21",
+      "name": "Hormones in the menstrual cycle and infertility treatment",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t22",
+      "name": "Thyroxine, adrenaline and negative feedback",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t23",
+      "name": "Glucagon and insulin",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t24",
+      "name": "Moles and the Avogadro constant",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t25",
+      "name": "Concentration in mol/dm³",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t26",
+      "name": "Strong and weak acids and pH",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t27",
+      "name": "Oxidation and reduction in terms of electrons",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t28",
+      "name": "Momentum",
+      "paper": [
+        "phys",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t29",
+      "name": "Fleming's left-hand rule and force on a conductor",
+      "paper": [
+        "phys",
+        "all"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j260-t30",
+      "name": "Radioactive decline over half-lives",
+      "paper": [
+        "phys",
+        "all"
+      ],
+      "higherOnly": true
     }
   ],
   "optionGroups": [],

@@ -147,6 +147,36 @@
       "name": "Global challenges (physics)",
       "paper": "p2",
       "higherOnly": false
+    },
+    {
+      "id": "ocr-j250-t19",
+      "name": "Thyroxine, adrenaline and negative feedback",
+      "paper": "b1",
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j250-t20",
+      "name": "Oxidation and reduction in terms of electrons",
+      "paper": "c1",
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j250-t21",
+      "name": "Inertia and inertial mass",
+      "paper": "p1",
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j250-t22",
+      "name": "Fleming's left-hand rule",
+      "paper": "p1",
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j250-t23",
+      "name": "Radioactive decline over half-lives",
+      "paper": "p2",
+      "higherOnly": true
     }
   ],
   "optionGroups": [],

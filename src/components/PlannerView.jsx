@@ -59,6 +59,7 @@ export default function PlannerView({
             onToggleTopic={(topicId) => actions.toggleTopic(sub.id, topicId)}
             onAddTopic={actions.addTopic}
             onDeleteTopic={actions.deleteTopic}
+            onUpdateTopic={actions.updateTopic}
             onToggleSubtask={actions.toggleSubtask}
             onAddSubtask={actions.addSubtask}
             onDeleteSubtask={actions.deleteSubtask}

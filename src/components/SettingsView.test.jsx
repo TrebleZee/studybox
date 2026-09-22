@@ -96,19 +96,25 @@ describe("Settings", () => {
       await uploadSpec(user, AQA_MATHS);
 
       const catalogueOption = await screen.findByRole("radio", {
-        name: /Use StudyBox's topic list for AQA GCSE Mathematics \(13 topics\)/,
+        name: /Use StudyBox's topic list for AQA GCSE Mathematics \(21 topics\)/,
       });
       expect(catalogueOption.checked).toBe(true);
       expect(screen.getByRole("radio", { name: /Use topics read from the PDF \(2 topics\)/ }).checked).toBe(false);
       expect(screen.getByDisplayValue("Mathematics")).toBeTruthy();
-      expect(screen.getByText("13 topics from StudyBox's catalogue")).toBeTruthy();
+      expect(screen.getByText("21 topics from StudyBox's catalogue")).toBeTruthy();
       expect(screen.getByText("Structure and calculation")).toBeTruthy();
 
       await user.click(screen.getByRole("button", { name: "Create subject" }));
       const stored = JSON.parse(localStorage.getItem("sb-subjects")).find((s) => s.name === "Mathematics");
       expect(stored).toMatchObject({ qualification: "gcse", board: "AQA", spec: "8300", specName: "Mathematics" });
-      expect(stored.topics).toHaveLength(13);
-      expect(stored.topics[0]).toMatchObject({ name: "Structure and calculation", catalogueTopicId: "aqa-8300-t01" });
+      expect(stored.topics).toHaveLength(21);
+      expect(stored.topics[0]).toMatchObject({
+        name: "Structure and calculation",
+        catalogueTopicId: "aqa-8300-t01",
+        paper: ["p1", "p2", "p3"],
+      });
+      expect(stored.papers.map((p) => p.id)).toEqual(["p1", "p2", "p3"]);
+      expect(stored.topics.filter((t) => t.higherOnly)).toHaveLength(8);
       expect(stored.topics.every((t) => t.catalogueTopicId && !t.done)).toBe(true);
     });
 

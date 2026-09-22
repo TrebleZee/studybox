@@ -6,6 +6,7 @@ import {
   TIERS,
   normalizeSubject,
   subjectsFromPresets,
+  topicPapers,
 } from "./subjects.js";
 
 // Each spec file becomes its own lazily-loaded chunk, so the main bundle only
@@ -20,12 +21,9 @@ const SPEC_LOADERS = Object.fromEntries(
 
 const isNonEmptyString = (value) => typeof value === "string" && value.trim() !== "";
 
-// A topic's paper is one paper id, or an array of ids when the topic is
-// examined on several papers (e.g. A-level Maths pure content on papers 1 and 2).
-export const topicPapers = (topic) => {
-  if (Array.isArray(topic?.paper)) return topic.paper;
-  return isNonEmptyString(topic?.paper) ? [topic.paper] : [];
-};
+// Lives in subjects.js (subjects carry papers too); re-exported for callers
+// that think of it as a catalogue helper.
+export { topicPapers };
 
 // Returns a list of human-readable problems; an empty list means valid.
 // `fileName` (without directory) is checked against the id when given.
@@ -191,6 +189,8 @@ export const subjectFromSpec = (spec, { tier = null, optionIds = [], color, id }
       done: false,
       subtasks: [],
       catalogueTopicId: topic.id,
+      paper: topic.paper,
+      higherOnly: topic.higherOnly,
     }));
 
   return normalizeSubject({
@@ -202,6 +202,7 @@ export const subjectFromSpec = (spec, { tier = null, optionIds = [], color, id }
     specName: spec.specName,
     tier: spec.tiers?.includes(tier) ? tier : null,
     color,
+    papers: spec.papers.map(({ id: paperId, name }) => ({ id: paperId, name })),
     topics,
   });
 };

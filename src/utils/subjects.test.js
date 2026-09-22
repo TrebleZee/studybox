@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
+import aqa8300 from "../data/specs/aqa-8300.json";
+import { subjectFromSpec } from "./catalogue.js";
 import {
   SUBJECT_PRESETS,
   TEMPLATES,
   addUniqueTag,
   defaultSubjects,
+  groupTopicsByPaper,
+  inTierTopics,
   isUntouchedDefaultSubjects,
   normalizeSessions,
   normalizeSubjects,
+  paperProgress,
   subjectLabel,
   subjectProgress,
   subjectsFromPresets,
@@ -377,5 +382,127 @@ describe("onboarding guard", () => {
     stored[1].qualification = "gcse";
     stored[1].tier = "higher";
     expect(isUntouchedDefaultSubjects(stored)).toBe(false);
+  });
+});
+
+describe("papers and higher-tier topics", () => {
+  const maths = (tier) => subjectFromSpec(aqa8300, { tier });
+
+  it("Foundation GCSE Maths progress ignores higher-only topics", () => {
+    const foundation = maths("foundation");
+    const higherOnly = foundation.topics.filter((t) => t.higherOnly);
+    expect(higherOnly.length).toBeGreaterThan(0);
+
+    // Every foundation topic done, no higher-only topic done: 100% on Foundation.
+    foundation.topics.forEach((t) => (t.done = !t.higherOnly));
+    expect(subjectProgress(foundation)).toBe(100);
+    expect(inTierTopics(foundation)).toHaveLength(foundation.topics.length - higherOnly.length);
+
+    // The same subject on Higher counts the undone higher-only topics.
+    const higher = { ...foundation, tier: "higher" };
+    expect(subjectProgress(higher)).toBe(
+      Math.round(((foundation.topics.length - higherOnly.length) / foundation.topics.length) * 100)
+    );
+  });
+
+  it("an unset tier counts every topic", () => {
+    const subject = maths(null);
+    subject.topics[0].done = true;
+    expect(subjectProgress(subject)).toBe(Math.round((1 / subject.topics.length) * 100));
+  });
+
+  it("paperProgress counts in-tier topics examined on that paper, including shared ones", () => {
+    const subject = normalizeSubjects([
+      {
+        id: "s",
+        name: "S",
+        board: "AQA",
+        qualification: "gcse",
+        tier: "foundation",
+        papers: [{ id: "p1", name: "Paper 1" }, { id: "p2", name: "Paper 2" }],
+        topics: [
+          { id: "a", name: "A", paper: "p1", done: true },
+          { id: "b", name: "B", paper: ["p1", "p2"] },
+          { id: "c", name: "C", paper: "p2", done: true },
+          { id: "d", name: "D", paper: "p1", higherOnly: true },
+        ],
+      },
+    ])[0];
+    expect(paperProgress(subject, "p1")).toBe(50);
+    expect(paperProgress(subject, "p2")).toBe(50);
+    expect(paperProgress({ ...subject, tier: "higher" }, "p1")).toBe(33);
+    expect(paperProgress(subject, "p9")).toBe(0);
+  });
+
+  it("groups topics by paper combination in paper order, with Other last", () => {
+    const subject = {
+      papers: [{ id: "p1", name: "Pure 1" }, { id: "p2", name: "Pure 2" }, { id: "p3", name: "Stats" }],
+      topics: [
+        { id: "x", name: "Loose" },
+        { id: "a", name: "A", paper: "p3" },
+        { id: "b", name: "B", paper: ["p2", "p1"] },
+        { id: "c", name: "C", paper: "p1" },
+        { id: "d", name: "D", paper: ["p1", "p2", "p3"] },
+        { id: "e", name: "E", paper: "gone" },
+      ],
+    };
+    expect(groupTopicsByPaper(subject).map((g) => [g.name, g.topics.map((t) => t.id)])).toEqual([
+      ["Pure 1", ["c"]],
+      ["Pure 1 & Pure 2", ["b"]],
+      ["All papers", ["d"]],
+      ["Stats", ["a"]],
+      ["Other", ["x", "e"]],
+    ]);
+    expect(groupTopicsByPaper({ topics: [{ id: "a", name: "A" }] })).toEqual([]);
+    expect(groupTopicsByPaper({ papers: subject.papers, topics: [{ id: "a", name: "A" }] })).toEqual([]);
+  });
+
+  it("orders paper combinations sharing a first paper by their remaining papers", () => {
+    const subject = {
+      papers: [{ id: "p1", name: "P1" }, { id: "p2", name: "P2" }, { id: "p3", name: "P3" }, { id: "p4", name: "P4" }],
+      topics: [
+        { id: "a", name: "A", paper: ["p1", "p3"] },
+        { id: "b", name: "B", paper: ["p1", "p2"] },
+        { id: "c", name: "C", paper: ["p1", "p2", "p4"] },
+        { id: "d", name: "D", paper: ["p1", "p2", "p3"] },
+      ],
+    };
+    expect(groupTopicsByPaper(subject).map((g) => g.name)).toEqual([
+      "P1 & P2",
+      "P1 & P3",
+      "P1 & P2 & P3",
+      "P1 & P2 & P4",
+    ]);
+  });
+
+  it("normalizes papers, paper tags and higherOnly as optional, idempotent fields", () => {
+    const [subject] = normalizeSubjects([
+      {
+        id: "s",
+        name: "S",
+        board: "AQA",
+        papers: [{ id: "p1", name: "One" }, { id: "p1", name: "Dup" }, { id: "", name: "x" }, { id: "p2" }],
+        topics: [
+          { id: "a", name: "A", paper: "p1", higherOnly: true },
+          { id: "b", name: "B", paper: ["p1", "p1", "", 3, "p2"], higherOnly: false },
+          { id: "c", name: "C", paper: "", higherOnly: "yes" },
+        ],
+      },
+    ]);
+    expect(subject.papers).toEqual([{ id: "p1", name: "One" }, { id: "p2", name: "p2" }]);
+    expect(subject.topics[0]).toMatchObject({ paper: "p1", higherOnly: true });
+    expect(subject.topics[1].paper).toEqual(["p1", "p2"]);
+    expect(subject.topics[1]).not.toHaveProperty("higherOnly");
+    expect(subject.topics[2]).not.toHaveProperty("paper");
+    expect(subject.topics[2]).not.toHaveProperty("higherOnly");
+    expect(normalizeSubjects([subject])).toEqual([subject]);
+    expect(normalizeSubjects(JSON.parse(JSON.stringify([subject])))).toEqual([subject]);
+  });
+
+  it("leaves subjects without papers exactly as before (no new keys)", () => {
+    const [subject] = normalizeSubjects([{ id: "x", name: "X", topics: [{ id: "a", name: "A" }] }]);
+    expect(subject).not.toHaveProperty("papers");
+    expect(Object.keys(subject.topics[0]).sort()).toEqual(["done", "id", "name", "subtasks"]);
+    expect(isUntouchedDefaultSubjects(normalizeSubjects(defaultSubjects()))).toBe(true);
   });
 });

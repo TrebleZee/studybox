@@ -183,6 +183,78 @@
       "name": "Magnetism and electromagnetism",
       "paper": "p2",
       "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t25",
+      "name": "Hormones to treat infertility",
+      "paper": "b2",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t26",
+      "name": "Feedback systems",
+      "paper": "b2",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t27",
+      "name": "Moles and balancing equations with moles",
+      "paper": "c1",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t28",
+      "name": "Limiting reactants",
+      "paper": "c1",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t29",
+      "name": "Oxidation and reduction in terms of electrons",
+      "paper": "c1",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t30",
+      "name": "Strong and weak acids",
+      "paper": "c1",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t31",
+      "name": "Half equations at electrodes",
+      "paper": "c1",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t32",
+      "name": "Energy change of reactions from bond energies",
+      "paper": "c1",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t33",
+      "name": "Changing conditions and equilibrium",
+      "paper": "c2",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t34",
+      "name": "Alternative methods of extracting metals",
+      "paper": "c2",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t35",
+      "name": "Momentum",
+      "paper": "p2",
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8464-t36",
+      "name": "Fleming's left-hand rule and electric motors",
+      "paper": "p2",
+      "higherOnly": true
     }
   ],
   "optionGroups": [],

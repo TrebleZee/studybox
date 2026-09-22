@@ -157,6 +157,86 @@
         "p3"
       ],
       "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t14",
+      "name": "Transformations of graphs",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t15",
+      "name": "Gradients and areas under graphs",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t16",
+      "name": "Solving equations by iteration",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t17",
+      "name": "Instantaneous and average rates of change",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t18",
+      "name": "Combined transformations",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t19",
+      "name": "Sine and cosine rules",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t20",
+      "name": "Conditional probability",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t21",
+      "name": "Histograms with unequal class widths",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
     }
   ],
   "optionGroups": [],
