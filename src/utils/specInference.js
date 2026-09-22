@@ -348,7 +348,11 @@ export function inferQualification(text = "", fileName = "") {
 
   if (alevel === Infinity && as === Infinity && gcse === Infinity) return null;
   if (gcse < Math.min(alevel, as)) return "gcse";
-  return alevel === Infinity ? "as" : "alevel";
+  // An AS-only cover often mentions its A-level ("co-teachable with the
+  // Advanced GCE"), so whichever comes first wins, unless the title is a
+  // joint "AS and A-level" spec.
+  const joint = /\bAS and A[- ]?level\b/i.test(cover);
+  return as < alevel && !joint ? "as" : "alevel";
 }
 
 export function generateSubjectDraftFromSpecText(text, fileName = "") {

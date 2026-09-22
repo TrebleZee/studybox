@@ -67,6 +67,30 @@ describe("AddSubjectCard spec import", () => {
     expect(subject.topics.some((topic) => typeof topic === "object" && topic.catalogueTopicId)).toBe(false);
   });
 
+  it("drops the matched spec name when the spec code is changed to another spec", async () => {
+    await upload("aqa-maths.pdf");
+    const code = screen.getByLabelText("Spec code");
+    await user.clear(code);
+    await user.type(code, "8700");
+    await user.click(screen.getByLabelText("Create subject"));
+
+    const subject = onAddSubject.mock.calls[0][0];
+    expect(subject).toMatchObject({ board: "AQA", spec: "8700", specName: null });
+    expect(subject.topics.some((topic) => typeof topic === "object" && topic.catalogueTopicId)).toBe(false);
+  });
+
+  it("restores the matched spec name if the user returns to the matched spec", async () => {
+    await upload("aqa-maths.pdf");
+    await user.selectOptions(screen.getByLabelText("Exam board"), "Edexcel");
+    await user.selectOptions(screen.getByLabelText("Exam board"), "AQA");
+    await user.type(screen.getByLabelText("Spec code"), "8300");
+    await user.click(screen.getByLabelText("Create subject"));
+
+    const subject = onAddSubject.mock.calls[0][0];
+    expect(subject).toMatchObject({ board: "AQA", spec: "8300", specName: "Mathematics" });
+    expect(subject.topics[0].catalogueTopicId).toMatch(/^aqa-8300-/);
+  });
+
   it("keeps the catalogue topics while the spec code is only re-cased", async () => {
     await upload("aqa-maths.pdf");
     const code = screen.getByLabelText("Spec code");

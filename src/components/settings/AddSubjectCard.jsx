@@ -56,6 +56,9 @@ export default function AddSubjectCard({ C, onAddSubject }) {
       ...subjectMeta,
       name: cleanName,
       spec: subjectMeta.spec.trim() || null,
+      // A matched spec's name only belongs to that spec: once the user
+      // re-points board or code, drop it rather than mislabel the subject.
+      specName: matchApplies ? catalogueMatch.subject.specName : catalogueMatch ? null : subjectMeta.specName,
       exam: subjectMeta.exam.trim() || "Custom",
       color: subjectColor,
       topics: useCatalogueTopics

@@ -132,6 +132,10 @@ describe("inferSpecCode", () => {
     const aqaAsOnly = `AS PHYSICS (7407) Specification. AQA AS Physics 7407, see also A-level 7408 later`;
     expect(inferSpecCode(aqaAsOnly)).toEqual({ board: "AQA", spec: "7407" });
 
+    const edexcelAsOnly = `Pearson Edexcel Level 3 Advanced Subsidiary GCE in Further Mathematics (8FM0). First teaching 2017. This AS qualification is co-teachable with the Pearson Edexcel Level 3 Advanced GCE in Further Mathematics (9FM0), and AS marks do not count towards the A level.`;
+    expect(inferQualification(edexcelAsOnly)).toBe("as");
+    expect(inferSpecCode(edexcelAsOnly)).toEqual({ board: "Edexcel", spec: "8FM0" });
+
     const edexcelJoint = `Pearson Edexcel Level 3 Advanced GCE in Further Mathematics (9FM0) and Advanced Subsidiary (8FM0)`;
     expect(inferSpecCode(edexcelJoint)).toEqual({ board: "Edexcel", spec: "9FM0" });
   });
