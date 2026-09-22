@@ -46,6 +46,7 @@ This file documents the app structure so future changes stay consistent.
 - Keep the planner layout focused on subjects, topics, and the timer.
 - Keep history entries compact, with tags shown as chips.
 - Preserve the existing PWA support and local-only data model.
+- `vite.config.js`'s workbox config must keep `navigateFallback: 'index.html'` set - without it, an offline reload or a fresh open of the installed PWA hits the browser's own offline error page instead of the cached app shell.
 
 ## Code layout
 

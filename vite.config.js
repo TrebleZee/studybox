@@ -9,6 +9,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
+        // StudyBox is a single-route SPA, so any offline navigation (a deep
+        // link, a reload, or the installed PWA's start_url) should fall back
+        // to the cached app shell instead of failing with no network.
+        navigateFallback: 'index.html',
       },
       manifest: {
         name: 'StudyBox',
