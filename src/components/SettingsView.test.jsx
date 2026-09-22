@@ -1,11 +1,11 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { extractPdfText } from "../specImport.js";
+import { extractPdfText } from "../utils/specImport.js";
 import { goTo, renderApp } from "../test/helpers.jsx";
 
-vi.mock("../specImport.js", async () => {
-  const { generateSubjectDraftFromSpecText } = await import("../specInference.js");
+vi.mock("../utils/specImport.js", async () => {
+  const { generateSubjectDraftFromSpecText } = await import("../utils/specInference.js");
   return { extractPdfText: vi.fn(), generateSubjectDraftFromPdfText: generateSubjectDraftFromSpecText };
 });
 
@@ -18,14 +18,18 @@ describe("Settings", () => {
     const name = screen.getByLabelText("Subject name physics");
     await user.clear(name);
     await user.type(name, "Advanced Physics");
-    const exam = screen.getByLabelText("Subject exam physics");
-    await user.clear(exam);
-    await user.type(exam, "AQA");
+    expect(screen.queryByLabelText("Tier physics")).toBeNull();
+    await user.selectOptions(screen.getByLabelText("Exam board physics"), "AQA");
+    await user.selectOptions(screen.getByLabelText("Qualification physics"), "gcse");
+    await user.selectOptions(screen.getByLabelText("Tier physics"), "higher");
     fireEvent.change(screen.getByLabelText("Subject colour physics"), { target: { value: "#ff7a59" } });
     await goTo(user, "Planner");
 
     expect(screen.getByRole("button", { name: "Advanced Physics" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Physics" })).toBeNull();
+    expect(screen.getAllByText("AQA GCSE Advanced Physics (Higher)").length).toBeGreaterThan(0);
+    const stored = JSON.parse(localStorage.getItem("sb-subjects")).find((s) => s.id === "physics");
+    expect(stored).toMatchObject({ board: "AQA", qualification: "gcse", tier: "higher", spec: null, exam: "AQA" });
 
     await goTo(user, "Settings");
     await user.click(screen.getByRole("button", { name: "Delete subject maths" }));
@@ -65,6 +69,8 @@ describe("Settings", () => {
     await goTo(user, "Planner");
     expect(screen.getByRole("button", { name: "Art History" })).toBeTruthy();
     expect(screen.getByText("Ancient Art")).toBeTruthy();
+    const stored = JSON.parse(localStorage.getItem("sb-subjects")).find((s) => s.name === "Art History");
+    expect(stored).toMatchObject({ board: "AQA", exam: "AQA", spec: null, tier: null });
   });
 
   describe("backup and restore", () => {

@@ -136,37 +136,169 @@ export const subjectsForTemplate = (templateId) => {
   return template ? subjectsFromPresets(template.presets) : [];
 };
 
+export const QUALIFICATIONS = ["gcse", "alevel", "as", "other"];
+export const BOARDS = ["AQA", "Edexcel", "OCR", "Eduqas", "WJEC", "CCEA", "Custom"];
+export const TIERS = ["foundation", "higher"];
+
+export const QUALIFICATION_LABELS = {
+  gcse: "GCSE",
+  alevel: "A-level",
+  as: "AS",
+  other: "Other",
+};
+
+export const TIER_LABELS = { foundation: "Foundation", higher: "Higher" };
+
+// Exact metadata for the built-in example subjects. Applied during migration
+// only while the stored exam text still matches the preset's original label,
+// so a preset the user re-pointed at another board isn't overwritten.
+const PRESET_METADATA = {
+  physics: { qualification: "alevel", board: "OCR", spec: "H556", specName: "Physics A" },
+  maths: { qualification: "alevel", board: "Edexcel", spec: "9MA0", specName: null },
+  further: { qualification: "alevel", board: "Edexcel", spec: "9FM0", specName: null },
+  cs: { qualification: "alevel", board: "OCR", spec: "H446", specName: null },
+  "gcse-english": { qualification: "gcse", board: "AQA", spec: null, specName: null },
+  "gcse-maths": { qualification: "gcse", board: "AQA", spec: "8300", specName: null },
+  "gcse-science": {
+    qualification: "gcse",
+    board: "AQA",
+    spec: "8464",
+    specName: "Combined Science Trilogy",
+  },
+};
+
+// Order matters: "WJEC Eduqas" resolves to Eduqas, "Pearson" alone to Edexcel.
+const BOARD_PATTERNS = [
+  ["AQA", /\bAQA\b/i],
+  ["Edexcel", /\b(edexcel|pearson)\b/i],
+  ["OCR", /\bOCR\b/i],
+  ["Eduqas", /\beduqas\b/i],
+  ["WJEC", /\bWJEC\b/i],
+  ["CCEA", /\bCCEA\b/i],
+];
+
+export const boardFromText = (text) => {
+  const value = typeof text === "string" ? text : "";
+  const match = BOARD_PATTERNS.find(([, regex]) => regex.test(value));
+  return match ? match[0] : "Custom";
+};
+
+const qualificationFromText = (text) => {
+  if (/\bGCSE\b/i.test(text)) return "gcse";
+  if (/\bA[- ]?levels?\b/i.test(text)) return "alevel";
+  if (/\bAS\b/.test(text)) return "as";
+  return "other";
+};
+
+// Kept untrimmed so editing a field never swallows a space mid-typing.
+const cleanString = (value) => (typeof value === "string" && value.trim() ? value : null);
+
+// The legacy `exam` string, still written so older app versions reading a
+// backup show something sensible. Custom subjects keep their own free text
+// (possibly empty while being edited - subjectLabel falls back to "Custom").
+export const deriveExam = ({ board, specName, exam }) => {
+  if (board === "Custom") return typeof exam === "string" ? exam : "Custom";
+  return [board, specName].filter(Boolean).join(" ");
+};
+
+const subjectMetadata = (subject, preset) => {
+  const exam = cleanString(subject?.exam)?.trim() || preset?.exam || "Custom";
+  let meta;
+
+  if (BOARDS.includes(subject?.board)) {
+    meta = {
+      qualification: QUALIFICATIONS.includes(subject.qualification)
+        ? subject.qualification
+        : "other",
+      board: subject.board,
+      spec: cleanString(subject.spec),
+      specName: cleanString(subject.specName),
+      tier: TIERS.includes(subject.tier) ? subject.tier : null,
+    };
+  } else if (PRESET_METADATA[subject?.id] && exam === preset.exam) {
+    meta = { ...PRESET_METADATA[subject.id], tier: null };
+  } else {
+    const board = boardFromText(exam);
+    meta = {
+      qualification:
+        board === "Custom" ? "other" : qualificationFromText(`${exam} ${subject?.name || ""}`),
+      board,
+      spec: null,
+      specName: null,
+      tier: null,
+    };
+  }
+
+  if (meta.qualification !== "gcse") meta.tier = null;
+  // Once a subject has a stored board, its free text is taken verbatim.
+  const examText =
+    BOARDS.includes(subject?.board) && typeof subject.exam === "string" ? subject.exam : exam;
+  return { ...meta, exam: deriveExam({ ...meta, exam: examText }) };
+};
+
+// e.g. "OCR A-level Physics A", "AQA GCSE Maths (Higher)", or the free-text
+// exam label for Custom subjects.
+export const subjectLabel = (subject) => {
+  if (!subject) return "";
+  if (!BOARDS.includes(subject.board) || subject.board === "Custom") {
+    return subject.exam || "Custom";
+  }
+  const level =
+    subject.qualification === "other" ? null : QUALIFICATION_LABELS[subject.qualification];
+  const tier =
+    subject.qualification === "gcse" && TIER_LABELS[subject.tier]
+      ? `(${TIER_LABELS[subject.tier]})`
+      : null;
+  return [subject.board, level, subject.specName || subject.name, tier]
+    .filter(Boolean)
+    .join(" ");
+};
+
+// The untouched check compares normalized forms, so it keeps working now that
+// normalization adds metadata that the frozen defaultSubjects() doesn't carry.
 export const isUntouchedDefaultSubjects = (subjects) =>
-  JSON.stringify(subjects) === JSON.stringify(defaultSubjects());
+  JSON.stringify(normalizeSubjects(subjects)) ===
+  JSON.stringify(normalizeSubjects(defaultSubjects()));
+
+// Merge an edit into a subject and re-derive exam/tier so they never go stale.
+// Only the metadata is re-derived: other fields (e.g. a name mid-edit, briefly
+// empty) are kept exactly as typed.
+export const updateSubjectFields = (subject, patch) => {
+  const next = { ...subject, ...patch };
+  const preset = SUBJECT_PRESETS.find((item) => item.id === next.id);
+  return { ...next, ...subjectMetadata(next, preset) };
+};
 
 export const normalizeSubjects = (input) => {
   if (!Array.isArray(input)) {
-    return defaultSubjects();
+    return defaultSubjects().map((subject, index) => normalizeSubject(subject, index));
   }
 
-  return input.map((subject, index) => {
-    const preset = SUBJECT_PRESETS.find((item) => item.id === subject?.id);
-    const sourceTopics = Array.isArray(subject?.topics) ? subject.topics : [];
+  return input.map((subject, index) => normalizeSubject(subject, index));
+};
 
-    return {
-      id: subject?.id || `sub-${Date.now().toString(36)}-${index}`,
-      name: subject?.name || preset?.name || "Untitled subject",
-      exam: subject?.exam || preset?.exam || "Custom",
-      color: subject?.color || preset?.color || "#4F9CF9",
-      topics: sourceTopics.map((topic, topicIndex) => ({
-        id: topic?.id || `${subject?.id || "sub"}-${topicIndex}`,
-        name: topic?.name || "Untitled topic",
-        done: Boolean(topic?.done),
-        subtasks: (Array.isArray(topic?.subtasks) ? topic.subtasks : []).map(
-          (subtask, subtaskIndex) => ({
-            id: subtask?.id || `${topic?.id || topicIndex}-st${subtaskIndex}`,
-            name: subtask?.name || "Untitled subtask",
-            done: Boolean(subtask?.done),
-          })
-        ),
-      })),
-    };
-  });
+export const normalizeSubject = (subject, index = 0) => {
+  const preset = SUBJECT_PRESETS.find((item) => item.id === subject?.id);
+  const sourceTopics = Array.isArray(subject?.topics) ? subject.topics : [];
+
+  return {
+    id: subject?.id || `sub-${Date.now().toString(36)}-${index}`,
+    name: subject?.name || preset?.name || "Untitled subject",
+    ...subjectMetadata(subject, preset),
+    color: subject?.color || preset?.color || "#4F9CF9",
+    topics: sourceTopics.map((topic, topicIndex) => ({
+      id: topic?.id || `${subject?.id || "sub"}-${topicIndex}`,
+      name: topic?.name || "Untitled topic",
+      done: Boolean(topic?.done),
+      subtasks: (Array.isArray(topic?.subtasks) ? topic.subtasks : []).map(
+        (subtask, subtaskIndex) => ({
+          id: subtask?.id || `${topic?.id || topicIndex}-st${subtaskIndex}`,
+          name: subtask?.name || "Untitled subtask",
+          done: Boolean(subtask?.done),
+        })
+      ),
+    })),
+  };
 };
 
 export const normalizeSessions = (input) => {

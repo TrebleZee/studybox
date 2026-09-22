@@ -2,7 +2,9 @@ import { normalizeGame } from "./gameLogic.js";
 import { normalizeSessions, normalizeSubjects } from "./subjects.js";
 import { THEMES } from "./themes.js";
 
-export const BACKUP_VERSION = 1;
+// v2 (1.3.0) adds subject qualification/board/spec/specName/tier. v1 files still
+// load: normalizeSubjects migrates them.
+export const BACKUP_VERSION = 2;
 
 export const buildBackup = ({ subjects, sessions, themeId, game }) => ({
   subjects,
@@ -29,6 +31,11 @@ export const parseBackup = (text) => {
   const hasKnownData = isObject && (Array.isArray(data.subjects) || Array.isArray(data.sessions));
   if (!hasKnownData) {
     throw new Error("That file doesn't look like a StudyBox backup.");
+  }
+  // Unversioned, v1 and v2 files all load; a newer file could carry fields this
+  // build would silently drop, so refuse it rather than lose data.
+  if (typeof data.version === "number" && data.version > BACKUP_VERSION) {
+    throw new Error("That backup was made by a newer version of StudyBox. Update the app and try again.");
   }
 
   const restored = {};
