@@ -14,6 +14,21 @@ const optionStyle = (C) => ({
 
 export default function Onboarding({ C, onStartBlank, onUseTemplate, onRestore }) {
   const [error, setError] = useState("");
+  const [loadingTemplate, setLoadingTemplate] = useState(null);
+  // While a template loads, every other start option is locked so its result
+  // can't be overwritten when the template arrives.
+  const loading = loadingTemplate !== null;
+
+  const chooseTemplate = async (templateId) => {
+    setLoadingTemplate(templateId);
+    setError("");
+    const result = await onUseTemplate(templateId);
+    // On success Onboarding unmounts, so only a failure needs state updates.
+    if (!result?.ok) {
+      setLoadingTemplate(null);
+      setError(result?.error || "That template couldn't be loaded.");
+    }
+  };
 
   return (
     <div
@@ -44,7 +59,13 @@ export default function Onboarding({ C, onStartBlank, onUseTemplate, onRestore }
           stored in this browser only. How would you like to start?
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <button type="button" className="nb" onClick={onStartBlank} style={optionStyle(C)}>
+          <button
+            type="button"
+            className="nb"
+            disabled={loading}
+            onClick={onStartBlank}
+            style={optionStyle(C)}
+          >
             <div style={{ fontWeight: 700, fontSize: "13px" }}>Start blank</div>
             <div style={{ color: C.muted, fontSize: "11px", marginTop: "3px" }}>
               Add your own subjects and topics.
@@ -55,10 +76,15 @@ export default function Onboarding({ C, onStartBlank, onUseTemplate, onRestore }
               key={template.id}
               type="button"
               className="nb"
-              onClick={() => onUseTemplate(template.id)}
+              disabled={loading}
+              aria-busy={loadingTemplate === template.id}
+              onClick={() => chooseTemplate(template.id)}
               style={optionStyle(C)}
             >
-              <div style={{ fontWeight: 700, fontSize: "13px" }}>Use {template.name}</div>
+              <div style={{ fontWeight: 700, fontSize: "13px" }}>
+                Use {template.name}
+                {loadingTemplate === template.id ? " (loading…)" : ""}
+              </div>
               <div style={{ color: C.muted, fontSize: "11px", marginTop: "3px" }}>
                 {template.description} Edit or delete anything.
               </div>
@@ -67,12 +93,20 @@ export default function Onboarding({ C, onStartBlank, onUseTemplate, onRestore }
         </div>
         <div style={{ marginTop: "16px", fontSize: "11px", color: C.muted }}>
           Already have a backup?{" "}
-          <label style={{ color: C.txt, cursor: "pointer", textDecoration: "underline" }}>
+          <label
+            style={{
+              color: C.txt,
+              cursor: loading ? "default" : "pointer",
+              textDecoration: "underline",
+              opacity: loading ? 0.5 : 1,
+            }}
+          >
             Restore from file
             <input
               type="file"
               accept="application/json,.json"
               aria-label="Restore backup file"
+              disabled={loading}
               style={{ display: "none" }}
               onChange={async (e) => {
                 const file = e.target.files?.[0];

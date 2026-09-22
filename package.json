@@ -1,12 +1,14 @@
 {
   "name": "studybox",
   "private": true,
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/build-spec-index.js",
     "build": "vite build",
     "lint": "eslint .",
+    "pretest": "node scripts/build-spec-index.js",
     "test": "vitest run",
     "preview": "vite preview"
   },

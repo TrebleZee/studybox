@@ -1,0 +1,171 @@
+{
+  "id": "ocr-h446",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H446",
+  "subject": "Computer Science",
+  "specName": "Computer Science",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/170844-specification-accredited-a-level-gce-computer-science-h446.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Computer systems"
+    },
+    {
+      "id": "p2",
+      "name": "Algorithms and programming"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h446-t01",
+      "name": "Structure and function of the processor",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t02",
+      "name": "Types of processor",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t03",
+      "name": "Input, output and storage",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t04",
+      "name": "Systems software",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t05",
+      "name": "Applications generation",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t06",
+      "name": "Software development",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t07",
+      "name": "Types of programming language",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t08",
+      "name": "Compression, encryption and hashing",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t09",
+      "name": "Databases",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t10",
+      "name": "Networks",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t11",
+      "name": "Web technologies",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t12",
+      "name": "Data types",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t13",
+      "name": "Data structures",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t14",
+      "name": "Boolean algebra",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t15",
+      "name": "Computing related legislation",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t16",
+      "name": "Moral and ethical issues",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t17",
+      "name": "Thinking abstractly",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t18",
+      "name": "Thinking ahead",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t19",
+      "name": "Thinking procedurally",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t20",
+      "name": "Thinking logically",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t21",
+      "name": "Thinking concurrently",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t22",
+      "name": "Programming techniques",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t23",
+      "name": "Computational methods",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h446-t24",
+      "name": "Algorithms",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

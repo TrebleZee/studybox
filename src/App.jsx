@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AnalysisPanel from "./components/AnalysisPanel.jsx";
 import EditSessionModal from "./components/EditSessionModal.jsx";
 import LogView from "./components/LogView.jsx";
@@ -25,9 +25,9 @@ import {
   normalizeSessions,
   normalizeSubject,
   normalizeSubjects,
-  subjectsForTemplate,
   updateSubjectFields,
 } from "./utils/subjects.js";
+import { subjectsForTemplate } from "./utils/catalogue.js";
 import { THEMES } from "./utils/themes.js";
 
 const readFileText = (file) =>
@@ -61,6 +61,7 @@ export default function StudyBox() {
     )
   );
   const [onboarded, setOnboarded] = useState(() => loadJson(STORAGE_KEYS.onboarded, false));
+  const templateRequest = useRef(0);
   const [sel, setSel] = useState(() => subjects[0]?.id ?? null);
   const [view, setView] = useState("planner");
   const [asanaTask, setAsanaTask] = useState(null);
@@ -322,6 +323,7 @@ export default function StudyBox() {
     if (!file) return { ok: false };
     try {
       const restored = parseBackup(await readFileText(file));
+      templateRequest.current += 1;
       if (restored.subjects) {
         setSubjects(restored.subjects);
         setSel(restored.subjects[0]?.id ?? null);
@@ -340,16 +342,29 @@ export default function StudyBox() {
   };
 
   const startBlank = () => {
+    templateRequest.current += 1;
     setSubjects([]);
     setSel(null);
     setOnboarded(true);
   };
 
-  const useTemplate = (templateId) => {
-    const template = normalizeSubjects(subjectsForTemplate(templateId));
-    setSubjects(template);
-    setSel(template[0]?.id ?? null);
-    setOnboarded(true);
+  // Catalogue-backed templates load their spec chunks on demand, so this is
+  // async; Onboarding shows an error if that load fails. Each request takes a
+  // ticket; if another onboarding action (start blank, restore, a newer
+  // template) happened while it was loading, the stale result is dropped.
+  const useTemplate = async (templateId) => {
+    const request = ++templateRequest.current;
+    try {
+      const template = await subjectsForTemplate(templateId);
+      if (request !== templateRequest.current) return { ok: true };
+      if (!template.length) return { ok: false, error: "That template couldn't be loaded." };
+      setSubjects(template);
+      setSel(template[0].id);
+      setOnboarded(true);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "That template couldn't be loaded. Check your connection and try again." };
+    }
   };
 
   const needsOnboarding =

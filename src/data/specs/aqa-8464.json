@@ -1,0 +1,190 @@
+{
+  "id": "aqa-8464",
+  "qualification": "gcse",
+  "board": "AQA",
+  "spec": "8464",
+  "subject": "Combined Science",
+  "specName": "Combined Science Trilogy",
+  "specVersion": "2016",
+  "firstExam": 2018,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/science/specifications/AQA-8464-SP-2016.PDF",
+  "tiers": [
+    "foundation",
+    "higher"
+  ],
+  "papers": [
+    {
+      "id": "b1",
+      "name": "Biology Paper 1"
+    },
+    {
+      "id": "b2",
+      "name": "Biology Paper 2"
+    },
+    {
+      "id": "c1",
+      "name": "Chemistry Paper 1"
+    },
+    {
+      "id": "c2",
+      "name": "Chemistry Paper 2"
+    },
+    {
+      "id": "p1",
+      "name": "Physics Paper 1"
+    },
+    {
+      "id": "p2",
+      "name": "Physics Paper 2"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-8464-t01",
+      "name": "Cell biology",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t02",
+      "name": "Organisation",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t03",
+      "name": "Infection and response",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t04",
+      "name": "Bioenergetics",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t05",
+      "name": "Homeostasis and response",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t06",
+      "name": "Inheritance, variation and evolution",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t07",
+      "name": "Ecology",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t08",
+      "name": "Atomic structure and the periodic table",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t09",
+      "name": "Bonding, structure and the properties of matter",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t10",
+      "name": "Quantitative chemistry",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t11",
+      "name": "Chemical changes",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t12",
+      "name": "Energy changes",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t13",
+      "name": "The rate and extent of chemical change",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t14",
+      "name": "Organic chemistry",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t15",
+      "name": "Chemical analysis",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t16",
+      "name": "Chemistry of the atmosphere",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t17",
+      "name": "Using resources",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t18",
+      "name": "Energy",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t19",
+      "name": "Electricity",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t20",
+      "name": "Particle model of matter",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t21",
+      "name": "Atomic structure",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t22",
+      "name": "Forces",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t23",
+      "name": "Waves",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8464-t24",
+      "name": "Magnetism and electromagnetism",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

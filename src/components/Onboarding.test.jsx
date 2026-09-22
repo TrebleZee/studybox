@@ -1,13 +1,15 @@
-import { screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import Onboarding from "./Onboarding.jsx";
+import { THEMES } from "../utils/themes.js";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderApp } from "../test/helpers.jsx";
 import {
   TEMPLATES,
   defaultSubjects,
   normalizeSubjects,
-  subjectsForTemplate,
 } from "../utils/subjects.js";
+import { subjectsForTemplate } from "../utils/catalogue.js";
 
 describe("first-run onboarding", () => {
   it("appears on a clean slate instead of the planner, offering every template", () => {
@@ -43,16 +45,69 @@ describe("first-run onboarding", () => {
     expect(localStorage.getItem("sb-onboarded")).toBe("true");
   });
 
-  it("selecting the GCSE template loads its own core subjects, not the A-Level ones", async () => {
+  it("selecting the GCSE template loads its catalogue subjects, not the A-Level ones", async () => {
     const user = userEvent.setup();
     renderApp({ onboarded: false });
     await user.click(screen.getByRole("button", { name: /Use GCSE core subjects/ }));
 
-    expect(screen.getByRole("button", { name: "English" })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "English Language" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "English Literature" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Combined Science" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Physics" })).toBeNull();
-    expect(JSON.parse(localStorage.getItem("sb-subjects"))).toEqual(normalizeSubjects(subjectsForTemplate("gcse")));
-    expect(localStorage.getItem("sb-onboarded")).toBe("true");
+    const expected = await subjectsForTemplate("gcse");
+    await waitFor(() => {
+      expect(JSON.parse(localStorage.getItem("sb-subjects"))).toEqual(expected);
+      expect(localStorage.getItem("sb-onboarded")).toBe("true");
+    });
+  });
+
+  it("shows an error and re-enables the templates if one can't be loaded", async () => {
+    const user = userEvent.setup();
+    let fail;
+    const onUseTemplate = vi.fn(() => new Promise((resolve) => (fail = resolve)));
+    render(
+      <Onboarding C={THEMES[0].colors} onStartBlank={() => {}} onUseTemplate={onUseTemplate} onRestore={() => {}} />
+    );
+    await user.click(screen.getByRole("button", { name: /Use GCSE core subjects/ }));
+
+    expect(onUseTemplate).toHaveBeenCalledWith("gcse");
+    const busy = screen.getByRole("button", { name: /Use GCSE core subjects \(loading/ });
+    expect(busy.disabled).toBe(true);
+    expect(screen.getByRole("button", { name: /Use A-Level example set/ }).disabled).toBe(true);
+
+    await act(async () => fail({ ok: false, error: "That template couldn't be loaded." }));
+    expect(screen.getByRole("alert").textContent).toMatch(/couldn't be loaded/);
+    const ready = screen.getByRole("button", { name: /Use GCSE core subjects/ });
+    expect(ready.disabled).toBe(false);
+    expect(ready.textContent).not.toMatch(/loading/);
+  });
+
+  it("locks Start blank and Restore from file while a template is loading", async () => {
+    const user = userEvent.setup();
+    let finish;
+    const onStartBlank = vi.fn();
+    const onRestore = vi.fn();
+    const onUseTemplate = vi.fn(() => new Promise((resolve) => (finish = resolve)));
+    render(
+      <Onboarding
+        C={THEMES[0].colors}
+        onStartBlank={onStartBlank}
+        onUseTemplate={onUseTemplate}
+        onRestore={onRestore}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: /Use GCSE core subjects/ }));
+
+    const blank = screen.getByRole("button", { name: /Start blank/ });
+    const restore = screen.getByLabelText("Restore backup file");
+    expect(blank.disabled).toBe(true);
+    expect(restore.disabled).toBe(true);
+    await user.click(blank);
+    expect(onStartBlank).not.toHaveBeenCalled();
+
+    await act(async () => finish({ ok: false, error: "That template couldn't be loaded." }));
+    expect(screen.getByRole("button", { name: /Start blank/ }).disabled).toBe(false);
+    expect(screen.getByLabelText("Restore backup file").disabled).toBe(false);
   });
 
   it.each(["Start blank", "Use A-Level example set", "Use GCSE core subjects"])(
@@ -61,6 +116,7 @@ describe("first-run onboarding", () => {
       const user = userEvent.setup();
       const first = renderApp({ onboarded: false });
       await user.click(screen.getByRole("button", { name: new RegExp(name) }));
+      await screen.findByRole("button", { name: "Planner" });
       first.unmount();
 
       renderApp({ onboarded: false });
