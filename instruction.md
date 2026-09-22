@@ -42,6 +42,13 @@ This file documents the app structure so future changes stay consistent.
 - `src/utils/catalogue.js`: `listSpecs(filters)` searches the index; `loadSpec(id)` loads a spec lazily (each file is its own chunk via `import.meta.glob`, so the main bundle carries only the index); `subjectFromSpec(spec, { tier, optionIds, color, id })` returns a normalized subject; `subjectsForTemplate(templateId)` (async) builds any onboarding template; `validateSpec`/`validateCatalogue` are the schema checks run by `catalogue.test.js`.
 - The workbox `globPatterns` in `vite.config.js` must keep precaching the spec chunks so catalogue-backed templates work offline.
 
+## Authoring specs
+
+- `npm run draft-spec -- <pdf path or https URL> --board <Board> --spec <code> --qualification gcse|alevel|as --subject "<Subject>"` writes a draft to `drafts/<id>.json` (gitignored). It is dev-only and never writes into `src/data/specs/`.
+  - `--depth 2|3|leaf` picks the heading level (`leaf` keeps the deepest heading on each branch, for mixed-depth specs such as AQA GCSE Maths); `--layout stacked` reads Pearson's number-on-its-own-line tables; `--sections 4,5,6` keeps only those chapters; `--tiered` marks a GCSE as foundation/higher; `--dump-text` also writes the extracted text to `drafts/<id>.txt`.
+  - Parsing is pure and tested in `scripts/lib/specDraft.js`; the CLI (`scripts/draft-spec.js`) only reads the PDF with pdf.js and writes files.
+- A draft deliberately fails `validateSpec` (`paper: "TODO"`, `firstExam: null`, `specVersion: "TODO"`). To finish one: check every heading against the PDF and drop non-topic ones; rephrase any heading that reads like spec prose; assign `paper` (one id or a list), `higherOnly` and option groups; fill `specVersion`, `firstExam` and `specUrl`; delete the `_source` fields; then move the file into `src/data/specs/` and run `npm test`.
+
 ## Customization rules
 
 - Any subject can be edited or deleted from Settings, including the example subjects.
