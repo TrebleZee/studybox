@@ -124,6 +124,18 @@ describe("inferSpecCode", () => {
     });
   });
 
+  it("picks the code matching the cover's level on joint AS and A-level covers", () => {
+    const aqaJoint = `AS AND A-LEVEL PHYSICS (7407, 7408) Specification. AQA AS and A-level Physics 7407 7408`;
+    expect(inferSpecCode(aqaJoint)).toEqual({ board: "AQA", spec: "7408" });
+    expect(inferQualification(aqaJoint)).toBe("alevel");
+
+    const aqaAsOnly = `AS PHYSICS (7407) Specification. AQA AS Physics 7407, see also A-level 7408 later`;
+    expect(inferSpecCode(aqaAsOnly)).toEqual({ board: "AQA", spec: "7407" });
+
+    const edexcelJoint = `Pearson Edexcel Level 3 Advanced GCE in Further Mathematics (9FM0) and Advanced Subsidiary (8FM0)`;
+    expect(inferSpecCode(edexcelJoint)).toEqual({ board: "Edexcel", spec: "9FM0" });
+  });
+
   it("prefers the cover code over a code mentioned later (e.g. a related spec)", () => {
     const text = `${COVERS["AQA 8464"]}\n${"filler text ".repeat(500)}\nSee also AQA GCSE Biology (8461) and AQA GCSE Biology 8461.`;
     expect(inferSpecCode(text)).toEqual({ board: "AQA", spec: "8464" });

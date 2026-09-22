@@ -54,6 +54,27 @@ describe("AddSubjectCard spec import", () => {
     expect(subject.topics.every((topic) => !topic.catalogueTopicId)).toBe(true);
   });
 
+  it("drops the catalogue topics once the board is changed away from the matched spec", async () => {
+    await upload("aqa-maths.pdf");
+    expect(screen.getByRole("radio", { name: /Use StudyBox's topic list/ })).toBeTruthy();
+
+    await user.selectOptions(screen.getByLabelText("Exam board"), "Edexcel");
+    expect(screen.queryByRole("radio")).toBeNull();
+    await user.click(screen.getByLabelText("Create subject"));
+
+    const subject = onAddSubject.mock.calls[0][0];
+    expect(subject.board).toBe("Edexcel");
+    expect(subject.topics.some((topic) => typeof topic === "object" && topic.catalogueTopicId)).toBe(false);
+  });
+
+  it("keeps the catalogue topics while the spec code is only re-cased", async () => {
+    await upload("aqa-maths.pdf");
+    const code = screen.getByLabelText("Spec code");
+    await user.clear(code);
+    await user.type(code, " 8300 ");
+    expect(screen.getByRole("radio", { name: /Use StudyBox's topic list/ }).checked).toBe(true);
+  });
+
   it("does not carry a previous match's spec code onto a Custom subject", async () => {
     await upload("aqa-maths.pdf");
     await upload("sqa-history.pdf");

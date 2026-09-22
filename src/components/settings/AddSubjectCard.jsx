@@ -30,7 +30,15 @@ export default function AddSubjectCard({ C, onAddSubject }) {
   const [catalogueMatch, setCatalogueMatch] = useState(null);
   const [topicSource, setTopicSource] = useState("catalogue");
 
-  const useCatalogueTopics = catalogueMatch && topicSource === "catalogue";
+  // The match only applies while the form still names the matched spec: if
+  // the user re-points board or spec code, the catalogue list (and its
+  // catalogueTopicIds) would belong to a different spec, so fall back to the
+  // topics read from the PDF.
+  const matchApplies =
+    Boolean(catalogueMatch) &&
+    subjectMeta.board === catalogueMatch.subject.board &&
+    (subjectMeta.spec || "").trim().toUpperCase() === catalogueMatch.subject.spec;
+  const useCatalogueTopics = matchApplies && topicSource === "catalogue";
 
   const resetImport = () => {
     setSpecFileName("");
@@ -273,7 +281,7 @@ export default function AddSubjectCard({ C, onAddSubject }) {
         {!specImporting && specFileName && !specError && (
           <div style={{ marginTop: "8px", fontSize: "11px", color: C.txt }}>
             Loaded {specFileName}.
-            {catalogueMatch && (
+            {matchApplies && (
               <fieldset
                 style={{ marginTop: "8px", border: "none", padding: 0, display: "grid", gap: "6px" }}
               >

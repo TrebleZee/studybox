@@ -301,9 +301,38 @@ export function inferSpecCode(text = "", fileName = "") {
     }
   });
 
-  const best = [...scores.values()].sort((a, b) => b.score - a.score || a.first - b.first)[0];
+  // Joint covers list several codes (AQA "AS and A-level Physics (7407,
+  // 7408)", Edexcel 8FM0 + 9FM0). Codes whose level matches the cover win.
+  const qualification = inferQualification(text, fileName);
+  const candidates = [...scores.values()].map((candidate) => ({
+    ...candidate,
+    score: candidate.score + (levelMatches(codeLevel(candidate), qualification) ? 2 : 0),
+  }));
+  const best = candidates.sort(
+    (a, b) => b.score - a.score || aqaJointTieBreak(a, b, qualification) || a.first - b.first
+  )[0];
   return best ? { board: best.board, spec: best.spec } : null;
 }
+
+// The level a code's shape implies: "gcse", "as", "alevel", "advanced" (AQA
+// 7xxx, which is used for both AS and A-level) or null.
+const codeLevel = ({ board, spec }) => {
+  if (board === "AQA") return spec.startsWith("8") ? "gcse" : "advanced";
+  if (board === "OCR") return spec.startsWith("J") ? "gcse" : spec[1] === "1" ? "as" : "alevel";
+  return { 1: "gcse", 8: "as", 9: "alevel" }[spec[0]] || null;
+};
+
+const levelMatches = (level, qualification) =>
+  Boolean(level && qualification) &&
+  (level === qualification || (level === "advanced" && qualification !== "gcse"));
+
+// AQA numbers an A-level straight after its AS (7407 AS, 7408 A-level), so on
+// a joint cover the higher code is the A-level one.
+const aqaJointTieBreak = (a, b, qualification) => {
+  if (a.board !== "AQA" || b.board !== "AQA" || !["alevel", "as"].includes(qualification)) return 0;
+  const diff = Number(b.spec) - Number(a.spec);
+  return qualification === "alevel" ? diff : -diff;
+};
 
 // "gcse", "alevel" or "as" from the cover pages, or null if unclear. A joint
 // "AS and A-level" spec counts as A-level.
