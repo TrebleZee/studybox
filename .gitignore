@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Catalogue authoring drafts (scripts/draft-spec.js)
+drafts/

@@ -9,6 +9,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "pretest": "node scripts/build-spec-index.js",
+    "draft-spec": "node scripts/draft-spec.js",
     "test": "vitest run",
     "preview": "vite preview"
   },

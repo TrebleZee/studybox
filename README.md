@@ -90,6 +90,8 @@ npm run preview
 
 Spec files live in `src/data/specs/` (one `<board>-<spec>.json` per specification). `src/data/specs/index.json` is generated from them by `scripts/build-spec-index.js`, which runs automatically before `npm run build` and `npm test`, so don't edit it by hand.
 
+To start a new spec file, run `npm run draft-spec -- <spec PDF path or URL> --board AQA --spec 8461 --qualification gcse --subject Biology`. It writes a draft to `drafts/` (not committed) that you then check against the PDF and finish by hand. See "Authoring specs" in `instruction.md`.
+
 ### Lint and test
 
 ```bash
@@ -114,7 +116,7 @@ StudyBox includes PWA support through `vite-plugin-pwa`. On a supported browser,
 - `src/hooks/useTimer.js` - timestamp-anchored study timer
 - `src/utils/` - formatting, storage, subject normalisation, spec catalogue, streak/XP logic, backup and themes
 - `src/data/specs/` - the spec catalogue (one JSON file per specification plus a generated search index)
-- `scripts/` - dev scripts (`build-spec-index.js`)
+- `scripts/` - dev scripts (`build-spec-index.js`, `draft-spec.js` with its pure parser in `scripts/lib/`)
 - `src/services/asanaClient.js` - optional Asana API client
 - `public/` - icons and favicon assets
 
