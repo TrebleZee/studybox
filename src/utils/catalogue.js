@@ -148,7 +148,7 @@ export const listSpecs = (filters = {}, index = specIndex) =>
   );
 
 export const loadSpec = async (id) => {
-  const loader = SPEC_LOADERS[id];
+  const loader = Object.hasOwn(SPEC_LOADERS, id) ? SPEC_LOADERS[id] : null;
   return loader ? loader() : null;
 };
 

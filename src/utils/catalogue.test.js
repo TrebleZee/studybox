@@ -182,6 +182,13 @@ describe("loadSpec", () => {
     expect(await loadSpec("nope-0000")).toBeNull();
     expect(await loadSpec("index")).toBeNull();
   });
+
+  it.each(["constructor", "toString", "hasOwnProperty", "__proto__"])(
+    "returns null for the inherited object key %s",
+    async (id) => {
+      expect(await loadSpec(id)).toBeNull();
+    }
+  );
 });
 
 describe("topicPapers", () => {
