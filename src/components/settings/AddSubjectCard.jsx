@@ -102,14 +102,16 @@ export default function AddSubjectCard({ C, onAddSubject }) {
 
       setSubjectName(draft.subjectName);
       // Unrecognised boards (e.g. SQA) stay Custom with the inferred name as the label.
+      // Start from empty meta so nothing from an earlier upload (e.g. a
+      // catalogue match's spec name) leaks into this subject.
       const board = draft.specCode?.board || boardFromText(draft.examBoard);
-      setSubjectMeta((prev) => ({
-        ...prev,
+      setSubjectMeta({
+        ...EMPTY_META,
         board,
         exam: draft.examBoard === "Custom" ? "" : draft.examBoard,
         ...(board !== "Custom" && draft.qualification ? { qualification: draft.qualification } : {}),
         ...(draft.specCode ? { spec: draft.specCode.spec } : {}),
-      }));
+      });
     } catch (error) {
       setSpecError(error instanceof Error ? error.message : "Unable to read PDF spec.");
     } finally {
