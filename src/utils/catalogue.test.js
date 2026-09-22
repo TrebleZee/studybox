@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import specIndex from "../data/specs/index.json";
 import {
+  findSpec,
   listSpecs,
   loadSpec,
   subjectFromSpec,
@@ -198,6 +199,23 @@ describe("listSpecs", () => {
     ];
     expect(listSpecs({}, index).map((s) => s.id)).toEqual(["aqa-2"]);
     expect(listSpecs({ includeDeprecated: true }, index).map((s) => s.id)).toEqual(["aqa-1", "aqa-2"]);
+  });
+});
+
+describe("findSpec", () => {
+  it("matches a board and code case-insensitively, else null", () => {
+    expect(findSpec("AQA", "8300")?.id).toBe("aqa-8300");
+    expect(findSpec("OCR", "h556")?.id).toBe("ocr-h556");
+    expect(findSpec("Edexcel", "1MA1")?.id).toBe("edexcel-1ma1");
+    expect(findSpec("OCR", "J277")).toBeNull();
+    expect(findSpec("AQA", "H556")).toBeNull();
+    expect(findSpec(null, "8300")).toBeNull();
+    expect(findSpec("AQA", undefined)).toBeNull();
+  });
+
+  it("still finds a deprecated spec, so an old PDF matches its old spec", () => {
+    const index = [{ id: "aqa-1234", board: "AQA", spec: "1234", deprecated: true }];
+    expect(findSpec("AQA", "1234", index)).toEqual(index[0]);
   });
 });
 

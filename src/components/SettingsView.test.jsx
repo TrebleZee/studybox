@@ -64,6 +64,8 @@ describe("Settings", () => {
     expect(screen.getByDisplayValue("AQA")).toBeTruthy();
     expect(screen.getByText("Ancient Art")).toBeTruthy();
     expect(screen.getByText("5 topics found")).toBeTruthy();
+    // No spec code, so no catalogue match: the pre-catalogue flow is unchanged.
+    expect(screen.queryByRole("radio")).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Create subject" }));
     await goTo(user, "Planner");
@@ -71,6 +73,86 @@ describe("Settings", () => {
     expect(screen.getByText("Ancient Art")).toBeTruthy();
     const stored = JSON.parse(localStorage.getItem("sb-subjects")).find((s) => s.name === "Art History");
     expect(stored).toMatchObject({ board: "AQA", exam: "AQA", spec: null, tier: null });
+  });
+
+  describe("spec PDF matching the catalogue", () => {
+    const AQA_MATHS = `GCSE MATHEMATICS (8300) Specification For teaching from September 2015 onwards
+      Visit aqa.org.uk/8300 for the most up-to-date specifications
+      Why choose AQA for GCSE Mathematics
+      3.1 Number 3.2 Algebra`;
+
+    const uploadSpec = async (user, text, name = "spec.pdf") => {
+      extractPdfText.mockResolvedValueOnce(text);
+      renderApp();
+      await goTo(user, "Settings");
+      await user.upload(
+        screen.getByLabelText("Import subject specification PDF"),
+        new File(["spec"], name, { type: "application/pdf" })
+      );
+    };
+
+    it("offers StudyBox's topic list by default and seeds catalogue topics", async () => {
+      const user = userEvent.setup();
+      await uploadSpec(user, AQA_MATHS);
+
+      const catalogueOption = await screen.findByRole("radio", {
+        name: /Use StudyBox's topic list for AQA GCSE Mathematics \(13 topics\)/,
+      });
+      expect(catalogueOption.checked).toBe(true);
+      expect(screen.getByRole("radio", { name: /Use topics read from the PDF \(2 topics\)/ }).checked).toBe(false);
+      expect(screen.getByDisplayValue("Mathematics")).toBeTruthy();
+      expect(screen.getByText("13 topics from StudyBox's catalogue")).toBeTruthy();
+      expect(screen.getByText("Structure and calculation")).toBeTruthy();
+
+      await user.click(screen.getByRole("button", { name: "Create subject" }));
+      const stored = JSON.parse(localStorage.getItem("sb-subjects")).find((s) => s.name === "Mathematics");
+      expect(stored).toMatchObject({ qualification: "gcse", board: "AQA", spec: "8300", specName: "Mathematics" });
+      expect(stored.topics).toHaveLength(13);
+      expect(stored.topics[0]).toMatchObject({ name: "Structure and calculation", catalogueTopicId: "aqa-8300-t01" });
+      expect(stored.topics.every((t) => t.catalogueTopicId && !t.done)).toBe(true);
+    });
+
+    it("can use the topics read from the PDF instead", async () => {
+      const user = userEvent.setup();
+      await uploadSpec(user, AQA_MATHS);
+
+      await user.click(await screen.findByRole("radio", { name: /Use topics read from the PDF/ }));
+      expect(screen.getByText("2 topics found")).toBeTruthy();
+      expect(screen.queryByText("Structure and calculation")).toBeNull();
+
+      await user.click(screen.getByRole("button", { name: "Create subject" }));
+      const stored = JSON.parse(localStorage.getItem("sb-subjects")).find((s) => s.name === "Mathematics");
+      expect(stored.topics.map((t) => t.name)).toEqual(["Number", "Algebra"]);
+      expect(stored.topics.some((t) => "catalogueTopicId" in t)).toBe(false);
+      expect(stored).toMatchObject({ board: "AQA", spec: "8300", qualification: "gcse" });
+    });
+
+    it("notes that set texts aren't included for specs with option groups", async () => {
+      const user = userEvent.setup();
+      await uploadSpec(
+        user,
+        `GCSE ENGLISH LITERATURE (8702) Specification. Why choose AQA for GCSE English Literature
+         3.1 Shakespeare and the 19th-century novel`
+      );
+      expect(await screen.findByText(/Set texts and optional papers aren't included/)).toBeTruthy();
+    });
+
+    it("prefills board, spec and qualification for a code the catalogue doesn't have", async () => {
+      const user = userEvent.setup();
+      await uploadSpec(
+        user,
+        `Qualification Accredited GCSE (9–1) Specification Computer Science J277 For first assessment in 2022
+         OCR is part of Cambridge University Press & Assessment
+         1.1 Systems architecture 1.2 Memory and storage`
+      );
+
+      expect(await screen.findByText("2 topics found")).toBeTruthy();
+      expect(screen.queryByRole("radio")).toBeNull();
+      await user.click(screen.getByRole("button", { name: "Create subject" }));
+      const stored = JSON.parse(localStorage.getItem("sb-subjects")).find((s) => s.spec === "J277");
+      expect(stored).toMatchObject({ board: "OCR", spec: "J277", qualification: "gcse", exam: "OCR" });
+      expect(stored.topics.map((t) => t.name)).toEqual(["Systems Architecture", "Memory and Storage"]);
+    });
   });
 
   describe("backup and restore", () => {

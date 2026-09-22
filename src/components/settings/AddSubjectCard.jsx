@@ -1,6 +1,12 @@
 import { useState } from "react";
+import { findSpec, loadSpec, subjectFromSpec } from "../../utils/catalogue.js";
 import { extractPdfText, generateSubjectDraftFromPdfText } from "../../utils/specImport.js";
-import { boardFromText, normalizeSubject, SUBJECT_PRESETS } from "../../utils/subjects.js";
+import {
+  boardFromText,
+  normalizeSubject,
+  subjectLabel,
+  SUBJECT_PRESETS,
+} from "../../utils/subjects.js";
 import SubjectMetaFields from "./SubjectMetaFields.jsx";
 
 const EMPTY_META = { qualification: "other", board: "Custom", tier: null, spec: "", exam: "" };
@@ -18,6 +24,29 @@ export default function AddSubjectCard({ C, onAddSubject }) {
   const [specImporting, setSpecImporting] = useState(false);
   const [specError, setSpecError] = useState("");
   const [specTopics, setSpecTopics] = useState([]);
+  // Set when the PDF's spec code is in the catalogue: { subject, optionCount }
+  // where subject is built by subjectFromSpec. topicSource picks which list
+  // the new subject gets.
+  const [catalogueMatch, setCatalogueMatch] = useState(null);
+  const [topicSource, setTopicSource] = useState("catalogue");
+
+  // The match only applies while the form still names the matched spec: if
+  // the user re-points board or spec code, the catalogue list (and its
+  // catalogueTopicIds) would belong to a different spec, so fall back to the
+  // topics read from the PDF.
+  const matchApplies =
+    Boolean(catalogueMatch) &&
+    subjectMeta.board === catalogueMatch.subject.board &&
+    (subjectMeta.spec || "").trim().toUpperCase() === catalogueMatch.subject.spec;
+  const useCatalogueTopics = matchApplies && topicSource === "catalogue";
+
+  const resetImport = () => {
+    setSpecFileName("");
+    setSpecError("");
+    setSpecTopics([]);
+    setCatalogueMatch(null);
+    setTopicSource("catalogue");
+  };
 
   const addSubject = () => {
     const cleanName = subjectName.trim();
@@ -27,37 +56,73 @@ export default function AddSubjectCard({ C, onAddSubject }) {
       ...subjectMeta,
       name: cleanName,
       spec: subjectMeta.spec.trim() || null,
+      // A matched spec's name only belongs to that spec: once the user
+      // re-points board or code, drop it rather than mislabel the subject.
+      specName: matchApplies ? catalogueMatch.subject.specName : catalogueMatch ? null : subjectMeta.specName,
       exam: subjectMeta.exam.trim() || "Custom",
       color: subjectColor,
-      topics: specTopics,
+      topics: useCatalogueTopics
+        ? catalogueMatch.subject.topics.map(({ name, catalogueTopicId }) => ({ name, catalogueTopicId }))
+        : specTopics,
     });
     setSubjectName("");
     setSubjectMeta(EMPTY_META);
     setSubjectColor("#4F9CF9");
-    setSpecFileName("");
-    setSpecError("");
-    setSpecTopics([]);
+    resetImport();
+  };
+
+  // A catalogue spec for the PDF's code, or null. A failed load (e.g. offline
+  // before the chunk was cached) just falls back to the PDF's own topics.
+  const catalogueSpecFor = async (specCode) => {
+    const entry = specCode && findSpec(specCode.board, specCode.spec);
+    if (!entry) return null;
+    try {
+      return await loadSpec(entry.id);
+    } catch {
+      return null;
+    }
   };
 
   const handleSpecUpload = async (file) => {
     if (!file) return;
 
     setSpecImporting(true);
-    setSpecError("");
+    resetImport();
     setSpecFileName(file.name);
 
     try {
       const text = await extractPdfText(file);
       const draft = generateSubjectDraftFromPdfText(text, file.name);
+      const spec = await catalogueSpecFor(draft.specCode);
+      setSpecTopics(draft.topics || []);
+
+      if (spec) {
+        const subject = subjectFromSpec(spec);
+        setCatalogueMatch({ subject, optionCount: spec.optionGroups.length });
+        setSubjectName(subject.name);
+        setSubjectMeta({
+          qualification: subject.qualification,
+          board: subject.board,
+          tier: null,
+          spec: subject.spec,
+          specName: subject.specName,
+          exam: "",
+        });
+        return;
+      }
 
       setSubjectName(draft.subjectName);
       // Unrecognised boards (e.g. SQA) stay Custom with the inferred name as the label.
-      setSubjectMeta((prev) => ({
-        ...prev,
-        board: boardFromText(draft.examBoard),
+      // Start from empty meta so nothing from an earlier upload (e.g. a
+      // catalogue match's spec name) leaks into this subject.
+      const board = draft.specCode?.board || boardFromText(draft.examBoard);
+      setSubjectMeta({
+        ...EMPTY_META,
+        board,
         exam: draft.examBoard === "Custom" ? "" : draft.examBoard,
-      }));
-      setSpecTopics(draft.topics || []);
+        ...(board !== "Custom" && draft.qualification ? { qualification: draft.qualification } : {}),
+        ...(draft.specCode ? { spec: draft.specCode.spec } : {}),
+      });
     } catch (error) {
       setSpecError(error instanceof Error ? error.message : "Unable to read PDF spec.");
     } finally {
@@ -65,11 +130,10 @@ export default function AddSubjectCard({ C, onAddSubject }) {
     }
   };
 
-  const clearSpecImport = () => {
-    setSpecFileName("");
-    setSpecError("");
-    setSpecTopics([]);
-  };
+  const clearSpecImport = resetImport;
+  const shownTopics = useCatalogueTopics
+    ? catalogueMatch.subject.topics.map((topic) => topic.name)
+    : specTopics;
 
   return (
     <div
@@ -220,13 +284,50 @@ export default function AddSubjectCard({ C, onAddSubject }) {
         {!specImporting && specFileName && !specError && (
           <div style={{ marginTop: "8px", fontSize: "11px", color: C.txt }}>
             Loaded {specFileName}.
-            {specTopics.length > 0 && (
+            {matchApplies && (
+              <fieldset
+                style={{ marginTop: "8px", border: "none", padding: 0, display: "grid", gap: "6px" }}
+              >
+                <legend style={{ fontSize: "11px", color: C.txt, marginBottom: "4px", padding: 0 }}>
+                  This is {subjectLabel(catalogueMatch.subject)}, which StudyBox already knows.
+                </legend>
+                <label style={{ display: "flex", gap: "6px", alignItems: "flex-start", cursor: "pointer" }}>
+                  <input
+                    type="radio"
+                    name="spec-topic-source"
+                    checked={topicSource === "catalogue"}
+                    onChange={() => setTopicSource("catalogue")}
+                  />
+                  <span>
+                    Use StudyBox&apos;s topic list for {subjectLabel(catalogueMatch.subject)} (
+                    {catalogueMatch.subject.topics.length} topics)
+                  </span>
+                </label>
+                <label style={{ display: "flex", gap: "6px", alignItems: "flex-start", cursor: "pointer" }}>
+                  <input
+                    type="radio"
+                    name="spec-topic-source"
+                    checked={topicSource === "pdf"}
+                    onChange={() => setTopicSource("pdf")}
+                  />
+                  <span>Use topics read from the PDF ({specTopics.length} topics)</span>
+                </label>
+                {useCatalogueTopics && catalogueMatch.optionCount > 0 && (
+                  <div style={{ fontSize: "10px", color: C.muted, lineHeight: 1.5 }}>
+                    Set texts and optional papers aren&apos;t included. Add the ones you study as
+                    topics after creating the subject.
+                  </div>
+                )}
+              </fieldset>
+            )}
+            {shownTopics.length > 0 && (
               <>
                 <div style={{ marginTop: "6px", fontSize: "10px", color: C.muted }}>
-                  {specTopics.length} topic{specTopics.length === 1 ? "" : "s"} found
+                  {shownTopics.length} topic{shownTopics.length === 1 ? "" : "s"}{" "}
+                  {useCatalogueTopics ? "from StudyBox's catalogue" : "found"}
                 </div>
                 <div style={{ marginTop: "4px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                {specTopics.map((topic, idx) => (
+                {shownTopics.map((topic, idx) => (
                   <span
                     key={idx}
                     style={{

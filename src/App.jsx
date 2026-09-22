@@ -275,9 +275,10 @@ export default function StudyBox() {
       normalizeSubject({
         ...fields,
         id,
+        // Topics are names, or { name, catalogueTopicId } when seeded from the catalogue.
         topics: topics.map((topic, i) => ({
+          ...(typeof topic === "string" ? { name: topic } : topic),
           id: `${id}-topic-${i}`,
-          name: topic,
           done: false,
           subtasks: [],
         })),
