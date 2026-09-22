@@ -1,0 +1,309 @@
+{
+  "id": "ocr-j352",
+  "qualification": "gcse",
+  "board": "OCR",
+  "spec": "J352",
+  "subject": "English Literature",
+  "specName": "English Literature",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/168995-specification-accredited-gcse-english-literature-j352.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Exploring modern and literary heritage texts"
+    },
+    {
+      "id": "p2",
+      "name": "Exploring poetry and Shakespeare"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-j352-t01",
+      "name": "Unseen poetry",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t02",
+      "name": "Modern text: Anita and Me",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t03",
+      "name": "Modern text: Never Let Me Go",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t04",
+      "name": "Modern text: Animal Farm",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t05",
+      "name": "Modern text: An Inspector Calls",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t06",
+      "name": "Modern text: DNA",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t07",
+      "name": "Modern text: Leave Taking",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t08",
+      "name": "19th-century prose: Great Expectations",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t09",
+      "name": "19th-century prose: Pride and Prejudice",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t10",
+      "name": "19th-century prose: The War of the Worlds",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t11",
+      "name": "19th-century prose: The Strange Case of Dr Jekyll and Mr Hyde",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t12",
+      "name": "19th-century prose: Jane Eyre",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t13",
+      "name": "19th-century prose: A Christmas Carol",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t14",
+      "name": "Poetry anthology: Love and Relationships",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t15",
+      "name": "Poetry anthology: Conflict",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t16",
+      "name": "Poetry anthology: Youth and Age",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t17",
+      "name": "Shakespeare: Romeo and Juliet",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t18",
+      "name": "Shakespeare: The Merchant of Venice",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t19",
+      "name": "Shakespeare: Macbeth",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j352-t20",
+      "name": "Shakespeare: Much Ado About Nothing",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "modern",
+      "name": "Modern prose or drama",
+      "pick": 1,
+      "options": [
+        {
+          "id": "anita-and-me",
+          "name": "Anita and Me",
+          "topicIds": [
+            "ocr-j352-t02"
+          ]
+        },
+        {
+          "id": "never-let-me-go",
+          "name": "Never Let Me Go",
+          "topicIds": [
+            "ocr-j352-t03"
+          ]
+        },
+        {
+          "id": "animal-farm",
+          "name": "Animal Farm",
+          "topicIds": [
+            "ocr-j352-t04"
+          ]
+        },
+        {
+          "id": "inspector-calls",
+          "name": "An Inspector Calls",
+          "topicIds": [
+            "ocr-j352-t05"
+          ]
+        },
+        {
+          "id": "dna",
+          "name": "DNA",
+          "topicIds": [
+            "ocr-j352-t06"
+          ]
+        },
+        {
+          "id": "leave-taking",
+          "name": "Leave Taking",
+          "topicIds": [
+            "ocr-j352-t07"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prose-19th",
+      "name": "19th-century prose",
+      "pick": 1,
+      "options": [
+        {
+          "id": "great-expectations",
+          "name": "Great Expectations",
+          "topicIds": [
+            "ocr-j352-t08"
+          ]
+        },
+        {
+          "id": "pride-and-prejudice",
+          "name": "Pride and Prejudice",
+          "topicIds": [
+            "ocr-j352-t09"
+          ]
+        },
+        {
+          "id": "war-of-the-worlds",
+          "name": "The War of the Worlds",
+          "topicIds": [
+            "ocr-j352-t10"
+          ]
+        },
+        {
+          "id": "jekyll-and-hyde",
+          "name": "The Strange Case of Dr Jekyll and Mr Hyde",
+          "topicIds": [
+            "ocr-j352-t11"
+          ]
+        },
+        {
+          "id": "jane-eyre",
+          "name": "Jane Eyre",
+          "topicIds": [
+            "ocr-j352-t12"
+          ]
+        },
+        {
+          "id": "christmas-carol",
+          "name": "A Christmas Carol",
+          "topicIds": [
+            "ocr-j352-t13"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poetry",
+      "name": "Poetry anthology cluster",
+      "pick": 1,
+      "options": [
+        {
+          "id": "love-and-relationships",
+          "name": "Love and Relationships",
+          "topicIds": [
+            "ocr-j352-t14"
+          ]
+        },
+        {
+          "id": "conflict",
+          "name": "Conflict",
+          "topicIds": [
+            "ocr-j352-t15"
+          ]
+        },
+        {
+          "id": "youth-and-age",
+          "name": "Youth and Age",
+          "topicIds": [
+            "ocr-j352-t16"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shakespeare",
+      "name": "Shakespeare play",
+      "pick": 1,
+      "options": [
+        {
+          "id": "romeo-and-juliet",
+          "name": "Romeo and Juliet",
+          "topicIds": [
+            "ocr-j352-t17"
+          ]
+        },
+        {
+          "id": "merchant-of-venice",
+          "name": "The Merchant of Venice",
+          "topicIds": [
+            "ocr-j352-t18"
+          ]
+        },
+        {
+          "id": "macbeth",
+          "name": "Macbeth",
+          "topicIds": [
+            "ocr-j352-t19"
+          ]
+        },
+        {
+          "id": "much-ado",
+          "name": "Much Ado About Nothing",
+          "topicIds": [
+            "ocr-j352-t20"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

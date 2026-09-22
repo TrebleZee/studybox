@@ -32,6 +32,38 @@
     "specName": "English Literature"
   },
   {
+    "id": "edexcel-1en0",
+    "qualification": "gcse",
+    "board": "Edexcel",
+    "spec": "1EN0",
+    "subject": "English Language",
+    "specName": "English Language"
+  },
+  {
+    "id": "edexcel-1et0",
+    "qualification": "gcse",
+    "board": "Edexcel",
+    "spec": "1ET0",
+    "subject": "English Literature",
+    "specName": "English Literature"
+  },
+  {
+    "id": "edexcel-1ma1",
+    "qualification": "gcse",
+    "board": "Edexcel",
+    "spec": "1MA1",
+    "subject": "Mathematics",
+    "specName": "Mathematics"
+  },
+  {
+    "id": "edexcel-1sc0",
+    "qualification": "gcse",
+    "board": "Edexcel",
+    "spec": "1SC0",
+    "subject": "Combined Science",
+    "specName": "Combined Science"
+  },
+  {
     "id": "edexcel-9fm0",
     "qualification": "alevel",
     "board": "Edexcel",
@@ -62,5 +94,45 @@
     "spec": "H556",
     "subject": "Physics",
     "specName": "Physics A"
+  },
+  {
+    "id": "ocr-j250",
+    "qualification": "gcse",
+    "board": "OCR",
+    "spec": "J250",
+    "subject": "Combined Science",
+    "specName": "Combined Science A (Gateway)"
+  },
+  {
+    "id": "ocr-j260",
+    "qualification": "gcse",
+    "board": "OCR",
+    "spec": "J260",
+    "subject": "Combined Science",
+    "specName": "Combined Science B (Twenty First Century)"
+  },
+  {
+    "id": "ocr-j351",
+    "qualification": "gcse",
+    "board": "OCR",
+    "spec": "J351",
+    "subject": "English Language",
+    "specName": "English Language"
+  },
+  {
+    "id": "ocr-j352",
+    "qualification": "gcse",
+    "board": "OCR",
+    "spec": "J352",
+    "subject": "English Literature",
+    "specName": "English Literature"
+  },
+  {
+    "id": "ocr-j560",
+    "qualification": "gcse",
+    "board": "OCR",
+    "spec": "J560",
+    "subject": "Mathematics",
+    "specName": "Mathematics"
   }
 ]

@@ -1,0 +1,164 @@
+{
+  "id": "edexcel-1ma1",
+  "qualification": "gcse",
+  "board": "Edexcel",
+  "spec": "1MA1",
+  "subject": "Mathematics",
+  "specName": "Mathematics",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/GCSE/mathematics/2015/specification-and-sample-assesment/gcse-maths-2015-specification.pdf",
+  "tiers": [
+    "foundation",
+    "higher"
+  ],
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1 (non-calculator)"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2 (calculator)"
+    },
+    {
+      "id": "p3",
+      "name": "Paper 3 (calculator)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-1ma1-t01",
+      "name": "Structure and calculation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t02",
+      "name": "Fractions, decimals and percentages",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t03",
+      "name": "Measures and accuracy",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t04",
+      "name": "Algebraic notation, vocabulary and manipulation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t05",
+      "name": "Graphs",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t06",
+      "name": "Solving equations and inequalities",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t07",
+      "name": "Sequences",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t08",
+      "name": "Ratio, proportion and rates of change",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t09",
+      "name": "Properties and constructions",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t10",
+      "name": "Mensuration and calculation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t11",
+      "name": "Vectors",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t12",
+      "name": "Probability",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t13",
+      "name": "Statistics",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

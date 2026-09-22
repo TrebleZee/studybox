@@ -1,0 +1,211 @@
+{
+  "id": "ocr-j260",
+  "qualification": "gcse",
+  "board": "OCR",
+  "spec": "J260",
+  "subject": "Combined Science",
+  "specName": "Combined Science B (Twenty First Century)",
+  "specVersion": "2016",
+  "firstExam": 2018,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/234597-specification-accredited-gcse-twenty-first-century-science-suite-combined-science-b-j260.pdf",
+  "tiers": [
+    "foundation",
+    "higher"
+  ],
+  "papers": [
+    {
+      "id": "bio",
+      "name": "Biology (Paper 1 or 5)"
+    },
+    {
+      "id": "chem",
+      "name": "Chemistry (Paper 2 or 6)"
+    },
+    {
+      "id": "phys",
+      "name": "Physics (Paper 3 or 7)"
+    },
+    {
+      "id": "all",
+      "name": "Combined science (Paper 4 or 8)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-j260-t01",
+      "name": "You and your genes",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t02",
+      "name": "Keeping healthy",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t03",
+      "name": "Living together: food and ecosystems",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t04",
+      "name": "Using food and controlling growth",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t05",
+      "name": "The human body: staying alive",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t06",
+      "name": "Life on Earth: past, present and future",
+      "paper": [
+        "bio",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t07",
+      "name": "Air and water",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t08",
+      "name": "Chemical patterns",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t09",
+      "name": "Chemicals of the natural environment",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t10",
+      "name": "Material choices",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t11",
+      "name": "Chemical analysis",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t12",
+      "name": "Making useful chemicals",
+      "paper": [
+        "chem",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t13",
+      "name": "Radiation and waves",
+      "paper": [
+        "phys",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t14",
+      "name": "Sustainable energy",
+      "paper": [
+        "phys",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t15",
+      "name": "Electric circuits",
+      "paper": [
+        "phys",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t16",
+      "name": "Explaining motion",
+      "paper": [
+        "phys",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t17",
+      "name": "Radioactive materials",
+      "paper": [
+        "phys",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t18",
+      "name": "Matter: models and explanations",
+      "paper": [
+        "phys",
+        "all"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j260-t19",
+      "name": "Ideas about science",
+      "paper": [
+        "bio",
+        "chem",
+        "phys",
+        "all"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

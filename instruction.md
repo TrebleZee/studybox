@@ -32,6 +32,7 @@ This file documents the app structure so future changes stay consistent.
 
 ## Spec catalogue
 
+- Current coverage: GCSE Maths, English Language, English Literature and Combined Science on AQA (8300, 8700, 8702, 8464), Edexcel (1MA1, 1EN0, 1ET0, 1SC0) and OCR (J560, J351, J352, J250, J260), plus A-level OCR H556, H446 and Edexcel 9MA0, 9FM0. When a board sits Foundation and Higher on different paper numbers (OCR J560, J250, J260), one paper entry covers the matching pair (e.g. "Paper 1 or 4") so dates and progress line up across tiers.
 - One file per specification in `src/data/specs/`, named `<board>-<spec>.json` in lowercase (e.g. `ocr-h556.json`); the file name must equal the spec's `id`.
 - Schema: `id`, `qualification` (`gcse`/`alevel`/`as`), `board` (a real entry of `BOARDS`), `spec`, `subject`, `specName` (string or `null`), `specVersion`, `firstExam`, `lastExam` (year or `null`), `specUrl` (the board's spec PDF, https), `tiers` (`null` or a list of `TIERS`, GCSE only), `papers` (`[{ id, name }]`), `topics` (`[{ id, name, paper, higherOnly }]`), `optionGroups` (`[{ id, name, pick, options: [{ id, name, topicIds }] }]`) and `milestones` (`[]` until F6). Optional `deprecated: true` retires a spec.
   - A topic's `paper` is one paper id, or a list of ids when the topic is examined on several papers (e.g. A-level Maths pure content on papers 1 and 2). Use `topicPapers(topic)` to read it.
