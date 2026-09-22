@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { backupFileName, buildBackup, parseBackup } from "./backup.js";
 import { DEFAULT_GAME } from "./gameLogic.js";
-import { defaultSubjects, normalizeSessions } from "./subjects.js";
+import { defaultSubjects, normalizeSessions, normalizeSubjects } from "./subjects.js";
 
 const sampleState = () => {
-  const subjects = defaultSubjects();
+  const subjects = normalizeSubjects(defaultSubjects());
   subjects[0].topics[0].done = true;
   return {
     subjects,
@@ -31,7 +31,7 @@ describe("backup", () => {
     const parsed = JSON.parse(JSON.stringify(buildBackup(state)));
     expect(Object.keys(parsed).sort()).toEqual(["game", "sessions", "subjects", "theme", "version"]);
     expect(parsed.theme).toBe("forest");
-    expect(parsed.version).toBe(1);
+    expect(parsed.version).toBe(2);
   });
 
   it("round-trips through export and import to identical state", () => {
@@ -41,6 +41,45 @@ describe("backup", () => {
     expect(restored.sessions).toEqual(state.sessions);
     expect(restored.themeId).toBe(state.themeId);
     expect(restored.game).toEqual(state.game);
+  });
+
+  it("loads a v1 backup, migrating subjects without losing progress", () => {
+    const v1 = {
+      version: 1,
+      theme: "forest",
+      sessions: [],
+      subjects: [
+        {
+          id: "physics",
+          name: "Physics",
+          exam: "OCR A",
+          color: "#4F9CF9",
+          topics: [{ id: "ph0", name: "Foundations", done: true, subtasks: [] }],
+        },
+        { id: "custom-1", name: "Latin", exam: "My tutor", color: "#ff0000", topics: [] },
+      ],
+    };
+    const restored = parseBackup(JSON.stringify(v1));
+    expect(restored.subjects[0]).toMatchObject({ board: "OCR", spec: "H556", qualification: "alevel" });
+    expect(restored.subjects[0].topics).toEqual(v1.subjects[0].topics);
+    expect(restored.subjects[1]).toMatchObject({ board: "Custom", exam: "My tutor" });
+
+    // Re-exporting the migrated data as v2 and loading it again is lossless.
+    const again = parseBackup(JSON.stringify(buildBackup({ ...restored, game: DEFAULT_GAME })));
+    expect(again.subjects).toEqual(restored.subjects);
+  });
+
+  it("round-trips v2 metadata such as tier and spec code", () => {
+    const subjects = normalizeSubjects([
+      { id: "m", name: "Maths", board: "Edexcel", qualification: "gcse", spec: "1MA1", tier: "higher" },
+    ]);
+    const restored = parseBackup(JSON.stringify(buildBackup({ ...sampleState(), subjects })));
+    expect(restored.subjects).toEqual(subjects);
+    expect(restored.subjects[0]).toMatchObject({ tier: "higher", spec: "1MA1", exam: "Edexcel" });
+  });
+
+  it("refuses a backup from a newer, unknown version rather than dropping its data", () => {
+    expect(() => parseBackup(JSON.stringify({ version: 99, subjects: [] }))).toThrow(/newer version/);
   });
 
   it("rejects malformed JSON with a visible error", () => {

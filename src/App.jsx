@@ -23,8 +23,10 @@ import {
   addUniqueTag,
   isUntouchedDefaultSubjects,
   normalizeSessions,
+  normalizeSubject,
   normalizeSubjects,
   subjectsForTemplate,
+  updateSubjectFields,
 } from "./utils/subjects.js";
 import { THEMES } from "./utils/themes.js";
 
@@ -265,22 +267,20 @@ export default function StudyBox() {
     },
   };
 
-  const addSubject = ({ name, exam, color, topics }) => {
+  const addSubject = ({ topics, ...fields }) => {
     const id = `custom-${Date.now().toString(36)}`;
     setSubjects((prev) => [
       ...prev,
-      {
+      normalizeSubject({
+        ...fields,
         id,
-        name,
-        exam,
-        color,
         topics: topics.map((topic, i) => ({
           id: `${id}-topic-${i}`,
           name: topic,
           done: false,
           subtasks: [],
         })),
-      },
+      }),
     ]);
     setSel(id);
   };
@@ -346,7 +346,7 @@ export default function StudyBox() {
   };
 
   const useTemplate = (templateId) => {
-    const template = subjectsForTemplate(templateId);
+    const template = normalizeSubjects(subjectsForTemplate(templateId));
     setSubjects(template);
     setSel(template[0]?.id ?? null);
     setOnboarded(true);
@@ -453,7 +453,7 @@ export default function StudyBox() {
               subjects={subjects}
               onAddSubject={addSubject}
               onUpdateSubject={(id, patch) =>
-                setSubjects((prev) => mapSubject(prev, id, (s) => ({ ...s, ...patch })))
+                setSubjects((prev) => mapSubject(prev, id, (s) => updateSubjectFields(s, patch)))
               }
               onRemoveSubject={removeSubject}
               asanaCfg={asanaCfg}

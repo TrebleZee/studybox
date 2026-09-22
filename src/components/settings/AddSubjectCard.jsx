@@ -1,10 +1,18 @@
 import { useState } from "react";
-import { extractPdfText, generateSubjectDraftFromPdfText } from "../../specImport.js";
-import { SUBJECT_PRESETS } from "../../utils/subjects.js";
+import { extractPdfText, generateSubjectDraftFromPdfText } from "../../utils/specImport.js";
+import { boardFromText, normalizeSubject, SUBJECT_PRESETS } from "../../utils/subjects.js";
+import SubjectMetaFields from "./SubjectMetaFields.jsx";
+
+const EMPTY_META = { qualification: "other", board: "Custom", tier: null, spec: "", exam: "" };
+
+const presetMeta = (preset) => {
+  const { qualification, board, tier, spec, specName, exam } = normalizeSubject(preset);
+  return { qualification, board, tier, spec: spec || "", specName, exam };
+};
 
 export default function AddSubjectCard({ C, onAddSubject }) {
   const [subjectName, setSubjectName] = useState("");
-  const [subjectExam, setSubjectExam] = useState("");
+  const [subjectMeta, setSubjectMeta] = useState(EMPTY_META);
   const [subjectColor, setSubjectColor] = useState("#4F9CF9");
   const [specFileName, setSpecFileName] = useState("");
   const [specImporting, setSpecImporting] = useState(false);
@@ -16,13 +24,15 @@ export default function AddSubjectCard({ C, onAddSubject }) {
     if (!cleanName) return;
 
     onAddSubject({
+      ...subjectMeta,
       name: cleanName,
-      exam: subjectExam.trim() || "Custom",
+      spec: subjectMeta.spec.trim() || null,
+      exam: subjectMeta.exam.trim() || "Custom",
       color: subjectColor,
       topics: specTopics,
     });
     setSubjectName("");
-    setSubjectExam("");
+    setSubjectMeta(EMPTY_META);
     setSubjectColor("#4F9CF9");
     setSpecFileName("");
     setSpecError("");
@@ -41,7 +51,12 @@ export default function AddSubjectCard({ C, onAddSubject }) {
       const draft = generateSubjectDraftFromPdfText(text, file.name);
 
       setSubjectName(draft.subjectName);
-      setSubjectExam(draft.examBoard);
+      // Unrecognised boards (e.g. SQA) stay Custom with the inferred name as the label.
+      setSubjectMeta((prev) => ({
+        ...prev,
+        board: boardFromText(draft.examBoard),
+        exam: draft.examBoard === "Custom" ? "" : draft.examBoard,
+      }));
       setSpecTopics(draft.topics || []);
     } catch (error) {
       setSpecError(error instanceof Error ? error.message : "Unable to read PDF spec.");
@@ -80,7 +95,7 @@ export default function AddSubjectCard({ C, onAddSubject }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr) 52px auto",
+          gridTemplateColumns: "minmax(0, 1fr) 52px auto",
           gap: "8px",
           alignItems: "center",
         }}
@@ -89,19 +104,6 @@ export default function AddSubjectCard({ C, onAddSubject }) {
           value={subjectName}
           onChange={(e) => setSubjectName(e.target.value)}
           placeholder="Subject name"
-          style={{
-            background: C.s2,
-            border: `1px solid ${C.bdr2}`,
-            borderRadius: "8px",
-            padding: "9px 10px",
-            color: C.txt,
-            outline: "none",
-          }}
-        />
-        <input
-          value={subjectExam}
-          onChange={(e) => setSubjectExam(e.target.value)}
-          placeholder="Exam board / level"
           style={{
             background: C.s2,
             border: `1px solid ${C.bdr2}`,
@@ -144,6 +146,13 @@ export default function AddSubjectCard({ C, onAddSubject }) {
           Add
         </button>
       </div>
+      <div style={{ marginTop: "8px" }}>
+        <SubjectMetaFields
+          C={C}
+          value={subjectMeta}
+          onChange={(patch) => setSubjectMeta((prev) => ({ ...prev, ...patch }))}
+        />
+      </div>
       <div style={{ marginTop: "10px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
         {SUBJECT_PRESETS.map((preset) => (
           <button
@@ -151,7 +160,7 @@ export default function AddSubjectCard({ C, onAddSubject }) {
             className="nb"
             onClick={() => {
               setSubjectName(preset.name);
-              setSubjectExam(preset.exam);
+              setSubjectMeta(presetMeta(preset));
               setSubjectColor(preset.color);
             }}
             style={{

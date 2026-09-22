@@ -2,7 +2,12 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { renderApp } from "../test/helpers.jsx";
-import { TEMPLATES, defaultSubjects, subjectsForTemplate } from "../utils/subjects.js";
+import {
+  TEMPLATES,
+  defaultSubjects,
+  normalizeSubjects,
+  subjectsForTemplate,
+} from "../utils/subjects.js";
 
 describe("first-run onboarding", () => {
   it("appears on a clean slate instead of the planner, offering every template", () => {
@@ -34,7 +39,7 @@ describe("first-run onboarding", () => {
 
     expect(screen.getByRole("button", { name: "Physics" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Computer Science" })).toBeTruthy();
-    expect(JSON.parse(localStorage.getItem("sb-subjects"))).toEqual(defaultSubjects());
+    expect(JSON.parse(localStorage.getItem("sb-subjects"))).toEqual(normalizeSubjects(defaultSubjects()));
     expect(localStorage.getItem("sb-onboarded")).toBe("true");
   });
 
@@ -46,7 +51,7 @@ describe("first-run onboarding", () => {
     expect(screen.getByRole("button", { name: "English" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Combined Science" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Physics" })).toBeNull();
-    expect(JSON.parse(localStorage.getItem("sb-subjects"))).toEqual(subjectsForTemplate("gcse"));
+    expect(JSON.parse(localStorage.getItem("sb-subjects"))).toEqual(normalizeSubjects(subjectsForTemplate("gcse")));
     expect(localStorage.getItem("sb-onboarded")).toBe("true");
   });
 

@@ -21,16 +21,22 @@ This file documents the app structure so future changes stay consistent.
 
 ## Data model
 
-- Subjects include `id`, `name`, `exam`, `color`, and `topics`.
+- Subjects include `id`, `name`, `qualification`, `board`, `spec`, `specName`, `tier`, `exam`, `color`, and `topics`.
+  - `qualification` is one of `QUALIFICATIONS` (`gcse`, `alevel`, `as`, `other`); `board` one of `BOARDS` (`AQA`, `Edexcel`, `OCR`, `Eduqas`, `WJEC`, `CCEA`, `Custom`); `tier` one of `TIERS` (`foundation`, `higher`) or `null`, and always `null` unless `qualification === "gcse"`. `spec` (e.g. `H556`) and `specName` (e.g. `Physics A`) are strings or `null`. All constants live in `src/utils/subjects.js`.
+  - `exam` is a legacy string kept so older app versions reading a backup still show something. For real boards it is derived (`board` + `specName`); for `Custom` it is the user's free-text label. Don't render it directly - use `subjectLabel(subject)` (e.g. `OCR A-level Physics A`, `AQA GCSE Maths (Higher)`, or the free text for `Custom`).
+  - Migration lives in `normalizeSubjects`, which every load path (storage, backup restore, templates) runs through. Subjects stored before v1.3.0 have no `board`: the built-in preset ids map to exact metadata (only while their `exam` still matches the preset's original label), anything else has its `exam` parsed for a board name, else `board: "Custom"`, `qualification: "other"`. Normalization is idempotent.
+  - Edits go through `updateSubjectFields(subject, patch)`, which re-derives `exam`/`tier` without touching other fields.
 - Topics include `id`, `name`, and `done`.
+- Backups carry `version: 2` (`BACKUP_VERSION` in `src/utils/backup.js`). `parseBackup` loads unversioned, v1 and v2 files (v1 subjects are migrated), and refuses a higher version rather than silently dropping fields it doesn't know.
 - Sessions include `id`, `subjectId`, `subjectName`, `subjectColor`, `duration`, `date`, `note`, and `tags`.
 
 ## Customization rules
 
 - Any subject can be edited or deleted from Settings, including the example subjects.
-- The example subjects are only an optional starting template chosen during onboarding. `TEMPLATES` in `src/utils/subjects.js` lists every selectable template (currently A-Level and GCSE); `defaultSubjects()` always returns the A-Level set specifically, since it also doubles as the "untouched" placeholder `isUntouchedDefaultSubjects` checks against before onboarding is dismissed. Use `subjectsForTemplate(id)` to build subjects for any template, including new ones.
+- The example subjects are only an optional starting template chosen during onboarding. `TEMPLATES` in `src/utils/subjects.js` lists every selectable template (currently A-Level and GCSE); `defaultSubjects()` always returns the A-Level set specifically, since it also doubles as the "untouched" placeholder `isUntouchedDefaultSubjects` checks against before onboarding is dismissed. `defaultSubjects()` output is frozen (no metadata fields); `isUntouchedDefaultSubjects` compares normalized forms so the check survives normalization adding fields. Keep a test for both whenever `subjects.js` changes. Use `subjectsForTemplate(id)` to build subjects for any template, including new ones.
 - Custom subjects can still be added from Settings.
-- A subject specification PDF can be uploaded from Settings to prefill the subject form with inferred name, exam board, and topics.
+- A subject specification PDF can be uploaded from Settings to prefill the subject form with inferred name, exam board, and topics. PDF parsing lives in `src/utils/specImport.js` (pdf.js) and `src/utils/specInference.js` (pure, tested); `boardFromText` maps the inferred board onto `BOARDS`.
+- The add and edit subject cards share `src/components/settings/SubjectMetaFields.jsx` for qualification, board, tier (GCSE only), spec code and, for `Custom` boards, a free-text exam label. Changing the board clears the spec code and spec name.
 - Theme changes should update the app surfaces and borders without changing subject colors.
 - Session tags should be entered freely and also support quick suggestions such as `Past papers`, `Blurting`, and `Recap`.
 

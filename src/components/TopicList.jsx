@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { fmtDur } from "../utils/format.js";
+import { subjectLabel } from "../utils/subjects.js";
 
 export default function TopicList({
   C,
@@ -62,7 +63,7 @@ export default function TopicList({
               border: `1px solid ${C.bdr2}`,
             }}
           >
-            {sub.exam}
+            {subjectLabel(sub)}
           </span>
           <span style={{ fontSize: "11px", color: C.muted, marginLeft: "auto" }}>
             {sub.topics.filter((topic) => topic.done).length}/{sub.topics.length} done
