@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { fmtDur } from "../utils/format.js";
 import {
   groupTopicsByPaper,
@@ -39,6 +39,14 @@ export default function TopicList({
   const groups = groupTopicsByPaper(sub, topics);
   const papers = sub.papers || [];
   const canSetHigher = sub.qualification === "gcse";
+
+  // A topic that drops out of view (hidden higher-tier topic, or one just
+  // flagged higher-only) must not stay selected, or the next logged session
+  // would be tagged with a topic the user can't see.
+  const expandedVisible = !expandedTopic || topics.some((topic) => topic.id === expandedTopic);
+  useEffect(() => {
+    if (!expandedVisible) setExpandedTopic(null);
+  }, [expandedVisible, setExpandedTopic]);
 
   const submitTopic = () => {
     if (!newTopic.trim()) return;

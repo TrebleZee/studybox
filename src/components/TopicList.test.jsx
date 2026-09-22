@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import { useState } from "react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { THEMES } from "../utils/themes.js";
@@ -124,6 +125,43 @@ describe("TopicList with papers", () => {
     const paper = screen.getByLabelText("Paper for Probability");
     expect(paper.value).toBe("__several__");
     expect(within(paper).getByRole("option", { name: "Paper 1 & Paper 2" })).toBeTruthy();
+  });
+
+  it("clears the expanded topic when it is hidden, so a session isn't tagged with it", async () => {
+    const user = userEvent.setup();
+    const setExpanded = vi.fn();
+    function Harness({ sub }) {
+      const [expanded, setExpandedState] = useState(null);
+      const set = (value) =>
+        setExpandedState((prev) => {
+          const next = typeof value === "function" ? value(prev) : value;
+          setExpanded(next);
+          return next;
+        });
+      return (
+        <TopicList C={C} sub={sub} loggedSecs={0} expandedTopic={expanded} setExpandedTopic={set} {...handlers()} />
+      );
+    }
+    const { rerender } = render(<Harness sub={GCSE_SUBJECT} />);
+
+    // Show higher topics, expand one, then hide them again.
+    await user.click(screen.getByRole("button", { name: "Show higher-tier topics" }));
+    await user.click(screen.getByText("Circle theorems"));
+    expect(screen.getByLabelText("Higher tier only: Circle theorems")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Show higher-tier topics" }));
+    expect(screen.queryByText("Circle theorems")).toBeNull();
+    expect(setExpanded).toHaveBeenLastCalledWith(null);
+
+    // Expand a visible topic, then mark it higher-only while higher topics are hidden.
+    await user.click(screen.getByText("Graphs"));
+    expect(screen.getByLabelText("Higher tier only: Graphs")).toBeTruthy();
+    const flagged = {
+      ...GCSE_SUBJECT,
+      topics: GCSE_SUBJECT.topics.map((t) => (t.id === "b" ? { ...t, higherOnly: true } : t)),
+    };
+    rerender(<Harness sub={flagged} />);
+    expect(screen.queryByText("Graphs")).toBeNull();
+    expect(setExpanded).toHaveBeenLastCalledWith(null);
   });
 
   it("has no paper or tier controls for a non-GCSE subject without papers", () => {
