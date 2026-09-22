@@ -39,13 +39,14 @@ describe("catalogue files", () => {
   });
 
   it("index.json lists exactly the spec files, with matching metadata", () => {
-    const fromFiles = SPECS.map(({ id, qualification, board, spec, subject, specName }) => ({
+    const fromFiles = SPECS.map(({ id, qualification, board, spec, subject, specName, deprecated }) => ({
       id,
       qualification,
       board,
       spec,
       subject,
       specName,
+      ...(deprecated ? { deprecated: true } : {}),
     })).sort((a, b) => a.id.localeCompare(b.id));
     expect(specIndex).toEqual(fromFiles);
   });
@@ -147,8 +148,9 @@ describe("validateSpec rejects broken fixtures", () => {
 });
 
 describe("listSpecs", () => {
-  it("returns the whole index with no filters", () => {
-    expect(listSpecs()).toEqual(specIndex);
+  it("returns every current spec with no filters, and the whole index with includeDeprecated", () => {
+    expect(listSpecs()).toEqual(specIndex.filter((entry) => !entry.deprecated));
+    expect(listSpecs({ includeDeprecated: true })).toEqual(specIndex);
   });
 
   it("filters by qualification and board", () => {
