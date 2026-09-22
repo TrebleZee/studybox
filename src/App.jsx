@@ -20,10 +20,10 @@ import {
 import { loadJson, STORAGE_KEYS } from "./utils/storage.js";
 import {
   addUniqueTag,
-  defaultSubjects,
   isUntouchedDefaultSubjects,
   normalizeSessions,
   normalizeSubjects,
+  subjectsForTemplate,
 } from "./utils/subjects.js";
 import { THEMES } from "./utils/themes.js";
 
@@ -343,10 +343,10 @@ export default function StudyBox() {
     setOnboarded(true);
   };
 
-  const useTemplate = () => {
-    const template = defaultSubjects();
+  const useTemplate = (templateId) => {
+    const template = subjectsForTemplate(templateId);
     setSubjects(template);
-    setSel(template[0].id);
+    setSel(template[0]?.id ?? null);
     setOnboarded(true);
   };
 

@@ -27,7 +27,7 @@ This file documents the app structure so future changes stay consistent.
 ## Customization rules
 
 - Any subject can be edited or deleted from Settings, including the example subjects.
-- The example subjects are only an optional starting template chosen during onboarding.
+- The example subjects are only an optional starting template chosen during onboarding. `TEMPLATES` in `src/utils/subjects.js` lists every selectable template (currently A-Level and GCSE); `defaultSubjects()` always returns the A-Level set specifically, since it also doubles as the "untouched" placeholder `isUntouchedDefaultSubjects` checks against before onboarding is dismissed. Use `subjectsForTemplate(id)` to build subjects for any template, including new ones.
 - Custom subjects can still be added from Settings.
 - A subject specification PDF can be uploaded from Settings to prefill the subject form with inferred name, exam board, and topics.
 - Theme changes should update the app surfaces and borders without changing subject colors.

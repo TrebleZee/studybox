@@ -1,19 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
   SUBJECT_PRESETS,
+  TEMPLATES,
   addUniqueTag,
   defaultSubjects,
   isUntouchedDefaultSubjects,
   normalizeSessions,
   normalizeSubjects,
   subjectProgress,
+  subjectsForTemplate,
   topicList,
 } from "./subjects.js";
 
 describe("defaultSubjects", () => {
-  it("builds the four example subjects with unchecked topics and no dead flags", () => {
+  it("builds the A-Level example subjects with unchecked topics and no dead flags", () => {
     const subjects = defaultSubjects();
-    expect(subjects.map((s) => s.id)).toEqual(SUBJECT_PRESETS.map((s) => s.id));
+    expect(subjects.map((s) => s.id)).toEqual(["physics", "maths", "further", "cs"]);
     subjects.forEach((s) => {
       expect(s.topics.length).toBeGreaterThan(0);
       expect(s.topics.every((t) => t.done === false)).toBe(true);
@@ -28,6 +30,59 @@ describe("defaultSubjects", () => {
     edited[0].topics[0].done = true;
     expect(isUntouchedDefaultSubjects(edited)).toBe(false);
     expect(isUntouchedDefaultSubjects([])).toBe(false);
+  });
+
+  it("is only the alevel template, even though SUBJECT_PRESETS now spans every template", () => {
+    expect(defaultSubjects().map((s) => s.id)).toEqual(
+      TEMPLATES.find((t) => t.id === "alevel").presets.map((p) => p.id)
+    );
+    expect(SUBJECT_PRESETS.length).toBeGreaterThan(defaultSubjects().length);
+  });
+});
+
+describe("onboarding templates", () => {
+  it("exposes more than one selectable template, each with a distinct starter set", () => {
+    expect(TEMPLATES.length).toBeGreaterThan(1);
+    const ids = TEMPLATES.map((t) => t.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("subjectsForTemplate builds a full, unchecked, deterministic subject list per template", () => {
+    TEMPLATES.forEach((template) => {
+      const subjects = subjectsForTemplate(template.id);
+      expect(subjects.length).toBeGreaterThan(0);
+      expect(subjects.map((s) => s.id)).toEqual(template.presets.map((p) => p.id));
+      subjects.forEach((s) => {
+        expect(s.topics.length).toBeGreaterThan(0);
+        expect(s.topics.every((t) => t.done === false)).toBe(true);
+      });
+      expect(subjectsForTemplate(template.id)).toEqual(subjects);
+    });
+  });
+
+  it("the GCSE template covers the core subjects with a shape matching SUBJECT_PRESETS", () => {
+    const gcse = TEMPLATES.find((t) => t.id === "gcse");
+    expect(gcse.presets.map((p) => p.name).sort()).toEqual(
+      ["Combined Science", "English", "Maths"].sort()
+    );
+    const subjects = subjectsForTemplate("gcse");
+    subjects.forEach((s) => {
+      expect(s).toMatchObject({
+        id: expect.any(String),
+        name: expect.any(String),
+        exam: expect.any(String),
+        color: expect.any(String),
+      });
+      expect(SUBJECT_PRESETS.some((p) => p.id === s.id)).toBe(true);
+    });
+  });
+
+  it("returns [] for an unknown template id instead of throwing", () => {
+    expect(subjectsForTemplate("nope")).toEqual([]);
+  });
+
+  it("picking a non-alevel template is never mistaken for the untouched default", () => {
+    expect(isUntouchedDefaultSubjects(subjectsForTemplate("gcse"))).toBe(false);
   });
 });
 

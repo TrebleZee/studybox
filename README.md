@@ -20,7 +20,9 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 The first time you open StudyBox you choose how to begin:
 
 - **Start blank** and add your own subjects and topics
-- **Use example subjects** (Physics, Maths, Further Maths and Computer Science with sample A-level topics) as a template you can freely edit or delete
+- Pick a **starter template** you can freely edit or delete:
+  - **A-Level example set** - Physics, Maths, Further Maths and Computer Science with sample A-level topics
+  - **GCSE core subjects** - English, Maths and Combined Science with sample GCSE topics
 - **Restore from file** if you already have a backup
 
 ## How it works
