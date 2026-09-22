@@ -264,5 +264,11 @@
     }
   ],
   "optionGroups": [],
-  "milestones": []
+  "milestones": [
+    {
+      "id": "edexcel-1sc0-m01",
+      "name": "Core practicals",
+      "kind": "practical"
+    }
+  ]
 }

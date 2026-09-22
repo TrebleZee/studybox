@@ -1,6 +1,7 @@
 import specIndex from "../data/specs/index.json";
 import {
   BOARDS,
+  MILESTONE_KINDS,
   QUALIFICATIONS,
   TEMPLATES,
   TIERS,
@@ -108,6 +109,16 @@ export const validateSpec = (spec, fileName) => {
   });
 
   if (!Array.isArray(spec.milestones)) fail("milestones must be a list");
+  const milestoneIds = new Set();
+  (Array.isArray(spec.milestones) ? spec.milestones : []).forEach((milestone) => {
+    if (!isNonEmptyString(milestone?.id) || !milestone.id.startsWith(`${spec.id}-m`)) {
+      fail(`milestone id ${milestone?.id} must start with ${spec.id}-m`);
+    }
+    if (milestoneIds.has(milestone?.id)) fail(`duplicate milestone id ${milestone?.id}`);
+    milestoneIds.add(milestone?.id);
+    if (!isNonEmptyString(milestone?.name)) fail(`milestone ${milestone?.id} needs a name`);
+    if (!MILESTONE_KINDS.includes(milestone?.kind)) fail(`milestone ${milestone?.id} has an unknown kind`);
+  });
   return errors;
 };
 
@@ -203,6 +214,15 @@ export const subjectFromSpec = (spec, { tier = null, optionIds = [], color, id }
     tier: spec.tiers?.includes(tier) ? tier : null,
     color,
     papers: spec.papers.map(({ id: paperId, name }) => ({ id: paperId, name })),
+    // Seeded undated and not done; the student adds their own due dates.
+    milestones: (spec.milestones || []).map((milestone, index) => ({
+      id: `${subjectId}-m${index}`,
+      name: milestone.name,
+      kind: milestone.kind,
+      due: null,
+      done: false,
+      catalogueMilestoneId: milestone.id,
+    })),
     topics,
   });
 };

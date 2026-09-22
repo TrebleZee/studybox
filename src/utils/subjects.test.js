@@ -499,6 +499,28 @@ describe("papers and higher-tier topics", () => {
     expect(normalizeSubjects(JSON.parse(JSON.stringify([subject])))).toEqual([subject]);
   });
 
+  it("normalizes milestones as an optional, idempotent list", () => {
+    const [subject] = normalizeSubjects([
+      {
+        id: "cs",
+        name: "CS",
+        milestones: [
+          { id: "a", name: "NEA", kind: "nea", due: "2027-03-31", done: 1 },
+          { name: "", kind: "essay", due: "2027-02-30" },
+          null,
+          { id: "c", name: "Practicals", kind: "practical", due: "31/03/2027", catalogueMilestoneId: "aqa-8464-m01" },
+        ],
+      },
+    ]);
+    expect(subject.milestones).toEqual([
+      { id: "a", name: "NEA", kind: "nea", due: "2027-03-31", done: true },
+      { id: "cs-m1", name: "Untitled milestone", kind: "other", due: null, done: false },
+      { id: "c", name: "Practicals", kind: "practical", due: null, done: false, catalogueMilestoneId: "aqa-8464-m01" },
+    ]);
+    expect(normalizeSubjects([subject])).toEqual([subject]);
+    expect(normalizeSubjects([{ id: "x", name: "X", milestones: [] }])[0]).not.toHaveProperty("milestones");
+  });
+
   it("leaves subjects without papers exactly as before (no new keys)", () => {
     const [subject] = normalizeSubjects([{ id: "x", name: "X", topics: [{ id: "a", name: "A" }] }]);
     expect(subject).not.toHaveProperty("papers");

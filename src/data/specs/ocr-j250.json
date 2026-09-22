@@ -180,5 +180,11 @@
     }
   ],
   "optionGroups": [],
-  "milestones": []
+  "milestones": [
+    {
+      "id": "ocr-j250-m01",
+      "name": "Practical activity groups (PAGs)",
+      "kind": "practical"
+    }
+  ]
 }

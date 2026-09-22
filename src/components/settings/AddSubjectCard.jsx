@@ -63,7 +63,9 @@ export default function AddSubjectCard({ C, onAddSubject }) {
       color: subjectColor,
       // Catalogue topics keep their paper and higher-only tags, and bring the
       // spec's papers with them.
-      ...(useCatalogueTopics ? { papers: catalogueMatch.subject.papers } : {}),
+      ...(useCatalogueTopics
+        ? { papers: catalogueMatch.subject.papers, milestones: catalogueMatch.subject.milestones }
+        : {}),
       topics: useCatalogueTopics
         ? catalogueMatch.subject.topics.map(({ name, catalogueTopicId, paper, higherOnly }) => ({
             name,

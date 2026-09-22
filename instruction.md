@@ -17,6 +17,7 @@ This file documents the app structure so future changes stay consistent.
 - `sb-asana`, `sb-asana-stats` - optional Asana integration config (`enabled` is false until the user opts in)
 - `sb-onboarded` - set once first-run setup is dismissed
 - `sb-last-streak-reminder` - the local date (`YYYY-MM-DD`) the streak-reminder notification last fired, so it never fires twice in one day
+- `sb-last-milestone-reminder` - the local date (`YYYY-MM-DD`) the milestone-reminder notification last fired, so it never fires twice in one day
 - `sb-subjects` also stores subjects created from uploaded specification PDFs, including inferred exam board and topic checklist
 
 ## Data model
@@ -31,6 +32,7 @@ This file documents the app structure so future changes stay consistent.
   - `inTierTopics(subject)` drops higher-only topics for a Foundation GCSE; `subjectProgress`, the planner's done count and the Analysis topic figures all use it. `paperProgress(subject, paperId)` is the in-tier progress on one paper (topics shared across papers count for each).
   - `groupTopicsByPaper(subject, topics)` returns one group per distinct paper combination in paper order ("All papers" when a topic is on every paper), then "Other" for topics without a known paper; it returns `[]` when no topic has a paper, and `TopicList` then renders the flat list exactly as before (pinned by a snapshot recorded before papers existed).
   - Foundation subjects hide higher-only topics by default behind a "Show higher-tier topics" toggle (state lives in `TopicList`).
+- Subjects may carry `milestones: [{ id, name, kind, due, done }]` (plus `catalogueMilestoneId` when seeded from the catalogue). `kind` is one of `MILESTONE_KINDS` (`nea`, `practical`, `coursework`, `other`); `due` is a local calendar date `YYYY-MM-DD` or `null`. The key is omitted when there are none. Milestones never award XP or affect streaks (`gameLogic.js` doesn't know about them).
 - Topics include `id`, `name`, `done` and `subtasks`. Topics seeded from the spec catalogue also carry `catalogueTopicId` (the catalogue topic they came from, so a later "reset to spec" can match them up); user-created topics have none. Seeded topics are freely editable. `normalizeSubjects` keeps `catalogueTopicId` only when it is a string.
 - Backups carry `version: 2` (`BACKUP_VERSION` in `src/utils/backup.js`). `parseBackup` loads unversioned, v1 and v2 files (v1 subjects are migrated), and refuses a higher version rather than silently dropping fields it doesn't know. Optional, additive fields (e.g. `catalogueTopicId`, `papers`, topic `paper`, `higherOnly`) don't bump the version: older builds ignore them and the rest of the backup still loads. Bump `BACKUP_VERSION` only for changes an older build would misread (renamed, removed or re-typed fields, or changed meaning).
 - Sessions include `id`, `subjectId`, `subjectName`, `subjectColor`, `duration`, `date`, `note`, and `tags`.
@@ -39,7 +41,7 @@ This file documents the app structure so future changes stay consistent.
 
 - Current coverage: GCSE Maths, English Language, English Literature and Combined Science on AQA (8300, 8700, 8702, 8464), Edexcel (1MA1, 1EN0, 1ET0, 1SC0) and OCR (J560, J351, J352, J250, J260), plus A-level OCR H556, H446 and Edexcel 9MA0, 9FM0. When a board sits Foundation and Higher on different paper numbers (OCR J560, J250, J260), one paper entry covers the matching pair (e.g. "Paper 1 or 4") so dates and progress line up across tiers.
 - One file per specification in `src/data/specs/`, named `<board>-<spec>.json` in lowercase (e.g. `ocr-h556.json`); the file name must equal the spec's `id`.
-- Schema: `id`, `qualification` (`gcse`/`alevel`/`as`), `board` (a real entry of `BOARDS`), `spec`, `subject`, `specName` (string or `null`), `specVersion`, `firstExam`, `lastExam` (year or `null`), `specUrl` (the board's spec PDF, https), `tiers` (`null` or a list of `TIERS`, GCSE only), `papers` (`[{ id, name }]`), `topics` (`[{ id, name, paper, higherOnly }]`), `optionGroups` (`[{ id, name, pick, options: [{ id, name, topicIds }] }]`) and `milestones` (`[]` until F6). Optional `deprecated: true` retires a spec.
+- Schema: `id`, `qualification` (`gcse`/`alevel`/`as`), `board` (a real entry of `BOARDS`), `spec`, `subject`, `specName` (string or `null`), `specVersion`, `firstExam`, `lastExam` (year or `null`), `specUrl` (the board's spec PDF, https), `tiers` (`null` or a list of `TIERS`, GCSE only), `papers` (`[{ id, name }]`), `topics` (`[{ id, name, paper, higherOnly }]`), `optionGroups` (`[{ id, name, pick, options: [{ id, name, topicIds }] }]`) and `milestones` (`[{ id: "<spec id>-mNN", name, kind }]`, seeded onto subjects undated and not done: OCR H446 NEA, OCR H556 practical endorsement, AQA 8464 / Edexcel 1SC0 / OCR J250, J260 practicals, and the spoken language endorsement on AQA 8700, Edexcel 1EN0, OCR J351). Optional `deprecated: true` retires a spec.
   - A topic's `paper` is one paper id, or a list of ids when the topic is examined on several papers (e.g. A-level Maths pure content on papers 1 and 2). Use `topicPapers(topic)` to read it.
   - Topics listed in an option are only seeded when that option is picked (`subjectFromSpec(spec, { optionIds })`).
   - Topic ids are `<spec id>-tNN`. Spec ids and topic ids are permanent once merged: rename `name`, never `id`; retire with `deprecated: true`, never delete. New topics are appended with new ids.
@@ -68,6 +70,13 @@ This file documents the app structure so future changes stay consistent.
 - The add and edit subject cards share `src/components/settings/SubjectMetaFields.jsx` for qualification, board, tier (GCSE only), spec code and, for `Custom` boards, a free-text exam label. Changing the board clears the spec code and spec name.
 - Theme changes should update the app surfaces and borders without changing subject colors.
 - Session tags should be entered freely and also support quick suggestions such as `Past papers`, `Blurting`, and `Recap`.
+
+## Milestones
+
+- Pure helpers live in `src/utils/milestones.js`: `daysUntil` / `isOverdue` / `dueLabel` treat due dates as local calendar days (Europe/London users see a milestone as due today all day, across midnight and clock changes); `allMilestones` flattens subjects sorted by due date, undated last; `neaTopicCandidates` / `convertTopicToMilestone` handle NEA topics.
+- `src/components/MilestoneStrip.jsx` sits above the topic list in the planner: every subject's milestones, soonest first, overdue ones highlighted, with add / edit / complete / delete inline (its form state lives in the strip). Completed milestones sit behind a toggle.
+- A topic whose name matches `/NEA/i` gets a "Convert to milestone" offer. It is opt-in and two-step: the topic stays until the user confirms; "Keep as topic" hides the offer for the session. Never convert silently.
+- Reminder: `milestonesToRemind` / `shouldShowMilestoneReminder` in `src/utils/reminders.js` pick milestones that are not done, dated, and due between today and 3 days ahead (overdue ones don't re-notify), at most once per local day via `sb-last-milestone-reminder`. `src/hooks/useMilestoneReminder.js` mirrors the streak reminder's Notification flow (permission asked at most once per app session and only when something is due soon; silent when denied or unsupported).
 
 ## Streak reminders
 

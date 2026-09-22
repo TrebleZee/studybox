@@ -1,4 +1,4 @@
-# StudyBox - v1.7.0
+# StudyBox - v1.8.0
 
 StudyBox is a lightweight study planner and revision timer built with React and Vite. It is designed to help you track topics, mark progress, time revision sessions, and keep a simple local history of your study work.
 
@@ -18,6 +18,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Shows progress and time summaries per subject
 - Works offline as a PWA once installed
 - Can nudge you in the evening with a browser notification if today's streak is still unlogged
+- Tracks milestones such as NEA deadlines, required practicals and spoken language endorsements, with due dates, overdue highlighting and a browser reminder three days before; catalogue specs come with their milestones, and an "NEA" topic can be turned into a milestone with one confirmed click
 
 ## Getting started
 

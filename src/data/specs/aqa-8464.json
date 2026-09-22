@@ -258,5 +258,11 @@
     }
   ],
   "optionGroups": [],
-  "milestones": []
+  "milestones": [
+    {
+      "id": "aqa-8464-m01",
+      "name": "Required practical activities",
+      "kind": "practical"
+    }
+  ]
 }

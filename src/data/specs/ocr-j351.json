@@ -62,5 +62,11 @@
     }
   ],
   "optionGroups": [],
-  "milestones": []
+  "milestones": [
+    {
+      "id": "ocr-j351-m01",
+      "name": "Spoken language endorsement",
+      "kind": "nea"
+    }
+  ]
 }

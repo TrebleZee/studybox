@@ -1,4 +1,25 @@
 import { dateKey, isStreakAtRisk } from "./gameLogic.js";
+import { allMilestones, daysUntil } from "./milestones.js";
+
+// A milestone is "due soon" from 3 days before its due date up to the day itself.
+export const MILESTONE_REMINDER_DAYS = 3;
+
+// The milestones today's reminder should mention: not done, dated, due
+// between today and MILESTONE_REMINDER_DAYS days from now (overdue ones are
+// already highlighted in the planner, so they don't re-notify). Empty when
+// a milestone reminder already fired today (lastReminderDate is the local
+// date it last fired, from sb-last-milestone-reminder).
+export const milestonesToRemind = (subjects, { now = new Date(), lastReminderDate = null } = {}) => {
+  if (lastReminderDate === dateKey(now)) return [];
+  return allMilestones(subjects).filter((milestone) => {
+    if (milestone.done) return false;
+    const days = daysUntil(milestone.due, now);
+    return days !== null && days >= 0 && days <= MILESTONE_REMINDER_DAYS;
+  });
+};
+
+export const shouldShowMilestoneReminder = (subjects, options) =>
+  milestonesToRemind(subjects, options).length > 0;
 
 // Fixed local hour after which an at-risk streak is worth nagging about.
 export const REMINDER_HOUR = 20;

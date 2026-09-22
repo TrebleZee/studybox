@@ -89,5 +89,11 @@
     }
   ],
   "optionGroups": [],
-  "milestones": []
+  "milestones": [
+    {
+      "id": "aqa-8700-m01",
+      "name": "Spoken language endorsement",
+      "kind": "nea"
+    }
+  ]
 }
