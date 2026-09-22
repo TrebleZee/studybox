@@ -6,6 +6,7 @@ import Onboarding from "./components/Onboarding.jsx";
 import PlannerView from "./components/PlannerView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import TopBar from "./components/TopBar.jsx";
+import useStreakReminder from "./hooks/useStreakReminder.js";
 import useTimer from "./hooks/useTimer.js";
 import { normalizeAsanaConfig } from "./services/asanaClient.js";
 import { buildCss } from "./utils/appCss.js";
@@ -121,6 +122,7 @@ export default function StudyBox() {
     canTime,
     defaultSubjectId: asanaSelected ? asanaCfg.id : sub?.id ?? null,
   });
+  useStreakReminder(game);
   const { running, displaySecs, timedSubjectId } = timer;
   const timedSubject = subjects.find((subject) => subject.id === timedSubjectId);
   const timingAsana = asanaEnabled && timedSubjectId === asanaCfg.id;

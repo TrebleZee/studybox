@@ -9,6 +9,7 @@ import {
   freezeStats,
   getLongestStreak,
   getStreakForDates,
+  isStreakAtRisk,
   normalizeDateKey,
   normalizeGame,
   streakExpiry,
@@ -180,5 +181,34 @@ describe("buildInitialGame", () => {
     const result = buildInitialGame(stored, [], [], loadedAt);
     expect(result.currentStreak).toBe(3);
     expect(result.freezesUsed).toBe(1);
+  });
+});
+
+describe("isStreakAtRisk", () => {
+  const studied = "2026-09-13";
+  const later = localDay(2026, 9, 14, 21).getTime();
+
+  it("is false with no streak at all", () => {
+    expect(isStreakAtRisk(game(), later)).toBe(false);
+  });
+
+  it("is true when the streak is live and today's session hasn't been logged", () => {
+    const g = game({ currentStreak: 3, lastStudyDate: studied });
+    expect(isStreakAtRisk(g, later)).toBe(true);
+  });
+
+  it("is false once today's session has already been logged", () => {
+    const g = game({ currentStreak: 3, lastStudyDate: "2026-09-15" });
+    expect(isStreakAtRisk(g, localDay(2026, 9, 15, 21).getTime())).toBe(false);
+  });
+
+  it("is false once the streak has already lapsed with no freeze to save it", () => {
+    const g = game({ currentStreak: 3, lastStudyDate: studied });
+    expect(isStreakAtRisk(g, streakExpiry(studied))).toBe(false);
+  });
+
+  it("is true when a freeze keeps the streak alive but today is still unlogged", () => {
+    const g = game({ currentStreak: 3, lastStudyDate: studied, totalXP: 500 });
+    expect(isStreakAtRisk(g, streakExpiry(studied) + 12 * 60 * 60 * 1000)).toBe(true);
   });
 });

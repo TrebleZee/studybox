@@ -129,6 +129,14 @@ export const validateStreak = (game, nowMs = Date.now()) => {
   };
 };
 
+// True when the user has a streak that would break if they don't study today.
+// Reuses validateStreak so a streak already covered by a freeze, or already
+// lapsed, is never reported as "at risk".
+export const isStreakAtRisk = (game, nowMs = Date.now()) => {
+  const validated = validateStreak(game, nowMs);
+  return validated.currentStreak > 0 && validated.lastStudyDate !== dateKey(nowMs);
+};
+
 export const buildInitialGame = (loaded, sessions, subjects, nowMs = Date.now()) => {
   const storedGame = normalizeGame(loaded);
   const dateStrings = Array.from(

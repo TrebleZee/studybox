@@ -14,6 +14,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Logs each session with duration, date, subject, tags, and an optional note
 - Shows progress and time summaries per subject
 - Works offline as a PWA once installed
+- Can nudge you in the evening with a browser notification if today's streak is still unlogged
 
 ## Getting started
 
@@ -39,6 +40,10 @@ The timer is based on timestamps rather than a simple interval counter, so it st
 All data is stored locally in `localStorage`. Nothing is synced to a server. Use **Settings > Backup & Restore** to download a JSON backup, since browsers can clear site data.
 
 Asana is an optional integration, off until you choose **Connect Asana** in Settings.
+
+## Streak reminders
+
+If you have a live streak and haven't logged a session by 8pm local time, StudyBox can show one browser notification reminding you, at most once a day. It's entirely client-side (no push server) and only fires while the app is open in some form - a tab, a backgrounded tab, or the installed PWA. Notification permission is requested at most once per visit, and only on a day the reminder could actually matter; if you deny it or your browser doesn't support notifications, the app stays silent about it and works exactly as before.
 
 ## Quick Start
 
