@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TEMPLATES } from "../utils/subjects.js";
 
 const optionStyle = (C) => ({
   textAlign: "left",
@@ -49,13 +50,20 @@ export default function Onboarding({ C, onStartBlank, onUseTemplate, onRestore }
               Add your own subjects and topics.
             </div>
           </button>
-          <button type="button" className="nb" onClick={onUseTemplate} style={optionStyle(C)}>
-            <div style={{ fontWeight: 700, fontSize: "13px" }}>Use example subjects</div>
-            <div style={{ color: C.muted, fontSize: "11px", marginTop: "3px" }}>
-              Physics, Maths, Further Maths and Computer Science with sample A-level topics.
-              Edit or delete anything.
-            </div>
-          </button>
+          {TEMPLATES.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              className="nb"
+              onClick={() => onUseTemplate(template.id)}
+              style={optionStyle(C)}
+            >
+              <div style={{ fontWeight: 700, fontSize: "13px" }}>Use {template.name}</div>
+              <div style={{ color: C.muted, fontSize: "11px", marginTop: "3px" }}>
+                {template.description} Edit or delete anything.
+              </div>
+            </button>
+          ))}
         </div>
         <div style={{ marginTop: "16px", fontSize: "11px", color: C.muted }}>
           Already have a backup?{" "}

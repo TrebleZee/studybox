@@ -49,13 +49,70 @@ const TOPIC_SEED = {
     "Theory of Computation",
     "NEA Programming Project",
   ],
+  "gcse-english": [
+    "Reading Non-Fiction",
+    "Reading Fiction",
+    "Creative Writing",
+    "Transactional Writing",
+    "Poetry Analysis",
+    "Shakespeare",
+    "A 19th-Century Novel",
+    "Modern Prose or Drama",
+  ],
+  "gcse-maths": [
+    "Number",
+    "Algebra",
+    "Ratio, Proportion and Rates of Change",
+    "Geometry and Measures",
+    "Probability",
+    "Statistics",
+  ],
+  "gcse-science": [
+    "Cell Biology",
+    "Organisation",
+    "Infection and Response",
+    "Bioenergetics",
+    "Atomic Structure and the Periodic Table",
+    "Bonding, Structure and Properties of Matter",
+    "Energy Changes",
+    "Forces",
+    "Waves",
+    "Electricity",
+  ],
 };
 
-export const SUBJECT_PRESETS = [
+const ALEVEL_PRESETS = [
   { id: "physics", name: "Physics", exam: "OCR A", color: "#4F9CF9" },
   { id: "maths", name: "Maths", exam: "Edexcel", color: "#34D399" },
   { id: "further", name: "Further Maths", exam: "Edexcel", color: "#A78BFA" },
   { id: "cs", name: "Computer Science", exam: "OCR", color: "#FBBF24" },
+];
+
+const GCSE_PRESETS = [
+  { id: "gcse-english", name: "English", exam: "AQA", color: "#F472B6" },
+  { id: "gcse-maths", name: "Maths", exam: "AQA", color: "#34D399" },
+  { id: "gcse-science", name: "Combined Science", exam: "AQA", color: "#60A5FA" },
+];
+
+export const SUBJECT_PRESETS = [...ALEVEL_PRESETS, ...GCSE_PRESETS];
+
+// Onboarding starter templates. "alevel" doubles as the app's true default
+// (see defaultSubjects below) - every other template is only ever reached
+// by an explicit choice in Onboarding.
+export const TEMPLATES = [
+  {
+    id: "alevel",
+    name: "A-Level example set",
+    description:
+      "Physics, Maths, Further Maths and Computer Science with sample A-level topics.",
+    presets: ALEVEL_PRESETS,
+  },
+  {
+    id: "gcse",
+    name: "GCSE core subjects",
+    description: "English, Maths and Combined Science with sample GCSE topics.",
+    presets: GCSE_PRESETS,
+  },
 ];
 
 export const topicList = (seed, prefix) =>
@@ -66,11 +123,18 @@ export const topicList = (seed, prefix) =>
     subtasks: [],
   }));
 
-export const defaultSubjects = () =>
-  SUBJECT_PRESETS.map((subject) => ({
+const subjectsFromPresets = (presets) =>
+  presets.map((subject) => ({
     ...subject,
     topics: topicList(TOPIC_SEED[subject.id] || [], subject.id.slice(0, 2)),
   }));
+
+export const defaultSubjects = () => subjectsFromPresets(ALEVEL_PRESETS);
+
+export const subjectsForTemplate = (templateId) => {
+  const template = TEMPLATES.find((item) => item.id === templateId);
+  return template ? subjectsFromPresets(template.presets) : [];
+};
 
 export const isUntouchedDefaultSubjects = (subjects) =>
   JSON.stringify(subjects) === JSON.stringify(defaultSubjects());
