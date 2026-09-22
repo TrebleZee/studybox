@@ -16,6 +16,7 @@ This file documents the app structure so future changes stay consistent.
 - `sb-game` - streak, XP and freeze state
 - `sb-asana`, `sb-asana-stats` - optional Asana integration config (`enabled` is false until the user opts in)
 - `sb-onboarded` - set once first-run setup is dismissed
+- `sb-last-streak-reminder` - the local date (`YYYY-MM-DD`) the streak-reminder notification last fired, so it never fires twice in one day
 - `sb-subjects` also stores subjects created from uploaded specification PDFs, including inferred exam board and topic checklist
 
 ## Data model
@@ -32,6 +33,13 @@ This file documents the app structure so future changes stay consistent.
 - A subject specification PDF can be uploaded from Settings to prefill the subject form with inferred name, exam board, and topics.
 - Theme changes should update the app surfaces and borders without changing subject colors.
 - Session tags should be entered freely and also support quick suggestions such as `Past papers`, `Blurting`, and `Recap`.
+
+## Streak reminders
+
+- Client-side only, via the browser Notification API - no push server, so it only fires while the app is open.
+- The at-risk condition (`isStreakAtRisk` in `src/utils/gameLogic.js`) reuses `validateStreak`; don't duplicate streak-lapse logic elsewhere.
+- Timing (evening threshold, once-per-day gating) is a separate pure function, `shouldShowStreakReminder` in `src/utils/reminders.js`, so it stays unit-testable without the Notification API.
+- `src/hooks/useStreakReminder.js` is the only place that touches `Notification` directly: it requests permission at most once per app session and only when the streak is actually at risk that day, and stays silent if permission is denied or `Notification` doesn't exist.
 
 ## Editing guidance
 

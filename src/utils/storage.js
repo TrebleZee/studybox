@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   asanaStats: "sb-asana-stats",
   game: "sb-game",
   onboarded: "sb-onboarded",
+  lastStreakReminder: "sb-last-streak-reminder",
 };
 
 export const loadJson = (key, fallback) => {
