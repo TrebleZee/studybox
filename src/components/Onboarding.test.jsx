@@ -79,6 +79,34 @@ describe("first-run onboarding", () => {
     expect(ready.textContent).not.toMatch(/loading/);
   });
 
+  it("locks Start blank and Restore from file while a template is loading", async () => {
+    const user = userEvent.setup();
+    let finish;
+    const onStartBlank = vi.fn();
+    const onRestore = vi.fn();
+    const onUseTemplate = vi.fn(() => new Promise((resolve) => (finish = resolve)));
+    render(
+      <Onboarding
+        C={THEMES[0].colors}
+        onStartBlank={onStartBlank}
+        onUseTemplate={onUseTemplate}
+        onRestore={onRestore}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: /Use GCSE core subjects/ }));
+
+    const blank = screen.getByRole("button", { name: /Start blank/ });
+    const restore = screen.getByLabelText("Restore backup file");
+    expect(blank.disabled).toBe(true);
+    expect(restore.disabled).toBe(true);
+    await user.click(blank);
+    expect(onStartBlank).not.toHaveBeenCalled();
+
+    await act(async () => finish({ ok: false, error: "That template couldn't be loaded." }));
+    expect(screen.getByRole("button", { name: /Start blank/ }).disabled).toBe(false);
+    expect(screen.getByLabelText("Restore backup file").disabled).toBe(false);
+  });
+
   it.each(["Start blank", "Use A-Level example set", "Use GCSE core subjects"])(
     "does not reappear after dismissal (%s) and a reload",
     async (name) => {
