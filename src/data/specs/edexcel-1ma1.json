@@ -157,6 +157,116 @@
         "p3"
       ],
       "higherOnly": false
+    },
+    {
+      "id": "edexcel-1ma1-t14",
+      "name": "Transformations of graphs",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t15",
+      "name": "Gradients and areas under graphs",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t16",
+      "name": "Equation of a circle and tangents",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t17",
+      "name": "Solving equations by iteration",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t18",
+      "name": "Instantaneous and average rates of change",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t19",
+      "name": "Combined transformations",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t20",
+      "name": "Circle theorems",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t21",
+      "name": "Sine and cosine rules",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t22",
+      "name": "Area of a triangle using ½ab sin C",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t23",
+      "name": "Conditional probability",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1ma1-t24",
+      "name": "Histograms with unequal class widths",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
     }
   ],
   "optionGroups": [],

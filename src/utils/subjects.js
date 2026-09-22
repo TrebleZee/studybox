@@ -284,15 +284,51 @@ export const normalizeSubjects = (input) => {
   return input.map((subject, index) => normalizeSubject(subject, index));
 };
 
+const isNonEmptyString = (value) => typeof value === "string" && value.trim() !== "";
+
+// A topic's paper is one paper id, or a list of ids when the topic is
+// examined on several papers (e.g. A-level Maths pure content on papers 1
+// and 2). Returns the list form; [] when the topic has no paper.
+export const topicPapers = (topic) => {
+  if (Array.isArray(topic?.paper)) return topic.paper;
+  return isNonEmptyString(topic?.paper) ? [topic.paper] : [];
+};
+
+// Optional `papers: [{ id, name }]`, kept only when there is a valid one, so
+// subjects without papers normalize exactly as before.
+const normalizePapers = (papers) => {
+  if (!Array.isArray(papers)) return null;
+  const seen = new Set();
+  const valid = papers
+    .filter((paper) => isNonEmptyString(paper?.id) && !seen.has(paper.id) && seen.add(paper.id))
+    .map((paper) => ({
+      id: paper.id,
+      name: isNonEmptyString(paper.name) ? paper.name : paper.id,
+    }));
+  return valid.length ? valid : null;
+};
+
+// A topic's optional `paper` (string, or list of strings) and `higherOnly`
+// (kept only when true).
+const topicTierFields = (topic) => {
+  const papers = [...new Set(topicPapers(topic).filter(isNonEmptyString))];
+  return {
+    ...(papers.length ? { paper: Array.isArray(topic.paper) ? papers : papers[0] } : {}),
+    ...(topic?.higherOnly === true ? { higherOnly: true } : {}),
+  };
+};
+
 export const normalizeSubject = (subject, index = 0) => {
   const preset = SUBJECT_PRESETS.find((item) => item.id === subject?.id);
   const sourceTopics = Array.isArray(subject?.topics) ? subject.topics : [];
+  const papers = normalizePapers(subject?.papers);
 
   return {
     id: subject?.id || `sub-${Date.now().toString(36)}-${index}`,
     name: subject?.name || preset?.name || "Untitled subject",
     ...subjectMetadata(subject, preset),
     color: subject?.color || preset?.color || "#4F9CF9",
+    ...(papers ? { papers } : {}),
     topics: sourceTopics.map((topic, topicIndex) => ({
       id: topic?.id || `${subject?.id || "sub"}-${topicIndex}`,
       name: topic?.name || "Untitled topic",
@@ -308,6 +344,7 @@ export const normalizeSubject = (subject, index = 0) => {
       ...(typeof topic?.catalogueTopicId === "string"
         ? { catalogueTopicId: topic.catalogueTopicId }
         : {}),
+      ...topicTierFields(topic),
     })),
   };
 };
@@ -337,9 +374,52 @@ export const addUniqueTag = (current, nextTag) => {
   return exists ? current : [...current, cleaned];
 };
 
-export const subjectProgress = (subject) =>
-  subject.topics.length
-    ? Math.round(
-        (subject.topics.filter((topic) => topic.done).length / subject.topics.length) * 100
-      )
+// The topics a subject's tier actually sits: a Foundation GCSE skips
+// higher-only topics; every other subject (including an unset tier) has all.
+export const inTierTopics = (subject) =>
+  subject.tier === "foundation"
+    ? subject.topics.filter((topic) => !topic.higherOnly)
+    : subject.topics;
+
+const percentDone = (topics) =>
+  topics.length
+    ? Math.round((topics.filter((topic) => topic.done).length / topics.length) * 100)
     : 0;
+
+export const subjectProgress = (subject) => percentDone(inTierTopics(subject));
+
+// Progress on one paper: in-tier topics examined on it (including topics
+// shared with other papers). 0 when the paper has no topics.
+export const paperProgress = (subject, paperId) =>
+  percentDone(inTierTopics(subject).filter((topic) => topicPapers(topic).includes(paperId)));
+
+// Groups topics for display: one group per distinct paper combination, in
+// the subject's paper order, then "Other" for topics with no known paper.
+// Returns [] when no topic has a paper, so callers can keep a flat list.
+export const groupTopicsByPaper = (subject, topics = subject.topics) => {
+  const papers = subject.papers || [];
+  const order = new Map(papers.map((paper, index) => [paper.id, index]));
+  const known = (topic) => topicPapers(topic).filter((id) => order.has(id));
+  if (!topics.some((topic) => known(topic).length)) return [];
+
+  const groups = new Map();
+  topics.forEach((topic) => {
+    const ids = known(topic).sort((a, b) => order.get(a) - order.get(b));
+    const key = ids.join("+") || "";
+    if (!groups.has(key)) {
+      const name = !ids.length
+        ? "Other"
+        : ids.length > 1 && ids.length === papers.length
+          ? "All papers"
+          : ids.map((id) => papers[order.get(id)].name).join(" & ");
+      groups.set(key, { key, paperIds: ids, name, topics: [] });
+    }
+    groups.get(key).topics.push(topic);
+  });
+
+  return [...groups.values()].sort((a, b) => {
+    if (!a.paperIds.length) return 1;
+    if (!b.paperIds.length) return -1;
+    return order.get(a.paperIds[0]) - order.get(b.paperIds[0]) || a.paperIds.length - b.paperIds.length;
+  });
+};

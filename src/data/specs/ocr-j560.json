@@ -147,6 +147,86 @@
         "p3"
       ],
       "higherOnly": false
+    },
+    {
+      "id": "ocr-j560-t13",
+      "name": "Equation of a circle and tangents",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j560-t14",
+      "name": "Solving equations by iteration",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j560-t15",
+      "name": "Instantaneous and average rates of change",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j560-t16",
+      "name": "Combined transformations",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j560-t17",
+      "name": "Circle theorems",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j560-t18",
+      "name": "Sine and cosine rules",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j560-t19",
+      "name": "Conditional probability",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "ocr-j560-t20",
+      "name": "Histograms with unequal class widths",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
     }
   ],
   "optionGroups": [],

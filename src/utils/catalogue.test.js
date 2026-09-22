@@ -67,6 +67,21 @@ describe("catalogue files", () => {
     );
   });
 
+  it.each(SPECS.filter((spec) => spec.tiers).map((spec) => [spec.id, spec]))(
+    "tiered %s has at least one higher-only topic",
+    (_id, spec) => {
+      expect(spec.topics.some((topic) => topic.higherOnly)).toBe(true);
+      // ...and still has plenty of Foundation content.
+      expect(spec.topics.filter((topic) => !topic.higherOnly).length).toBeGreaterThan(5);
+    }
+  );
+
+  it("untiered specs have no higher-only topics", () => {
+    SPECS.filter((spec) => !spec.tiers).forEach((spec) =>
+      expect(spec.topics.filter((topic) => topic.higherOnly), spec.id).toEqual([])
+    );
+  });
+
   // Wave 1: the four core GCSEs on each of the three big boards.
   it.each(["AQA", "Edexcel", "OCR"])("offers every core GCSE on %s", (board) => {
     const gcse = SPECS.filter((spec) => spec.board === board && spec.qualification === "gcse");
@@ -265,8 +280,10 @@ describe("subjectFromSpec", () => {
         done: false,
         subtasks: [],
         catalogueTopicId: spec.topics[index].id,
+        paper: spec.topics[index].paper,
       });
     });
+    expect(subject.papers).toEqual(spec.papers);
     expect(normalizeSubjects([subject])).toEqual([subject]);
   });
 
