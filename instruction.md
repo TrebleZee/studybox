@@ -66,6 +66,10 @@ This file documents the app structure so future changes stay consistent.
 - Preserve the existing PWA support and local-only data model.
 - `vite.config.js`'s workbox config must keep `navigateFallback: 'index.html'` set - without it, an offline reload or a fresh open of the installed PWA hits the browser's own offline error page instead of the cached app shell.
 
+## Line endings
+
+- `.gitattributes` pins text files to LF on every platform (`* text=auto eol=lf`) and marks images, PDFs and fonts as binary. Scripts that write files (e.g. `scripts/build-spec-index.js`) should write LF.
+
 ## Code layout
 
 - Keep pure logic in `src/utils/` with a sibling `*.test.js`; keep views in `src/components/` with a `*.test.jsx`.
