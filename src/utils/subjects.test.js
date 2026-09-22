@@ -9,7 +9,7 @@ import {
   normalizeSubjects,
   subjectLabel,
   subjectProgress,
-  subjectsForTemplate,
+  subjectsFromPresets,
   topicList,
   updateSubjectFields,
 } from "./subjects.js";
@@ -49,42 +49,67 @@ describe("onboarding templates", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("subjectsForTemplate builds a full, unchecked, deterministic subject list per template", () => {
+  it("each template lists either presets or catalogue specs, never both", () => {
     TEMPLATES.forEach((template) => {
-      const subjects = subjectsForTemplate(template.id);
-      expect(subjects.length).toBeGreaterThan(0);
-      expect(subjects.map((s) => s.id)).toEqual(template.presets.map((p) => p.id));
-      subjects.forEach((s) => {
-        expect(s.topics.length).toBeGreaterThan(0);
-        expect(s.topics.every((t) => t.done === false)).toBe(true);
-      });
-      expect(subjectsForTemplate(template.id)).toEqual(subjects);
+      expect(Boolean(template.presets) !== Boolean(template.specs)).toBe(true);
     });
+    expect(TEMPLATES.find((t) => t.id === "alevel").presets).toBeTruthy();
+    expect(TEMPLATES.find((t) => t.id === "gcse").specs.map((s) => s.specId)).toEqual([
+      "aqa-8700",
+      "aqa-8702",
+      "aqa-8300",
+      "aqa-8464",
+    ]);
   });
 
-  it("the GCSE template covers the core subjects with a shape matching SUBJECT_PRESETS", () => {
-    const gcse = TEMPLATES.find((t) => t.id === "gcse");
-    expect(gcse.presets.map((p) => p.name).sort()).toEqual(
-      ["Combined Science", "English", "Maths"].sort()
-    );
-    const subjects = subjectsForTemplate("gcse");
+  // subjectsForTemplate itself lives in catalogue.js; see catalogue.test.js.
+});
+
+describe("onboarding guard (catalogue must not change the A-level default)", () => {
+  it("defaultSubjects() still returns the frozen A-level preset set", () => {
+    const subjects = defaultSubjects();
+    expect(subjects).toEqual(subjectsFromPresets(TEMPLATES.find((t) => t.id === "alevel").presets));
+    expect(subjects.map((s) => [s.id, s.exam, s.topics.length])).toEqual([
+      ["physics", "OCR A", 6],
+      ["maths", "Edexcel", 14],
+      ["further", "Edexcel", 12],
+      ["cs", "OCR", 10],
+    ]);
     subjects.forEach((s) => {
-      expect(s).toMatchObject({
-        id: expect.any(String),
-        name: expect.any(String),
-        exam: expect.any(String),
-        color: expect.any(String),
-      });
-      expect(SUBJECT_PRESETS.some((p) => p.id === s.id)).toBe(true);
+      expect(s).not.toHaveProperty("board");
+      s.topics.forEach((t) => expect(t).not.toHaveProperty("catalogueTopicId"));
     });
   });
 
-  it("returns [] for an unknown template id instead of throwing", () => {
-    expect(subjectsForTemplate("nope")).toEqual([]);
+  it("isUntouchedDefaultSubjects still detects an untouched install and nothing else", () => {
+    expect(isUntouchedDefaultSubjects(defaultSubjects())).toBe(true);
+    expect(isUntouchedDefaultSubjects(normalizeSubjects(defaultSubjects()))).toBe(true);
+    expect(isUntouchedDefaultSubjects(normalizeSubjects(undefined))).toBe(true);
+    const tagged = normalizeSubjects(defaultSubjects());
+    tagged[0].topics[0] = { ...tagged[0].topics[0], catalogueTopicId: "ocr-h556-t01" };
+    expect(isUntouchedDefaultSubjects(tagged)).toBe(false);
   });
+});
 
-  it("picking a non-alevel template is never mistaken for the untouched default", () => {
-    expect(isUntouchedDefaultSubjects(subjectsForTemplate("gcse"))).toBe(false);
+describe("catalogueTopicId", () => {
+  it("is kept by normalization when present and never invented", () => {
+    const [subject] = normalizeSubjects([
+      {
+        id: "s",
+        name: "S",
+        board: "AQA",
+        qualification: "gcse",
+        topics: [
+          { id: "a", name: "A", catalogueTopicId: "aqa-8300-t01" },
+          { id: "b", name: "B" },
+          { id: "c", name: "C", catalogueTopicId: 42 },
+        ],
+      },
+    ]);
+    expect(subject.topics[0].catalogueTopicId).toBe("aqa-8300-t01");
+    expect(subject.topics[1]).not.toHaveProperty("catalogueTopicId");
+    expect(subject.topics[2]).not.toHaveProperty("catalogueTopicId");
+    expect(normalizeSubjects([subject])).toEqual([subject]);
   });
 });
 

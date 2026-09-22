@@ -8,7 +8,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
+        // Spec catalogue files are lazy chunks; they must be precached too so
+        // catalogue-backed onboarding templates work offline.
+        globPatterns: ['**/*.{js,json,css,html,png,svg,ico,woff2}'],
         // StudyBox is a single-route SPA, so any offline navigation (a deep
         // link, a reload, or the installed PWA's start_url) should fall back
         // to the cached app shell instead of failing with no network.

@@ -98,7 +98,9 @@ export const SUBJECT_PRESETS = [...ALEVEL_PRESETS, ...GCSE_PRESETS];
 
 // Onboarding starter templates. "alevel" doubles as the app's true default
 // (see defaultSubjects below) - every other template is only ever reached
-// by an explicit choice in Onboarding.
+// by an explicit choice in Onboarding. A template either lists `presets`
+// (built from TOPIC_SEED) or `specs` (loaded from the catalogue in
+// src/data/specs, see subjectsForTemplate in catalogue.js).
 export const TEMPLATES = [
   {
     id: "alevel",
@@ -110,8 +112,18 @@ export const TEMPLATES = [
   {
     id: "gcse",
     name: "GCSE core subjects",
-    description: "English, Maths and Combined Science with sample GCSE topics.",
-    presets: GCSE_PRESETS,
+    description:
+      "AQA English Language, English Literature, Maths and Combined Science with their spec topic lists.",
+    specs: [
+      { specId: "aqa-8700", color: "#F472B6" },
+      {
+        specId: "aqa-8702",
+        color: "#FB923C",
+        optionIds: ["macbeth", "christmas-carol", "inspector-calls", "power-and-conflict"],
+      },
+      { specId: "aqa-8300", color: "#34D399" },
+      { specId: "aqa-8464", color: "#60A5FA" },
+    ],
   },
 ];
 
@@ -123,18 +135,13 @@ export const topicList = (seed, prefix) =>
     subtasks: [],
   }));
 
-const subjectsFromPresets = (presets) =>
+export const subjectsFromPresets = (presets) =>
   presets.map((subject) => ({
     ...subject,
     topics: topicList(TOPIC_SEED[subject.id] || [], subject.id.slice(0, 2)),
   }));
 
 export const defaultSubjects = () => subjectsFromPresets(ALEVEL_PRESETS);
-
-export const subjectsForTemplate = (templateId) => {
-  const template = TEMPLATES.find((item) => item.id === templateId);
-  return template ? subjectsFromPresets(template.presets) : [];
-};
 
 export const QUALIFICATIONS = ["gcse", "alevel", "as", "other"];
 export const BOARDS = ["AQA", "Edexcel", "OCR", "Eduqas", "WJEC", "CCEA", "Custom"];
@@ -297,6 +304,10 @@ export const normalizeSubject = (subject, index = 0) => {
           done: Boolean(subtask?.done),
         })
       ),
+      // Only topics seeded from the catalogue carry this.
+      ...(typeof topic?.catalogueTopicId === "string"
+        ? { catalogueTopicId: topic.catalogueTopicId }
+        : {}),
     })),
   };
 };

@@ -1,0 +1,426 @@
+{
+  "id": "aqa-8702",
+  "qualification": "gcse",
+  "board": "AQA",
+  "spec": "8702",
+  "subject": "English Literature",
+  "specName": "English Literature",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/english/specifications/AQA-8702-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Shakespeare and the 19th-century novel"
+    },
+    {
+      "id": "p2",
+      "name": "Modern texts and poetry"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-8702-t01",
+      "name": "Unseen poetry",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t02",
+      "name": "Shakespeare: Macbeth",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t03",
+      "name": "Shakespeare: Romeo and Juliet",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t04",
+      "name": "Shakespeare: The Tempest",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t05",
+      "name": "Shakespeare: The Merchant of Venice",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t06",
+      "name": "Shakespeare: Much Ado About Nothing",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t07",
+      "name": "Shakespeare: Julius Caesar",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t08",
+      "name": "19th-century novel: The Strange Case of Dr Jekyll and Mr Hyde",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t09",
+      "name": "19th-century novel: A Christmas Carol",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t10",
+      "name": "19th-century novel: Great Expectations",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t11",
+      "name": "19th-century novel: Jane Eyre",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t12",
+      "name": "19th-century novel: Frankenstein",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t13",
+      "name": "19th-century novel: Pride and Prejudice",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t14",
+      "name": "19th-century novel: The Sign of Four",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t15",
+      "name": "Modern text: An Inspector Calls",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t16",
+      "name": "Modern text: Blood Brothers",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t17",
+      "name": "Modern text: DNA",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t18",
+      "name": "Modern text: A Taste of Honey",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t19",
+      "name": "Modern text: Princess & The Hustler",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t20",
+      "name": "Modern text: Leave Taking",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t21",
+      "name": "Modern text: Lord of the Flies",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t22",
+      "name": "Modern text: Telling Tales",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t23",
+      "name": "Modern text: Animal Farm",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t24",
+      "name": "Modern text: Anita and Me",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t25",
+      "name": "Modern text: Pigeon English",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t26",
+      "name": "Modern text: My Name is Leon",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t27",
+      "name": "Poetry anthology: Love and Relationships",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t28",
+      "name": "Poetry anthology: Power and Conflict",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8702-t29",
+      "name": "Poetry anthology: Worlds and Lives",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "shakespeare",
+      "name": "Shakespeare play",
+      "pick": 1,
+      "options": [
+        {
+          "id": "macbeth",
+          "name": "Macbeth",
+          "topicIds": [
+            "aqa-8702-t02"
+          ]
+        },
+        {
+          "id": "romeo-and-juliet",
+          "name": "Romeo and Juliet",
+          "topicIds": [
+            "aqa-8702-t03"
+          ]
+        },
+        {
+          "id": "the-tempest",
+          "name": "The Tempest",
+          "topicIds": [
+            "aqa-8702-t04"
+          ]
+        },
+        {
+          "id": "merchant-of-venice",
+          "name": "The Merchant of Venice",
+          "topicIds": [
+            "aqa-8702-t05"
+          ]
+        },
+        {
+          "id": "much-ado",
+          "name": "Much Ado About Nothing",
+          "topicIds": [
+            "aqa-8702-t06"
+          ]
+        },
+        {
+          "id": "julius-caesar",
+          "name": "Julius Caesar",
+          "topicIds": [
+            "aqa-8702-t07"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "novel",
+      "name": "19th-century novel",
+      "pick": 1,
+      "options": [
+        {
+          "id": "jekyll-and-hyde",
+          "name": "The Strange Case of Dr Jekyll and Mr Hyde",
+          "topicIds": [
+            "aqa-8702-t08"
+          ]
+        },
+        {
+          "id": "christmas-carol",
+          "name": "A Christmas Carol",
+          "topicIds": [
+            "aqa-8702-t09"
+          ]
+        },
+        {
+          "id": "great-expectations",
+          "name": "Great Expectations",
+          "topicIds": [
+            "aqa-8702-t10"
+          ]
+        },
+        {
+          "id": "jane-eyre",
+          "name": "Jane Eyre",
+          "topicIds": [
+            "aqa-8702-t11"
+          ]
+        },
+        {
+          "id": "frankenstein",
+          "name": "Frankenstein",
+          "topicIds": [
+            "aqa-8702-t12"
+          ]
+        },
+        {
+          "id": "pride-and-prejudice",
+          "name": "Pride and Prejudice",
+          "topicIds": [
+            "aqa-8702-t13"
+          ]
+        },
+        {
+          "id": "sign-of-four",
+          "name": "The Sign of Four",
+          "topicIds": [
+            "aqa-8702-t14"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "modern",
+      "name": "Modern prose or drama",
+      "pick": 1,
+      "options": [
+        {
+          "id": "inspector-calls",
+          "name": "An Inspector Calls",
+          "topicIds": [
+            "aqa-8702-t15"
+          ]
+        },
+        {
+          "id": "blood-brothers",
+          "name": "Blood Brothers",
+          "topicIds": [
+            "aqa-8702-t16"
+          ]
+        },
+        {
+          "id": "dna",
+          "name": "DNA",
+          "topicIds": [
+            "aqa-8702-t17"
+          ]
+        },
+        {
+          "id": "taste-of-honey",
+          "name": "A Taste of Honey",
+          "topicIds": [
+            "aqa-8702-t18"
+          ]
+        },
+        {
+          "id": "princess-and-the-hustler",
+          "name": "Princess & The Hustler",
+          "topicIds": [
+            "aqa-8702-t19"
+          ]
+        },
+        {
+          "id": "leave-taking",
+          "name": "Leave Taking",
+          "topicIds": [
+            "aqa-8702-t20"
+          ]
+        },
+        {
+          "id": "lord-of-the-flies",
+          "name": "Lord of the Flies",
+          "topicIds": [
+            "aqa-8702-t21"
+          ]
+        },
+        {
+          "id": "telling-tales",
+          "name": "Telling Tales",
+          "topicIds": [
+            "aqa-8702-t22"
+          ]
+        },
+        {
+          "id": "animal-farm",
+          "name": "Animal Farm",
+          "topicIds": [
+            "aqa-8702-t23"
+          ]
+        },
+        {
+          "id": "anita-and-me",
+          "name": "Anita and Me",
+          "topicIds": [
+            "aqa-8702-t24"
+          ]
+        },
+        {
+          "id": "pigeon-english",
+          "name": "Pigeon English",
+          "topicIds": [
+            "aqa-8702-t25"
+          ]
+        },
+        {
+          "id": "my-name-is-leon",
+          "name": "My Name is Leon",
+          "topicIds": [
+            "aqa-8702-t26"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poetry",
+      "name": "Poetry anthology cluster",
+      "pick": 1,
+      "options": [
+        {
+          "id": "love-and-relationships",
+          "name": "Love and Relationships",
+          "topicIds": [
+            "aqa-8702-t27"
+          ]
+        },
+        {
+          "id": "power-and-conflict",
+          "name": "Power and Conflict",
+          "topicIds": [
+            "aqa-8702-t28"
+          ]
+        },
+        {
+          "id": "worlds-and-lives",
+          "name": "Worlds and Lives",
+          "topicIds": [
+            "aqa-8702-t29"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

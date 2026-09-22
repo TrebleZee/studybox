@@ -25,9 +25,9 @@ import {
   normalizeSessions,
   normalizeSubject,
   normalizeSubjects,
-  subjectsForTemplate,
   updateSubjectFields,
 } from "./utils/subjects.js";
+import { subjectsForTemplate } from "./utils/catalogue.js";
 import { THEMES } from "./utils/themes.js";
 
 const readFileText = (file) =>
@@ -345,11 +345,19 @@ export default function StudyBox() {
     setOnboarded(true);
   };
 
-  const useTemplate = (templateId) => {
-    const template = normalizeSubjects(subjectsForTemplate(templateId));
-    setSubjects(template);
-    setSel(template[0]?.id ?? null);
-    setOnboarded(true);
+  // Catalogue-backed templates load their spec chunks on demand, so this is
+  // async; Onboarding shows an error if that load fails.
+  const useTemplate = async (templateId) => {
+    try {
+      const template = await subjectsForTemplate(templateId);
+      if (!template.length) return { ok: false, error: "That template couldn't be loaded." };
+      setSubjects(template);
+      setSel(template[0].id);
+      setOnboarded(true);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "That template couldn't be loaded. Check your connection and try again." };
+    }
   };
 
   const needsOnboarding =

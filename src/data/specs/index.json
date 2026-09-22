@@ -1,0 +1,66 @@
+[
+  {
+    "id": "aqa-8300",
+    "qualification": "gcse",
+    "board": "AQA",
+    "spec": "8300",
+    "subject": "Mathematics",
+    "specName": "Mathematics"
+  },
+  {
+    "id": "aqa-8464",
+    "qualification": "gcse",
+    "board": "AQA",
+    "spec": "8464",
+    "subject": "Combined Science",
+    "specName": "Combined Science Trilogy"
+  },
+  {
+    "id": "aqa-8700",
+    "qualification": "gcse",
+    "board": "AQA",
+    "spec": "8700",
+    "subject": "English Language",
+    "specName": "English Language"
+  },
+  {
+    "id": "aqa-8702",
+    "qualification": "gcse",
+    "board": "AQA",
+    "spec": "8702",
+    "subject": "English Literature",
+    "specName": "English Literature"
+  },
+  {
+    "id": "edexcel-9fm0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9FM0",
+    "subject": "Further Mathematics",
+    "specName": "Further Mathematics"
+  },
+  {
+    "id": "edexcel-9ma0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9MA0",
+    "subject": "Mathematics",
+    "specName": "Mathematics"
+  },
+  {
+    "id": "ocr-h446",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H446",
+    "subject": "Computer Science",
+    "specName": "Computer Science"
+  },
+  {
+    "id": "ocr-h556",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H556",
+    "subject": "Physics",
+    "specName": "Physics A"
+  }
+]

@@ -1,4 +1,4 @@
-# StudyBox - v1.3.0
+# StudyBox - v1.4.0
 
 StudyBox is a lightweight study planner and revision timer built with React and Vite. It is designed to help you track topics, mark progress, time revision sessions, and keep a simple local history of your study work.
 
@@ -9,6 +9,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Supports custom subjects with your own name, colour, qualification (GCSE, A-level, AS or other), exam board (AQA, Edexcel, OCR, Eduqas, WJEC, CCEA or custom), optional spec code and, for GCSE, foundation or higher tier
 - Labels each subject clearly, e.g. "OCR A-level Physics A" or "AQA GCSE Maths (Higher)"
 - Lets you edit or delete the built-in subjects as well
+- Ships a built-in catalogue of real exam specifications (AQA, Pearson Edexcel and OCR), with each spec's topic headings, papers and set-text options, bundled with the app so it works offline
 - Lets you upload a subject specification PDF and auto-fill the subject name, exam board, and topic checklist
 - Includes several theme presets so you can change the app's overall look
 - Includes a built-in timer for focused study sessions
@@ -24,7 +25,7 @@ The first time you open StudyBox you choose how to begin:
 - **Start blank** and add your own subjects and topics
 - Pick a **starter template** you can freely edit or delete:
   - **A-Level example set** - Physics, Maths, Further Maths and Computer Science with sample A-level topics
-  - **GCSE core subjects** - English, Maths and Combined Science with sample GCSE topics
+  - **GCSE core subjects** - AQA English Language, English Literature (starting with Macbeth, A Christmas Carol, An Inspector Calls and Power and Conflict), Maths and Combined Science: Trilogy, with each spec's topic list
 - **Restore from file** if you already have a backup
 
 ## How it works
@@ -85,6 +86,10 @@ npm run build
 npm run preview
 ```
 
+### Spec catalogue
+
+Spec files live in `src/data/specs/` (one `<board>-<spec>.json` per specification). `src/data/specs/index.json` is generated from them by `scripts/build-spec-index.js`, which runs automatically before `npm run build` and `npm test`, so don't edit it by hand.
+
 ### Lint and test
 
 ```bash
@@ -107,7 +112,9 @@ StudyBox includes PWA support through `vite-plugin-pwa`. On a supported browser,
 - `src/App.jsx` - app shell: state, persistence effects, handlers and the view switch
 - `src/components/` - `PlannerView`, `LogView`, `SettingsView` (with `settings/` cards), `Onboarding`, `TopBar`, `AnalysisPanel`, `AsanaTasksPanel` and smaller pieces
 - `src/hooks/useTimer.js` - timestamp-anchored study timer
-- `src/utils/` - formatting, storage, subject normalisation, streak/XP logic, backup and themes
+- `src/utils/` - formatting, storage, subject normalisation, spec catalogue, streak/XP logic, backup and themes
+- `src/data/specs/` - the spec catalogue (one JSON file per specification plus a generated search index)
+- `scripts/` - dev scripts (`build-spec-index.js`)
 - `src/services/asanaClient.js` - optional Asana API client
 - `public/` - icons and favicon assets
 

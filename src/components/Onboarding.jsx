@@ -14,6 +14,18 @@ const optionStyle = (C) => ({
 
 export default function Onboarding({ C, onStartBlank, onUseTemplate, onRestore }) {
   const [error, setError] = useState("");
+  const [loadingTemplate, setLoadingTemplate] = useState(null);
+
+  const chooseTemplate = async (templateId) => {
+    setLoadingTemplate(templateId);
+    setError("");
+    const result = await onUseTemplate(templateId);
+    // On success Onboarding unmounts, so only a failure needs state updates.
+    if (!result?.ok) {
+      setLoadingTemplate(null);
+      setError(result?.error || "That template couldn't be loaded.");
+    }
+  };
 
   return (
     <div
@@ -55,10 +67,15 @@ export default function Onboarding({ C, onStartBlank, onUseTemplate, onRestore }
               key={template.id}
               type="button"
               className="nb"
-              onClick={() => onUseTemplate(template.id)}
+              disabled={loadingTemplate !== null}
+              aria-busy={loadingTemplate === template.id}
+              onClick={() => chooseTemplate(template.id)}
               style={optionStyle(C)}
             >
-              <div style={{ fontWeight: 700, fontSize: "13px" }}>Use {template.name}</div>
+              <div style={{ fontWeight: 700, fontSize: "13px" }}>
+                Use {template.name}
+                {loadingTemplate === template.id ? " (loading…)" : ""}
+              </div>
               <div style={{ color: C.muted, fontSize: "11px", marginTop: "3px" }}>
                 {template.description} Edit or delete anything.
               </div>
