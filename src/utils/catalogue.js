@@ -153,6 +153,14 @@ export const listSpecs = (filters = {}, index = specIndex) =>
       (!filters.query || matchesQuery(entry, filters.query))
   );
 
+// The catalogue entry for a board + spec code (e.g. from inferSpecCode), or
+// null. Deprecated specs still match: an old PDF should find its old spec.
+export const findSpec = (board, spec, index = specIndex) => {
+  if (typeof board !== "string" || typeof spec !== "string") return null;
+  const id = `${board}-${spec}`.toLowerCase();
+  return index.find((entry) => entry.id === id) || null;
+};
+
 export const loadSpec = async (id) => {
   const loader = Object.hasOwn(SPEC_LOADERS, id) ? SPEC_LOADERS[id] : null;
   return loader ? loader() : null;
