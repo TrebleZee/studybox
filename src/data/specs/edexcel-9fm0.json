@@ -142,7 +142,7 @@
     },
     {
       "id": "edexcel-9fm0-t11",
-      "name": "Further calculus",
+      "name": "Further calculus (Further Pure 1)",
       "paper": "3a",
       "higherOnly": false
     },
@@ -160,7 +160,7 @@
     },
     {
       "id": "edexcel-9fm0-t14",
-      "name": "Further vectors",
+      "name": "Further vectors (Further Pure 1)",
       "paper": "3a",
       "higherOnly": false
     },
@@ -292,7 +292,7 @@
     },
     {
       "id": "edexcel-9fm0-t36",
-      "name": "Further calculus",
+      "name": "Further calculus (Further Pure 2)",
       "paper": "4a",
       "higherOnly": false
     },

@@ -100,6 +100,15 @@ describe("validateSpec rejects broken fixtures", () => {
       /duplicate topic id/,
     ],
     [
+      "two topics with the same name (case-insensitive)",
+      (s) => ({
+        ...s,
+        topics: [...s.topics, { ...s.topics[0], id: "aqa-8702-t99", name: " unseen POETRY " }],
+      }),
+      undefined,
+      /duplicate topic name/,
+    ],
+    [
       "topic id without the spec prefix",
       (s) => ({ ...s, topics: [{ ...s.topics[0], id: "t01" }, ...s.topics.slice(1)] }),
       undefined,

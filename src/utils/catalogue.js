@@ -67,6 +67,9 @@ export const validateSpec = (spec, fileName) => {
   });
 
   const topicIds = new Set();
+  // Names must be unique within a spec too, or a seeded checklist can show
+  // two identical items (e.g. core and option "Further calculus").
+  const topicNames = new Set();
   if (!Array.isArray(spec.topics) || !spec.topics.length) fail("topics must be a non-empty list");
   (Array.isArray(spec.topics) ? spec.topics : []).forEach((topic) => {
     if (!isNonEmptyString(topic?.id) || !topic.id.startsWith(`${spec.id}-`)) {
@@ -75,6 +78,9 @@ export const validateSpec = (spec, fileName) => {
     if (topicIds.has(topic?.id)) fail(`duplicate topic id ${topic?.id}`);
     topicIds.add(topic?.id);
     if (!isNonEmptyString(topic?.name)) fail(`topic ${topic?.id} needs a name`);
+    const nameKey = String(topic?.name).trim().toLowerCase();
+    if (topicNames.has(nameKey)) fail(`duplicate topic name "${topic?.name}"`);
+    topicNames.add(nameKey);
     const papers = topicPapers(topic);
     if (!papers.length) fail(`topic ${topic?.id} needs a paper`);
     papers.forEach((paper) => {

@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import Onboarding from "./Onboarding.jsx";
 import { THEMES } from "../utils/themes.js";
 import userEvent from "@testing-library/user-event";
@@ -54,8 +54,11 @@ describe("first-run onboarding", () => {
     expect(screen.getByRole("button", { name: "English Literature" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Combined Science" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Physics" })).toBeNull();
-    expect(JSON.parse(localStorage.getItem("sb-subjects"))).toEqual(await subjectsForTemplate("gcse"));
-    expect(localStorage.getItem("sb-onboarded")).toBe("true");
+    const expected = await subjectsForTemplate("gcse");
+    await waitFor(() => {
+      expect(JSON.parse(localStorage.getItem("sb-subjects"))).toEqual(expected);
+      expect(localStorage.getItem("sb-onboarded")).toBe("true");
+    });
   });
 
   it("shows an error and re-enables the templates if one can't be loaded", async () => {
