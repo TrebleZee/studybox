@@ -19,10 +19,18 @@ The reviewer confirmed these invariants:
 
 Also fixed, not a finding: the reviewer noted instruction.md still described `addSubject` in its pre-F3 form. That line is updated.
 
+## Round 2 (re-check of the fix commit d2255ec..ede9c93)
+
+Verdict: R1 is confirmed fixed. One new low finding on a sibling path, fixed below. It was not re-reviewed, because the gate allows two rounds at most.
+
+| ID | Severity | Category | File | Summary | Outcome |
+| --- | --- | --- | --- | --- | --- |
+| R2 | low | correctness | src/components/SubjectPicker.jsx:115 | Choosing a board with several specs didn't abandon a single-spec load started from the same board list. For example, AQA Maths still loading when OCR is clicked would later jump to AQA's details. | Fixed: `chooseBoard` bumps the request counter. Test: AQA Maths is held open, OCR is clicked, the load is released, and the picker stays on OCR's spec list. |
+
 ## Follow-ups (not fixed on this branch)
 
 None.
 
 ## Checks
 
-lint pass · test pass (411 tests, 26 files) · build pass
+lint pass · test pass (412 tests, 26 files) · build pass

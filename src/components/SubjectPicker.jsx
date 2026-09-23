@@ -106,6 +106,7 @@ export default function SubjectPicker({ C, existingSubjects = [], mode = "single
   };
 
   const chooseBoard = (next) => {
+    specRequest.current += 1; // a different board abandons any spec still loading
     setBoard(next);
     const available = next.specs.filter((item) => !specAlreadyAdded(taken, item));
     if (next.specs.length === 1) {

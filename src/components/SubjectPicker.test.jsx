@@ -204,6 +204,25 @@ describe("SubjectPicker", () => {
     expect(screen.queryByRole("button", { name: "Add subject" })).toBeNull();
   });
 
+  it("ignores a slow spec load when another board is chosen meanwhile", async () => {
+    const user = userEvent.setup();
+    const { loadSpec } = await import("../utils/catalogue.js");
+    const actual = (await vi.importActual("../utils/catalogue.js")).loadSpec;
+    let release;
+    loadSpec.mockImplementationOnce((id) => new Promise((resolve) => (release = () => resolve(actual(id)))));
+
+    render(<SubjectPicker C={C} mode="single" onConfirm={vi.fn()} />);
+    await user.click(screen.getByRole("radio", { name: "A-level" }));
+    await user.click(subjectButton(/^Mathematics/));
+    await user.click(boardButton(/^AQA/)); // one spec: load held open
+    await user.click(boardButton(/^OCR/)); // two specs: goes to the spec list
+    expect(screen.getByRole("heading", { name: /OCR Mathematics: which specification/ })).toBeTruthy();
+
+    await act(async () => release());
+    expect(screen.getByRole("heading", { name: /OCR Mathematics: which specification/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Add subject" })).toBeNull();
+  });
+
   it("says so when nothing matches", async () => {
     const user = userEvent.setup();
     render(<SubjectPicker C={C} mode="single" onConfirm={vi.fn()} />);
