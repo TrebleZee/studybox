@@ -31,7 +31,7 @@ export default function SettingsView({
             gap: "12px",
           }}
         >
-          <AddSubjectCard C={C} onAddSubject={onAddSubject} />
+          <AddSubjectCard C={C} subjects={subjects} onAddSubject={onAddSubject} />
           <EditSubjectsCard
             C={C}
             subjects={subjects}

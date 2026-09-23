@@ -162,6 +162,46 @@ export const listSpecs = (filters = {}, index = specIndex) =>
       (!filters.query || matchesQuery(entry, filters.query))
   );
 
+const LEVEL_ORDER = { gcse: 0, as: 1, alevel: 2 };
+
+// Index entries grouped for the subject picker: one group per subject and
+// level (e.g. "Mathematics · GCSE"), each listing its boards and, per board,
+// the specs (OCR offers Maths A and Maths B). Sorted by subject, then level.
+export const groupSpecsBySubject = (entries) => {
+  const groups = new Map();
+  entries.forEach((entry) => {
+    const key = `${entry.qualification}|${entry.subject}`;
+    if (!groups.has(key)) {
+      groups.set(key, { key, subject: entry.subject, qualification: entry.qualification, boards: new Map() });
+    }
+    const boards = groups.get(key).boards;
+    if (!boards.has(entry.board)) boards.set(entry.board, []);
+    boards.get(entry.board).push(entry);
+  });
+  return [...groups.values()]
+    .map((group) => ({
+      ...group,
+      boards: [...group.boards.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([board, specs]) => ({ board, specs: [...specs].sort((a, b) => a.spec.localeCompare(b.spec)) })),
+    }))
+    .sort(
+      (a, b) =>
+        a.subject.localeCompare(b.subject) || LEVEL_ORDER[a.qualification] - LEVEL_ORDER[b.qualification]
+    );
+};
+
+// Whether a subject for this catalogue entry is already in `subjects`
+// (matched on board and spec code, so it also catches subjects made by hand
+// or from a PDF for the same spec).
+export const specAlreadyAdded = (subjects, entry) =>
+  subjects.some(
+    (subject) =>
+      subject.board === entry.board &&
+      typeof subject.spec === "string" &&
+      subject.spec.trim().toUpperCase() === entry.spec.toUpperCase()
+  );
+
 // The catalogue entry for a board + spec code (e.g. from inferSpecCode), or
 // null. Deprecated specs still match: an old PDF should find its old spec.
 export const findSpec = (board, spec, index = specIndex) => {

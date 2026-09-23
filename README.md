@@ -1,4 +1,4 @@
-# StudyBox - v1.9.0
+# StudyBox - v1.10.0
 
 StudyBox is a lightweight study planner and revision timer built with React and Vite. It is designed to help you track topics, mark progress, time revision sessions, and keep a simple local history of your study work.
 
@@ -9,6 +9,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Groups topics by exam paper with a progress bar per paper, for subjects from the catalogue; Foundation-tier GCSEs hide higher-tier-only topics (with a toggle to show them) and progress counts only your tier
 - Supports custom subjects with your own name, colour, qualification (GCSE, A-level, AS or other), exam board (AQA, Edexcel, OCR, Eduqas, WJEC, CCEA or custom), optional spec code and, for GCSE, foundation or higher tier
 - Labels each subject clearly, e.g. "OCR A-level Physics A" or "AQA GCSE Maths (Higher)"
+- Lets you add subjects from the catalogue in Settings (**Add from catalogue**) as well as by hand or from a spec PDF
 - Lets you edit or delete the built-in subjects as well
 - Ships a built-in catalogue of real exam specifications (AQA, Pearson Edexcel and OCR), with each spec's topic headings, papers and set-text options, bundled with the app so it works offline. It covers GCSE Maths, English Language, English Literature and Combined Science (including AQA Synergy and both OCR suites) on AQA, Edexcel and OCR, and the most-taken A-levels - Maths, Further Maths, Psychology, Biology, Chemistry, Business, Physics, History, Sociology, Art and Design, Economics and Computer Science - on every board that offers them
 - Lets you upload a subject specification PDF and auto-fill the subject name, exam board, spec code, qualification and topic checklist; if StudyBox recognises the spec code (e.g. AQA 8300, OCR H556, Edexcel 9MA0) it offers its own verified topic list instead of the one read from the PDF
@@ -24,6 +25,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 
 The first time you open StudyBox you choose how to begin:
 
+- **Choose my subjects**: search the catalogue, pick your exam board, specification, tier and set texts or options for each subject (GCSE and A-level together), and get each spec's topics, papers and milestones
 - **Start blank** and add your own subjects and topics
 - Pick a **starter template** you can freely edit or delete:
   - **A-Level example set** - Physics, Maths, Further Maths and Computer Science with sample A-level topics
