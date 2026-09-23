@@ -78,6 +78,28 @@ describe("backup", () => {
     expect(restored.subjects[0]).toMatchObject({ tier: "higher", spec: "1MA1", exam: "Edexcel" });
   });
 
+  it("round-trips milestones, papers and topic tags", () => {
+    const subjects = normalizeSubjects([
+      {
+        id: "cs",
+        name: "Computer Science",
+        board: "OCR",
+        qualification: "alevel",
+        spec: "H446",
+        papers: [{ id: "p1", name: "Computer systems" }],
+        topics: [{ id: "t", name: "Networks", paper: "p1" }],
+        milestones: [
+          { id: "m1", name: "Programming project (NEA)", kind: "nea", due: "2027-03-31", done: false, catalogueMilestoneId: "ocr-h446-m01" },
+          { id: "m2", name: "Analysis write-up", kind: "coursework", due: null, done: true },
+        ],
+      },
+    ]);
+    const restored = parseBackup(JSON.stringify(buildBackup({ ...sampleState(), subjects })));
+    expect(restored.subjects).toEqual(subjects);
+    expect(restored.subjects[0].milestones).toHaveLength(2);
+    expect(restored.subjects[0].milestones[0]).toMatchObject({ due: "2027-03-31", kind: "nea", done: false });
+  });
+
   it("refuses a backup from a newer, unknown version rather than dropping its data", () => {
     expect(() => parseBackup(JSON.stringify({ version: 99, subjects: [] }))).toThrow(/newer version/);
   });

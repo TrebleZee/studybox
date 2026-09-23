@@ -167,5 +167,11 @@
     }
   ],
   "optionGroups": [],
-  "milestones": []
+  "milestones": [
+    {
+      "id": "ocr-h446-m01",
+      "name": "Programming project (NEA)",
+      "kind": "nea"
+    }
+  ]
 }

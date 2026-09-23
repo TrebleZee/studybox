@@ -6,6 +6,7 @@ import Onboarding from "./components/Onboarding.jsx";
 import PlannerView from "./components/PlannerView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import TopBar from "./components/TopBar.jsx";
+import useMilestoneReminder from "./hooks/useMilestoneReminder.js";
 import useStreakReminder from "./hooks/useStreakReminder.js";
 import useTimer from "./hooks/useTimer.js";
 import { normalizeAsanaConfig } from "./services/asanaClient.js";
@@ -28,6 +29,7 @@ import {
   updateSubjectFields,
 } from "./utils/subjects.js";
 import { subjectsForTemplate } from "./utils/catalogue.js";
+import { convertTopicToMilestone } from "./utils/milestones.js";
 import { THEMES } from "./utils/themes.js";
 
 const readFileText = (file) =>
@@ -126,6 +128,7 @@ export default function StudyBox() {
     defaultSubjectId: asanaSelected ? asanaCfg.id : sub?.id ?? null,
   });
   useStreakReminder(game);
+  useMilestoneReminder(subjects);
   const { running, displaySecs, timedSubjectId } = timer;
   const timedSubject = subjects.find((subject) => subject.id === timedSubjectId);
   const timingAsana = asanaEnabled && timedSubjectId === asanaCfg.id;
@@ -212,6 +215,58 @@ export default function StudyBox() {
           { id: Date.now().toString(), name: topicName, done: false, subtasks: [] },
         ],
       }));
+    },
+    // Milestones never touch XP or streaks.
+    addMilestone: (subjectId, { name, kind, due }) => {
+      const cleanName = name.trim();
+      if (!cleanName) return;
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) =>
+          normalizeSubject({
+            ...subject,
+            milestones: [
+              ...(subject.milestones || []),
+              { id: `ms-${Date.now().toString(36)}`, name: cleanName, kind, due: due || null, done: false },
+            ],
+          })
+        )
+      );
+    },
+    updateMilestone: (subjectId, milestoneId, patch) =>
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) =>
+          normalizeSubject({
+            ...subject,
+            milestones: (subject.milestones || []).map((milestone) =>
+              milestone.id === milestoneId ? { ...milestone, ...patch } : milestone
+            ),
+          })
+        )
+      ),
+    deleteMilestone: (subjectId, milestoneId) =>
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) =>
+          normalizeSubject({
+            ...subject,
+            milestones: (subject.milestones || []).filter((milestone) => milestone.id !== milestoneId),
+          })
+        )
+      ),
+    // "Keep as topic" on the NEA offer: remembered on the topic itself, so the
+    // offer stays gone across views, reloads and backups.
+    keepAsTopic: (subjectId, topicId) =>
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) => ({
+          ...subject,
+          topics: subject.topics.map((topic) => (topic.id === topicId ? { ...topic, keepAsTopic: true } : topic)),
+        }))
+      ),
+    // Only called after the user confirms in the milestone strip.
+    convertTopicToMilestone: (subjectId, topicId) => {
+      if (expandedTopic === topicId) setExpandedTopic(null);
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) => normalizeSubject(convertTopicToMilestone(subject, topicId)))
+      );
     },
     // Patch a topic's own fields (e.g. paper, higherOnly); `undefined` removes one.
     updateTopic: (topicId, patch) =>

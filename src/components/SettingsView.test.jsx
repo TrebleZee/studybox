@@ -255,7 +255,9 @@ describe("Settings", () => {
       renderApp();
 
       expect(screen.queryByRole("button", { name: /Asana/i })).toBeNull();
-      expect(screen.queryByText(/NEA/)).toBeNull();
+      // No leftover hard-coded "NEA" planner tab. (The milestone strip may
+      // still suggest converting an NEA topic; that isn't a tab.)
+      expect(screen.queryByRole("button", { name: /NEA/ })).toBeNull();
 
       await goTo(user, "Settings");
       expect(screen.getByRole("button", { name: "Connect Asana" })).toBeTruthy();

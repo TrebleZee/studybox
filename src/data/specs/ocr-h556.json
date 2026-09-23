@@ -247,5 +247,11 @@
     }
   ],
   "optionGroups": [],
-  "milestones": []
+  "milestones": [
+    {
+      "id": "ocr-h556-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
 }

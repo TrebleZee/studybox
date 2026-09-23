@@ -146,6 +146,13 @@ export const defaultSubjects = () => subjectsFromPresets(ALEVEL_PRESETS);
 export const QUALIFICATIONS = ["gcse", "alevel", "as", "other"];
 export const BOARDS = ["AQA", "Edexcel", "OCR", "Eduqas", "WJEC", "CCEA", "Custom"];
 export const TIERS = ["foundation", "higher"];
+export const MILESTONE_KINDS = ["nea", "practical", "coursework", "other"];
+export const MILESTONE_KIND_LABELS = {
+  nea: "NEA",
+  practical: "Practical",
+  coursework: "Coursework",
+  other: "Other",
+};
 
 export const QUALIFICATION_LABELS = {
   gcse: "GCSE",
@@ -308,6 +315,49 @@ const normalizePapers = (papers) => {
   return valid.length ? valid : null;
 };
 
+// A calendar date as stored for milestones: "YYYY-MM-DD" that is a real day.
+export const isIsoDate = (value) => {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [y, m, d] = value.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+};
+
+// Optional `milestones: [{ id, name, kind, due, done }]` (plus
+// `catalogueMilestoneId` when seeded from the catalogue). The key is kept
+// only when there is at least one, so older subjects normalize as before.
+const normalizeMilestones = (milestones, subjectId) => {
+  if (!Array.isArray(milestones)) return null;
+  // Ids must be unique within the subject (edits and deletes match by id):
+  // keep the first owner of an id, give missing or repeated ids fresh ones.
+  const entries = milestones.filter((milestone) => milestone && typeof milestone === "object");
+  const taken = new Set();
+  const explicit = new Set(entries.map((milestone) => milestone.id).filter(isNonEmptyString));
+  const freshId = (index) => {
+    let n = index;
+    let id = `${subjectId || "sub"}-m${n}`;
+    while (taken.has(id) || explicit.has(id)) id = `${subjectId || "sub"}-m${++n}`;
+    return id;
+  };
+  const valid = entries
+    .map((milestone, index) => {
+      const id = isNonEmptyString(milestone.id) && !taken.has(milestone.id) ? milestone.id : freshId(index);
+      taken.add(id);
+      return { milestone, id };
+    })
+    .map(({ milestone, id }) => ({
+      id,
+      name: isNonEmptyString(milestone.name) ? milestone.name : "Untitled milestone",
+      kind: MILESTONE_KINDS.includes(milestone.kind) ? milestone.kind : "other",
+      due: isIsoDate(milestone.due) ? milestone.due : null,
+      done: Boolean(milestone.done),
+      ...(isNonEmptyString(milestone.catalogueMilestoneId)
+        ? { catalogueMilestoneId: milestone.catalogueMilestoneId }
+        : {}),
+    }));
+  return valid.length ? valid : null;
+};
+
 // A topic's optional `paper` (string, or list of strings) and `higherOnly`
 // (kept only when true).
 const topicTierFields = (topic) => {
@@ -315,6 +365,8 @@ const topicTierFields = (topic) => {
   return {
     ...(papers.length ? { paper: Array.isArray(topic.paper) ? papers : papers[0] } : {}),
     ...(topic?.higherOnly === true ? { higherOnly: true } : {}),
+    // Set when the user chose "Keep as topic" on the NEA-to-milestone offer.
+    ...(topic?.keepAsTopic === true ? { keepAsTopic: true } : {}),
   };
 };
 
@@ -322,6 +374,7 @@ export const normalizeSubject = (subject, index = 0) => {
   const preset = SUBJECT_PRESETS.find((item) => item.id === subject?.id);
   const sourceTopics = Array.isArray(subject?.topics) ? subject.topics : [];
   const papers = normalizePapers(subject?.papers);
+  const milestones = normalizeMilestones(subject?.milestones, subject?.id);
 
   return {
     id: subject?.id || `sub-${Date.now().toString(36)}-${index}`,
@@ -329,6 +382,7 @@ export const normalizeSubject = (subject, index = 0) => {
     ...subjectMetadata(subject, preset),
     color: subject?.color || preset?.color || "#4F9CF9",
     ...(papers ? { papers } : {}),
+    ...(milestones ? { milestones } : {}),
     topics: sourceTopics.map((topic, topicIndex) => ({
       id: topic?.id || `${subject?.id || "sub"}-${topicIndex}`,
       name: topic?.name || "Untitled topic",

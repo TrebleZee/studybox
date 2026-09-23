@@ -76,6 +76,20 @@ describe("catalogue files", () => {
     }
   );
 
+  it.each([
+    ["ocr-h446", "nea"],
+    ["ocr-h556", "practical"],
+    ["aqa-8464", "practical"],
+    ["edexcel-1sc0", "practical"],
+    ["ocr-j250", "practical"],
+    ["ocr-j260", "practical"],
+    ["aqa-8700", "nea"],
+    ["edexcel-1en0", "nea"],
+    ["ocr-j351", "nea"],
+  ])("%s seeds a %s milestone", (id, kind) => {
+    expect(SPECS.find((spec) => spec.id === id).milestones.map((m) => m.kind)).toContain(kind);
+  });
+
   it("untiered specs have no higher-only topics", () => {
     SPECS.filter((spec) => !spec.tiers).forEach((spec) =>
       expect(spec.topics.filter((topic) => topic.higherOnly), spec.id).toEqual([])
@@ -170,6 +184,30 @@ describe("validateSpec rejects broken fixtures", () => {
     ["tiered A-level", (s) => ({ ...s, qualification: "alevel", tiers: ["higher"] }), undefined, /only GCSE/],
     ["missing milestones list", (s) => ({ ...s, milestones: undefined }), undefined, /milestones/],
     ["non-https spec link", (s) => ({ ...s, specUrl: "http://example.com" }), undefined, /specUrl/],
+    [
+      "milestone with an unknown kind",
+      (s) => ({ ...s, milestones: [{ id: "aqa-8702-m01", name: "Essay", kind: "essay" }] }),
+      undefined,
+      /unknown kind/,
+    ],
+    [
+      "milestone id without the spec prefix",
+      (s) => ({ ...s, milestones: [{ id: "m1", name: "Essay", kind: "other" }] }),
+      undefined,
+      /milestone id m1 must start with/,
+    ],
+    [
+      "duplicate milestone id",
+      (s) => ({
+        ...s,
+        milestones: [
+          { id: "aqa-8702-m01", name: "A", kind: "other" },
+          { id: "aqa-8702-m01", name: "B", kind: "other" },
+        ],
+      }),
+      undefined,
+      /duplicate milestone id/,
+    ],
   ])("%s", (_label, mutate, fileName, pattern) => {
     const errors = validateSpec(mutate(base()), fileName ?? "aqa-8702.json");
     expect(errors.length).toBeGreaterThan(0);
@@ -309,6 +347,21 @@ describe("subjectFromSpec", () => {
     const coreCount = spec.topics.filter((t) => ["p1", "p2"].includes(topicPapers(t)[0])).length;
     expect(subject.topics).toHaveLength(coreCount + optionTopicIds.length);
     expect(subject.topics.slice(coreCount).map((t) => t.catalogueTopicId)).toEqual(optionTopicIds);
+  });
+
+  it("seeds the spec's milestones undated and not done", () => {
+    const subject = subjectFromSpec(specById("ocr-h446"));
+    expect(subject.milestones).toEqual([
+      {
+        id: "ocr-h446-m0",
+        name: "Programming project (NEA)",
+        kind: "nea",
+        due: null,
+        done: false,
+        catalogueMilestoneId: "ocr-h446-m01",
+      },
+    ]);
+    expect(subjectFromSpec(specById("edexcel-9ma0"))).not.toHaveProperty("milestones");
   });
 
   it("keeps a tier only when the spec is tiered", () => {
