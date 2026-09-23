@@ -43,27 +43,16 @@ AQA A Level Art History Specification
     );
   });
 
-  it("generates a topic checklist from headings", () => {
-    expect(inferTopicChecklist(sampleText)).toEqual([
-      "Ancient Art",
-      "Modern Art",
-      "Key Movements",
-      "Renaissance",
-      "Modernism",
-    ]);
+  it("generates a topic checklist from the deepest headings", () => {
+    expect(inferTopicChecklist(sampleText)).toEqual(["Ancient Art", "Modern Art", "Renaissance", "Modernism"]);
   });
 
   it("handles flattened PDF text with multiple headings on one line", () => {
-    const flatText =
-      "AQA A Level Art History Specification 1 Introduction to Art History 1.1 Ancient Art 1.2 Modern Art 2 Key Movements 2.1 Renaissance 2.2 Modernism";
+    const flatText = `AQA A Level Art History Specification. ${"This specification introduces the study of art. ".repeat(
+      6
+    )}1 Introduction to Art History 1.1 Ancient Art 1.2 Modern Art 2 Key Movements 2.1 Renaissance 2.2 Modernism`;
 
-    expect(inferTopicChecklist(flatText)).toEqual([
-      "Ancient Art",
-      "Modern Art",
-      "Key Movements",
-      "Renaissance",
-      "Modernism",
-    ]);
+    expect(inferTopicChecklist(flatText)).toEqual(["Ancient Art", "Modern Art", "Renaissance", "Modernism"]);
   });
 
   it("builds a draft from spec text", () => {
@@ -74,7 +63,7 @@ AQA A Level Art History Specification
       examBoard: "AQA",
       specCode: null,
       qualification: "alevel",
-      topics: ["Ancient Art", "Modern Art", "Key Movements", "Renaissance", "Modernism"],
+      topics: ["Ancient Art", "Modern Art", "Renaissance", "Modernism"],
     });
   });
 });
