@@ -63,7 +63,7 @@ describe("Settings", () => {
     expect(await screen.findByDisplayValue("Art History")).toBeTruthy();
     expect(screen.getByDisplayValue("AQA")).toBeTruthy();
     expect(screen.getByText("Ancient Art")).toBeTruthy();
-    expect(screen.getByText("5 topics found")).toBeTruthy();
+    expect(screen.getByText("4 topics found")).toBeTruthy();
     // No spec code, so no catalogue match: the pre-catalogue flow is unchanged.
     expect(screen.queryByRole("radio")).toBeNull();
 
@@ -157,7 +157,7 @@ describe("Settings", () => {
       await user.click(screen.getByRole("button", { name: "Create subject" }));
       const stored = JSON.parse(localStorage.getItem("sb-subjects")).find((s) => s.spec === "J277");
       expect(stored).toMatchObject({ board: "OCR", spec: "J277", qualification: "gcse", exam: "OCR" });
-      expect(stored.topics.map((t) => t.name)).toEqual(["Systems Architecture", "Memory and Storage"]);
+      expect(stored.topics.map((t) => t.name)).toEqual(["Systems architecture", "Memory and storage"]);
     });
   });
 

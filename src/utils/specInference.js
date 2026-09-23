@@ -1,3 +1,7 @@
+import { inferTopicChecklist } from "./topicExtraction.js";
+
+export { inferTopicChecklist };
+
 const BOARD_MATCHERS = [
   { name: "OCR A", regex: /\bOCR\b[^A-Za-z0-9]{0,12}\bA\b/i },
   { name: "OCR", regex: /\bOCR\b/i },
@@ -171,72 +175,6 @@ export function inferSubjectName(text, fileName = "") {
   const fallbackMatch = SUBJECT_MATCHERS.find(([, matcher]) => matcher.test(fallback.toLowerCase()));
   if (fallbackMatch) return fallbackMatch[0];
   return toTitleCase(fallback);
-}
-
-export function inferTopicChecklist(text) {
-  if (!text) return [];
-
-  const headingStartRegex = /\b(\d+(?:\.\d+)*)\s+([A-Z])/g;
-  const matches = [];
-  let match;
-
-  while ((match = headingStartRegex.exec(text)) !== null) {
-    const matchIndex = match.index;
-    const num = match[1];
-    const firstChar = match[2];
-
-    const beforeIndex = matchIndex - 1;
-    if (beforeIndex >= 0 && !/\s/.test(text[beforeIndex])) {
-      continue;
-    }
-
-    matches.push({
-      index: matchIndex,
-      num,
-      firstChar,
-    });
-  }
-
-  const headings = [];
-  for (let i = 0; i < matches.length; i++) {
-    const current = matches[i];
-    const next = matches[i + 1];
-    const endPos = next ? next.index : text.length;
-    const chunk = text.slice(current.index, endPos);
-
-    const normalized = normalizeHeading(chunk);
-    if (normalized) {
-      headings.push(normalized);
-    }
-  }
-
-  if (headings.length === 0) {
-    const lines = text.split(/\r?\n/);
-    for (const line of lines) {
-      const normalized = normalizeHeading(line);
-      if (normalized) {
-        if (/^\d+(?:\.\d+)*\s+/.test(normalized)) {
-          headings.push(normalized);
-        }
-      }
-    }
-  }
-
-  const topics = [];
-  for (const heading of headings) {
-    const lower = heading.toLowerCase();
-    if (GENERIC_SKIP.some((skip) => lower.includes(skip))) {
-      continue;
-    }
-
-    const topicName = heading.replace(/^\d+(?:\.\d+)*\s+/, "");
-    const cleanedTopic = toTitleCase(topicName);
-    if (cleanedTopic) {
-      topics.push(cleanedTopic);
-    }
-  }
-
-  return topics;
 }
 
 // --- Spec codes -------------------------------------------------------------
