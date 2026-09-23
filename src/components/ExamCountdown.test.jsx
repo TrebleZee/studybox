@@ -31,6 +31,7 @@ const gcseMaths = (overrides = {}) => ({
   board: "AQA",
   spec: "8300",
   tier: "higher",
+  examYear: 2027,
   papers: [
     { id: "p1", name: "Paper 1 (non-calculator)" },
     { id: "p2", name: "Paper 2 (calculator)" },
@@ -88,6 +89,11 @@ describe("exam countdown", () => {
     expect(screen.queryByRole("button", { name: /next exam/i })).toBeNull();
     renderAnalysis([gcseMaths()]);
     expect(screen.queryByText("Exam Pacing")).toBeNull();
+  });
+
+  it("doesn't count down to 2027 exams for a subject sat later or not yet set", () => {
+    renderTopBar([gcseMaths({ examYear: 2028 }), gcseMaths({ id: "unset", examYear: undefined })]);
+    expect(screen.queryByRole("button", { name: /next exam/i })).toBeNull();
   });
 
   it("counts down to the next published exam in the top bar", () => {

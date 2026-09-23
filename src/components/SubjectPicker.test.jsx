@@ -17,7 +17,7 @@ const subjectButton = (pattern) => within(screen.getByRole("list", { name: "Subj
 const boardButton = (name) => within(screen.getByRole("list", { name: "Exam boards" })).getByRole("button", { name });
 
 // Walks subject → board (→ spec) → details and adds the subject.
-const pick = async (user, { subject, board, spec, tier, options = [] }) => {
+const pick = async (user, { subject, board, spec, tier, options = [], examYear }) => {
   await user.click(subjectButton(subject));
   await user.click(boardButton(board));
   if (spec) {
@@ -25,6 +25,9 @@ const pick = async (user, { subject, board, spec, tier, options = [] }) => {
   }
   if (tier) await user.click(await screen.findByRole("radio", { name: tier }));
   for (const option of options) await user.click(await screen.findByRole("radio", { name: option }));
+  if (examYear !== undefined) {
+    await user.selectOptions(await screen.findByRole("combobox", { name: /When do you sit the exams/ }), examYear);
+  }
   await user.click(await screen.findByRole("button", { name: /Add to my subjects|Add subject/ }));
 };
 
@@ -65,6 +68,38 @@ describe("SubjectPicker", () => {
     // Distinct colours, unique ids.
     expect(new Set(stored.map((s) => s.color)).size).toBe(4);
     expect(new Set(stored.map((s) => s.id)).size).toBe(4);
+    // The exam year defaults to the published series.
+    expect(stored.map((s) => s.examYear)).toEqual([2027, 2027, 2027, 2027]);
+  });
+
+  it("asks when the exams are sat, defaulting to the published series", async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    render(<SubjectPicker C={C} mode="single" onConfirm={onConfirm} />);
+    await user.type(screen.getByLabelText(/Search subjects/), "biology");
+    await user.click(subjectButton(/^Biology · A-level/));
+    await user.click(boardButton(/^AQA/));
+    const year = await screen.findByRole("combobox", { name: /When do you sit the exams/ });
+    expect(year.value).toBe("2027");
+    expect(within(year).getAllByRole("option").map((o) => o.textContent)).toEqual([
+      "Summer 2027",
+      "Summer 2028",
+      "Summer 2029",
+      "Not sure yet",
+    ]);
+    // A Year 12 student sitting in 2028.
+    await user.selectOptions(year, "2028");
+    await user.click(screen.getByRole("button", { name: "Add subject" }));
+    expect(onConfirm.mock.calls[0][0][0]).toMatchObject({ spec: "7402", examYear: 2028 });
+  });
+
+  it("stores no exam year when the student isn't sure yet", async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+    render(<SubjectPicker C={C} mode="single" onConfirm={onConfirm} />);
+    await user.type(screen.getByLabelText(/Search subjects/), "english language");
+    await pick(user, { subject: /^English Language · GCSE/, board: /^AQA/, examYear: "" });
+    expect("examYear" in onConfirm.mock.calls[0][0][0]).toBe(false);
   });
 
   it("seeds only the chosen option's topics", async () => {

@@ -8,8 +8,10 @@
 // Where a paper's date comes from: the user's own `paper.examDate` always
 // wins; otherwise the published timetable in src/data/exam-dates-2027.json,
 // looked up by the subject's catalogue spec id (`<board>-<spec>`, lowercase)
-// and the paper id. A subject without papers, or on a spec the file doesn't
-// cover, has no dates and is left out of everything here.
+// and the paper id, but only for a subject whose `examYear` is 2027: a Year
+// 10 or Year 12 student sitting in 2028 must not be paced against 2027
+// dates, and a subject with no `examYear` hasn't said. A subject without
+// dates is left out of everything here.
 //
 // Pace rule (kept deliberately simple):
 //   - The deadline is the subject's next exam: its earliest paper today or later.
@@ -23,6 +25,7 @@ import PUBLISHED_EXAM_DATES from "../data/exam-dates-2027.json";
 import { daysUntil } from "./milestones.js";
 import { inTierTopics, isIsoDate } from "./subjects.js";
 
+export const PUBLISHED_EXAM_YEAR = 2027; // the series exam-dates-2027.json covers
 export const PACE_MARGIN = 10; // percentage points either side of "on-track"
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -41,11 +44,13 @@ export const specIdOf = (subject) =>
 // The date that counts for one paper: the user's own, else the published one.
 export const paperExamDate = (subject, paper, published = PUBLISHED_EXAM_DATES) => {
   if (isIsoDate(paper?.examDate)) return paper.examDate;
+  if (subject?.examYear !== PUBLISHED_EXAM_YEAR) return null;
   const fromFile = published?.[specIdOf(subject)]?.[paper?.id];
   return isIsoDate(fromFile) ? fromFile : null;
 };
 
-// The published date alone, e.g. to show as the default in Settings.
+// The published date alone (still only for the published series), e.g. to
+// show as the default in Settings.
 export const publishedExamDate = (subject, paper, published = PUBLISHED_EXAM_DATES) =>
   paperExamDate(subject, { id: paper?.id }, published);
 

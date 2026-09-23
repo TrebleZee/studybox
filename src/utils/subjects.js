@@ -318,6 +318,10 @@ const normalizePapers = (papers) => {
   return valid.length ? valid : null;
 };
 
+// The summer exam series a subject is sat in (e.g. 2027), when the student
+// has said. Optional: published exam dates only apply once it's set.
+export const isExamYear = (value) => Number.isInteger(value) && value >= 2000 && value <= 2100;
+
 // A calendar date as stored for milestones: "YYYY-MM-DD" that is a real day.
 export const isIsoDate = (value) => {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -385,6 +389,7 @@ export const normalizeSubject = (subject, index = 0) => {
     ...subjectMetadata(subject, preset),
     color: subject?.color || preset?.color || "#4F9CF9",
     ...(papers ? { papers } : {}),
+    ...(isExamYear(subject?.examYear) ? { examYear: subject.examYear } : {}),
     ...(milestones ? { milestones } : {}),
     topics: sourceTopics.map((topic, topicIndex) => ({
       id: topic?.id || `${subject?.id || "sub"}-${topicIndex}`,

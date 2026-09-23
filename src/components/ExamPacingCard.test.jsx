@@ -31,6 +31,7 @@ const gcseMaths = (overrides = {}) => ({
   board: "AQA",
   spec: "8300",
   tier: "higher",
+  examYear: 2027,
   papers: [
     { id: "p1", name: "Paper 1 (non-calculator)" },
     { id: "p2", name: "Paper 2 (calculator)" },
@@ -112,6 +113,11 @@ describe("exam pacing card", () => {
     });
     render(<ExamPacingCard C={C} subjects={[moved]} />);
     expect(screen.getByTestId("pacing-gcse-maths").textContent).toContain("(2027-06-20)");
+  });
+
+  it("leaves out a subject sitting a later series", () => {
+    renderAnalysis([gcseMaths({ examYear: 2028 })]);
+    expect(screen.queryByText("Exam Pacing")).toBeNull();
   });
 
   it("follows the Analysis subject filter", () => {

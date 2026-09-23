@@ -33,6 +33,7 @@ const maths = (overrides = {}) => ({
   board: "AQA",
   spec: "8300",
   tier: "higher",
+  examYear: 2027,
   papers: [
     { id: "p1", name: "Paper 1" },
     { id: "p2", name: "Paper 2" },
@@ -47,6 +48,7 @@ const physics = (overrides = {}) => ({
   name: "Physics",
   board: "OCR",
   spec: "H556",
+  examYear: 2027,
   papers: [{ id: "p1", name: "Modelling physics" }],
   topics: topics(4),
   ...overrides,
@@ -67,6 +69,22 @@ describe("exam dates", () => {
     // An invalid user value falls back to the published date.
     expect(paperExamDate(subject, { id: "p1", examDate: "2027-02-30" }, DATES)).toBe("2027-05-14");
     expect(paperExamDate(subject, { id: "p9" }, DATES)).toBeNull();
+  });
+
+  it("uses published dates only for a subject sitting the published series (2027)", () => {
+    // A Year 12 / Year 10 student sitting in 2028, or one who hasn't said,
+    // must not be counted down or paced against the 2027 timetable.
+    for (const examYear of [2028, undefined]) {
+      const subject = maths({ examYear, topics: topics(50, 10) });
+      expect(paperExamDate(subject, subject.papers[0], DATES)).toBeNull();
+      expect(hasExamDates([subject], DATES)).toBe(false);
+      expect(nextExam([subject], at(2027, 1, 15), DATES)).toBeNull();
+      expect(pace(subject, at(2027, 1, 15), DATES)).toBeNull();
+    }
+    // Their own dates still count.
+    const own = maths({ examYear: 2028, papers: [{ id: "p1", name: "Paper 1", examDate: "2028-05-18" }] });
+    expect(nextExam([own], at(2027, 1, 15), DATES)).toMatchObject({ date: "2028-05-18" });
+    expect(pace(own, at(2027, 1, 15), DATES).exam.date).toBe("2028-05-18");
   });
 
   it("lists a subject's dated papers earliest first", () => {
@@ -288,6 +306,13 @@ describe("published timetable file", () => {
 });
 
 describe("normalizeSubjects keeps exam dates", () => {
+  it("keeps a valid examYear and drops anything else", () => {
+    const [kept, dropped, text] = normalizeSubjects([maths(), maths({ examYear: 2027.5 }), maths({ examYear: "2027" })]);
+    expect(kept.examYear).toBe(2027);
+    expect("examYear" in dropped).toBe(false);
+    expect("examYear" in text).toBe(false);
+  });
+
   it("keeps a valid paper examDate and drops an invalid one", () => {
     const [subject] = normalizeSubjects([
       maths({

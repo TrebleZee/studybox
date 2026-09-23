@@ -29,6 +29,7 @@ const gcseMaths = (overrides = {}) => ({
   board: "AQA",
   spec: "8300",
   tier: "higher",
+  examYear: 2027,
   papers: [
     { id: "p1", name: "Paper 1 (non-calculator)" },
     { id: "p2", name: "Paper 2 (calculator)" },
@@ -67,6 +68,7 @@ describe("exam dates in Settings", () => {
           onRemoveSubject={() => {}}
         />
         <output data-testid="papers">{JSON.stringify(subjects[0].papers)}</output>
+        <output data-testid="subject">{JSON.stringify(subjects[0])}</output>
       </>
     );
   };
@@ -92,6 +94,23 @@ describe("exam dates in Settings", () => {
       id: "p1",
       name: "Paper 1 (non-calculator)",
     });
+  });
+
+  it("shows published dates only once the exam year is summer 2027", () => {
+    render(<Harness initial={[gcseMaths({ examYear: undefined })]} />);
+    const input = screen.getByLabelText("Exam date Paper 1 (non-calculator) gcse-maths");
+    const year = screen.getByLabelText("Exam year gcse-maths");
+    expect(year.value).toBe("");
+    expect(input.value).toBe("");
+    expect(screen.getByText(/Published dates are filled in for summer 2027/)).toBeTruthy();
+
+    fireEvent.change(year, { target: { value: "2027" } });
+    expect(input.value).toBe("2027-05-14");
+    expect(JSON.parse(screen.getByTestId("subject").textContent).examYear).toBe(2027);
+
+    fireEvent.change(year, { target: { value: "2028" } });
+    expect(input.value).toBe("");
+    expect(screen.getAllByText("No date")).toHaveLength(3);
   });
 
   it("lets a subject off the timetable have its own dates", () => {

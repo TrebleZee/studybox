@@ -11,6 +11,7 @@ import {
   topicPapers,
   validateCatalogue,
   validateSpec,
+  examYearChoices,
 } from "./catalogue.js";
 import { defaultSubjects, isUntouchedDefaultSubjects, normalizeSubjects } from "./subjects.js";
 
@@ -355,6 +356,15 @@ describe("topicPapers", () => {
     expect(topicPapers({ paper: "p1" })).toEqual(["p1"]);
     expect(topicPapers({ paper: ["p1", "p2"] })).toEqual(["p1", "p2"]);
     expect(topicPapers({})).toEqual([]);
+  });
+});
+
+describe("examYearChoices", () => {
+  it("offers three summers from the published year, the first exam if later, up to the last exam", () => {
+    expect(examYearChoices({ firstExam: 2017, lastExam: null })).toEqual([2027, 2028, 2029]);
+    expect(examYearChoices({ firstExam: 2028, lastExam: null })).toEqual([2028, 2029, 2030]);
+    expect(examYearChoices({ firstExam: 2017, lastExam: 2027 })).toEqual([2027]);
+    expect(examYearChoices({ firstExam: 2017, lastExam: 2028 })).toEqual([2027, 2028]);
   });
 });
 

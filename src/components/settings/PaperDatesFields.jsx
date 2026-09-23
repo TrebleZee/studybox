@@ -1,8 +1,14 @@
-import { paperExamDate, publishedExamDate } from "../../utils/pacing.js";
+import { PUBLISHED_EXAM_YEAR, paperExamDate, publishedExamDate } from "../../utils/pacing.js";
 
-// Exam date per paper for one subject. The published timetable date shows
-// by default; typing a date stores the user's own `examDate`, which always
+// Exam year and exam date per paper for one subject. The published timetable
+// date shows by default once the subject is set to the published series
+// (summer 2027); typing a date stores the user's own `examDate`, which always
 // wins. "Use published" (or clearing the field) drops the user's date again.
+const yearChoices = (current) => {
+  const years = [PUBLISHED_EXAM_YEAR - 1, PUBLISHED_EXAM_YEAR, PUBLISHED_EXAM_YEAR + 1, PUBLISHED_EXAM_YEAR + 2];
+  return current && !years.includes(current) ? [...years, current].sort() : years;
+};
+
 export default function PaperDatesFields({ C, subject, onChange }) {
   const papers = subject.papers || [];
   if (papers.length === 0) return null;
@@ -21,6 +27,34 @@ export default function PaperDatesFields({ C, subject, onChange }) {
     <details>
       <summary style={{ cursor: "pointer", fontSize: "11px", color: C.muted }}>Exam dates</summary>
       <div style={{ display: "grid", gap: "6px", marginTop: "6px" }}>
+        <label style={{ fontSize: "11px", color: C.txt }}>
+          Exam year{" "}
+          <select
+            aria-label={`Exam year ${subject.id}`}
+            value={subject.examYear ? String(subject.examYear) : ""}
+            onChange={(e) => onChange({ examYear: e.target.value ? Number(e.target.value) : undefined })}
+            style={{
+              background: C.s1,
+              border: `1px solid ${C.bdr2}`,
+              borderRadius: "8px",
+              padding: "4px 6px",
+              color: C.txt,
+              fontSize: "11px",
+            }}
+          >
+            <option value="">Not set</option>
+            {yearChoices(subject.examYear).map((year) => (
+              <option key={year} value={String(year)}>
+                Summer {year}
+              </option>
+            ))}
+          </select>
+          {subject.examYear !== PUBLISHED_EXAM_YEAR && (
+            <span style={{ display: "block", color: C.muted, fontSize: "10px", marginTop: "2px" }}>
+              Published dates are filled in for summer {PUBLISHED_EXAM_YEAR}; for other years, add your own below.
+            </span>
+          )}
+        </label>
         {papers.map((paper) => {
           const published = publishedExamDate(subject, paper);
           const own = paper.examDate && paper.examDate !== published;
