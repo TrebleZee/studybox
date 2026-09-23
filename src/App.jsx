@@ -524,6 +524,7 @@ export default function StudyBox() {
               C={C}
               subjects={subjects}
               sessions={sessions}
+              asanaCfg={asanaCfg}
               grandTotal={grandTotal}
               subTotal={subTotal}
               onEditSession={setEditingSession}

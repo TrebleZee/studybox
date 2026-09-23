@@ -4,11 +4,21 @@ export default function LogView({
   C,
   subjects,
   sessions,
+  asanaCfg,
   grandTotal,
   subTotal,
   onEditSession,
   onDeleteSession,
 }) {
+  // Asana tasks log time under asanaCfg.id, so list it alongside the subjects
+  // while it's enabled or still has logged time.
+  const showAsana =
+    asanaCfg && (asanaCfg.enabled || sessions.some((s) => s.subjectId === asanaCfg.id));
+  const rows = showAsana
+    ? [...subjects, { id: asanaCfg.id, name: asanaCfg.name, color: asanaCfg.color }]
+    : subjects;
+  const max = Math.max(...rows.map((item) => subTotal(item.id)), 1);
+
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
       <div
@@ -63,11 +73,10 @@ export default function LogView({
           By Subject
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "3px 0 8px" }}>
-          {[...subjects]
+          {[...rows]
             .sort((a, b) => subTotal(b.id) - subTotal(a.id))
             .map((subject) => {
               const total = subTotal(subject.id);
-              const max = Math.max(...subjects.map((item) => subTotal(item.id)), 1);
 
               return (
                 <div key={subject.id} style={{ padding: "5px 13px" }}>
