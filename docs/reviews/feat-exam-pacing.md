@@ -1,7 +1,7 @@
 # Review: feat/exam-pacing (PR #16, target v1.11.0)
 
 Date: 2026-09-23 · Reviewer: release-reviewer · Fixes: branch owner
-Round 1 verdict: blocked on one high finding (R1). It needed a design decision, which the branch owner made; the fix is below.
+Round 1 verdict: blocked on one high finding (R1). It needed a design decision, which the branch owner made; the fix is below. Round 2: clean, with one low finding (R2) accepted as a trade-off.
 
 The reviewer confirmed these invariants:
 
@@ -33,6 +33,14 @@ Tests added:
 - **Settings:** published dates appear only once the year is 2027, and disappear again at 2028.
 - **Picker:** the exam year defaults to 2027 in the four-GCSE onboarding pass. The A-level Biology options are 2027 to 2029, and choosing 2028 is stored. "Not sure yet" stores no year.
 - **catalogue:** `examYearChoices` respects the published year, `firstExam` and `lastExam`.
+
+## Round 2 (re-check of the fix commit a93f4ed..3061141)
+
+Verdict: clean. R1 is confirmed fixed, and every consumer respects the exam-year gate: `hasExamDates`, `nextExam`, `pace`, the countdown, the pacing card and the Settings default. There is no import cycle and no new sink.
+
+| ID | Severity | Category | File | Summary | Outcome |
+| --- | --- | --- | --- | --- | --- |
+| R2 | low | correctness | src/components/SubjectPicker.jsx | The picker preselects Summer 2027, so a Year 10 or Year 12 student who clicks straight through still gets the 2027 timetable. | Accepted as a product trade-off and not changed. The year is shown on every subject's details step and takes one click to change. Defaulting to "Not sure yet" would hide pacing for most students, who sit in 2027 (Years 11 and 13). The choice is documented here and in the PR; revisit it if students report it. |
 
 ## Follow-ups (not fixed on this branch)
 
