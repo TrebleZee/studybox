@@ -367,6 +367,25 @@ describe("subjectFromSpec", () => {
     ]);
   });
 
+  // `pick` is how many options a student usually takes, not a limit: Art
+  // students may work in "one or more" areas, and MEI Route C takes three
+  // minors. Every picked option is seeded.
+  it("seeds every picked option, even beyond the group's pick count", () => {
+    const fineArt = specById("aqa-7202");
+    expect(fineArt.optionGroups[0].pick).toBe(1);
+    const ids = fineArt.optionGroups[0].options.slice(0, 2).map((o) => o.id);
+    const subject = subjectFromSpec(fineArt, { optionIds: ids });
+    const seeded = subject.topics.map((t) => t.name);
+    fineArt.optionGroups[0].options.slice(0, 2).forEach((o) => expect(seeded).toContain(o.name));
+
+    const mei = specById("ocr-h645");
+    const minors = ["y433", "y434", "y435"];
+    const routeC = subjectFromSpec(mei, { optionIds: minors });
+    minors.forEach((id) =>
+      expect(routeC.topics.some((t) => mei.optionGroups[0].options.find((o) => o.id === id).topicIds.includes(t.catalogueTopicId))).toBe(true)
+    );
+  });
+
   it("seeds two Further Maths option papers alongside core pure", () => {
     const spec = specById("edexcel-9fm0");
     const subject = subjectFromSpec(spec, { optionIds: ["3b", "3d"] });

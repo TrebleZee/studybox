@@ -29,6 +29,8 @@ export default function AddSubjectCard({ C, onAddSubject }) {
   // the new subject gets.
   const [catalogueMatch, setCatalogueMatch] = useState(null);
   const [topicSource, setTopicSource] = useState("catalogue");
+  // Catalogue specs the uploaded PDF covers equally; the student picks one.
+  const [titleChoices, setTitleChoices] = useState([]);
 
   // The match only applies while the form still names the matched spec: if
   // the user re-points board or spec code, the catalogue list (and its
@@ -46,6 +48,7 @@ export default function AddSubjectCard({ C, onAddSubject }) {
     setSpecTopics([]);
     setCatalogueMatch(null);
     setTopicSource("catalogue");
+    setTitleChoices([]);
   };
 
   const addSubject = () => {
@@ -93,6 +96,32 @@ export default function AddSubjectCard({ C, onAddSubject }) {
     }
   };
 
+  const applyCatalogueSpec = (spec) => {
+    const subject = subjectFromSpec(spec);
+    setCatalogueMatch({ subject, optionCount: spec.optionGroups.length });
+    setSubjectName(subject.name);
+    setSubjectMeta({
+      qualification: subject.qualification,
+      board: subject.board,
+      tier: null,
+      spec: subject.spec,
+      specName: subject.specName,
+      exam: "",
+    });
+  };
+
+  const chooseTitle = async (entry) => {
+    setSpecError("");
+    try {
+      const spec = await loadSpec(entry.id);
+      if (!spec) throw new Error("missing");
+      setTitleChoices([]);
+      applyCatalogueSpec(spec);
+    } catch {
+      setSpecError("That specification couldn't be loaded. Check your connection and try again.");
+    }
+  };
+
   const handleSpecUpload = async (file) => {
     if (!file) return;
 
@@ -103,21 +132,23 @@ export default function AddSubjectCard({ C, onAddSubject }) {
     try {
       const text = await extractPdfText(file);
       const draft = generateSubjectDraftFromPdfText(text, file.name);
-      const spec = await catalogueSpecFor(draft.specCode);
       setSpecTopics(draft.topics || []);
 
+      // One PDF can cover several catalogue specs (e.g. every Art and Design
+      // title): ask which one rather than guess.
+      const choices = [draft.specCode?.spec, ...(draft.specCode?.alternatives || [])]
+        .map((code) => code && findSpec(draft.specCode.board, code))
+        .filter(Boolean);
+      if (choices.length > 1) {
+        setTitleChoices(choices);
+        setSubjectName(draft.subjectName);
+        setSubjectMeta({ ...EMPTY_META, board: draft.specCode.board, qualification: choices[0].qualification });
+        return;
+      }
+
+      const spec = await catalogueSpecFor(draft.specCode);
       if (spec) {
-        const subject = subjectFromSpec(spec);
-        setCatalogueMatch({ subject, optionCount: spec.optionGroups.length });
-        setSubjectName(subject.name);
-        setSubjectMeta({
-          qualification: subject.qualification,
-          board: subject.board,
-          tier: null,
-          spec: subject.spec,
-          specName: subject.specName,
-          exam: "",
-        });
+        applyCatalogueSpec(spec);
         return;
       }
 
@@ -294,6 +325,33 @@ export default function AddSubjectCard({ C, onAddSubject }) {
         {!specImporting && specFileName && !specError && (
           <div style={{ marginTop: "8px", fontSize: "11px", color: C.txt }}>
             Loaded {specFileName}.
+            {titleChoices.length > 0 && (
+              <fieldset style={{ marginTop: "8px", border: "none", padding: 0, display: "grid", gap: "6px" }}>
+                <legend style={{ fontSize: "11px", color: C.txt, marginBottom: "4px", padding: 0 }}>
+                  This specification covers {titleChoices.length} titles. Which one do you take?
+                </legend>
+                {titleChoices.map((entry) => (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    className="nb"
+                    onClick={() => chooseTitle(entry)}
+                    style={{
+                      textAlign: "left",
+                      border: `1px solid ${C.bdr2}`,
+                      background: C.s3,
+                      color: C.txt,
+                      borderRadius: "6px",
+                      padding: "5px 8px",
+                      cursor: "pointer",
+                      fontSize: "11px",
+                    }}
+                  >
+                    {entry.specName || entry.subject} ({entry.spec})
+                  </button>
+                ))}
+              </fieldset>
+            )}
             {matchApplies && (
               <fieldset
                 style={{ marginTop: "8px", border: "none", padding: 0, display: "grid", gap: "6px" }}

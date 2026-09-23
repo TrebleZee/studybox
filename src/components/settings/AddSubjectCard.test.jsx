@@ -9,6 +9,7 @@ const PDF_TEXT = {
   "aqa-maths.pdf": "GCSE MATHEMATICS (8300) Specification. AQA GCSE Mathematics 8300.",
   "ocr-cs.pdf": "GCSE (9-1) Computer Science J277 Specification. OCR GCSE Computer Science J277.",
   "sqa-history.pdf": "SQA National 5 History Course Specification.",
+  "aqa-art.pdf": "A-LEVEL ART AND DESIGN (7201, 7202, 7203, 7204, 7205, 7206) Specification. AQA A-level Art and Design.",
 };
 
 vi.mock("../../utils/specImport.js", async (importOriginal) => ({
@@ -97,6 +98,22 @@ describe("AddSubjectCard spec import", () => {
     await user.clear(code);
     await user.type(code, " 8300 ");
     expect(screen.getByRole("radio", { name: /Use StudyBox's topic list/ }).checked).toBe(true);
+  });
+
+  it("asks which title to use when one PDF covers several catalogue specs", async () => {
+    await upload("aqa-art.pdf");
+    expect(screen.getByText(/This specification covers 6 titles/)).toBeTruthy();
+    expect(screen.queryByRole("radio")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Fine art (7202)" }));
+    await waitFor(() =>
+      expect(screen.getByRole("radio", { name: /Use StudyBox's topic list for AQA A-level Fine art/ }).checked).toBe(true)
+    );
+    await user.click(screen.getByLabelText("Create subject"));
+
+    const subject = onAddSubject.mock.calls[0][0];
+    expect(subject).toMatchObject({ board: "AQA", spec: "7202", specName: "Fine art", qualification: "alevel" });
+    expect(subject.topics[0].catalogueTopicId).toMatch(/^aqa-7202-/);
   });
 
   it("does not carry a previous match's spec code onto a Custom subject", async () => {

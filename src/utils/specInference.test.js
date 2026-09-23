@@ -126,18 +126,34 @@ describe("inferSpecCode", () => {
 
   it("picks the code matching the cover's level on joint AS and A-level covers", () => {
     const aqaJoint = `AS AND A-LEVEL PHYSICS (7407, 7408) Specification. AQA AS and A-level Physics 7407 7408`;
-    expect(inferSpecCode(aqaJoint)).toEqual({ board: "AQA", spec: "7408" });
+    expect(inferSpecCode(aqaJoint)).toMatchObject({ board: "AQA", spec: "7408" });
     expect(inferQualification(aqaJoint)).toBe("alevel");
 
     const aqaAsOnly = `AS PHYSICS (7407) Specification. AQA AS Physics 7407, see also A-level 7408 later`;
-    expect(inferSpecCode(aqaAsOnly)).toEqual({ board: "AQA", spec: "7407" });
+    expect(inferSpecCode(aqaAsOnly)).toMatchObject({ board: "AQA", spec: "7407" });
 
     const edexcelAsOnly = `Pearson Edexcel Level 3 Advanced Subsidiary GCE in Further Mathematics (8FM0). First teaching 2017. This AS qualification is co-teachable with the Pearson Edexcel Level 3 Advanced GCE in Further Mathematics (9FM0), and AS marks do not count towards the A level.`;
     expect(inferQualification(edexcelAsOnly)).toBe("as");
-    expect(inferSpecCode(edexcelAsOnly)).toEqual({ board: "Edexcel", spec: "8FM0" });
+    expect(inferSpecCode(edexcelAsOnly)).toMatchObject({ board: "Edexcel", spec: "8FM0" });
 
     const edexcelJoint = `Pearson Edexcel Level 3 Advanced GCE in Further Mathematics (9FM0) and Advanced Subsidiary (8FM0)`;
-    expect(inferSpecCode(edexcelJoint)).toEqual({ board: "Edexcel", spec: "9FM0" });
+    expect(inferSpecCode(edexcelJoint)).toMatchObject({ board: "Edexcel", spec: "9FM0" });
+  });
+
+  it("reports the other codes a shared spec covers equally, so the student can choose", () => {
+    const aqaArt = `A-LEVEL ART AND DESIGN (7201, 7202, 7203, 7204, 7205,
+7206) Specification. AQA A-level Art and Design (7201, 7202, 7203, 7204, 7205, 7206). Visit aqa.org.uk/7201`;
+    const result = inferSpecCode(aqaArt);
+    expect([result.spec, ...result.alternatives].sort()).toEqual(["7201", "7202", "7203", "7204", "7205", "7206"]);
+
+    const ocrArt = `Specification A Level Art and Design Cambridge OCR Level 3 Advanced GCE in Art and Design H600–H606`;
+    const ocr = inferSpecCode(ocrArt);
+    expect([ocr.spec, ...ocr.alternatives].sort()).toEqual(["H600", "H601", "H602", "H603", "H604", "H605", "H606"]);
+  });
+
+  it("does not invent alternatives for a single-spec document", () => {
+    expect(inferSpecCode(COVERS["AQA 8300"])).toEqual({ board: "AQA", spec: "8300" });
+    expect(inferSpecCode("OCR maths J560 and years 2015–2027")).toEqual({ board: "OCR", spec: "J560" });
   });
 
   it("prefers the cover code over a code mentioned later (e.g. a related spec)", () => {
