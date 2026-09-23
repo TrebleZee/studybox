@@ -31,6 +31,7 @@ export default function AddSubjectCard({ C, onAddSubject }) {
   const [topicSource, setTopicSource] = useState("catalogue");
   // Catalogue specs the uploaded PDF covers equally; the student picks one.
   const [titleChoices, setTitleChoices] = useState([]);
+  const [titleError, setTitleError] = useState("");
 
   // The match only applies while the form still names the matched spec: if
   // the user re-points board or spec code, the catalogue list (and its
@@ -49,6 +50,7 @@ export default function AddSubjectCard({ C, onAddSubject }) {
     setCatalogueMatch(null);
     setTopicSource("catalogue");
     setTitleChoices([]);
+    setTitleError("");
   };
 
   const addSubject = () => {
@@ -111,14 +113,15 @@ export default function AddSubjectCard({ C, onAddSubject }) {
   };
 
   const chooseTitle = async (entry) => {
-    setSpecError("");
+    setTitleError("");
     try {
       const spec = await loadSpec(entry.id);
       if (!spec) throw new Error("missing");
       setTitleChoices([]);
       applyCatalogueSpec(spec);
     } catch {
-      setSpecError("That specification couldn't be loaded. Check your connection and try again.");
+      // Shown next to the buttons, which stay visible so the student can retry.
+      setTitleError("That specification couldn't be loaded. Check your connection and try again.");
     }
   };
 
@@ -139,7 +142,9 @@ export default function AddSubjectCard({ C, onAddSubject }) {
       const choices = [draft.specCode?.spec, ...(draft.specCode?.alternatives || [])]
         .map((code) => code && findSpec(draft.specCode.board, code))
         .filter(Boolean);
-      if (choices.length > 1) {
+      // Only when the PDF's own code is in the catalogue: an unrelated
+      // document (e.g. an exam timetable) must not offer random subjects.
+      if (choices.length > 1 && choices[0].spec === draft.specCode.spec) {
         setTitleChoices(choices);
         setSubjectName(draft.subjectName);
         setSubjectMeta({ ...EMPTY_META, board: draft.specCode.board, qualification: choices[0].qualification });
@@ -350,6 +355,11 @@ export default function AddSubjectCard({ C, onAddSubject }) {
                     {entry.specName || entry.subject} ({entry.spec})
                   </button>
                 ))}
+                {titleError && (
+                  <div role="alert" style={{ fontSize: "11px", color: "#f87171" }}>
+                    {titleError}
+                  </div>
+                )}
               </fieldset>
             )}
             {matchApplies && (

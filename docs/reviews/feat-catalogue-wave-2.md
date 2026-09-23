@@ -33,10 +33,19 @@ It found no mapping errors and no copied spec prose. No existing spec or topic i
 | R2 | low | correctness | src/utils/specInference.js | Each board ships one PDF for all its Art and Design titles, so an upload always resolved to one fixed title (AQA 7206, Edexcel 9AD0, OCR H600). | Fixed. `inferSpecCode` now returns `alternatives`: the other codes with an equal score, every code in a short range ("H600–H606"), or every code in a bracketed list ("(7201, …, 7206)"). When more than one of those is in the catalogue, the PDF import asks "Which one do you take?" and applies nothing until the student chooses. Tests: specInference (AQA list, OCR range, no invented alternatives) and AddSubjectCard (the chooser, then Fine art seeds aqa-7202 topics). A new bonus for the `aqa.org.uk/<code>` link also fixes AQA 7132, which the joint AS/A-level cover had been resolving to 7131. Checked against all 56 real spec texts: every non-Art spec resolves to exactly its own code, and each Art PDF offers all of its titles. |
 | R3 | low | correctness | src/data/specs/edexcel-9*.json | The Edexcel Art `specUrl` is named "specification-issue-4.pdf", but the text says Issue 6. | Rejected. That is the URL Pearson's own qualification page links to today, and the file it serves is Issue 6 (June 2024). It is the exact file downloaded and reviewed here, so the link is current and not dead. |
 
+## Round 2 (re-check of the fix commit b8dad5f..49747e9)
+
+Verdict: R1 and R2 above are confirmed fixed. The reviewer ran every real spec text with three file names each: all non-Art specs resolve to their own code, and all Art PDFs offer every title. Lint, test and build pass. It raised two new low findings, both fixed below. They were not re-reviewed, because the gate allows two rounds at most.
+
+| ID | Severity | Category | File | Summary | Outcome |
+| --- | --- | --- | --- | --- | --- |
+| R4 | low | correctness | src/components/settings/AddSubjectCard.jsx:139 | Uploading an unrelated document (e.g. an AQA exam timetable) whose winning code isn't in the catalogue could still offer unrelated catalogue subjects that happened to tie. | Fixed: the chooser now appears only when the PDF's own code is in the catalogue. Test: a timetable-like text offers no chooser and falls back to the old path. |
+| R5 | low | correctness | src/components/settings/AddSubjectCard.jsx:121 | A failed title load hid the chooser, so the student couldn't retry. | Fixed: the error is shown next to the title buttons, which stay visible. Test: the first load fails, the buttons remain, and a retry succeeds. |
+
 ## Follow-ups (not fixed on this branch)
 
 None.
 
 ## Checks
 
-lint pass · test pass (389 tests, 24 files) · build pass
+lint pass · test pass (391 tests, 24 files) · build pass
