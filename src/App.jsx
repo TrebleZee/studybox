@@ -329,23 +329,32 @@ export default function StudyBox() {
     },
   };
 
-  const addSubject = ({ topics, ...fields }) => {
-    const id = `custom-${Date.now().toString(36)}`;
-    setSubjects((prev) => [
-      ...prev,
-      normalizeSubject({
+  // New subjects from the add form, a PDF import or the catalogue picker.
+  // Each gets a fresh id (unique within the batch) and fresh topic ids.
+  const buildNewSubjects = (list) => {
+    const stamp = Date.now().toString(36);
+    return list.map(({ topics, ...fields }, index) => {
+      const id = list.length === 1 ? `custom-${stamp}` : `custom-${stamp}-${index}`;
+      return normalizeSubject({
         ...fields,
         id,
-        // Topics are names, or { name, catalogueTopicId } when seeded from the catalogue.
+        // Topics are names, or objects (catalogueTopicId, paper, higherOnly) when seeded from the catalogue.
         topics: topics.map((topic, i) => ({
           ...(typeof topic === "string" ? { name: topic } : topic),
           id: `${id}-topic-${i}`,
           done: false,
           subtasks: [],
         })),
-      }),
-    ]);
-    setSel(id);
+      });
+    });
+  };
+
+  // Accepts one subject or a list (the catalogue picker can add several).
+  const addSubject = (input) => {
+    const added = buildNewSubjects(Array.isArray(input) ? input : [input]);
+    if (!added.length) return;
+    setSubjects((prev) => [...prev, ...added]);
+    setSel(added[0].id);
   };
 
   const removeSubject = (id) => {
@@ -403,6 +412,16 @@ export default function StudyBox() {
     }
   };
 
+  // Onboarding's "Choose my subjects": the picked subjects replace the
+  // untouched placeholder list.
+  const startWithSubjects = (list) => {
+    const chosen = buildNewSubjects(list);
+    templateRequest.current += 1;
+    setSubjects(chosen);
+    setSel(chosen[0]?.id ?? null);
+    setOnboarded(true);
+  };
+
   const startBlank = () => {
     templateRequest.current += 1;
     setSubjects([]);
@@ -452,6 +471,7 @@ export default function StudyBox() {
           C={C}
           onStartBlank={startBlank}
           onUseTemplate={useTemplate}
+          onChooseSubjects={startWithSubjects}
           onRestore={importData}
         />
       ) : (

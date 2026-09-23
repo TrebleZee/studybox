@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import specIndex from "../data/specs/index.json";
 import {
   findSpec,
+  groupSpecsBySubject,
   listSpecs,
   loadSpec,
+  specAlreadyAdded,
   subjectFromSpec,
   subjectsForTemplate,
   topicPapers,
@@ -281,6 +283,38 @@ describe("listSpecs", () => {
     ];
     expect(listSpecs({}, index).map((s) => s.id)).toEqual(["aqa-2"]);
     expect(listSpecs({ includeDeprecated: true }, index).map((s) => s.id)).toEqual(["aqa-1", "aqa-2"]);
+  });
+});
+
+describe("groupSpecsBySubject", () => {
+  const entries = [
+    { id: "ocr-h640", qualification: "alevel", board: "OCR", spec: "H640", subject: "Mathematics", specName: "Mathematics B (MEI)" },
+    { id: "aqa-8300", qualification: "gcse", board: "AQA", spec: "8300", subject: "Mathematics", specName: "Mathematics" },
+    { id: "ocr-h240", qualification: "alevel", board: "OCR", spec: "H240", subject: "Mathematics", specName: "Mathematics A" },
+    { id: "edexcel-9ma0", qualification: "alevel", board: "Edexcel", spec: "9MA0", subject: "Mathematics", specName: "Mathematics" },
+    { id: "aqa-7408", qualification: "alevel", board: "AQA", spec: "7408", subject: "Physics", specName: "Physics" },
+  ];
+
+  it("groups by subject and level, sorted, with boards and their specs", () => {
+    const groups = groupSpecsBySubject(entries);
+    expect(groups.map((g) => g.key)).toEqual(["gcse|Mathematics", "alevel|Mathematics", "alevel|Physics"]);
+    const aLevelMaths = groups[1];
+    expect(aLevelMaths.boards.map((b) => b.board)).toEqual(["Edexcel", "OCR"]);
+    expect(aLevelMaths.boards[1].specs.map((s) => s.id)).toEqual(["ocr-h240", "ocr-h640"]);
+  });
+
+  it("returns nothing for no entries", () => {
+    expect(groupSpecsBySubject([])).toEqual([]);
+  });
+});
+
+describe("specAlreadyAdded", () => {
+  const entry = { board: "AQA", spec: "8300" };
+  it("matches board and spec code, case- and space-insensitively", () => {
+    expect(specAlreadyAdded([{ board: "AQA", spec: " 8300 " }], entry)).toBe(true);
+    expect(specAlreadyAdded([{ board: "OCR", spec: "8300" }], entry)).toBe(false);
+    expect(specAlreadyAdded([{ board: "AQA", spec: null }], entry)).toBe(false);
+    expect(specAlreadyAdded([], entry)).toBe(false);
   });
 });
 

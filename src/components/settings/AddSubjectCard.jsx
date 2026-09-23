@@ -8,6 +8,7 @@ import {
   SUBJECT_PRESETS,
 } from "../../utils/subjects.js";
 import SubjectMetaFields from "./SubjectMetaFields.jsx";
+import SubjectPicker from "../SubjectPicker.jsx";
 
 const EMPTY_META = { qualification: "other", board: "Custom", tier: null, spec: "", exam: "" };
 
@@ -16,7 +17,8 @@ const presetMeta = (preset) => {
   return { qualification, board, tier, spec: spec || "", specName, exam };
 };
 
-export default function AddSubjectCard({ C, onAddSubject }) {
+export default function AddSubjectCard({ C, subjects = [], onAddSubject }) {
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [subjectName, setSubjectName] = useState("");
   const [subjectMeta, setSubjectMeta] = useState(EMPTY_META);
   const [subjectColor, setSubjectColor] = useState("#4F9CF9");
@@ -201,6 +203,56 @@ export default function AddSubjectCard({ C, onAddSubject }) {
         }}
       >
         Add Subject
+      </div>
+      <div style={{ marginBottom: "12px" }}>
+        {pickerOpen ? (
+          <div
+            style={{ padding: "12px", borderRadius: "10px", border: `1px solid ${C.bdr}`, background: C.s1 }}
+          >
+            <SubjectPicker
+              C={C}
+              existingSubjects={subjects}
+              mode="single"
+              onConfirm={(list) => {
+                onAddSubject(list);
+                setPickerOpen(false);
+              }}
+              onCancel={() => setPickerOpen(false)}
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="nb"
+            onClick={() => setPickerOpen(true)}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: "10px",
+              border: `1px solid ${C.bdr2}`,
+              background: C.s2,
+              color: C.txt,
+              textAlign: "left",
+              cursor: "pointer",
+            }}
+          >
+            <div style={{ fontWeight: 700, fontSize: "12px" }}>Add from catalogue</div>
+            <div style={{ color: C.muted, fontSize: "11px", marginTop: "2px" }}>
+              Pick your exam board and specification to get its topics, papers and milestones.
+            </div>
+          </button>
+        )}
+      </div>
+      <div
+        style={{
+          fontSize: "10px",
+          color: C.muted,
+          textTransform: "uppercase",
+          letterSpacing: "1px",
+          marginBottom: "6px",
+        }}
+      >
+        Or add your own
       </div>
       <div
         style={{

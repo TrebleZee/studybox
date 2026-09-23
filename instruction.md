@@ -57,6 +57,14 @@ This file documents the app structure so future changes stay consistent.
 - `src/utils/catalogue.js`: `listSpecs(filters)` searches the index; `loadSpec(id)` loads a spec lazily (each file is its own chunk via `import.meta.glob`, so the main bundle carries only the index); `subjectFromSpec(spec, { tier, optionIds, color, id })` returns a normalized subject; `subjectsForTemplate(templateId)` (async) builds any onboarding template; `validateSpec`/`validateCatalogue` are the schema checks run by `catalogue.test.js`.
 - The workbox `globPatterns` in `vite.config.js` must keep precaching the spec chunks so catalogue-backed templates work offline.
 
+## Subject picker
+
+- `src/components/SubjectPicker.jsx` picks subjects from the catalogue: search (`listSpecs`) with a level filter (All / GCSE / A-level), results grouped by subject and level (`groupSpecsBySubject`), then board → spec (when a board has several, e.g. OCR Maths A and B) → tier (tiered GCSEs; required) → option groups (radio for `pick: 1`, checkboxes otherwise; `pick` is shown as a hint and options can be left for later). Each step's heading takes focus.
+- Modes: `single` (Settings: "Add from catalogue" in `AddSubjectCard`) calls `onConfirm([subject])`; `multi` (onboarding: "Choose my subjects") builds a list, GCSE and A-level mixed, and calls `onConfirm(list)` on Finish. All picker state lives in the picker.
+- A spec already present (same board and spec code, `specAlreadyAdded`), or already chosen in this pass, is shown as "already added" and can't be picked again.
+- New subjects get colours from `src/utils/palette.js` (`pickColors`), avoiding colours already in use.
+- App receives the finished subjects through the existing `addSubject` handler, which now also accepts a list (each subject gets a unique id), or `startWithSubjects` from onboarding (replaces the untouched placeholder list and dismisses onboarding).
+
 ## Authoring specs
 
 - `npm run draft-spec -- <pdf path or https URL> --board <Board> --spec <code> --qualification gcse|alevel|as --subject "<Subject>"` writes a draft to `drafts/<id>.json` (gitignored). It is dev-only and never writes into `src/data/specs/`.
@@ -72,7 +80,7 @@ This file documents the app structure so future changes stay consistent.
 - A subject specification PDF can be uploaded from Settings to prefill the subject form with inferred name, exam board, and topics. PDF parsing lives in `src/utils/specImport.js` (pdf.js) and `src/utils/specInference.js` (pure, tested); `boardFromText` maps the inferred board onto `BOARDS`.
   - `inferSpecCode(text, fileName)` finds the spec code with its board (AQA `7xxx`/`8xxx` only next to "AQA", in an `aqa.org.uk/<code>` link or as `(<code>)` in a document naming AQA; Edexcel `9MA0`-style; OCR `H556`/`J560`-style). Codes near the board name, on the first pages or in the file name win; a code for a board the document never names is ignored. `inferQualification` reads GCSE / A-level / AS from the cover pages.
   - If `findSpec(board, code)` (in `catalogue.js`) hits, `AddSubjectCard` fills name and metadata from the catalogue and offers "Use StudyBox's topic list for <label>" (default) or "Use topics read from the PDF". Catalogue topics are created with `catalogueTopicId`; option-group topics (set texts, optional papers) are not seeded here. On a miss the flow is unchanged except that board, spec code and qualification are prefilled when detected.
-  - `addSubject` in `App.jsx` accepts topics as names or `{ name, catalogueTopicId }`.
+  - `addSubject` in `App.jsx` accepts one subject or a list (the catalogue picker); topics are names, or objects carrying `catalogueTopicId`, `paper` and `higherOnly`.
 - The add and edit subject cards share `src/components/settings/SubjectMetaFields.jsx` for qualification, board, tier (GCSE only), spec code and, for `Custom` boards, a free-text exam label. Changing the board clears the spec code and spec name.
 - Theme changes should update the app surfaces and borders without changing subject colors.
 - Session tags should be entered freely and also support quick suggestions such as `Past papers`, `Blurting`, and `Recap`.
