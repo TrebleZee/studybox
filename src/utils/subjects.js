@@ -311,6 +311,9 @@ const normalizePapers = (papers) => {
     .map((paper) => ({
       id: paper.id,
       name: isNonEmptyString(paper.name) ? paper.name : paper.id,
+      // The user's own exam date for this paper; it overrides the published
+      // timetable (see pacing.js). Kept only when it is a real calendar day.
+      ...(isIsoDate(paper.examDate) ? { examDate: paper.examDate } : {}),
     }));
   return valid.length ? valid : null;
 };

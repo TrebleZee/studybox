@@ -20,6 +20,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Works offline as a PWA once installed
 - Can nudge you in the evening with a browser notification if today's streak is still unlogged
 - Tracks milestones such as NEA deadlines, required practicals and spoken language endorsements, with due dates, overdue highlighting and a browser reminder three days before; catalogue specs come with their milestones, and an "NEA" topic can be turned into a milestone with one confirmed click
+- Counts down to your next exam and shows, per subject, how many topics you have left, how many to cover each week and whether you're ahead, on track or behind; dates come from the boards' published summer 2027 timetables and you can set your own for any paper
 
 ## Getting started
 
@@ -120,6 +121,7 @@ StudyBox includes PWA support through `vite-plugin-pwa`. On a supported browser,
 - `src/hooks/useTimer.js` - timestamp-anchored study timer
 - `src/utils/` - formatting, storage, subject normalisation, spec catalogue, streak/XP logic, backup and themes
 - `src/data/specs/` - the spec catalogue (one JSON file per specification plus a generated search index)
+- `src/data/exam-dates-2027.json` - published summer 2027 exam dates per spec and paper
 - `scripts/` - dev scripts (`build-spec-index.js`, `draft-spec.js` with its pure parser in `scripts/lib/`)
 - `src/services/asanaClient.js` - optional Asana API client
 - `public/` - icons and favicon assets

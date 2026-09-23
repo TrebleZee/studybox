@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { inTierTopics } from "../utils/subjects.js";
+import ExamPacingCard from "./ExamPacingCard.jsx";
 
 // Helper duration formatters
 const fmtDur = (s) => {
@@ -624,6 +625,12 @@ export default function AnalysisPanel({
           </select>
         </div>
       </div>
+
+      {/* Exam pacing: hidden unless a subject has an exam still to come */}
+      <ExamPacingCard
+        C={C}
+        subjects={selectedSubjectFilter === "all" ? subjects : subjects.filter((s) => s.id === selectedSubjectFilter)}
+      />
 
       {/* Streaks & Gamification Strip (ALWAYS SHOWN - FIXED ROW) */}
       <div
