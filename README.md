@@ -13,6 +13,8 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Lets you edit or delete the built-in subjects as well
 - Ships a built-in catalogue of real exam specifications (AQA, Pearson Edexcel and OCR), with each spec's topic headings, papers and set-text options, bundled with the app so it works offline. It covers GCSE Maths, English Language, English Literature and Combined Science (including AQA Synergy and both OCR suites) on AQA, Edexcel and OCR, and the most-taken A-levels - Maths, Further Maths, Psychology, Biology, Chemistry, Business, Physics, History, Sociology, Art and Design, Economics and Computer Science - on every board that offers them
 - Lets you upload a subject specification PDF and auto-fill the subject name, exam board, spec code, qualification and topic checklist; if StudyBox recognises the spec code (e.g. AQA 8300, OCR H556, Edexcel 9MA0) it offers its own verified topic list instead of the one read from the PDF
+  - The topic reader understands the layouts the boards use: numbered headings (`3.1.2 Memory`), labelled ones (`Topic 1 – Key concepts in biology`, `Unit Y101: …`, `Chapter B1: …`), history option codes (`1A The Age of the Crusades…`) and unnumbered headings above "What students need to learn". It skips admin sections, learning statements, maths notation appendices, page numbers and running footers, and picks the heading level that gives a usable checklist
+  - Specs whose content isn't organised as headings (English set texts, Art and Design components, some maths specs laid out as tables) give few or no topics from the PDF; use the catalogue list, or add topics by hand
 - Includes several theme presets so you can change the app's overall look
 - Includes a built-in timer for focused study sessions
 - Logs each session with duration, date, subject, tags, and an optional note
@@ -120,6 +122,7 @@ StudyBox includes PWA support through `vite-plugin-pwa`. On a supported browser,
 - `src/components/` - `PlannerView`, `LogView`, `SettingsView` (with `settings/` cards), `Onboarding`, `TopBar`, `AnalysisPanel`, `AsanaTasksPanel` and smaller pieces
 - `src/hooks/useTimer.js` - timestamp-anchored study timer
 - `src/utils/` - formatting, storage, subject normalisation, spec catalogue, streak/XP logic, backup and themes
+- `src/utils/specImport.js`, `pdfLines.js`, `topicExtraction.js`, `specInference.js` - spec PDF import: text lines from pdf.js, the topic checklist, and board/spec code/qualification detection
 - `src/data/specs/` - the spec catalogue (one JSON file per specification plus a generated search index)
 - `src/data/exam-dates-2027.json` - published summer 2027 exam dates per spec and paper
 - `scripts/` - dev scripts (`build-spec-index.js`, `draft-spec.js` with its pure parser in `scripts/lib/`)
