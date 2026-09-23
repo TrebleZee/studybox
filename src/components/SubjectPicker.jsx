@@ -56,6 +56,7 @@ export default function SubjectPicker({ C, existingSubjects = [], mode = "single
   const [optionIds, setOptionIds] = useState({}); // groupId -> [optionId]
   const [chosen, setChosen] = useState([]); // multi mode: subjects picked so far
   const headingRef = useRef(null);
+  const specRequest = useRef(0);
 
   // Move focus to each step's heading so keyboard and screen-reader users
   // land on the new content.
@@ -70,6 +71,7 @@ export default function SubjectPicker({ C, existingSubjects = [], mode = "single
   );
 
   const reset = () => {
+    specRequest.current += 1;
     setStep("subject");
     setGroup(null);
     setBoard(null);
@@ -80,17 +82,27 @@ export default function SubjectPicker({ C, existingSubjects = [], mode = "single
   };
 
   const chooseSpec = async (nextEntry) => {
+    const request = ++specRequest.current;
     setLoadError("");
     try {
       const loaded = await loadSpec(nextEntry.id);
+      // The student may have moved on (Back, another subject) while this
+      // chunk loaded; only the latest request may change the step.
+      if (request !== specRequest.current) return;
       if (!loaded) throw new Error("missing");
       setSpec(loaded);
       setTier("");
       setOptionIds({});
       setStep("details");
     } catch {
+      if (request !== specRequest.current) return;
       setLoadError("That specification couldn't be loaded. Check your connection and try again.");
     }
+  };
+
+  const goTo = (target) => {
+    specRequest.current += 1; // abandon any spec still loading
+    setStep(target);
   };
 
   const chooseBoard = (next) => {
@@ -133,7 +145,7 @@ export default function SubjectPicker({ C, existingSubjects = [], mode = "single
   };
 
   const backButton = (target) => (
-    <button type="button" className="nb" onClick={() => setStep(target)} style={buttonStyle(C)}>
+    <button type="button" className="nb" onClick={() => goTo(target)} style={buttonStyle(C)}>
       Back
     </button>
   );

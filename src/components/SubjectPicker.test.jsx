@@ -1,9 +1,15 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { goTo, renderApp } from "../test/helpers.jsx";
 import { THEMES } from "../utils/themes.js";
 import SubjectPicker from "./SubjectPicker.jsx";
+
+// Pass-through, so a test can hold one spec load open with mockImplementationOnce.
+vi.mock("../utils/catalogue.js", async (importOriginal) => {
+  const actual = await importOriginal();
+  return { ...actual, loadSpec: vi.fn(actual.loadSpec) };
+});
 
 const C = THEMES[0].colors;
 
@@ -176,6 +182,26 @@ describe("SubjectPicker", () => {
     add.focus();
     await user.keyboard("{Enter}");
     expect(onConfirm.mock.calls[0][0][0]).toMatchObject({ board: "OCR", spec: "H446" });
+  });
+
+  it("ignores a slow spec load the student has already moved away from", async () => {
+    const user = userEvent.setup();
+    const { loadSpec } = await import("../utils/catalogue.js");
+    const actual = (await vi.importActual("../utils/catalogue.js")).loadSpec;
+    let release;
+    loadSpec.mockImplementationOnce((id) => new Promise((resolve) => (release = () => resolve(actual(id)))));
+
+    render(<SubjectPicker C={C} mode="single" onConfirm={vi.fn()} />);
+    await user.click(screen.getByRole("radio", { name: "A-level" }));
+    await user.click(subjectButton(/^Computer Science/));
+    await user.click(boardButton(/^OCR/)); // held open
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(subjectButton(/^Physics/));
+    expect(screen.getByRole("heading", { name: /Physics: which exam board/ })).toBeTruthy();
+
+    await act(async () => release());
+    expect(screen.getByRole("heading", { name: /Physics: which exam board/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Add subject" })).toBeNull();
   });
 
   it("says so when nothing matches", async () => {
