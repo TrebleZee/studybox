@@ -1,0 +1,72 @@
+{
+  "id": "edexcel-1en0",
+  "qualification": "gcse",
+  "board": "Edexcel",
+  "spec": "1EN0",
+  "subject": "English Language",
+  "specName": "English Language",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/GCSE/English%20Language/2015/specification-and-sample-assesment/gcse-2015-englang-spec.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Fiction and imaginative writing"
+    },
+    {
+      "id": "p2",
+      "name": "Non-fiction and transactional writing"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-1en0-t01",
+      "name": "Reading 19th-century fiction",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1en0-t02",
+      "name": "Imaginative writing",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1en0-t03",
+      "name": "Reading non-fiction and literary non-fiction",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1en0-t04",
+      "name": "Comparing two linked non-fiction texts",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1en0-t05",
+      "name": "Transactional writing",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1en0-t06",
+      "name": "Spelling, punctuation and grammar",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "edexcel-1en0-m01",
+      "name": "Spoken language endorsement",
+      "kind": "nea"
+    }
+  ]
+}

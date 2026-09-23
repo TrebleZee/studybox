@@ -1,0 +1,278 @@
+{
+  "id": "ocr-h606",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H606",
+  "subject": "Art and Design",
+  "specName": "Critical and Contextual Studies",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": 2028,
+  "specUrl": "https://www.ocr.org.uk/Images/170210-specification-accredited-a-level-gce-art-and-design-h600-h606.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set task"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h606-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t02",
+      "name": "Personal investigation: related study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t03",
+      "name": "Externally set task: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t04",
+      "name": "Externally set task: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t05",
+      "name": "Fine art and sculpture",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t06",
+      "name": "Design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t07",
+      "name": "Craft",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t08",
+      "name": "Art theory",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t09",
+      "name": "The human form",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t10",
+      "name": "Landscape and natural forms",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t11",
+      "name": "Still life and designed objects",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t12",
+      "name": "Architecture and the built environment",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t13",
+      "name": "Art movements, styles and genres",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t14",
+      "name": "Curating exhibitions",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t15",
+      "name": "Art management and art in the community",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t16",
+      "name": "Cultural representations within art and design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h606-t17",
+      "name": "Multimedia, emerging technologies and their use in art",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "fine-art-and-sculpture",
+          "name": "Fine art and sculpture",
+          "topicIds": [
+            "ocr-h606-t05"
+          ]
+        },
+        {
+          "id": "design",
+          "name": "Design",
+          "topicIds": [
+            "ocr-h606-t06"
+          ]
+        },
+        {
+          "id": "craft",
+          "name": "Craft",
+          "topicIds": [
+            "ocr-h606-t07"
+          ]
+        },
+        {
+          "id": "art-theory",
+          "name": "Art theory",
+          "topicIds": [
+            "ocr-h606-t08"
+          ]
+        },
+        {
+          "id": "the-human-form",
+          "name": "The human form",
+          "topicIds": [
+            "ocr-h606-t09"
+          ]
+        },
+        {
+          "id": "landscape-and-natural-forms",
+          "name": "Landscape and natural forms",
+          "topicIds": [
+            "ocr-h606-t10"
+          ]
+        },
+        {
+          "id": "still-life-and-designed-objects",
+          "name": "Still life and designed objects",
+          "topicIds": [
+            "ocr-h606-t11"
+          ]
+        },
+        {
+          "id": "architecture-and-the-built-environment",
+          "name": "Architecture and the built environment",
+          "topicIds": [
+            "ocr-h606-t12"
+          ]
+        },
+        {
+          "id": "art-movements-styles-and-genres",
+          "name": "Art movements, styles and genres",
+          "topicIds": [
+            "ocr-h606-t13"
+          ]
+        },
+        {
+          "id": "curating-exhibitions",
+          "name": "Curating exhibitions",
+          "topicIds": [
+            "ocr-h606-t14"
+          ]
+        },
+        {
+          "id": "art-management-and-art-in-the-community",
+          "name": "Art management and art in the community",
+          "topicIds": [
+            "ocr-h606-t15"
+          ]
+        },
+        {
+          "id": "cultural-representations-within-art-and-design",
+          "name": "Cultural representations within art and design",
+          "topicIds": [
+            "ocr-h606-t16"
+          ]
+        },
+        {
+          "id": "multimedia-emerging-technologies-and-their-use-in-art",
+          "name": "Multimedia, emerging technologies and their use in art",
+          "topicIds": [
+            "ocr-h606-t17"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ocr-h606-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "ocr-h606-m02",
+      "name": "Externally set task",
+      "kind": "other"
+    }
+  ]
+}

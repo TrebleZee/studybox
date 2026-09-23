@@ -1,0 +1,214 @@
+{
+  "id": "ocr-h605",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H605",
+  "subject": "Art and Design",
+  "specName": "Three-Dimensional Design",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/170210-specification-accredited-a-level-gce-art-and-design-h600-h606.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set task"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h605-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t02",
+      "name": "Personal investigation: related study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t03",
+      "name": "Externally set task: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t04",
+      "name": "Externally set task: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t05",
+      "name": "Craft or commercial ceramics",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t06",
+      "name": "Commercial sculptures or sculptural commissions",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t07",
+      "name": "Commercial three-dimensional design for a client",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t08",
+      "name": "Design and/or construction for television, games or film",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t09",
+      "name": "Stage, environmental or architectural design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t10",
+      "name": "Experimental three-dimensional design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t11",
+      "name": "Body ornament",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t12",
+      "name": "Product design and realisation",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h605-t13",
+      "name": "Constructions in a range of materials",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "craft-or-commercial-ceramics",
+          "name": "Craft or commercial ceramics",
+          "topicIds": [
+            "ocr-h605-t05"
+          ]
+        },
+        {
+          "id": "commercial-sculptures-or-sculptural-commissions",
+          "name": "Commercial sculptures or sculptural commissions",
+          "topicIds": [
+            "ocr-h605-t06"
+          ]
+        },
+        {
+          "id": "commercial-three-dimensional-design-for-a-client",
+          "name": "Commercial three-dimensional design for a client",
+          "topicIds": [
+            "ocr-h605-t07"
+          ]
+        },
+        {
+          "id": "design-and-or-construction-for-television-games-or-film",
+          "name": "Design and/or construction for television, games or film",
+          "topicIds": [
+            "ocr-h605-t08"
+          ]
+        },
+        {
+          "id": "stage-environmental-or-architectural-design",
+          "name": "Stage, environmental or architectural design",
+          "topicIds": [
+            "ocr-h605-t09"
+          ]
+        },
+        {
+          "id": "experimental-three-dimensional-design",
+          "name": "Experimental three-dimensional design",
+          "topicIds": [
+            "ocr-h605-t10"
+          ]
+        },
+        {
+          "id": "body-ornament",
+          "name": "Body ornament",
+          "topicIds": [
+            "ocr-h605-t11"
+          ]
+        },
+        {
+          "id": "product-design-and-realisation",
+          "name": "Product design and realisation",
+          "topicIds": [
+            "ocr-h605-t12"
+          ]
+        },
+        {
+          "id": "constructions-in-a-range-of-materials",
+          "name": "Constructions in a range of materials",
+          "topicIds": [
+            "ocr-h605-t13"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ocr-h605-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "ocr-h605-m02",
+      "name": "Externally set task",
+      "kind": "other"
+    }
+  ]
+}

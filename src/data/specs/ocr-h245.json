@@ -1,0 +1,368 @@
+{
+  "id": "ocr-h245",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H245",
+  "subject": "Further Mathematics",
+  "specName": "Further Mathematics A",
+  "specVersion": "2017",
+  "firstExam": 2019,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/308752-specification-accredited-a-level-gce-further-mathematics-a-h245.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Pure Core 1"
+    },
+    {
+      "id": "p2",
+      "name": "Pure Core 2"
+    },
+    {
+      "id": "y542",
+      "name": "Statistics"
+    },
+    {
+      "id": "y543",
+      "name": "Mechanics"
+    },
+    {
+      "id": "y544",
+      "name": "Discrete Mathematics"
+    },
+    {
+      "id": "y545",
+      "name": "Additional Pure Mathematics"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h245-t01",
+      "name": "Proof",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t02",
+      "name": "Complex numbers",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t03",
+      "name": "Matrices",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t04",
+      "name": "Further vectors",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t05",
+      "name": "Further algebra",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t06",
+      "name": "Series",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t07",
+      "name": "Hyperbolic functions",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t08",
+      "name": "Further calculus",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t09",
+      "name": "Polar coordinates",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t10",
+      "name": "Differential equations",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t11",
+      "name": "Probability",
+      "paper": "y542",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t12",
+      "name": "Discrete random variables",
+      "paper": "y542",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t13",
+      "name": "Continuous random variables",
+      "paper": "y542",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t14",
+      "name": "Linear combinations of random variables",
+      "paper": "y542",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t15",
+      "name": "Hypothesis tests and confidence intervals",
+      "paper": "y542",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t16",
+      "name": "Chi-squared tests",
+      "paper": "y542",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t17",
+      "name": "Non-parametric tests",
+      "paper": "y542",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t18",
+      "name": "Correlation",
+      "paper": "y542",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t19",
+      "name": "Linear regression",
+      "paper": "y542",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t20",
+      "name": "Dimensional analysis",
+      "paper": "y543",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t21",
+      "name": "Work, energy and power",
+      "paper": "y543",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t22",
+      "name": "Impulse and momentum",
+      "paper": "y543",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t23",
+      "name": "Centre of mass",
+      "paper": "y543",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t24",
+      "name": "Motion in a circle",
+      "paper": "y543",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t25",
+      "name": "Further dynamics and kinematics",
+      "paper": "y543",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t26",
+      "name": "Mathematical preliminaries",
+      "paper": "y544",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t27",
+      "name": "Graphs and networks",
+      "paper": "y544",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t28",
+      "name": "Algorithms",
+      "paper": "y544",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t29",
+      "name": "Network algorithms",
+      "paper": "y544",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t30",
+      "name": "Decision making in project management",
+      "paper": "y544",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t31",
+      "name": "Graphical linear programming",
+      "paper": "y544",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t32",
+      "name": "The simplex algorithm",
+      "paper": "y544",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t33",
+      "name": "Game theory",
+      "paper": "y544",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t34",
+      "name": "Sequences and series",
+      "paper": "y545",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t35",
+      "name": "Number theory",
+      "paper": "y545",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t36",
+      "name": "Groups",
+      "paper": "y545",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t37",
+      "name": "Further vectors (Additional Pure)",
+      "paper": "y545",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t38",
+      "name": "Surfaces and partial differentiation",
+      "paper": "y545",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h245-t39",
+      "name": "Further calculus (Additional Pure)",
+      "paper": "y545",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "options",
+      "name": "Optional papers",
+      "pick": 2,
+      "options": [
+        {
+          "id": "y542",
+          "name": "Statistics",
+          "topicIds": [
+            "ocr-h245-t11",
+            "ocr-h245-t12",
+            "ocr-h245-t13",
+            "ocr-h245-t14",
+            "ocr-h245-t15",
+            "ocr-h245-t16",
+            "ocr-h245-t17",
+            "ocr-h245-t18",
+            "ocr-h245-t19"
+          ]
+        },
+        {
+          "id": "y543",
+          "name": "Mechanics",
+          "topicIds": [
+            "ocr-h245-t20",
+            "ocr-h245-t21",
+            "ocr-h245-t22",
+            "ocr-h245-t23",
+            "ocr-h245-t24",
+            "ocr-h245-t25"
+          ]
+        },
+        {
+          "id": "y544",
+          "name": "Discrete Mathematics",
+          "topicIds": [
+            "ocr-h245-t26",
+            "ocr-h245-t27",
+            "ocr-h245-t28",
+            "ocr-h245-t29",
+            "ocr-h245-t30",
+            "ocr-h245-t31",
+            "ocr-h245-t32",
+            "ocr-h245-t33"
+          ]
+        },
+        {
+          "id": "y545",
+          "name": "Additional Pure Mathematics",
+          "topicIds": [
+            "ocr-h245-t34",
+            "ocr-h245-t35",
+            "ocr-h245-t36",
+            "ocr-h245-t37",
+            "ocr-h245-t38",
+            "ocr-h245-t39"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

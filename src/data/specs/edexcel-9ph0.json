@@ -1,0 +1,155 @@
+{
+  "id": "edexcel-9ph0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9PH0",
+  "subject": "Physics",
+  "specName": "Physics",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Physics/2015/Specification%20and%20sample%20assessments/pearsonedexcel-alevel-physics-spec.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Advanced Physics I"
+    },
+    {
+      "id": "p2",
+      "name": "Advanced Physics II"
+    },
+    {
+      "id": "p3",
+      "name": "General and Practical Principles in Physics"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9ph0-t01",
+      "name": "Working as a physicist",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t02",
+      "name": "Mechanics",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t03",
+      "name": "Electric circuits",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t04",
+      "name": "Further mechanics",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t05",
+      "name": "Electric and magnetic fields",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t06",
+      "name": "Nuclear and particle physics",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t07",
+      "name": "Materials",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t08",
+      "name": "Waves and the particle nature of light",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t09",
+      "name": "Thermodynamics",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t10",
+      "name": "Space",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t11",
+      "name": "Nuclear radiation",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t12",
+      "name": "Gravitational fields",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ph0-t13",
+      "name": "Oscillations",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "edexcel-9ph0-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

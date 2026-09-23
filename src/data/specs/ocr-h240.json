@@ -1,0 +1,185 @@
+{
+  "id": "ocr-h240",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H240",
+  "subject": "Mathematics",
+  "specName": "Mathematics A",
+  "specVersion": "2017",
+  "firstExam": 2018,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/308723-specification-accredited-a-level-gce-mathematics-a-h240.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Pure mathematics"
+    },
+    {
+      "id": "p2",
+      "name": "Pure mathematics and statistics"
+    },
+    {
+      "id": "p3",
+      "name": "Pure mathematics and mechanics"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h240-t01",
+      "name": "Proof",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t02",
+      "name": "Algebra and functions",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t03",
+      "name": "Coordinate geometry",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t04",
+      "name": "Sequences and series",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t05",
+      "name": "Trigonometry",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t06",
+      "name": "Exponentials and logarithms",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t07",
+      "name": "Differentiation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t08",
+      "name": "Integration",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t09",
+      "name": "Numerical methods",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t10",
+      "name": "Vectors",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t11",
+      "name": "Statistical sampling",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t12",
+      "name": "Data presentation and interpretation",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t13",
+      "name": "Probability",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t14",
+      "name": "Statistical distributions",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t15",
+      "name": "Statistical hypothesis testing",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t16",
+      "name": "Quantities and units in mechanics",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t17",
+      "name": "Kinematics",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t18",
+      "name": "Forces and Newton's laws",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h240-t19",
+      "name": "Moments",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

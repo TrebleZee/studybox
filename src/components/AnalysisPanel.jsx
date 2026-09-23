@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { inTierTopics } from "../utils/subjects.js";
+import ExamPacingCard from "./ExamPacingCard.jsx";
 
 // Helper duration formatters
 const fmtDur = (s) => {
@@ -116,7 +118,7 @@ export default function AnalysisPanel({
 
       const [doneTopics, totalTopics] = sub.isAsana
         ? [asanaStats?.completed || 0, asanaStats?.total || 0]
-        : [sub.topics.filter((t) => t.done).length, sub.topics.length];
+        : [inTierTopics(sub).filter((t) => t.done).length, inTierTopics(sub).length];
 
       const topicPct = totalTopics > 0 ? Math.round((doneTopics / totalTopics) * 100) : 0;
 
@@ -129,7 +131,7 @@ export default function AnalysisPanel({
         doneTopics,
         totalTopics,
         topicPct,
-        untouchedTopics: sub.isAsana ? [] : sub.topics.filter((t) => !t.done),
+        untouchedTopics: sub.isAsana ? [] : inTierTopics(sub).filter((t) => !t.done),
       };
     });
   }, [allSubjects, filteredSessions, asanaStats]);
@@ -623,6 +625,12 @@ export default function AnalysisPanel({
           </select>
         </div>
       </div>
+
+      {/* Exam pacing: hidden unless a subject has an exam still to come */}
+      <ExamPacingCard
+        C={C}
+        subjects={selectedSubjectFilter === "all" ? subjects : subjects.filter((s) => s.id === selectedSubjectFilter)}
+      />
 
       {/* Streaks & Gamification Strip (ALWAYS SHOWN - FIXED ROW) */}
       <div

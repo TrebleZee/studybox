@@ -1,0 +1,257 @@
+{
+  "id": "ocr-h556",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H556",
+  "subject": "Physics",
+  "specName": "Physics A",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/171726-specification-accredited-a-level-gce-physics-a-h556.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Modelling physics"
+    },
+    {
+      "id": "p2",
+      "name": "Exploring physics"
+    },
+    {
+      "id": "p3",
+      "name": "Unified physics"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h556-t01",
+      "name": "Practical skills assessed in a written exam",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t02",
+      "name": "Physical quantities and units",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t03",
+      "name": "Making measurements and analysing data",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t04",
+      "name": "Nature of quantities",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t05",
+      "name": "Motion",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t06",
+      "name": "Forces in action",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t07",
+      "name": "Work, energy and power",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t08",
+      "name": "Materials",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t09",
+      "name": "Newton's laws of motion and momentum",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t10",
+      "name": "Charge and current",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t11",
+      "name": "Energy, power and resistance",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t12",
+      "name": "Electrical circuits",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t13",
+      "name": "Waves",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t14",
+      "name": "Quantum physics",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t15",
+      "name": "Thermal physics",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t16",
+      "name": "Circular motion",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t17",
+      "name": "Oscillations",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t18",
+      "name": "Gravitational fields",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t19",
+      "name": "Astrophysics and cosmology",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t20",
+      "name": "Capacitors",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t21",
+      "name": "Electric fields",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t22",
+      "name": "Electromagnetism",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t23",
+      "name": "Nuclear and particle physics",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h556-t24",
+      "name": "Medical imaging",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "ocr-h556-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

@@ -1,48 +1,176 @@
 import { useState } from "react";
-import { extractPdfText, generateSubjectDraftFromPdfText } from "../../specImport.js";
-import { SUBJECT_PRESETS } from "../../utils/subjects.js";
+import { findSpec, loadSpec, subjectFromSpec } from "../../utils/catalogue.js";
+import { extractPdfText, generateSubjectDraftFromPdfText } from "../../utils/specImport.js";
+import {
+  boardFromText,
+  normalizeSubject,
+  subjectLabel,
+  SUBJECT_PRESETS,
+} from "../../utils/subjects.js";
+import SubjectMetaFields from "./SubjectMetaFields.jsx";
+import SubjectPicker from "../SubjectPicker.jsx";
 
-export default function AddSubjectCard({ C, onAddSubject }) {
+const EMPTY_META = { qualification: "other", board: "Custom", tier: null, spec: "", exam: "" };
+
+const presetMeta = (preset) => {
+  const { qualification, board, tier, spec, specName, exam } = normalizeSubject(preset);
+  return { qualification, board, tier, spec: spec || "", specName, exam };
+};
+
+export default function AddSubjectCard({ C, subjects = [], onAddSubject }) {
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [subjectName, setSubjectName] = useState("");
-  const [subjectExam, setSubjectExam] = useState("");
+  const [subjectMeta, setSubjectMeta] = useState(EMPTY_META);
   const [subjectColor, setSubjectColor] = useState("#4F9CF9");
   const [specFileName, setSpecFileName] = useState("");
   const [specImporting, setSpecImporting] = useState(false);
   const [specError, setSpecError] = useState("");
   const [specTopics, setSpecTopics] = useState([]);
+  // Set when the PDF's spec code is in the catalogue: { subject, optionCount }
+  // where subject is built by subjectFromSpec. topicSource picks which list
+  // the new subject gets.
+  const [catalogueMatch, setCatalogueMatch] = useState(null);
+  const [topicSource, setTopicSource] = useState("catalogue");
+  // Catalogue specs the uploaded PDF covers equally; the student picks one.
+  const [titleChoices, setTitleChoices] = useState([]);
+  const [titleError, setTitleError] = useState("");
+
+  // The match only applies while the form still names the matched spec: if
+  // the user re-points board or spec code, the catalogue list (and its
+  // catalogueTopicIds) would belong to a different spec, so fall back to the
+  // topics read from the PDF.
+  const matchApplies =
+    Boolean(catalogueMatch) &&
+    subjectMeta.board === catalogueMatch.subject.board &&
+    (subjectMeta.spec || "").trim().toUpperCase() === catalogueMatch.subject.spec;
+  const useCatalogueTopics = matchApplies && topicSource === "catalogue";
+
+  const resetImport = () => {
+    setSpecFileName("");
+    setSpecError("");
+    setSpecTopics([]);
+    setCatalogueMatch(null);
+    setTopicSource("catalogue");
+    setTitleChoices([]);
+    setTitleError("");
+  };
 
   const addSubject = () => {
     const cleanName = subjectName.trim();
     if (!cleanName) return;
 
     onAddSubject({
+      ...subjectMeta,
       name: cleanName,
-      exam: subjectExam.trim() || "Custom",
+      spec: subjectMeta.spec.trim() || null,
+      // A matched spec's name only belongs to that spec: once the user
+      // re-points board or code, drop it rather than mislabel the subject.
+      specName: matchApplies ? catalogueMatch.subject.specName : catalogueMatch ? null : subjectMeta.specName,
+      exam: subjectMeta.exam.trim() || "Custom",
       color: subjectColor,
-      topics: specTopics,
+      // Catalogue topics keep their paper and higher-only tags, and bring the
+      // spec's papers with them.
+      ...(useCatalogueTopics
+        ? { papers: catalogueMatch.subject.papers, milestones: catalogueMatch.subject.milestones }
+        : {}),
+      topics: useCatalogueTopics
+        ? catalogueMatch.subject.topics.map(({ name, catalogueTopicId, paper, higherOnly }) => ({
+            name,
+            catalogueTopicId,
+            paper,
+            higherOnly,
+          }))
+        : specTopics,
     });
     setSubjectName("");
-    setSubjectExam("");
+    setSubjectMeta(EMPTY_META);
     setSubjectColor("#4F9CF9");
-    setSpecFileName("");
-    setSpecError("");
-    setSpecTopics([]);
+    resetImport();
+  };
+
+  // A catalogue spec for the PDF's code, or null. A failed load (e.g. offline
+  // before the chunk was cached) just falls back to the PDF's own topics.
+  const catalogueSpecFor = async (specCode) => {
+    const entry = specCode && findSpec(specCode.board, specCode.spec);
+    if (!entry) return null;
+    try {
+      return await loadSpec(entry.id);
+    } catch {
+      return null;
+    }
+  };
+
+  const applyCatalogueSpec = (spec) => {
+    const subject = subjectFromSpec(spec);
+    setCatalogueMatch({ subject, optionCount: spec.optionGroups.length });
+    setSubjectName(subject.name);
+    setSubjectMeta({
+      qualification: subject.qualification,
+      board: subject.board,
+      tier: null,
+      spec: subject.spec,
+      specName: subject.specName,
+      exam: "",
+    });
+  };
+
+  const chooseTitle = async (entry) => {
+    setTitleError("");
+    try {
+      const spec = await loadSpec(entry.id);
+      if (!spec) throw new Error("missing");
+      setTitleChoices([]);
+      applyCatalogueSpec(spec);
+    } catch {
+      // Shown next to the buttons, which stay visible so the student can retry.
+      setTitleError("That specification couldn't be loaded. Check your connection and try again.");
+    }
   };
 
   const handleSpecUpload = async (file) => {
     if (!file) return;
 
     setSpecImporting(true);
-    setSpecError("");
+    resetImport();
     setSpecFileName(file.name);
 
     try {
       const text = await extractPdfText(file);
       const draft = generateSubjectDraftFromPdfText(text, file.name);
+      setSpecTopics(draft.topics || []);
+
+      // One PDF can cover several catalogue specs (e.g. every Art and Design
+      // title): ask which one rather than guess.
+      const choices = [draft.specCode?.spec, ...(draft.specCode?.alternatives || [])]
+        .map((code) => code && findSpec(draft.specCode.board, code))
+        .filter(Boolean);
+      // Only when the PDF's own code is in the catalogue: an unrelated
+      // document (e.g. an exam timetable) must not offer random subjects.
+      if (choices.length > 1 && choices[0].spec === draft.specCode.spec) {
+        setTitleChoices(choices);
+        setSubjectName(draft.subjectName);
+        setSubjectMeta({ ...EMPTY_META, board: draft.specCode.board, qualification: choices[0].qualification });
+        return;
+      }
+
+      const spec = await catalogueSpecFor(draft.specCode);
+      if (spec) {
+        applyCatalogueSpec(spec);
+        return;
+      }
 
       setSubjectName(draft.subjectName);
-      setSubjectExam(draft.examBoard);
-      setSpecTopics(draft.topics || []);
+      // Unrecognised boards (e.g. SQA) stay Custom with the inferred name as the label.
+      // Start from empty meta so nothing from an earlier upload (e.g. a
+      // catalogue match's spec name) leaks into this subject.
+      const board = draft.specCode?.board || boardFromText(draft.examBoard);
+      setSubjectMeta({
+        ...EMPTY_META,
+        board,
+        exam: draft.examBoard === "Custom" ? "" : draft.examBoard,
+        ...(board !== "Custom" && draft.qualification ? { qualification: draft.qualification } : {}),
+        ...(draft.specCode ? { spec: draft.specCode.spec } : {}),
+      });
     } catch (error) {
       setSpecError(error instanceof Error ? error.message : "Unable to read PDF spec.");
     } finally {
@@ -50,11 +178,10 @@ export default function AddSubjectCard({ C, onAddSubject }) {
     }
   };
 
-  const clearSpecImport = () => {
-    setSpecFileName("");
-    setSpecError("");
-    setSpecTopics([]);
-  };
+  const clearSpecImport = resetImport;
+  const shownTopics = useCatalogueTopics
+    ? catalogueMatch.subject.topics.map((topic) => topic.name)
+    : specTopics;
 
   return (
     <div
@@ -77,10 +204,60 @@ export default function AddSubjectCard({ C, onAddSubject }) {
       >
         Add Subject
       </div>
+      <div style={{ marginBottom: "12px" }}>
+        {pickerOpen ? (
+          <div
+            style={{ padding: "12px", borderRadius: "10px", border: `1px solid ${C.bdr}`, background: C.s1 }}
+          >
+            <SubjectPicker
+              C={C}
+              existingSubjects={subjects}
+              mode="single"
+              onConfirm={(list) => {
+                onAddSubject(list);
+                setPickerOpen(false);
+              }}
+              onCancel={() => setPickerOpen(false)}
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="nb"
+            onClick={() => setPickerOpen(true)}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: "10px",
+              border: `1px solid ${C.bdr2}`,
+              background: C.s2,
+              color: C.txt,
+              textAlign: "left",
+              cursor: "pointer",
+            }}
+          >
+            <div style={{ fontWeight: 700, fontSize: "12px" }}>Add from catalogue</div>
+            <div style={{ color: C.muted, fontSize: "11px", marginTop: "2px" }}>
+              Pick your exam board and specification to get its topics, papers and milestones.
+            </div>
+          </button>
+        )}
+      </div>
+      <div
+        style={{
+          fontSize: "10px",
+          color: C.muted,
+          textTransform: "uppercase",
+          letterSpacing: "1px",
+          marginBottom: "6px",
+        }}
+      >
+        Or add your own
+      </div>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr) 52px auto",
+          gridTemplateColumns: "minmax(0, 1fr) 52px auto",
           gap: "8px",
           alignItems: "center",
         }}
@@ -89,19 +266,6 @@ export default function AddSubjectCard({ C, onAddSubject }) {
           value={subjectName}
           onChange={(e) => setSubjectName(e.target.value)}
           placeholder="Subject name"
-          style={{
-            background: C.s2,
-            border: `1px solid ${C.bdr2}`,
-            borderRadius: "8px",
-            padding: "9px 10px",
-            color: C.txt,
-            outline: "none",
-          }}
-        />
-        <input
-          value={subjectExam}
-          onChange={(e) => setSubjectExam(e.target.value)}
-          placeholder="Exam board / level"
           style={{
             background: C.s2,
             border: `1px solid ${C.bdr2}`,
@@ -144,6 +308,13 @@ export default function AddSubjectCard({ C, onAddSubject }) {
           Add
         </button>
       </div>
+      <div style={{ marginTop: "8px" }}>
+        <SubjectMetaFields
+          C={C}
+          value={subjectMeta}
+          onChange={(patch) => setSubjectMeta((prev) => ({ ...prev, ...patch }))}
+        />
+      </div>
       <div style={{ marginTop: "10px", display: "flex", flexWrap: "wrap", gap: "6px" }}>
         {SUBJECT_PRESETS.map((preset) => (
           <button
@@ -151,7 +322,7 @@ export default function AddSubjectCard({ C, onAddSubject }) {
             className="nb"
             onClick={() => {
               setSubjectName(preset.name);
-              setSubjectExam(preset.exam);
+              setSubjectMeta(presetMeta(preset));
               setSubjectColor(preset.color);
             }}
             style={{
@@ -211,13 +382,82 @@ export default function AddSubjectCard({ C, onAddSubject }) {
         {!specImporting && specFileName && !specError && (
           <div style={{ marginTop: "8px", fontSize: "11px", color: C.txt }}>
             Loaded {specFileName}.
-            {specTopics.length > 0 && (
+            {titleChoices.length > 0 && (
+              <fieldset style={{ marginTop: "8px", border: "none", padding: 0, display: "grid", gap: "6px" }}>
+                <legend style={{ fontSize: "11px", color: C.txt, marginBottom: "4px", padding: 0 }}>
+                  This specification covers {titleChoices.length} titles. Which one do you take?
+                </legend>
+                {titleChoices.map((entry) => (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    className="nb"
+                    onClick={() => chooseTitle(entry)}
+                    style={{
+                      textAlign: "left",
+                      border: `1px solid ${C.bdr2}`,
+                      background: C.s3,
+                      color: C.txt,
+                      borderRadius: "6px",
+                      padding: "5px 8px",
+                      cursor: "pointer",
+                      fontSize: "11px",
+                    }}
+                  >
+                    {entry.specName || entry.subject} ({entry.spec})
+                  </button>
+                ))}
+                {titleError && (
+                  <div role="alert" style={{ fontSize: "11px", color: "#f87171" }}>
+                    {titleError}
+                  </div>
+                )}
+              </fieldset>
+            )}
+            {matchApplies && (
+              <fieldset
+                style={{ marginTop: "8px", border: "none", padding: 0, display: "grid", gap: "6px" }}
+              >
+                <legend style={{ fontSize: "11px", color: C.txt, marginBottom: "4px", padding: 0 }}>
+                  This is {subjectLabel(catalogueMatch.subject)}, which StudyBox already knows.
+                </legend>
+                <label style={{ display: "flex", gap: "6px", alignItems: "flex-start", cursor: "pointer" }}>
+                  <input
+                    type="radio"
+                    name="spec-topic-source"
+                    checked={topicSource === "catalogue"}
+                    onChange={() => setTopicSource("catalogue")}
+                  />
+                  <span>
+                    Use StudyBox&apos;s topic list for {subjectLabel(catalogueMatch.subject)} (
+                    {catalogueMatch.subject.topics.length} topics)
+                  </span>
+                </label>
+                <label style={{ display: "flex", gap: "6px", alignItems: "flex-start", cursor: "pointer" }}>
+                  <input
+                    type="radio"
+                    name="spec-topic-source"
+                    checked={topicSource === "pdf"}
+                    onChange={() => setTopicSource("pdf")}
+                  />
+                  <span>Use topics read from the PDF ({specTopics.length} topics)</span>
+                </label>
+                {useCatalogueTopics && catalogueMatch.optionCount > 0 && (
+                  <div style={{ fontSize: "10px", color: C.muted, lineHeight: 1.5 }}>
+                    Set texts and optional papers aren&apos;t included. Add the ones you study as
+                    topics after creating the subject.
+                  </div>
+                )}
+              </fieldset>
+            )}
+            {shownTopics.length > 0 && (
               <>
                 <div style={{ marginTop: "6px", fontSize: "10px", color: C.muted }}>
-                  {specTopics.length} topic{specTopics.length === 1 ? "" : "s"} found
+                  {shownTopics.length} topic{shownTopics.length === 1 ? "" : "s"}{" "}
+                  {useCatalogueTopics ? "from StudyBox's catalogue" : "found"}
                 </div>
                 <div style={{ marginTop: "4px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                {specTopics.map((topic, idx) => (
+                {shownTopics.map((topic, idx) => (
                   <span
                     key={idx}
                     style={{

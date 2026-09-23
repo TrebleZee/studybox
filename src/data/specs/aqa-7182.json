@@ -1,0 +1,218 @@
+{
+  "id": "aqa-7182",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7182",
+  "subject": "Psychology",
+  "specName": "Psychology",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/psychology/specifications/AQA-7181-7182-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Introductory topics in psychology"
+    },
+    {
+      "id": "p2",
+      "name": "Psychology in context"
+    },
+    {
+      "id": "p3",
+      "name": "Issues and options in psychology"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7182-t01",
+      "name": "Social influence",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t02",
+      "name": "Memory",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t03",
+      "name": "Attachment",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t04",
+      "name": "Psychopathology",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t05",
+      "name": "Approaches in psychology",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t06",
+      "name": "Biopsychology",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t07",
+      "name": "Research methods",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t08",
+      "name": "Issues and debates in psychology",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t09",
+      "name": "Relationships",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t10",
+      "name": "Gender",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t11",
+      "name": "Cognition and development",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t12",
+      "name": "Schizophrenia",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t13",
+      "name": "Eating behaviour",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t14",
+      "name": "Stress",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t15",
+      "name": "Aggression",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t16",
+      "name": "Forensic psychology",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7182-t17",
+      "name": "Addiction",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "option-1",
+      "name": "Option 1",
+      "pick": 1,
+      "options": [
+        {
+          "id": "relationships",
+          "name": "Relationships",
+          "topicIds": [
+            "aqa-7182-t09"
+          ]
+        },
+        {
+          "id": "gender",
+          "name": "Gender",
+          "topicIds": [
+            "aqa-7182-t10"
+          ]
+        },
+        {
+          "id": "cognition",
+          "name": "Cognition and development",
+          "topicIds": [
+            "aqa-7182-t11"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "option-2",
+      "name": "Option 2",
+      "pick": 1,
+      "options": [
+        {
+          "id": "schizophrenia",
+          "name": "Schizophrenia",
+          "topicIds": [
+            "aqa-7182-t12"
+          ]
+        },
+        {
+          "id": "eating",
+          "name": "Eating behaviour",
+          "topicIds": [
+            "aqa-7182-t13"
+          ]
+        },
+        {
+          "id": "stress",
+          "name": "Stress",
+          "topicIds": [
+            "aqa-7182-t14"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "option-3",
+      "name": "Option 3",
+      "pick": 1,
+      "options": [
+        {
+          "id": "aggression",
+          "name": "Aggression",
+          "topicIds": [
+            "aqa-7182-t15"
+          ]
+        },
+        {
+          "id": "forensic",
+          "name": "Forensic psychology",
+          "topicIds": [
+            "aqa-7182-t16"
+          ]
+        },
+        {
+          "id": "addiction",
+          "name": "Addiction",
+          "topicIds": [
+            "aqa-7182-t17"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

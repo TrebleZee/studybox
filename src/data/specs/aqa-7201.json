@@ -1,0 +1,150 @@
+{
+  "id": "aqa-7201",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7201",
+  "subject": "Art and Design",
+  "specName": "Art, craft and design",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/art-and-design/specifications/AQA-ART-A-LEVEL-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7201-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7201-t02",
+      "name": "Personal investigation: written material",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7201-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7201-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7201-t05",
+      "name": "Fine art",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7201-t06",
+      "name": "Graphic communication",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7201-t07",
+      "name": "Textile design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7201-t08",
+      "name": "Three-dimensional design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7201-t09",
+      "name": "Photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Endorsed titles worked across (at least two)",
+      "pick": 2,
+      "options": [
+        {
+          "id": "fine-art",
+          "name": "Fine art",
+          "topicIds": [
+            "aqa-7201-t05"
+          ]
+        },
+        {
+          "id": "graphic-communication",
+          "name": "Graphic communication",
+          "topicIds": [
+            "aqa-7201-t06"
+          ]
+        },
+        {
+          "id": "textile-design",
+          "name": "Textile design",
+          "topicIds": [
+            "aqa-7201-t07"
+          ]
+        },
+        {
+          "id": "three-dimensional-design",
+          "name": "Three-dimensional design",
+          "topicIds": [
+            "aqa-7201-t08"
+          ]
+        },
+        {
+          "id": "photography",
+          "name": "Photography",
+          "topicIds": [
+            "aqa-7201-t09"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "aqa-7201-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "aqa-7201-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

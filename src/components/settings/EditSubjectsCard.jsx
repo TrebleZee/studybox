@@ -1,3 +1,6 @@
+import PaperDatesFields from "./PaperDatesFields.jsx";
+import SubjectMetaFields from "./SubjectMetaFields.jsx";
+
 export default function EditSubjectsCard({ C, subjects, onUpdateSubject, onRemoveSubject }) {
   return (
     <div
@@ -67,19 +70,16 @@ export default function EditSubjectsCard({ C, subjects, onUpdateSubject, onRemov
                     outline: "none",
                   }}
                 />
-                <input
-                  aria-label={`Subject exam ${subject.id}`}
-                  value={subject.exam}
-                  onChange={(e) => onUpdateSubject(subject.id, { exam: e.target.value })}
-                  style={{
-                    width: "100%",
-                    background: C.s1,
-                    border: `1px solid ${C.bdr2}`,
-                    borderRadius: "8px",
-                    padding: "8px 9px",
-                    color: C.txt,
-                    outline: "none",
-                  }}
+                <SubjectMetaFields
+                  C={C}
+                  value={subject}
+                  labelSuffix={subject.id}
+                  onChange={(patch) => onUpdateSubject(subject.id, patch)}
+                />
+                <PaperDatesFields
+                  C={C}
+                  subject={subject}
+                  onChange={(patch) => onUpdateSubject(subject.id, patch)}
                 />
               </div>
               <input

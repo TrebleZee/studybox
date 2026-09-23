@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AnalysisPanel from "./components/AnalysisPanel.jsx";
 import EditSessionModal from "./components/EditSessionModal.jsx";
 import LogView from "./components/LogView.jsx";
@@ -6,6 +6,7 @@ import Onboarding from "./components/Onboarding.jsx";
 import PlannerView from "./components/PlannerView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import TopBar from "./components/TopBar.jsx";
+import useMilestoneReminder from "./hooks/useMilestoneReminder.js";
 import useStreakReminder from "./hooks/useStreakReminder.js";
 import useTimer from "./hooks/useTimer.js";
 import { normalizeAsanaConfig } from "./services/asanaClient.js";
@@ -23,9 +24,12 @@ import {
   addUniqueTag,
   isUntouchedDefaultSubjects,
   normalizeSessions,
+  normalizeSubject,
   normalizeSubjects,
-  subjectsForTemplate,
+  updateSubjectFields,
 } from "./utils/subjects.js";
+import { subjectsForTemplate } from "./utils/catalogue.js";
+import { convertTopicToMilestone } from "./utils/milestones.js";
 import { THEMES } from "./utils/themes.js";
 
 const readFileText = (file) =>
@@ -59,6 +63,7 @@ export default function StudyBox() {
     )
   );
   const [onboarded, setOnboarded] = useState(() => loadJson(STORAGE_KEYS.onboarded, false));
+  const templateRequest = useRef(0);
   const [sel, setSel] = useState(() => subjects[0]?.id ?? null);
   const [view, setView] = useState("planner");
   const [asanaTask, setAsanaTask] = useState(null);
@@ -123,6 +128,7 @@ export default function StudyBox() {
     defaultSubjectId: asanaSelected ? asanaCfg.id : sub?.id ?? null,
   });
   useStreakReminder(game);
+  useMilestoneReminder(subjects);
   const { running, displaySecs, timedSubjectId } = timer;
   const timedSubject = subjects.find((subject) => subject.id === timedSubjectId);
   const timingAsana = asanaEnabled && timedSubjectId === asanaCfg.id;
@@ -210,6 +216,64 @@ export default function StudyBox() {
         ],
       }));
     },
+    // Milestones never touch XP or streaks.
+    addMilestone: (subjectId, { name, kind, due }) => {
+      const cleanName = name.trim();
+      if (!cleanName) return;
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) =>
+          normalizeSubject({
+            ...subject,
+            milestones: [
+              ...(subject.milestones || []),
+              { id: `ms-${Date.now().toString(36)}`, name: cleanName, kind, due: due || null, done: false },
+            ],
+          })
+        )
+      );
+    },
+    updateMilestone: (subjectId, milestoneId, patch) =>
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) =>
+          normalizeSubject({
+            ...subject,
+            milestones: (subject.milestones || []).map((milestone) =>
+              milestone.id === milestoneId ? { ...milestone, ...patch } : milestone
+            ),
+          })
+        )
+      ),
+    deleteMilestone: (subjectId, milestoneId) =>
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) =>
+          normalizeSubject({
+            ...subject,
+            milestones: (subject.milestones || []).filter((milestone) => milestone.id !== milestoneId),
+          })
+        )
+      ),
+    // "Keep as topic" on the NEA offer: remembered on the topic itself, so the
+    // offer stays gone across views, reloads and backups.
+    keepAsTopic: (subjectId, topicId) =>
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) => ({
+          ...subject,
+          topics: subject.topics.map((topic) => (topic.id === topicId ? { ...topic, keepAsTopic: true } : topic)),
+        }))
+      ),
+    // Only called after the user confirms in the milestone strip.
+    convertTopicToMilestone: (subjectId, topicId) => {
+      if (expandedTopic === topicId) setExpandedTopic(null);
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) => normalizeSubject(convertTopicToMilestone(subject, topicId)))
+      );
+    },
+    // Patch a topic's own fields (e.g. paper, higherOnly); `undefined` removes one.
+    updateTopic: (topicId, patch) =>
+      updateCurrentSubject((subject) => ({
+        ...subject,
+        topics: subject.topics.map((topic) => (topic.id === topicId ? { ...topic, ...patch } : topic)),
+      })),
     deleteTopic: (topicId) =>
       updateCurrentSubject((subject) => ({
         ...subject,
@@ -265,24 +329,32 @@ export default function StudyBox() {
     },
   };
 
-  const addSubject = ({ name, exam, color, topics }) => {
-    const id = `custom-${Date.now().toString(36)}`;
-    setSubjects((prev) => [
-      ...prev,
-      {
+  // New subjects from the add form, a PDF import or the catalogue picker.
+  // Each gets a fresh id (unique within the batch) and fresh topic ids.
+  const buildNewSubjects = (list) => {
+    const stamp = Date.now().toString(36);
+    return list.map(({ topics, ...fields }, index) => {
+      const id = list.length === 1 ? `custom-${stamp}` : `custom-${stamp}-${index}`;
+      return normalizeSubject({
+        ...fields,
         id,
-        name,
-        exam,
-        color,
+        // Topics are names, or objects (catalogueTopicId, paper, higherOnly) when seeded from the catalogue.
         topics: topics.map((topic, i) => ({
+          ...(typeof topic === "string" ? { name: topic } : topic),
           id: `${id}-topic-${i}`,
-          name: topic,
           done: false,
           subtasks: [],
         })),
-      },
-    ]);
-    setSel(id);
+      });
+    });
+  };
+
+  // Accepts one subject or a list (the catalogue picker can add several).
+  const addSubject = (input) => {
+    const added = buildNewSubjects(Array.isArray(input) ? input : [input]);
+    if (!added.length) return;
+    setSubjects((prev) => [...prev, ...added]);
+    setSel(added[0].id);
   };
 
   const removeSubject = (id) => {
@@ -322,6 +394,7 @@ export default function StudyBox() {
     if (!file) return { ok: false };
     try {
       const restored = parseBackup(await readFileText(file));
+      templateRequest.current += 1;
       if (restored.subjects) {
         setSubjects(restored.subjects);
         setSel(restored.subjects[0]?.id ?? null);
@@ -339,17 +412,40 @@ export default function StudyBox() {
     }
   };
 
+  // Onboarding's "Choose my subjects": the picked subjects replace the
+  // untouched placeholder list.
+  const startWithSubjects = (list) => {
+    const chosen = buildNewSubjects(list);
+    templateRequest.current += 1;
+    setSubjects(chosen);
+    setSel(chosen[0]?.id ?? null);
+    setOnboarded(true);
+  };
+
   const startBlank = () => {
+    templateRequest.current += 1;
     setSubjects([]);
     setSel(null);
     setOnboarded(true);
   };
 
-  const useTemplate = (templateId) => {
-    const template = subjectsForTemplate(templateId);
-    setSubjects(template);
-    setSel(template[0]?.id ?? null);
-    setOnboarded(true);
+  // Catalogue-backed templates load their spec chunks on demand, so this is
+  // async; Onboarding shows an error if that load fails. Each request takes a
+  // ticket; if another onboarding action (start blank, restore, a newer
+  // template) happened while it was loading, the stale result is dropped.
+  const useTemplate = async (templateId) => {
+    const request = ++templateRequest.current;
+    try {
+      const template = await subjectsForTemplate(templateId);
+      if (request !== templateRequest.current) return { ok: true };
+      if (!template.length) return { ok: false, error: "That template couldn't be loaded." };
+      setSubjects(template);
+      setSel(template[0].id);
+      setOnboarded(true);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "That template couldn't be loaded. Check your connection and try again." };
+    }
   };
 
   const needsOnboarding =
@@ -375,11 +471,12 @@ export default function StudyBox() {
           C={C}
           onStartBlank={startBlank}
           onUseTemplate={useTemplate}
+          onChooseSubjects={startWithSubjects}
           onRestore={importData}
         />
       ) : (
         <>
-          <TopBar C={C} view={view} onChangeView={setView} game={game} grandTotal={grandTotal} />
+          <TopBar C={C} view={view} onChangeView={setView} game={game} grandTotal={grandTotal} subjects={subjects} />
 
           {view === "planner" && (
             <PlannerView
@@ -453,7 +550,7 @@ export default function StudyBox() {
               subjects={subjects}
               onAddSubject={addSubject}
               onUpdateSubject={(id, patch) =>
-                setSubjects((prev) => mapSubject(prev, id, (s) => ({ ...s, ...patch })))
+                setSubjects((prev) => mapSubject(prev, id, (s) => updateSubjectFields(s, patch)))
               }
               onRemoveSubject={removeSubject}
               asanaCfg={asanaCfg}

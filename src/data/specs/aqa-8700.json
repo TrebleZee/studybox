@@ -1,0 +1,99 @@
+{
+  "id": "aqa-8700",
+  "qualification": "gcse",
+  "board": "AQA",
+  "spec": "8700",
+  "subject": "English Language",
+  "specName": "English Language",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/english/specifications/AQA-8700-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Explorations in creative reading and writing"
+    },
+    {
+      "id": "p2",
+      "name": "Writers' viewpoints and perspectives"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-8700-t01",
+      "name": "Reading a fiction extract",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8700-t02",
+      "name": "Descriptive or narrative writing",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8700-t03",
+      "name": "Reading non-fiction and literary non-fiction",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8700-t04",
+      "name": "Writing to present a viewpoint",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8700-t05",
+      "name": "Critical reading and comprehension",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8700-t06",
+      "name": "Summary and synthesis",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8700-t07",
+      "name": "Analysing language, form and structure",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8700-t08",
+      "name": "Comparing texts",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8700-t09",
+      "name": "Writing for impact and technical accuracy",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "aqa-8700-m01",
+      "name": "Spoken language endorsement",
+      "kind": "nea"
+    }
+  ]
+}

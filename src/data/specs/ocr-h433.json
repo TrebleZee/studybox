@@ -1,0 +1,157 @@
+{
+  "id": "ocr-h433",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H433",
+  "subject": "Chemistry",
+  "specName": "Chemistry B (Salters)",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/171723-specification-accredited-a-level-gce-chemistry-b-salters-h433.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Fundamentals of chemistry"
+    },
+    {
+      "id": "p2",
+      "name": "Scientific literacy in chemistry"
+    },
+    {
+      "id": "p3",
+      "name": "Practical skills in chemistry"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h433-t01",
+      "name": "Practical skills in chemistry",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t02",
+      "name": "Chemical literacy",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t03",
+      "name": "Elements of life",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t04",
+      "name": "Developing fuels",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t05",
+      "name": "Elements from the sea",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t06",
+      "name": "The ozone story",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t07",
+      "name": "What's in a medicine?",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t08",
+      "name": "The chemical industry",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t09",
+      "name": "Polymers and life",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t10",
+      "name": "Oceans",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t11",
+      "name": "Developing metals",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h433-t12",
+      "name": "Colour by design",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "ocr-h433-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

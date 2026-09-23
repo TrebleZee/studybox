@@ -1,0 +1,113 @@
+{
+  "id": "edexcel-9bn0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9BN0",
+  "subject": "Biology",
+  "specName": "Biology A (Salters-Nuffield)",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/biology-a/2015/specification-and-sample-assessment-materials/9781446930885-gce2015-a-bioa-spec.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "The Natural Environment and Species Survival"
+    },
+    {
+      "id": "p2",
+      "name": "Energy, Exercise and Co-ordination"
+    },
+    {
+      "id": "p3",
+      "name": "General and Practical Applications in Biology"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9bn0-t01",
+      "name": "Lifestyle, health and risk",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bn0-t02",
+      "name": "Genes and health",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bn0-t03",
+      "name": "Voice of the genome",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bn0-t04",
+      "name": "Biodiversity and natural resources",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bn0-t05",
+      "name": "On the wild side",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bn0-t06",
+      "name": "Immunity, infection and forensics",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bn0-t07",
+      "name": "Run for your life",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bn0-t08",
+      "name": "Grey matter",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "edexcel-9bn0-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

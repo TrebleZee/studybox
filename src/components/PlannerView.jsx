@@ -1,4 +1,5 @@
 import AsanaTasksPanel from "./AsanaTasksPanel.jsx";
+import MilestoneStrip from "./MilestoneStrip.jsx";
 import SubjectSidebar from "./SubjectSidebar.jsx";
 import TimerPanel from "./TimerPanel.jsx";
 import TopicList from "./TopicList.jsx";
@@ -49,6 +50,17 @@ export default function PlannerView({
             onSelectTask={asana.setTask}
           />
         ) : sub ? (
+          <>
+          <MilestoneStrip
+            C={C}
+            subjects={subjects}
+            defaultSubjectId={sub.id}
+            onAdd={actions.addMilestone}
+            onUpdate={actions.updateMilestone}
+            onDelete={actions.deleteMilestone}
+            onConvertTopic={actions.convertTopicToMilestone}
+            onKeepTopic={actions.keepAsTopic}
+          />
           <TopicList
             key={sub.id}
             C={C}
@@ -59,10 +71,12 @@ export default function PlannerView({
             onToggleTopic={(topicId) => actions.toggleTopic(sub.id, topicId)}
             onAddTopic={actions.addTopic}
             onDeleteTopic={actions.deleteTopic}
+            onUpdateTopic={actions.updateTopic}
             onToggleSubtask={actions.toggleSubtask}
             onAddSubtask={actions.addSubtask}
             onDeleteSubtask={actions.deleteSubtask}
           />
+          </>
         ) : (
           <div
             style={{

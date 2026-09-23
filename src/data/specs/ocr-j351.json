@@ -1,0 +1,72 @@
+{
+  "id": "ocr-j351",
+  "qualification": "gcse",
+  "board": "OCR",
+  "spec": "J351",
+  "subject": "English Language",
+  "specName": "English Language",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/168996-specification-accredited-gcse-english-language-j351.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Communicating information and ideas"
+    },
+    {
+      "id": "p2",
+      "name": "Exploring effects and impact"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-j351-t01",
+      "name": "Reading non-fiction, including a 19th-century text",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j351-t02",
+      "name": "Comparing non-fiction texts",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j351-t03",
+      "name": "Writing for audience, impact and purpose",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j351-t04",
+      "name": "Reading 20th- and 21st-century fiction",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j351-t05",
+      "name": "Writing imaginatively and creatively",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-j351-t06",
+      "name": "Spelling, punctuation and grammar",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "ocr-j351-m01",
+      "name": "Spoken language endorsement",
+      "kind": "nea"
+    }
+  ]
+}

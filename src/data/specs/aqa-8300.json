@@ -1,0 +1,244 @@
+{
+  "id": "aqa-8300",
+  "qualification": "gcse",
+  "board": "AQA",
+  "spec": "8300",
+  "subject": "Mathematics",
+  "specName": "Mathematics",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/mathematics/specifications/AQA-8300-SP-2015.PDF",
+  "tiers": [
+    "foundation",
+    "higher"
+  ],
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1 (non-calculator)"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2 (calculator)"
+    },
+    {
+      "id": "p3",
+      "name": "Paper 3 (calculator)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-8300-t01",
+      "name": "Structure and calculation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t02",
+      "name": "Fractions, decimals and percentages",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t03",
+      "name": "Measures and accuracy",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t04",
+      "name": "Algebraic notation, vocabulary and manipulation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t05",
+      "name": "Graphs",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t06",
+      "name": "Solving equations and inequalities",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t07",
+      "name": "Sequences",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t08",
+      "name": "Ratio, proportion and rates of change",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t09",
+      "name": "Properties and constructions",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t10",
+      "name": "Mensuration and calculation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t11",
+      "name": "Vectors",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t12",
+      "name": "Probability",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t13",
+      "name": "Statistics",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8300-t14",
+      "name": "Transformations of graphs",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t15",
+      "name": "Gradients and areas under graphs",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t16",
+      "name": "Solving equations by iteration",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t17",
+      "name": "Instantaneous and average rates of change",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t18",
+      "name": "Combined transformations",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t19",
+      "name": "Sine and cosine rules",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t20",
+      "name": "Conditional probability",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8300-t21",
+      "name": "Histograms with unequal class widths",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": true
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

@@ -1,5 +1,6 @@
 import { fmtDur } from "../utils/format.js";
 import { freezeStats } from "../utils/gameLogic.js";
+import ExamCountdown from "./ExamCountdown.jsx";
 
 const VIEWS = [
   ["planner", "Planner"],
@@ -8,7 +9,7 @@ const VIEWS = [
   ["settings", "Settings"],
 ];
 
-export default function TopBar({ C, view, onChangeView, game, grandTotal }) {
+export default function TopBar({ C, view, onChangeView, game, grandTotal, subjects = [] }) {
   const { available: freezesAvailable, xpToNext: xpToNextFreeze } = freezeStats(game);
 
   return (
@@ -64,6 +65,8 @@ export default function TopBar({ C, view, onChangeView, game, grandTotal }) {
           fontSize: "11px",
         }}
       >
+        <ExamCountdown C={C} subjects={subjects} onClick={() => onChangeView("analysis")} />
+
         <button
           type="button"
           className="nb"

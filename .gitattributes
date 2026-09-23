@@ -1,0 +1,15 @@
+# Store and check out text files with LF on every platform, regardless of a
+# contributor's core.autocrlf, so diffs, generated files (e.g.
+# src/data/specs/index.json) and tooling agree on line endings.
+* text=auto eol=lf
+
+# Binary assets: never touch line endings or try to diff them.
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

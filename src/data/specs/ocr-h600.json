@@ -1,0 +1,166 @@
+{
+  "id": "ocr-h600",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H600",
+  "subject": "Art and Design",
+  "specName": "Art, Craft and Design",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/170210-specification-accredited-a-level-gce-art-and-design-h600-h606.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set task"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h600-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h600-t02",
+      "name": "Personal investigation: related study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h600-t03",
+      "name": "Externally set task: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h600-t04",
+      "name": "Externally set task: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h600-t05",
+      "name": "Fine art",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h600-t06",
+      "name": "Graphic communication",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h600-t07",
+      "name": "Photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h600-t08",
+      "name": "Textile design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h600-t09",
+      "name": "Three-dimensional design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h600-t10",
+      "name": "Critical and contextual studies",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Specialisms (at least two)",
+      "pick": 2,
+      "options": [
+        {
+          "id": "fine-art",
+          "name": "Fine art",
+          "topicIds": [
+            "ocr-h600-t05"
+          ]
+        },
+        {
+          "id": "graphic-communication",
+          "name": "Graphic communication",
+          "topicIds": [
+            "ocr-h600-t06"
+          ]
+        },
+        {
+          "id": "photography",
+          "name": "Photography",
+          "topicIds": [
+            "ocr-h600-t07"
+          ]
+        },
+        {
+          "id": "textile-design",
+          "name": "Textile design",
+          "topicIds": [
+            "ocr-h600-t08"
+          ]
+        },
+        {
+          "id": "three-dimensional-design",
+          "name": "Three-dimensional design",
+          "topicIds": [
+            "ocr-h600-t09"
+          ]
+        },
+        {
+          "id": "critical-and-contextual-studies",
+          "name": "Critical and contextual studies",
+          "topicIds": [
+            "ocr-h600-t10"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ocr-h600-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "ocr-h600-m02",
+      "name": "Externally set task",
+      "kind": "other"
+    }
+  ]
+}

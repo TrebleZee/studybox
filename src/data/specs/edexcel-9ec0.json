@@ -1,0 +1,220 @@
+{
+  "id": "edexcel-9ec0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9EC0",
+  "subject": "Economics",
+  "specName": "Economics A",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Economics/2015/specification-and-sample-assessment-materials/A_Level_Econ_A_Spec.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Markets and business behaviour"
+    },
+    {
+      "id": "p2",
+      "name": "The national and global economy"
+    },
+    {
+      "id": "p3",
+      "name": "Microeconomics and macroeconomics"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9ec0-t01",
+      "name": "Nature of economics",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t02",
+      "name": "How markets work",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t03",
+      "name": "Market failure",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t04",
+      "name": "Government intervention in markets",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t05",
+      "name": "Measures of economic performance",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t06",
+      "name": "Aggregate demand",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t07",
+      "name": "Aggregate supply",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t08",
+      "name": "National income",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t09",
+      "name": "Economic growth",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t10",
+      "name": "Macroeconomic objectives and policies",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t11",
+      "name": "Business growth",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t12",
+      "name": "Business objectives",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t13",
+      "name": "Revenues, costs and profits",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t14",
+      "name": "Market structures",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t15",
+      "name": "Labour market",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t16",
+      "name": "Government intervention in business",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t17",
+      "name": "International economics",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t18",
+      "name": "Poverty and inequality",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t19",
+      "name": "Emerging and developing economies",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t20",
+      "name": "The financial sector",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ec0-t21",
+      "name": "Role of the state in the macroeconomy",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

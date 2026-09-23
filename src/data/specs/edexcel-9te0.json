@@ -1,0 +1,118 @@
+{
+  "id": "edexcel-9te0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9TE0",
+  "subject": "Art and Design",
+  "specName": "Textile Design",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Art%20and%20Design/2015/specification-and-sample-assessment-materials/gce-a-level-art-and-design-specification-issue-4.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9te0-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9te0-t02",
+      "name": "Personal investigation: personal study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9te0-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9te0-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9te0-t05",
+      "name": "Textiles for interiors",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9te0-t06",
+      "name": "Fine art textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9te0-t07",
+      "name": "Fashion textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Discipline",
+      "pick": 1,
+      "options": [
+        {
+          "id": "textiles-for-interiors",
+          "name": "Textiles for interiors",
+          "topicIds": [
+            "edexcel-9te0-t05"
+          ]
+        },
+        {
+          "id": "fine-art-textiles",
+          "name": "Fine art textiles",
+          "topicIds": [
+            "edexcel-9te0-t06"
+          ]
+        },
+        {
+          "id": "fashion-textiles",
+          "name": "Fashion textiles",
+          "topicIds": [
+            "edexcel-9te0-t07"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "edexcel-9te0-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "edexcel-9te0-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

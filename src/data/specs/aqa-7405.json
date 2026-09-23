@@ -1,0 +1,347 @@
+{
+  "id": "aqa-7405",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7405",
+  "subject": "Chemistry",
+  "specName": "Chemistry",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/chemistry/specifications/AQA-7404-7405-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1 (inorganic and physical)"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2 (organic and physical)"
+    },
+    {
+      "id": "p3",
+      "name": "Paper 3"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7405-t01",
+      "name": "Atomic structure",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t02",
+      "name": "Amount of substance",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t03",
+      "name": "Bonding",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t04",
+      "name": "Energetics",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t05",
+      "name": "Kinetics",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t06",
+      "name": "Chemical equilibria, Le Chatelier's principle and Kc",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t07",
+      "name": "Oxidation, reduction and redox equations",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t08",
+      "name": "Thermodynamics",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t09",
+      "name": "Rate equations",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t10",
+      "name": "Equilibrium constant Kp",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t11",
+      "name": "Electrode potentials and electrochemical cells",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t12",
+      "name": "Acids and bases",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t13",
+      "name": "Periodicity",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t14",
+      "name": "Group 2, the alkaline earth metals",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t15",
+      "name": "Group 7(17), the halogens",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t16",
+      "name": "Properties of Period 3 elements and their oxides",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t17",
+      "name": "Transition metals",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t18",
+      "name": "Reactions of ions in aqueous solution",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t19",
+      "name": "Introduction to organic chemistry",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t20",
+      "name": "Alkanes",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t21",
+      "name": "Halogenoalkanes",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t22",
+      "name": "Alkenes",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t23",
+      "name": "Alcohols",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t24",
+      "name": "Organic analysis",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t25",
+      "name": "Optical isomerism",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t26",
+      "name": "Aldehydes and ketones",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t27",
+      "name": "Carboxylic acids and derivatives",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t28",
+      "name": "Aromatic chemistry",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t29",
+      "name": "Amines",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t30",
+      "name": "Polymers",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t31",
+      "name": "Amino acids, proteins and DNA",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t32",
+      "name": "Organic synthesis",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t33",
+      "name": "Nuclear magnetic resonance spectroscopy",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7405-t34",
+      "name": "Chromatography",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "aqa-7405-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

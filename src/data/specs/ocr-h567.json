@@ -1,0 +1,175 @@
+{
+  "id": "ocr-h567",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H567",
+  "subject": "Psychology",
+  "specName": "Psychology",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/171732-specification-accredited-a-level-gce-psychology-h567.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Research methods"
+    },
+    {
+      "id": "p2",
+      "name": "Psychological themes through core studies"
+    },
+    {
+      "id": "p3",
+      "name": "Applied psychology"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h567-t01",
+      "name": "Research methods and techniques",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t02",
+      "name": "Planning and conducting research",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t03",
+      "name": "Data recording, analysis and presentation",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t04",
+      "name": "Report writing",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t05",
+      "name": "Practical activities",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t06",
+      "name": "How science works",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t07",
+      "name": "Core studies: social area",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t08",
+      "name": "Core studies: cognitive area",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t09",
+      "name": "Core studies: developmental area",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t10",
+      "name": "Core studies: biological area",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t11",
+      "name": "Core studies: individual differences area",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t12",
+      "name": "Areas, perspectives and debates",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t13",
+      "name": "Practical applications",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t14",
+      "name": "Issues in mental health",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t15",
+      "name": "Child psychology",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t16",
+      "name": "Criminal psychology",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t17",
+      "name": "Environmental psychology",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h567-t18",
+      "name": "Sport and exercise psychology",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "applied",
+      "name": "Applied options",
+      "pick": 2,
+      "options": [
+        {
+          "id": "child",
+          "name": "Child psychology",
+          "topicIds": [
+            "ocr-h567-t15"
+          ]
+        },
+        {
+          "id": "criminal",
+          "name": "Criminal psychology",
+          "topicIds": [
+            "ocr-h567-t16"
+          ]
+        },
+        {
+          "id": "environmental",
+          "name": "Environmental psychology",
+          "topicIds": [
+            "ocr-h567-t17"
+          ]
+        },
+        {
+          "id": "sport",
+          "name": "Sport and exercise psychology",
+          "topicIds": [
+            "ocr-h567-t18"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

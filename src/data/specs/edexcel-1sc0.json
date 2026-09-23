@@ -1,0 +1,274 @@
+{
+  "id": "edexcel-1sc0",
+  "qualification": "gcse",
+  "board": "Edexcel",
+  "spec": "1SC0",
+  "subject": "Combined Science",
+  "specName": "Combined Science",
+  "specVersion": "2016",
+  "firstExam": 2018,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/GCSE/Science/2016/Specification/gcse-combinedscience-spec.pdf",
+  "tiers": [
+    "foundation",
+    "higher"
+  ],
+  "papers": [
+    {
+      "id": "b1",
+      "name": "Biology 1"
+    },
+    {
+      "id": "b2",
+      "name": "Biology 2"
+    },
+    {
+      "id": "c1",
+      "name": "Chemistry 1"
+    },
+    {
+      "id": "c2",
+      "name": "Chemistry 2"
+    },
+    {
+      "id": "p1",
+      "name": "Physics 1"
+    },
+    {
+      "id": "p2",
+      "name": "Physics 2"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-1sc0-t01",
+      "name": "Key concepts in biology",
+      "paper": [
+        "b1",
+        "b2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t02",
+      "name": "Cells and control",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t03",
+      "name": "Genetics",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t04",
+      "name": "Natural selection and genetic modification",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t05",
+      "name": "Health, disease and the development of medicines",
+      "paper": "b1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t06",
+      "name": "Plant structures and their functions",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t07",
+      "name": "Animal coordination, control and homeostasis",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t08",
+      "name": "Exchange and transport in animals",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t09",
+      "name": "Ecosystems and material cycles",
+      "paper": "b2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t10",
+      "name": "Key concepts in chemistry",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t11",
+      "name": "States of matter and mixtures",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t12",
+      "name": "Chemical changes",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t13",
+      "name": "Extracting metals and equilibria",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t14",
+      "name": "Groups in the periodic table",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t15",
+      "name": "Rates of reaction and energy changes",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t16",
+      "name": "Fuels and Earth science",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t17",
+      "name": "Key concepts of physics",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t18",
+      "name": "Motion and forces",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t19",
+      "name": "Conservation of energy",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t20",
+      "name": "Waves",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t21",
+      "name": "Light and the electromagnetic spectrum",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t22",
+      "name": "Radioactivity",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t23",
+      "name": "Energy: forces doing work",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t24",
+      "name": "Forces and their effects",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t25",
+      "name": "Electricity and circuits",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t26",
+      "name": "Magnetism and the motor effect",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t27",
+      "name": "Electromagnetic induction",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t28",
+      "name": "Particle model",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t29",
+      "name": "Forces and matter",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-1sc0-t30",
+      "name": "Glucagon and blood glucose regulation",
+      "paper": "b2",
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t31",
+      "name": "Moles and limiting reactants",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t32",
+      "name": "Electrolysis half equations, oxidation and reduction",
+      "paper": "c1",
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t33",
+      "name": "Circular motion and inertial mass",
+      "paper": "p1",
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t34",
+      "name": "The motor effect and Fleming's left-hand rule",
+      "paper": "p2",
+      "higherOnly": true
+    },
+    {
+      "id": "edexcel-1sc0-t35",
+      "name": "Transformers and induced potential difference",
+      "paper": "p2",
+      "higherOnly": true
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "edexcel-1sc0-m01",
+      "name": "Core practicals",
+      "kind": "practical"
+    }
+  ]
+}

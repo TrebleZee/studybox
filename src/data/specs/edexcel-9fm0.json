@@ -1,0 +1,546 @@
+{
+  "id": "edexcel-9fm0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9FM0",
+  "subject": "Further Mathematics",
+  "specName": "Further Mathematics",
+  "specVersion": "2017",
+  "firstExam": 2019,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Mathematics/2017/specification-and-sample-assesment/a-level-l3-further-mathematics-specification.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Core Pure Mathematics 1"
+    },
+    {
+      "id": "p2",
+      "name": "Core Pure Mathematics 2"
+    },
+    {
+      "id": "3a",
+      "name": "Further Pure Mathematics 1"
+    },
+    {
+      "id": "3b",
+      "name": "Further Statistics 1"
+    },
+    {
+      "id": "3c",
+      "name": "Further Mechanics 1"
+    },
+    {
+      "id": "3d",
+      "name": "Decision Mathematics 1"
+    },
+    {
+      "id": "4a",
+      "name": "Further Pure Mathematics 2"
+    },
+    {
+      "id": "4b",
+      "name": "Further Statistics 2"
+    },
+    {
+      "id": "4c",
+      "name": "Further Mechanics 2"
+    },
+    {
+      "id": "4d",
+      "name": "Decision Mathematics 2"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9fm0-t01",
+      "name": "Proof",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t02",
+      "name": "Complex numbers",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t03",
+      "name": "Matrices",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t04",
+      "name": "Further algebra and functions",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t05",
+      "name": "Further calculus",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t06",
+      "name": "Further vectors",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t07",
+      "name": "Polar coordinates",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t08",
+      "name": "Hyperbolic functions",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t09",
+      "name": "Differential equations",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t10",
+      "name": "Further trigonometry",
+      "paper": "3a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t11",
+      "name": "Further calculus (Further Pure 1)",
+      "paper": "3a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t12",
+      "name": "Further differential equations",
+      "paper": "3a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t13",
+      "name": "Coordinate systems",
+      "paper": "3a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t14",
+      "name": "Further vectors (Further Pure 1)",
+      "paper": "3a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t15",
+      "name": "Further numerical methods",
+      "paper": "3a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t16",
+      "name": "Inequalities",
+      "paper": "3a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t17",
+      "name": "Discrete probability distributions",
+      "paper": "3b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t18",
+      "name": "Poisson and binomial distributions",
+      "paper": "3b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t19",
+      "name": "Geometric and negative binomial distributions",
+      "paper": "3b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t20",
+      "name": "Hypothesis testing",
+      "paper": "3b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t21",
+      "name": "Central limit theorem",
+      "paper": "3b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t22",
+      "name": "Chi-squared tests",
+      "paper": "3b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t23",
+      "name": "Probability generating functions",
+      "paper": "3b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t24",
+      "name": "Quality of tests",
+      "paper": "3b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t25",
+      "name": "Momentum and impulse",
+      "paper": "3c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t26",
+      "name": "Work, energy and power",
+      "paper": "3c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t27",
+      "name": "Elastic strings, springs and elastic energy",
+      "paper": "3c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t28",
+      "name": "Elastic collisions in one dimension",
+      "paper": "3c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t29",
+      "name": "Elastic collisions in two dimensions",
+      "paper": "3c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t30",
+      "name": "Algorithms and graph theory",
+      "paper": "3d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t31",
+      "name": "Algorithms on graphs",
+      "paper": "3d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t32",
+      "name": "Algorithms on graphs II",
+      "paper": "3d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t33",
+      "name": "Critical path analysis",
+      "paper": "3d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t34",
+      "name": "Linear programming",
+      "paper": "3d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t35",
+      "name": "Groups",
+      "paper": "4a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t36",
+      "name": "Further calculus (Further Pure 2)",
+      "paper": "4a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t37",
+      "name": "Further matrix algebra",
+      "paper": "4a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t38",
+      "name": "Further complex numbers",
+      "paper": "4a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t39",
+      "name": "Number theory",
+      "paper": "4a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t40",
+      "name": "Further sequences and series",
+      "paper": "4a",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t41",
+      "name": "Linear regression",
+      "paper": "4b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t42",
+      "name": "Continuous probability distributions",
+      "paper": "4b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t43",
+      "name": "Correlation",
+      "paper": "4b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t44",
+      "name": "Combinations of random variables",
+      "paper": "4b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t45",
+      "name": "Estimation, confidence intervals and tests using a normal distribution",
+      "paper": "4b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t46",
+      "name": "Other hypothesis tests and confidence intervals",
+      "paper": "4b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t47",
+      "name": "Confidence intervals and tests using the t-distribution",
+      "paper": "4b",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t48",
+      "name": "Motion in a circle",
+      "paper": "4c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t49",
+      "name": "Centres of mass of plane figures",
+      "paper": "4c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t50",
+      "name": "Further centres of mass",
+      "paper": "4c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t51",
+      "name": "Further dynamics",
+      "paper": "4c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t52",
+      "name": "Further kinematics",
+      "paper": "4c",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t53",
+      "name": "Transportation problems",
+      "paper": "4d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t54",
+      "name": "Allocation (assignment) problems",
+      "paper": "4d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t55",
+      "name": "Flows in networks",
+      "paper": "4d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t56",
+      "name": "Dynamic programming",
+      "paper": "4d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t57",
+      "name": "Game theory",
+      "paper": "4d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t58",
+      "name": "Recurrence relations",
+      "paper": "4d",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fm0-t59",
+      "name": "Decision analysis",
+      "paper": "4d",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "options",
+      "name": "Optional papers",
+      "pick": 2,
+      "options": [
+        {
+          "id": "3a",
+          "name": "Further Pure Mathematics 1",
+          "topicIds": [
+            "edexcel-9fm0-t10",
+            "edexcel-9fm0-t11",
+            "edexcel-9fm0-t12",
+            "edexcel-9fm0-t13",
+            "edexcel-9fm0-t14",
+            "edexcel-9fm0-t15",
+            "edexcel-9fm0-t16"
+          ]
+        },
+        {
+          "id": "3b",
+          "name": "Further Statistics 1",
+          "topicIds": [
+            "edexcel-9fm0-t17",
+            "edexcel-9fm0-t18",
+            "edexcel-9fm0-t19",
+            "edexcel-9fm0-t20",
+            "edexcel-9fm0-t21",
+            "edexcel-9fm0-t22",
+            "edexcel-9fm0-t23",
+            "edexcel-9fm0-t24"
+          ]
+        },
+        {
+          "id": "3c",
+          "name": "Further Mechanics 1",
+          "topicIds": [
+            "edexcel-9fm0-t25",
+            "edexcel-9fm0-t26",
+            "edexcel-9fm0-t27",
+            "edexcel-9fm0-t28",
+            "edexcel-9fm0-t29"
+          ]
+        },
+        {
+          "id": "3d",
+          "name": "Decision Mathematics 1",
+          "topicIds": [
+            "edexcel-9fm0-t30",
+            "edexcel-9fm0-t31",
+            "edexcel-9fm0-t32",
+            "edexcel-9fm0-t33",
+            "edexcel-9fm0-t34"
+          ]
+        },
+        {
+          "id": "4a",
+          "name": "Further Pure Mathematics 2",
+          "topicIds": [
+            "edexcel-9fm0-t35",
+            "edexcel-9fm0-t36",
+            "edexcel-9fm0-t37",
+            "edexcel-9fm0-t38",
+            "edexcel-9fm0-t39",
+            "edexcel-9fm0-t40"
+          ]
+        },
+        {
+          "id": "4b",
+          "name": "Further Statistics 2",
+          "topicIds": [
+            "edexcel-9fm0-t41",
+            "edexcel-9fm0-t42",
+            "edexcel-9fm0-t43",
+            "edexcel-9fm0-t44",
+            "edexcel-9fm0-t45",
+            "edexcel-9fm0-t46",
+            "edexcel-9fm0-t47"
+          ]
+        },
+        {
+          "id": "4c",
+          "name": "Further Mechanics 2",
+          "topicIds": [
+            "edexcel-9fm0-t48",
+            "edexcel-9fm0-t49",
+            "edexcel-9fm0-t50",
+            "edexcel-9fm0-t51",
+            "edexcel-9fm0-t52"
+          ]
+        },
+        {
+          "id": "4d",
+          "name": "Decision Mathematics 2",
+          "topicIds": [
+            "edexcel-9fm0-t53",
+            "edexcel-9fm0-t54",
+            "edexcel-9fm0-t55",
+            "edexcel-9fm0-t56",
+            "edexcel-9fm0-t57",
+            "edexcel-9fm0-t58",
+            "edexcel-9fm0-t59"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

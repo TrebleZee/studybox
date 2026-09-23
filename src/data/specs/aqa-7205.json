@@ -1,0 +1,214 @@
+{
+  "id": "aqa-7205",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7205",
+  "subject": "Art and Design",
+  "specName": "Three-dimensional design",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/art-and-design/specifications/AQA-ART-A-LEVEL-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7205-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t02",
+      "name": "Personal investigation: written material",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t05",
+      "name": "Ceramics",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t06",
+      "name": "Sculpture",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t07",
+      "name": "Exhibition design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t08",
+      "name": "Design for theatre, television and film",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t09",
+      "name": "Interior design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t10",
+      "name": "Product design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t11",
+      "name": "Environmental and architectural design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t12",
+      "name": "Jewellery/body ornament",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7205-t13",
+      "name": "3D digital design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "ceramics",
+          "name": "Ceramics",
+          "topicIds": [
+            "aqa-7205-t05"
+          ]
+        },
+        {
+          "id": "sculpture",
+          "name": "Sculpture",
+          "topicIds": [
+            "aqa-7205-t06"
+          ]
+        },
+        {
+          "id": "exhibition-design",
+          "name": "Exhibition design",
+          "topicIds": [
+            "aqa-7205-t07"
+          ]
+        },
+        {
+          "id": "design-for-theatre-television-and-film",
+          "name": "Design for theatre, television and film",
+          "topicIds": [
+            "aqa-7205-t08"
+          ]
+        },
+        {
+          "id": "interior-design",
+          "name": "Interior design",
+          "topicIds": [
+            "aqa-7205-t09"
+          ]
+        },
+        {
+          "id": "product-design",
+          "name": "Product design",
+          "topicIds": [
+            "aqa-7205-t10"
+          ]
+        },
+        {
+          "id": "environmental-and-architectural-design",
+          "name": "Environmental and architectural design",
+          "topicIds": [
+            "aqa-7205-t11"
+          ]
+        },
+        {
+          "id": "jewellery-body-ornament",
+          "name": "Jewellery/body ornament",
+          "topicIds": [
+            "aqa-7205-t12"
+          ]
+        },
+        {
+          "id": "3d-digital-design",
+          "name": "3D digital design",
+          "topicIds": [
+            "aqa-7205-t13"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "aqa-7205-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "aqa-7205-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

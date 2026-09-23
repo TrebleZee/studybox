@@ -1,0 +1,301 @@
+{
+  "id": "ocr-h436",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H436",
+  "subject": "Business",
+  "specName": "Business",
+  "specVersion": "2026",
+  "firstExam": 2028,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/716172-specification-accredited-a-level-gce-business-h436.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Business activity, marketing and people"
+    },
+    {
+      "id": "p2",
+      "name": "Operations, finance and external influences"
+    },
+    {
+      "id": "p3",
+      "name": "Strategy, risk and managing change"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h436-t01",
+      "name": "What is business activity?",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t02",
+      "name": "Business structure",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t03",
+      "name": "Stakeholders",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t04",
+      "name": "Business size and growth",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t05",
+      "name": "Scale of operations",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t06",
+      "name": "Customer journey",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t07",
+      "name": "What is marketing?",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t08",
+      "name": "Identifying and anticipating customer needs",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t09",
+      "name": "Targeting customers",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t10",
+      "name": "The marketing mix",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t11",
+      "name": "Sales forecasting",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t12",
+      "name": "Technology in marketing",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t13",
+      "name": "Measuring marketing performance",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t14",
+      "name": "What is human resource management?",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t15",
+      "name": "Organisational design",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t16",
+      "name": "Motivation",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t17",
+      "name": "Leadership",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t18",
+      "name": "Employer/employee relations",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t19",
+      "name": "Recruitment and selection",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t20",
+      "name": "Training and development",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t21",
+      "name": "Measuring human resource performance",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t22",
+      "name": "What is operations?",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t23",
+      "name": "Productivity",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t24",
+      "name": "Quality",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t25",
+      "name": "Managing capacity",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t26",
+      "name": "Inventory",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t27",
+      "name": "Supply chain management and logistics",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t28",
+      "name": "Measuring operational performance",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t29",
+      "name": "What is finance?",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t30",
+      "name": "Costs, revenue, profit and loss",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t31",
+      "name": "Budgeting",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t32",
+      "name": "Cash flow forecasting and liquidity",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t33",
+      "name": "Sources of finance",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t34",
+      "name": "Financial statements",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t35",
+      "name": "Measuring financial performance",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t36",
+      "name": "What is the market?",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t37",
+      "name": "The global market",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t38",
+      "name": "Political, economic, social and technological influences",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t39",
+      "name": "Business planning",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t40",
+      "name": "Business strategy",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t41",
+      "name": "Strategic decision making and implementation",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t42",
+      "name": "Investment decisions",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t43",
+      "name": "Managing risk",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t44",
+      "name": "Change management",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h436-t45",
+      "name": "Ethical, legal, environmental and sustainability issues",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

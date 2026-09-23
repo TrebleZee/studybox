@@ -27,7 +27,7 @@ describe("loading corrupted app state", () => {
     const sessions = normalizeSessions(loadJson(STORAGE_KEYS.sessions, []));
     const game = buildInitialGame(loadJson(STORAGE_KEYS.game, null), sessions, subjects);
 
-    expect(subjects).toEqual(defaultSubjects());
+    expect(subjects).toEqual(normalizeSubjects(defaultSubjects()));
     expect(sessions).toEqual([]);
     expect(game.currentStreak).toBe(0);
   });

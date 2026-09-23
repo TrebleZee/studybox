@@ -1,0 +1,175 @@
+{
+  "id": "edexcel-9ma0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9MA0",
+  "subject": "Mathematics",
+  "specName": "Mathematics",
+  "specVersion": "2017",
+  "firstExam": 2019,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Mathematics/2017/specification-and-sample-assesment/a-level-l3-mathematics-specification-issue4.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Pure Mathematics 1"
+    },
+    {
+      "id": "p2",
+      "name": "Pure Mathematics 2"
+    },
+    {
+      "id": "p3",
+      "name": "Statistics and Mechanics"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9ma0-t01",
+      "name": "Proof",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t02",
+      "name": "Algebra and functions",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t03",
+      "name": "Coordinate geometry in the (x, y) plane",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t04",
+      "name": "Sequences and series",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t05",
+      "name": "Trigonometry",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t06",
+      "name": "Exponentials and logarithms",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t07",
+      "name": "Differentiation",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t08",
+      "name": "Integration",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t09",
+      "name": "Numerical methods",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t10",
+      "name": "Vectors",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t11",
+      "name": "Statistical sampling",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t12",
+      "name": "Data presentation and interpretation",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t13",
+      "name": "Probability",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t14",
+      "name": "Statistical distributions",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t15",
+      "name": "Statistical hypothesis testing",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t16",
+      "name": "Quantities and units in mechanics",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t17",
+      "name": "Kinematics",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t18",
+      "name": "Forces and Newton's laws",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ma0-t19",
+      "name": "Moments",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

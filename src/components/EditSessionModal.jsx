@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { dateKey } from "../utils/gameLogic.js";
+import { subjectLabel } from "../utils/subjects.js";
 
 export default function EditSessionModal({ C, session, subjects, asanaCfg, onSave, onClose }) {
   const [editSubjectId, setEditSubjectId] = useState(session.subjectId);
@@ -128,7 +129,7 @@ export default function EditSessionModal({ C, session, subjects, asanaCfg, onSav
           >
             {subjects.map((sub) => (
               <option key={sub.id} value={sub.id}>
-                {sub.name} {sub.exam ? `(${sub.exam})` : ""}
+                {sub.name} ({subjectLabel(sub)})
               </option>
             ))}
             {(asanaCfg.enabled || session.subjectId === asanaCfg.id) && (

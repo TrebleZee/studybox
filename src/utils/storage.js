@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   game: "sb-game",
   onboarded: "sb-onboarded",
   lastStreakReminder: "sb-last-streak-reminder",
+  lastMilestoneReminder: "sb-last-milestone-reminder",
 };
 
 export const loadJson = (key, fallback) => {

@@ -1,0 +1,451 @@
+{
+  "id": "ocr-h645",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H645",
+  "subject": "Further Mathematics",
+  "specName": "Further Mathematics B (MEI)",
+  "specVersion": "2017",
+  "firstExam": 2019,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/308768-specification-accredited-a-level-gce-further-mathematics-b-mei-h645.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "y420",
+      "name": "Core Pure"
+    },
+    {
+      "id": "y421",
+      "name": "Mechanics Major"
+    },
+    {
+      "id": "y422",
+      "name": "Statistics Major"
+    },
+    {
+      "id": "y431",
+      "name": "Mechanics Minor"
+    },
+    {
+      "id": "y432",
+      "name": "Statistics Minor"
+    },
+    {
+      "id": "y433",
+      "name": "Modelling with Algorithms"
+    },
+    {
+      "id": "y434",
+      "name": "Numerical Methods"
+    },
+    {
+      "id": "y435",
+      "name": "Extra Pure"
+    },
+    {
+      "id": "y436",
+      "name": "Further Pure with Technology"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h645-t01",
+      "name": "Proof",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t02",
+      "name": "Complex numbers",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t03",
+      "name": "Matrices and transformations",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t04",
+      "name": "Vectors and 3-D geometry",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t05",
+      "name": "Algebra",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t06",
+      "name": "Series",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t07",
+      "name": "Calculus",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t08",
+      "name": "Polar coordinates",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t09",
+      "name": "Hyperbolic functions",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t10",
+      "name": "Differential equations",
+      "paper": "y420",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t11",
+      "name": "Dimensional analysis (Mechanics Major)",
+      "paper": "y421",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t12",
+      "name": "Forces (Mechanics Major)",
+      "paper": "y421",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t13",
+      "name": "Work, energy and power (Mechanics Major)",
+      "paper": "y421",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t14",
+      "name": "Momentum and impulse (Mechanics Major)",
+      "paper": "y421",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t15",
+      "name": "Circular motion",
+      "paper": "y421",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t16",
+      "name": "Hooke's law",
+      "paper": "y421",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t17",
+      "name": "Centre of mass (Mechanics Major)",
+      "paper": "y421",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t18",
+      "name": "Vectors and variable forces",
+      "paper": "y421",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t19",
+      "name": "Sampling (Statistics Major)",
+      "paper": "y422",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t20",
+      "name": "Discrete random variables (Statistics Major)",
+      "paper": "y422",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t21",
+      "name": "Bivariate data (Statistics Major)",
+      "paper": "y422",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t22",
+      "name": "Chi-squared tests (Statistics Major)",
+      "paper": "y422",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t23",
+      "name": "Continuous random variables",
+      "paper": "y422",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t24",
+      "name": "Inference",
+      "paper": "y422",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t25",
+      "name": "Simulation",
+      "paper": "y422",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t26",
+      "name": "Dimensional analysis (Mechanics Minor)",
+      "paper": "y431",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t27",
+      "name": "Forces (Mechanics Minor)",
+      "paper": "y431",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t28",
+      "name": "Work, energy and power (Mechanics Minor)",
+      "paper": "y431",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t29",
+      "name": "Momentum and impulse (Mechanics Minor)",
+      "paper": "y431",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t30",
+      "name": "Centre of mass (Mechanics Minor)",
+      "paper": "y431",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t31",
+      "name": "Sampling (Statistics Minor)",
+      "paper": "y432",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t32",
+      "name": "Discrete random variables (Statistics Minor)",
+      "paper": "y432",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t33",
+      "name": "Bivariate data (Statistics Minor)",
+      "paper": "y432",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t34",
+      "name": "Chi-squared tests (Statistics Minor)",
+      "paper": "y432",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t35",
+      "name": "Algorithms",
+      "paper": "y433",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t36",
+      "name": "Networks",
+      "paper": "y433",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t37",
+      "name": "Linear programming",
+      "paper": "y433",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t38",
+      "name": "Use of technology",
+      "paper": "y434",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t39",
+      "name": "Errors",
+      "paper": "y434",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t40",
+      "name": "Solution of equations",
+      "paper": "y434",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t41",
+      "name": "Numerical differentiation",
+      "paper": "y434",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t42",
+      "name": "Numerical integration",
+      "paper": "y434",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t43",
+      "name": "Approximations to functions",
+      "paper": "y434",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t44",
+      "name": "Recurrence relations",
+      "paper": "y435",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t45",
+      "name": "Groups",
+      "paper": "y435",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t46",
+      "name": "Matrices (Extra Pure)",
+      "paper": "y435",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t47",
+      "name": "Multivariable calculus",
+      "paper": "y435",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t48",
+      "name": "Investigation of curves",
+      "paper": "y436",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t49",
+      "name": "Exploring differential equations",
+      "paper": "y436",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h645-t50",
+      "name": "Number theory",
+      "paper": "y436",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "options",
+      "name": "Optional papers (a major and a minor, or three minors)",
+      "pick": 2,
+      "options": [
+        {
+          "id": "y421",
+          "name": "Mechanics Major",
+          "topicIds": [
+            "ocr-h645-t11",
+            "ocr-h645-t12",
+            "ocr-h645-t13",
+            "ocr-h645-t14",
+            "ocr-h645-t15",
+            "ocr-h645-t16",
+            "ocr-h645-t17",
+            "ocr-h645-t18"
+          ]
+        },
+        {
+          "id": "y422",
+          "name": "Statistics Major",
+          "topicIds": [
+            "ocr-h645-t19",
+            "ocr-h645-t20",
+            "ocr-h645-t21",
+            "ocr-h645-t22",
+            "ocr-h645-t23",
+            "ocr-h645-t24",
+            "ocr-h645-t25"
+          ]
+        },
+        {
+          "id": "y431",
+          "name": "Mechanics Minor",
+          "topicIds": [
+            "ocr-h645-t26",
+            "ocr-h645-t27",
+            "ocr-h645-t28",
+            "ocr-h645-t29",
+            "ocr-h645-t30"
+          ]
+        },
+        {
+          "id": "y432",
+          "name": "Statistics Minor",
+          "topicIds": [
+            "ocr-h645-t31",
+            "ocr-h645-t32",
+            "ocr-h645-t33",
+            "ocr-h645-t34"
+          ]
+        },
+        {
+          "id": "y433",
+          "name": "Modelling with Algorithms",
+          "topicIds": [
+            "ocr-h645-t35",
+            "ocr-h645-t36",
+            "ocr-h645-t37"
+          ]
+        },
+        {
+          "id": "y434",
+          "name": "Numerical Methods",
+          "topicIds": [
+            "ocr-h645-t38",
+            "ocr-h645-t39",
+            "ocr-h645-t40",
+            "ocr-h645-t41",
+            "ocr-h645-t42",
+            "ocr-h645-t43"
+          ]
+        },
+        {
+          "id": "y435",
+          "name": "Extra Pure",
+          "topicIds": [
+            "ocr-h645-t44",
+            "ocr-h645-t45",
+            "ocr-h645-t46",
+            "ocr-h645-t47"
+          ]
+        },
+        {
+          "id": "y436",
+          "name": "Further Pure with Technology",
+          "topicIds": [
+            "ocr-h645-t48",
+            "ocr-h645-t49",
+            "ocr-h645-t50"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

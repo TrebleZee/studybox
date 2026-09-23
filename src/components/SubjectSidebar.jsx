@@ -1,5 +1,5 @@
 import { fmtDur } from "../utils/format.js";
-import { subjectProgress } from "../utils/subjects.js";
+import { subjectLabel, subjectProgress } from "../utils/subjects.js";
 
 export default function SubjectSidebar({
   C,
@@ -85,7 +85,7 @@ export default function SubjectSidebar({
                 </span>
               </div>
               <div style={{ fontSize: "10px", color: C.muted, marginBottom: "5px" }}>
-                {subject.exam}
+                {subjectLabel(subject)}
               </div>
               <div
                 style={{
