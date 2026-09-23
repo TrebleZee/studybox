@@ -1,0 +1,287 @@
+{
+  "id": "aqa-7367",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7367",
+  "subject": "Further Mathematics",
+  "specName": "Further Mathematics",
+  "specVersion": "2017",
+  "firstExam": 2019,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/mathematics/specifications/AQA-7367-SP-2017.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2"
+    },
+    {
+      "id": "p3",
+      "name": "Paper 3 (two optional applications)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7367-t01",
+      "name": "Proof",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t02",
+      "name": "Complex numbers",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t03",
+      "name": "Matrices",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t04",
+      "name": "Further algebra and functions",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t05",
+      "name": "Further calculus",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t06",
+      "name": "Further vectors",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t07",
+      "name": "Polar coordinates",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t08",
+      "name": "Hyperbolic functions",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t09",
+      "name": "Differential equations",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t10",
+      "name": "Numerical methods",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t11",
+      "name": "Dimensional analysis",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t12",
+      "name": "Momentum and collisions",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t13",
+      "name": "Work, energy and power",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t14",
+      "name": "Circular motion",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t15",
+      "name": "Centres of mass and moments",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t16",
+      "name": "Discrete random variables and expectation",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t17",
+      "name": "Poisson distribution",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t18",
+      "name": "Type I and Type II errors",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t19",
+      "name": "Continuous random variables",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t20",
+      "name": "Chi-squared tests for association",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t21",
+      "name": "Exponential distribution",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t22",
+      "name": "Inference: one-sample t-distribution",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t23",
+      "name": "Confidence intervals",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t24",
+      "name": "Graphs",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t25",
+      "name": "Networks",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t26",
+      "name": "Network flows",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t27",
+      "name": "Linear programming",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t28",
+      "name": "Critical path analysis",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t29",
+      "name": "Game theory for zero-sum games",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7367-t30",
+      "name": "Binary operations",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "applications",
+      "name": "Optional applications",
+      "pick": 2,
+      "options": [
+        {
+          "id": "mechanics",
+          "name": "Mechanics",
+          "topicIds": [
+            "aqa-7367-t11",
+            "aqa-7367-t12",
+            "aqa-7367-t13",
+            "aqa-7367-t14",
+            "aqa-7367-t15"
+          ]
+        },
+        {
+          "id": "statistics",
+          "name": "Statistics",
+          "topicIds": [
+            "aqa-7367-t16",
+            "aqa-7367-t17",
+            "aqa-7367-t18",
+            "aqa-7367-t19",
+            "aqa-7367-t20",
+            "aqa-7367-t21",
+            "aqa-7367-t22",
+            "aqa-7367-t23"
+          ]
+        },
+        {
+          "id": "discrete",
+          "name": "Discrete mathematics",
+          "topicIds": [
+            "aqa-7367-t24",
+            "aqa-7367-t25",
+            "aqa-7367-t26",
+            "aqa-7367-t27",
+            "aqa-7367-t28",
+            "aqa-7367-t29",
+            "aqa-7367-t30"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

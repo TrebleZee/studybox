@@ -1,0 +1,214 @@
+{
+  "id": "aqa-7206",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7206",
+  "subject": "Art and Design",
+  "specName": "Photography",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/art-and-design/specifications/AQA-ART-A-LEVEL-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7206-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t02",
+      "name": "Personal investigation: written material",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t05",
+      "name": "Portraiture",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t06",
+      "name": "Landscape photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t07",
+      "name": "Still life photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t08",
+      "name": "Documentary photography, photojournalism",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t09",
+      "name": "Fashion photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t10",
+      "name": "Experimental imagery",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t11",
+      "name": "Multimedia",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t12",
+      "name": "Photographic installation",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7206-t13",
+      "name": "Moving image",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "portraiture",
+          "name": "Portraiture",
+          "topicIds": [
+            "aqa-7206-t05"
+          ]
+        },
+        {
+          "id": "landscape-photography",
+          "name": "Landscape photography",
+          "topicIds": [
+            "aqa-7206-t06"
+          ]
+        },
+        {
+          "id": "still-life-photography",
+          "name": "Still life photography",
+          "topicIds": [
+            "aqa-7206-t07"
+          ]
+        },
+        {
+          "id": "documentary-photography-photojournalism",
+          "name": "Documentary photography, photojournalism",
+          "topicIds": [
+            "aqa-7206-t08"
+          ]
+        },
+        {
+          "id": "fashion-photography",
+          "name": "Fashion photography",
+          "topicIds": [
+            "aqa-7206-t09"
+          ]
+        },
+        {
+          "id": "experimental-imagery",
+          "name": "Experimental imagery",
+          "topicIds": [
+            "aqa-7206-t10"
+          ]
+        },
+        {
+          "id": "multimedia",
+          "name": "Multimedia",
+          "topicIds": [
+            "aqa-7206-t11"
+          ]
+        },
+        {
+          "id": "photographic-installation",
+          "name": "Photographic installation",
+          "topicIds": [
+            "aqa-7206-t12"
+          ]
+        },
+        {
+          "id": "moving-image",
+          "name": "Moving image",
+          "topicIds": [
+            "aqa-7206-t13"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "aqa-7206-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "aqa-7206-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "id": "aqa-7357",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7357",
+  "subject": "Mathematics",
+  "specName": "Mathematics",
+  "specVersion": "2017",
+  "firstExam": 2018,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/mathematics/specifications/AQA-7357-SP-2017.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2 (pure and mechanics)"
+    },
+    {
+      "id": "p3",
+      "name": "Paper 3 (pure and statistics)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7357-t01",
+      "name": "Proof",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t02",
+      "name": "Algebra and functions",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t03",
+      "name": "Coordinate geometry in the (x, y) plane",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t04",
+      "name": "Sequences and series",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t05",
+      "name": "Trigonometry",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t06",
+      "name": "Exponentials and logarithms",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t07",
+      "name": "Differentiation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t08",
+      "name": "Integration",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t09",
+      "name": "Numerical methods",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t10",
+      "name": "Vectors",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t11",
+      "name": "Quantities and units in mechanics",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t12",
+      "name": "Kinematics",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t13",
+      "name": "Forces and Newton's laws",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t14",
+      "name": "Moments",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t15",
+      "name": "Statistical sampling",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t16",
+      "name": "Data presentation and interpretation",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t17",
+      "name": "Probability",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t18",
+      "name": "Statistical distributions",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7357-t19",
+      "name": "Statistical hypothesis testing",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

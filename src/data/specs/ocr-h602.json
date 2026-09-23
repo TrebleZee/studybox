@@ -1,0 +1,214 @@
+{
+  "id": "ocr-h602",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H602",
+  "subject": "Art and Design",
+  "specName": "Graphic Communication",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/170210-specification-accredited-a-level-gce-art-and-design-h600-h606.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set task"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h602-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t02",
+      "name": "Personal investigation: related study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t03",
+      "name": "Externally set task: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t04",
+      "name": "Externally set task: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t05",
+      "name": "Image and typography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t06",
+      "name": "Illustration",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t07",
+      "name": "Advertising",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t08",
+      "name": "Layout design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t09",
+      "name": "Packaging",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t10",
+      "name": "Editorial design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t11",
+      "name": "Experimental imagery",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t12",
+      "name": "Signage",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h602-t13",
+      "name": "Abstract approaches",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "image-and-typography",
+          "name": "Image and typography",
+          "topicIds": [
+            "ocr-h602-t05"
+          ]
+        },
+        {
+          "id": "illustration",
+          "name": "Illustration",
+          "topicIds": [
+            "ocr-h602-t06"
+          ]
+        },
+        {
+          "id": "advertising",
+          "name": "Advertising",
+          "topicIds": [
+            "ocr-h602-t07"
+          ]
+        },
+        {
+          "id": "layout-design",
+          "name": "Layout design",
+          "topicIds": [
+            "ocr-h602-t08"
+          ]
+        },
+        {
+          "id": "packaging",
+          "name": "Packaging",
+          "topicIds": [
+            "ocr-h602-t09"
+          ]
+        },
+        {
+          "id": "editorial-design",
+          "name": "Editorial design",
+          "topicIds": [
+            "ocr-h602-t10"
+          ]
+        },
+        {
+          "id": "experimental-imagery",
+          "name": "Experimental imagery",
+          "topicIds": [
+            "ocr-h602-t11"
+          ]
+        },
+        {
+          "id": "signage",
+          "name": "Signage",
+          "topicIds": [
+            "ocr-h602-t12"
+          ]
+        },
+        {
+          "id": "abstract-approaches",
+          "name": "Abstract approaches",
+          "topicIds": [
+            "ocr-h602-t13"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ocr-h602-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "ocr-h602-m02",
+      "name": "Externally set task",
+      "kind": "other"
+    }
+  ]
+}

@@ -1,0 +1,211 @@
+{
+  "id": "edexcel-9bs0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9BS0",
+  "subject": "Business",
+  "specName": "Business",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Business%20Studies/2015/specification-and-sample-assessment-materials/9781446914694-gce2015-a-bus-web.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Marketing, people and global businesses"
+    },
+    {
+      "id": "p2",
+      "name": "Business activities, decisions and strategy"
+    },
+    {
+      "id": "p3",
+      "name": "Investigating business in a competitive environment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9bs0-t01",
+      "name": "Meeting customer needs",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t02",
+      "name": "The market",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t03",
+      "name": "Marketing mix and strategy",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t04",
+      "name": "Managing people",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t05",
+      "name": "Entrepreneurs and leaders",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t06",
+      "name": "Raising finance",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t07",
+      "name": "Financial planning",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t08",
+      "name": "Managing finance",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t09",
+      "name": "Resource management",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t10",
+      "name": "External influences",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t11",
+      "name": "Business objectives and strategy",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t12",
+      "name": "Business growth",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t13",
+      "name": "Decision-making techniques",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t14",
+      "name": "Influences on business decisions",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t15",
+      "name": "Assessing competitiveness",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t16",
+      "name": "Managing change",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t17",
+      "name": "Globalisation",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t18",
+      "name": "Global markets and business expansion",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t19",
+      "name": "Global marketing",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bs0-t20",
+      "name": "Global industries and companies",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

@@ -1,0 +1,207 @@
+{
+  "id": "ocr-h640",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H640",
+  "subject": "Mathematics",
+  "specName": "Mathematics B (MEI)",
+  "specVersion": "2017",
+  "firstExam": 2018,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/308740-specification-accredited-a-level-gce-mathematics-b-mei-h640.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Pure mathematics and mechanics"
+    },
+    {
+      "id": "p2",
+      "name": "Pure mathematics and statistics"
+    },
+    {
+      "id": "p3",
+      "name": "Pure mathematics and comprehension"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h640-t01",
+      "name": "Proof",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t02",
+      "name": "Algebra",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t03",
+      "name": "Functions",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t04",
+      "name": "Graphs",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t05",
+      "name": "Coordinate geometry",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t06",
+      "name": "Sequences and series",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t07",
+      "name": "Trigonometry",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t08",
+      "name": "Exponentials and logarithms",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t09",
+      "name": "Calculus",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t10",
+      "name": "Numerical methods",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t11",
+      "name": "Vectors",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t12",
+      "name": "Models and quantities in mechanics",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t13",
+      "name": "Kinematics",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t14",
+      "name": "Projectiles",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t15",
+      "name": "Forces",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t16",
+      "name": "Newton's laws of motion",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t17",
+      "name": "Rigid bodies",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t18",
+      "name": "Sampling",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t19",
+      "name": "Data presentation and interpretation",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t20",
+      "name": "Probability",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t21",
+      "name": "Probability distributions",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h640-t22",
+      "name": "Statistical hypothesis testing",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

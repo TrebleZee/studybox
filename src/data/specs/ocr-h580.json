@@ -1,0 +1,148 @@
+{
+  "id": "ocr-h580",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H580",
+  "subject": "Sociology",
+  "specName": "Sociology",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/170212-specification-accredited-a-level-gce-sociology.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Socialisation, culture and identity"
+    },
+    {
+      "id": "p2",
+      "name": "Researching and understanding social inequalities"
+    },
+    {
+      "id": "p3",
+      "name": "Debates in contemporary society"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h580-t01",
+      "name": "Introducing socialisation, culture and identity",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h580-t02",
+      "name": "Research methods and researching social inequalities",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h580-t03",
+      "name": "Understanding social inequalities",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h580-t04",
+      "name": "Globalisation and the digital social world",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h580-t05",
+      "name": "Families and relationships",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h580-t06",
+      "name": "Youth subcultures",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h580-t07",
+      "name": "Media",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h580-t08",
+      "name": "Crime and deviance",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h580-t09",
+      "name": "Education",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h580-t10",
+      "name": "Religion, belief and faith",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "culture-option",
+      "name": "Socialisation option",
+      "pick": 1,
+      "options": [
+        {
+          "id": "families",
+          "name": "Families and relationships",
+          "topicIds": [
+            "ocr-h580-t05"
+          ]
+        },
+        {
+          "id": "youth",
+          "name": "Youth subcultures",
+          "topicIds": [
+            "ocr-h580-t06"
+          ]
+        },
+        {
+          "id": "media",
+          "name": "Media",
+          "topicIds": [
+            "ocr-h580-t07"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "debates-option",
+      "name": "Debates option",
+      "pick": 1,
+      "options": [
+        {
+          "id": "crime",
+          "name": "Crime and deviance",
+          "topicIds": [
+            "ocr-h580-t08"
+          ]
+        },
+        {
+          "id": "education",
+          "name": "Education",
+          "topicIds": [
+            "ocr-h580-t09"
+          ]
+        },
+        {
+          "id": "religion",
+          "name": "Religion, belief and faith",
+          "topicIds": [
+            "ocr-h580-t10"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

@@ -1,0 +1,395 @@
+{
+  "id": "aqa-8465",
+  "qualification": "gcse",
+  "board": "AQA",
+  "spec": "8465",
+  "subject": "Combined Science",
+  "specName": "Combined Science Synergy",
+  "specVersion": "2016",
+  "firstExam": 2018,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/science/specifications/AQA-8465-SP-2016.PDF",
+  "tiers": [
+    "foundation",
+    "higher"
+  ],
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1 (life and environmental sciences)"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2 (life and environmental sciences)"
+    },
+    {
+      "id": "p3",
+      "name": "Paper 3 (physical sciences)"
+    },
+    {
+      "id": "p4",
+      "name": "Paper 4 (physical sciences)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-8465-t01",
+      "name": "States of matter",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t02",
+      "name": "Atomic structure",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t03",
+      "name": "Cells in animals and plants",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t04",
+      "name": "Waves",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t05",
+      "name": "Systems in the human body",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t06",
+      "name": "Plants and photosynthesis",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t07",
+      "name": "Lifestyle and health",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t08",
+      "name": "Radiation and risk",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t09",
+      "name": "Preventing, treating and curing diseases",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t10",
+      "name": "The Earth's atmosphere",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t11",
+      "name": "Ecosystems and biodiversity",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t12",
+      "name": "Inheritance",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t13",
+      "name": "Variation and evolution",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t14",
+      "name": "The periodic table",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t15",
+      "name": "Chemical quantities",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t16",
+      "name": "Forces and energy changes",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t17",
+      "name": "Structure and bonding",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t18",
+      "name": "Magnetism and electromagnetism",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t19",
+      "name": "Forces and motion",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t20",
+      "name": "Electricity",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t21",
+      "name": "Acids and alkalis",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t22",
+      "name": "The rate and extent of chemical change",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t23",
+      "name": "Atoms into ions and ions into atoms",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t24",
+      "name": "Carbon chemistry",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t25",
+      "name": "Resources of materials and energy",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-8465-t26",
+      "name": "Radio waves",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t27",
+      "name": "Reflection and refraction of electromagnetic waves",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t28",
+      "name": "Treatments for infertility",
+      "paper": [
+        "p1",
+        "p2"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t29",
+      "name": "Amounts in moles",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t30",
+      "name": "Calculations based on equations",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t31",
+      "name": "Resolving forces",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t32",
+      "name": "The motor effect and electric motors",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t33",
+      "name": "Circular motion",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t34",
+      "name": "Momentum",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t35",
+      "name": "Strong and weak acids",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t36",
+      "name": "Bond breaking and bond forming",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t37",
+      "name": "Factors affecting the position of equilibrium",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t38",
+      "name": "Electron transfer reactions",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    },
+    {
+      "id": "aqa-8465-t39",
+      "name": "Metal extraction by biological methods",
+      "paper": [
+        "p3",
+        "p4"
+      ],
+      "higherOnly": true
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "aqa-8465-m01",
+      "name": "Required practical activities",
+      "kind": "practical"
+    }
+  ]
+}

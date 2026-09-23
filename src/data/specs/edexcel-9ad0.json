@@ -1,0 +1,342 @@
+{
+  "id": "edexcel-9ad0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9AD0",
+  "subject": "Art and Design",
+  "specName": "Art, Craft and Design",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Art%20and%20Design/2015/specification-and-sample-assessment-materials/gce-a-level-art-and-design-specification-issue-4.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9ad0-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t02",
+      "name": "Personal investigation: personal study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t05",
+      "name": "Painting and drawing",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t06",
+      "name": "Printmaking",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t07",
+      "name": "Sculpture",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t08",
+      "name": "Lens-based image making",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t09",
+      "name": "Advertising",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t10",
+      "name": "Illustration",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t11",
+      "name": "Branding",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t12",
+      "name": "Information design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t13",
+      "name": "Textiles for interiors",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t14",
+      "name": "Fine art textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t15",
+      "name": "Fashion textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t16",
+      "name": "Spatial design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t17",
+      "name": "Product design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t18",
+      "name": "Design crafts",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t19",
+      "name": "Film-based photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t20",
+      "name": "Digital photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ad0-t21",
+      "name": "Film and video",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Disciplines (at least two, from different titles)",
+      "pick": 2,
+      "options": [
+        {
+          "id": "painting-and-drawing",
+          "name": "Painting and drawing",
+          "topicIds": [
+            "edexcel-9ad0-t05"
+          ]
+        },
+        {
+          "id": "printmaking",
+          "name": "Printmaking",
+          "topicIds": [
+            "edexcel-9ad0-t06"
+          ]
+        },
+        {
+          "id": "sculpture",
+          "name": "Sculpture",
+          "topicIds": [
+            "edexcel-9ad0-t07"
+          ]
+        },
+        {
+          "id": "lens-based-image-making",
+          "name": "Lens-based image making",
+          "topicIds": [
+            "edexcel-9ad0-t08"
+          ]
+        },
+        {
+          "id": "advertising",
+          "name": "Advertising",
+          "topicIds": [
+            "edexcel-9ad0-t09"
+          ]
+        },
+        {
+          "id": "illustration",
+          "name": "Illustration",
+          "topicIds": [
+            "edexcel-9ad0-t10"
+          ]
+        },
+        {
+          "id": "branding",
+          "name": "Branding",
+          "topicIds": [
+            "edexcel-9ad0-t11"
+          ]
+        },
+        {
+          "id": "information-design",
+          "name": "Information design",
+          "topicIds": [
+            "edexcel-9ad0-t12"
+          ]
+        },
+        {
+          "id": "textiles-for-interiors",
+          "name": "Textiles for interiors",
+          "topicIds": [
+            "edexcel-9ad0-t13"
+          ]
+        },
+        {
+          "id": "fine-art-textiles",
+          "name": "Fine art textiles",
+          "topicIds": [
+            "edexcel-9ad0-t14"
+          ]
+        },
+        {
+          "id": "fashion-textiles",
+          "name": "Fashion textiles",
+          "topicIds": [
+            "edexcel-9ad0-t15"
+          ]
+        },
+        {
+          "id": "spatial-design",
+          "name": "Spatial design",
+          "topicIds": [
+            "edexcel-9ad0-t16"
+          ]
+        },
+        {
+          "id": "product-design",
+          "name": "Product design",
+          "topicIds": [
+            "edexcel-9ad0-t17"
+          ]
+        },
+        {
+          "id": "design-crafts",
+          "name": "Design crafts",
+          "topicIds": [
+            "edexcel-9ad0-t18"
+          ]
+        },
+        {
+          "id": "film-based-photography",
+          "name": "Film-based photography",
+          "topicIds": [
+            "edexcel-9ad0-t19"
+          ]
+        },
+        {
+          "id": "digital-photography",
+          "name": "Digital photography",
+          "topicIds": [
+            "edexcel-9ad0-t20"
+          ]
+        },
+        {
+          "id": "film-and-video",
+          "name": "Film and video",
+          "topicIds": [
+            "edexcel-9ad0-t21"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "edexcel-9ad0-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "edexcel-9ad0-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

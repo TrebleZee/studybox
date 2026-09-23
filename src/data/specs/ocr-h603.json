@@ -1,0 +1,246 @@
+{
+  "id": "ocr-h603",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H603",
+  "subject": "Art and Design",
+  "specName": "Photography",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/170210-specification-accredited-a-level-gce-art-and-design-h600-h606.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set task"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h603-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t02",
+      "name": "Personal investigation: related study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t03",
+      "name": "Externally set task: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t04",
+      "name": "Externally set task: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t05",
+      "name": "Portraiture",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t06",
+      "name": "Landscape photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t07",
+      "name": "Commercial photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t08",
+      "name": "Still life photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t09",
+      "name": "Documentary photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t10",
+      "name": "Experimental imagery",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t11",
+      "name": "Editorial photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t12",
+      "name": "Photographic installation",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t13",
+      "name": "The photographic process",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t14",
+      "name": "Moving image",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h603-t15",
+      "name": "Animation",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "portraiture",
+          "name": "Portraiture",
+          "topicIds": [
+            "ocr-h603-t05"
+          ]
+        },
+        {
+          "id": "landscape-photography",
+          "name": "Landscape photography",
+          "topicIds": [
+            "ocr-h603-t06"
+          ]
+        },
+        {
+          "id": "commercial-photography",
+          "name": "Commercial photography",
+          "topicIds": [
+            "ocr-h603-t07"
+          ]
+        },
+        {
+          "id": "still-life-photography",
+          "name": "Still life photography",
+          "topicIds": [
+            "ocr-h603-t08"
+          ]
+        },
+        {
+          "id": "documentary-photography",
+          "name": "Documentary photography",
+          "topicIds": [
+            "ocr-h603-t09"
+          ]
+        },
+        {
+          "id": "experimental-imagery",
+          "name": "Experimental imagery",
+          "topicIds": [
+            "ocr-h603-t10"
+          ]
+        },
+        {
+          "id": "editorial-photography",
+          "name": "Editorial photography",
+          "topicIds": [
+            "ocr-h603-t11"
+          ]
+        },
+        {
+          "id": "photographic-installation",
+          "name": "Photographic installation",
+          "topicIds": [
+            "ocr-h603-t12"
+          ]
+        },
+        {
+          "id": "the-photographic-process",
+          "name": "The photographic process",
+          "topicIds": [
+            "ocr-h603-t13"
+          ]
+        },
+        {
+          "id": "moving-image",
+          "name": "Moving image",
+          "topicIds": [
+            "ocr-h603-t14"
+          ]
+        },
+        {
+          "id": "animation",
+          "name": "Animation",
+          "topicIds": [
+            "ocr-h603-t15"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ocr-h603-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "ocr-h603-m02",
+      "name": "Externally set task",
+      "kind": "other"
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "id": "edexcel-9ps0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9PS0",
+  "subject": "Psychology",
+  "specName": "Psychology",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Psychology/2015/specification-and-sample-assessments/al-specification-psychology.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Foundations in psychology"
+    },
+    {
+      "id": "p2",
+      "name": "Applications of psychology"
+    },
+    {
+      "id": "p3",
+      "name": "Psychological skills"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9ps0-t01",
+      "name": "Social psychology",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t02",
+      "name": "Cognitive psychology",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t03",
+      "name": "Biological psychology",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t04",
+      "name": "Learning theories",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t05",
+      "name": "Clinical psychology",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t06",
+      "name": "Research methods",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t07",
+      "name": "Synoptic review of studies",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t08",
+      "name": "Issues and debates",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t09",
+      "name": "Criminological psychology",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t10",
+      "name": "Child psychology",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ps0-t11",
+      "name": "Health psychology",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "application",
+      "name": "Optional application",
+      "pick": 1,
+      "options": [
+        {
+          "id": "criminological",
+          "name": "Criminological psychology",
+          "topicIds": [
+            "edexcel-9ps0-t09"
+          ]
+        },
+        {
+          "id": "child",
+          "name": "Child psychology",
+          "topicIds": [
+            "edexcel-9ps0-t10"
+          ]
+        },
+        {
+          "id": "health",
+          "name": "Health psychology",
+          "topicIds": [
+            "edexcel-9ps0-t11"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

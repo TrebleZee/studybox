@@ -1,0 +1,278 @@
+{
+  "id": "ocr-h420",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H420",
+  "subject": "Biology",
+  "specName": "Biology A",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/687834-download-a-level-specification.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Biological processes"
+    },
+    {
+      "id": "p2",
+      "name": "Biological diversity"
+    },
+    {
+      "id": "p3",
+      "name": "Unified biology"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h420-t01",
+      "name": "Practical skills assessed in a written exam",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t02",
+      "name": "Cell structure",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t03",
+      "name": "Biological molecules",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t04",
+      "name": "Nucleotides and nucleic acids",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t05",
+      "name": "Enzymes",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t06",
+      "name": "Biological membranes",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t07",
+      "name": "Cell division, cell diversity and cellular organisation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t08",
+      "name": "Exchange surfaces",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t09",
+      "name": "Transport in animals",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t10",
+      "name": "Transport in plants",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t11",
+      "name": "Communicable diseases, disease prevention and the immune system",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t12",
+      "name": "Biodiversity",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t13",
+      "name": "Classification and evolution",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t14",
+      "name": "Communication and homeostasis",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t15",
+      "name": "Excretion as an example of homeostatic control",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t16",
+      "name": "Neuronal communication",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t17",
+      "name": "Hormonal communication",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t18",
+      "name": "Plant and animal responses",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t19",
+      "name": "Photosynthesis",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t20",
+      "name": "Respiration",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t21",
+      "name": "Cellular control",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t22",
+      "name": "Patterns of inheritance",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t23",
+      "name": "Manipulating genomes",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t24",
+      "name": "Cloning and biotechnology",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t25",
+      "name": "Ecosystems",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h420-t26",
+      "name": "Populations and sustainability",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "ocr-h420-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

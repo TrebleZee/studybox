@@ -1,0 +1,109 @@
+{
+  "id": "aqa-7402",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7402",
+  "subject": "Biology",
+  "specName": "Biology",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/biology/specifications/AQA-7401-7402-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2"
+    },
+    {
+      "id": "p3",
+      "name": "Paper 3"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7402-t01",
+      "name": "Biological molecules",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7402-t02",
+      "name": "Cells",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7402-t03",
+      "name": "Organisms exchange substances with their environment",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7402-t04",
+      "name": "Genetic information, variation and relationships between organisms",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7402-t05",
+      "name": "Energy transfers in and between organisms",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7402-t06",
+      "name": "Organisms respond to changes in their internal and external environments",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7402-t07",
+      "name": "Genetics, populations, evolution and ecosystems",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7402-t08",
+      "name": "The control of gene expression",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "aqa-7402-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

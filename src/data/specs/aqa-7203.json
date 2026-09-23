@@ -1,0 +1,230 @@
+{
+  "id": "aqa-7203",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7203",
+  "subject": "Art and Design",
+  "specName": "Graphic communication",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/art-and-design/specifications/AQA-ART-A-LEVEL-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7203-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t02",
+      "name": "Personal investigation: written material",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t05",
+      "name": "Interactive media",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t06",
+      "name": "Advertising",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t07",
+      "name": "Packaging design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t08",
+      "name": "Design for print",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t09",
+      "name": "Illustration",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t10",
+      "name": "Communication graphics",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t11",
+      "name": "Branding",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t12",
+      "name": "Multimedia",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t13",
+      "name": "Motion graphics",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7203-t14",
+      "name": "Design for film and television",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "interactive-media",
+          "name": "Interactive media",
+          "topicIds": [
+            "aqa-7203-t05"
+          ]
+        },
+        {
+          "id": "advertising",
+          "name": "Advertising",
+          "topicIds": [
+            "aqa-7203-t06"
+          ]
+        },
+        {
+          "id": "packaging-design",
+          "name": "Packaging design",
+          "topicIds": [
+            "aqa-7203-t07"
+          ]
+        },
+        {
+          "id": "design-for-print",
+          "name": "Design for print",
+          "topicIds": [
+            "aqa-7203-t08"
+          ]
+        },
+        {
+          "id": "illustration",
+          "name": "Illustration",
+          "topicIds": [
+            "aqa-7203-t09"
+          ]
+        },
+        {
+          "id": "communication-graphics",
+          "name": "Communication graphics",
+          "topicIds": [
+            "aqa-7203-t10"
+          ]
+        },
+        {
+          "id": "branding",
+          "name": "Branding",
+          "topicIds": [
+            "aqa-7203-t11"
+          ]
+        },
+        {
+          "id": "multimedia",
+          "name": "Multimedia",
+          "topicIds": [
+            "aqa-7203-t12"
+          ]
+        },
+        {
+          "id": "motion-graphics",
+          "name": "Motion graphics",
+          "topicIds": [
+            "aqa-7203-t13"
+          ]
+        },
+        {
+          "id": "design-for-film-and-television",
+          "name": "Design for film and television",
+          "topicIds": [
+            "aqa-7203-t14"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "aqa-7203-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "aqa-7203-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

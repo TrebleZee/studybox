@@ -1,0 +1,121 @@
+{
+  "id": "ocr-h460",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H460",
+  "subject": "Economics",
+  "specName": "Economics",
+  "specVersion": "2019",
+  "firstExam": 2021,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/536455-specification-accredited-a-level-gce-economics-h460.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Microeconomics"
+    },
+    {
+      "id": "p2",
+      "name": "Macroeconomics"
+    },
+    {
+      "id": "p3",
+      "name": "Themes in economics"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h460-t01",
+      "name": "Introduction to microeconomics",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h460-t02",
+      "name": "The role of markets",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h460-t03",
+      "name": "Business objectives",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h460-t04",
+      "name": "Market structures",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h460-t05",
+      "name": "The labour market",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h460-t06",
+      "name": "Aggregate demand and aggregate supply",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h460-t07",
+      "name": "Economic policy objectives",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h460-t08",
+      "name": "Implementing policy",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h460-t09",
+      "name": "The global context",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h460-t10",
+      "name": "The financial sector",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

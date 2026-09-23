@@ -1,0 +1,101 @@
+{
+  "id": "ocr-h431",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H431",
+  "subject": "Business",
+  "specName": "Business",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": 2027,
+  "specUrl": "https://www.ocr.org.uk/Images/170837-specification-accredited-a-level-gce-business-h431.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Operating in a local business environment"
+    },
+    {
+      "id": "p2",
+      "name": "The UK business environment"
+    },
+    {
+      "id": "p3",
+      "name": "The global business environment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h431-t01",
+      "name": "Business objectives and strategic decisions",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h431-t02",
+      "name": "External influences facing businesses",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h431-t03",
+      "name": "Marketing and marketing strategies",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h431-t04",
+      "name": "Operational strategy",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h431-t05",
+      "name": "Human resources",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h431-t06",
+      "name": "Accounting and financial considerations",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h431-t07",
+      "name": "The global environment of business",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

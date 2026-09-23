@@ -1,0 +1,134 @@
+{
+  "id": "edexcel-9fa0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9FA0",
+  "subject": "Art and Design",
+  "specName": "Fine Art",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Art%20and%20Design/2015/specification-and-sample-assessment-materials/gce-a-level-art-and-design-specification-issue-4.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9fa0-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fa0-t02",
+      "name": "Personal investigation: personal study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fa0-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fa0-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fa0-t05",
+      "name": "Painting and drawing",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fa0-t06",
+      "name": "Printmaking",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fa0-t07",
+      "name": "Sculpture",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9fa0-t08",
+      "name": "Lens-based image making",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Discipline",
+      "pick": 1,
+      "options": [
+        {
+          "id": "painting-and-drawing",
+          "name": "Painting and drawing",
+          "topicIds": [
+            "edexcel-9fa0-t05"
+          ]
+        },
+        {
+          "id": "printmaking",
+          "name": "Printmaking",
+          "topicIds": [
+            "edexcel-9fa0-t06"
+          ]
+        },
+        {
+          "id": "sculpture",
+          "name": "Sculpture",
+          "topicIds": [
+            "edexcel-9fa0-t07"
+          ]
+        },
+        {
+          "id": "lens-based-image-making",
+          "name": "Lens-based image making",
+          "topicIds": [
+            "edexcel-9fa0-t08"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "edexcel-9fa0-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "edexcel-9fa0-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

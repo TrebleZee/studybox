@@ -96,6 +96,34 @@ describe("catalogue files", () => {
     );
   });
 
+  // Wave 2: the A-level top 10 plus Further Maths and Computer Science on
+  // every one of the three boards that offers the subject (Pearson Edexcel
+  // has no A-level Sociology or Computer Science).
+  const WAVE_2 = ["Mathematics", "Psychology", "Biology", "Chemistry", "Business", "Physics", "History", "Sociology",
+    "Art and Design", "Economics", "Further Mathematics", "Computer Science"];
+  const NOT_OFFERED = { Edexcel: ["Sociology", "Computer Science"] };
+  it.each(["AQA", "Edexcel", "OCR"])("offers every Wave 2 A-level that %s runs", (board) => {
+    const subjects = new Set(SPECS.filter((s) => s.board === board && s.qualification === "alevel").map((s) => s.subject));
+    WAVE_2.filter((subject) => !(NOT_OFFERED[board] || []).includes(subject)).forEach((subject) =>
+      expect(subjects.has(subject), `${board} A-level ${subject}`).toBe(true)
+    );
+  });
+
+  it("lists every spec variant a board runs (OCR A/B, Edexcel A/B)", () => {
+    const ids = SPECS.map((s) => s.id);
+    expect(ids).toEqual(expect.arrayContaining([
+      "ocr-h240", "ocr-h640", "ocr-h245", "ocr-h645", "ocr-h420", "ocr-h422", "ocr-h432", "ocr-h433", "ocr-h556", "ocr-h557",
+      "edexcel-9bn0", "edexcel-9bi0", "edexcel-9ec0", "edexcel-9eb0",
+    ]));
+  });
+
+  it("marks specs that are being withdrawn with their last exam year", () => {
+    const byId = Object.fromEntries(SPECS.map((s) => [s.id, s]));
+    expect(byId["ocr-h431"].lastExam).toBe(2027);
+    expect(byId["ocr-h436"].firstExam).toBe(2028);
+    expect(byId["ocr-h606"].lastExam).toBe(2028);
+  });
+
   // Wave 1: the four core GCSEs on each of the three big boards.
   it.each(["AQA", "Edexcel", "OCR"])("offers every core GCSE on %s", (board) => {
     const gcse = SPECS.filter((spec) => spec.board === board && spec.qualification === "gcse");
@@ -231,14 +259,15 @@ describe("listSpecs", () => {
 
   it("filters by qualification and board", () => {
     expect(listSpecs({ qualification: "gcse" }).every((s) => s.qualification === "gcse")).toBe(true);
-    expect(listSpecs({ qualification: "alevel", board: "OCR" }).map((s) => s.id).sort()).toEqual([
-      "ocr-h446",
-      "ocr-h556",
-    ]);
+    const ocrALevel = listSpecs({ qualification: "alevel", board: "OCR" });
+    expect(ocrALevel.length).toBeGreaterThan(2);
+    expect(ocrALevel.every((s) => s.board === "OCR" && s.qualification === "alevel")).toBe(true);
+    expect(ocrALevel.map((s) => s.id)).toEqual(expect.arrayContaining(["ocr-h446", "ocr-h556"]));
   });
 
   it("searches board, code, subject and spec name case-insensitively, all words required", () => {
-    expect(listSpecs({ query: "physics" }).map((s) => s.id)).toEqual(["ocr-h556"]);
+    expect(listSpecs({ query: "ocr physics h556" }).map((s) => s.id)).toEqual(["ocr-h556"]);
+    expect(listSpecs({ query: "physics" }).map((s) => s.id).sort()).toEqual(["aqa-7408", "edexcel-9ph0", "ocr-h556", "ocr-h557"]);
     expect(listSpecs({ query: "9ma0" }).map((s) => s.id)).toEqual(["edexcel-9ma0"]);
     expect(listSpecs({ query: "aqa english" }).map((s) => s.id).sort()).toEqual(["aqa-8700", "aqa-8702"]);
     expect(listSpecs({ query: "ocr english" }).map((s) => s.id).sort()).toEqual(["ocr-j351", "ocr-j352"]);

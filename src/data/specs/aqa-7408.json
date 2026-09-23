@@ -1,0 +1,170 @@
+{
+  "id": "aqa-7408",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7408",
+  "subject": "Physics",
+  "specName": "Physics",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/physics/specifications/AQA-7407-7408-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2"
+    },
+    {
+      "id": "p3",
+      "name": "Paper 3 (practical skills and option)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7408-t01",
+      "name": "Measurements and their errors",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t02",
+      "name": "Particles and radiation",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t03",
+      "name": "Waves",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t04",
+      "name": "Mechanics and materials",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t05",
+      "name": "Electricity",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t06",
+      "name": "Periodic motion",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t07",
+      "name": "Thermal physics",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t08",
+      "name": "Fields and their consequences",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t09",
+      "name": "Nuclear physics",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t10",
+      "name": "Practical skills and data analysis",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t11",
+      "name": "Astrophysics",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t12",
+      "name": "Medical physics",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t13",
+      "name": "Engineering physics",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t14",
+      "name": "Turning points in physics",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7408-t15",
+      "name": "Electronics",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "option",
+      "name": "Paper 3 option",
+      "pick": 1,
+      "options": [
+        {
+          "id": "astrophysics",
+          "name": "Astrophysics",
+          "topicIds": [
+            "aqa-7408-t11"
+          ]
+        },
+        {
+          "id": "medical",
+          "name": "Medical physics",
+          "topicIds": [
+            "aqa-7408-t12"
+          ]
+        },
+        {
+          "id": "engineering",
+          "name": "Engineering physics",
+          "topicIds": [
+            "aqa-7408-t13"
+          ]
+        },
+        {
+          "id": "turning-points",
+          "name": "Turning points in physics",
+          "topicIds": [
+            "aqa-7408-t14"
+          ]
+        },
+        {
+          "id": "electronics",
+          "name": "Electronics",
+          "topicIds": [
+            "aqa-7408-t15"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "aqa-7408-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

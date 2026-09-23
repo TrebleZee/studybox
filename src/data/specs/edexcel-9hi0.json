@@ -1,0 +1,579 @@
+{
+  "id": "edexcel-9hi0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9HI0",
+  "subject": "History",
+  "specName": "History",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/History/2015/Specification%20and%20sample%20assessments/9781446914366-gce-2015-a-hist.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Breadth study with interpretations"
+    },
+    {
+      "id": "p2",
+      "name": "Depth study"
+    },
+    {
+      "id": "p3",
+      "name": "Themes in breadth with aspects in depth"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9hi0-t01",
+      "name": "The crusades, c1095–1204",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t02",
+      "name": "England, 1509–1603: authority, nation and religion",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t03",
+      "name": "Britain, 1625–1701: conflict, revolution and settlement",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t04",
+      "name": "Britain, c1785–c1870: democracy, protest and reform",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t05",
+      "name": "Russia, 1917–91: from Lenin to Yeltsin",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t06",
+      "name": "In search of the American Dream: the USA, c1917–96",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t07",
+      "name": "Germany and West Germany, 1918–89",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t08",
+      "name": "Britain transformed, 1918–97",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t09",
+      "name": "Anglo-Saxon England and the Anglo-Norman Kingdom, c1053–1106",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t10",
+      "name": "England and the Angevin Empire in the reign of Henry II, 1154–89",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t11",
+      "name": "Luther and the German Reformation, c1515–55",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t12",
+      "name": "The Dutch Revolt, c1563–1609",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t13",
+      "name": "France in revolution, 1774–99",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t14",
+      "name": "Russia in revolution, 1894–1924",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t15",
+      "name": "The unification of Italy, c1830–70",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t16",
+      "name": "The unification of Germany, c1840–71",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t17",
+      "name": "Mao's China, 1949–76",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t18",
+      "name": "The German Democratic Republic, 1949–90",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t19",
+      "name": "India, c1914–48: the road to independence",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t20",
+      "name": "South Africa, 1948–94: from apartheid state to 'rainbow nation'",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t21",
+      "name": "The rise and fall of fascism in Italy, c1911–46",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t22",
+      "name": "Spain, 1930–78: republicanism, Francoism and the re-establishment of democracy",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t23",
+      "name": "The USA, c1920–55: boom, bust and recovery",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t24",
+      "name": "The USA, 1955–92: conformity and challenge",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t25",
+      "name": "Lancastrians, Yorkists and Henry VII, 1399–1509",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t26",
+      "name": "Rebellion and disorder under the Tudors, 1485–1603",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t27",
+      "name": "The Golden Age of Spain, 1474–1598",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t28",
+      "name": "The witch craze in Britain, Europe and North America, c1580–c1750",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t29",
+      "name": "Industrialisation and social change in Britain, 1759–1928: forging a new society",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t30",
+      "name": "Poverty, public health and the state in Britain, c1780–1939",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t31",
+      "name": "Britain: losing and gaining an empire, 1763–1914",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t32",
+      "name": "The British experience of warfare, c1790–1918",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t33",
+      "name": "Protest, agitation and parliamentary reform in Britain, c1780–1928",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t34",
+      "name": "Ireland and the Union, c1774–1923",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t35",
+      "name": "The changing nature of warfare, 1859–1991: perception and reality",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t36",
+      "name": "Germany, 1871–1990: united, divided and reunited",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t37",
+      "name": "The making of modern Russia, 1855–1991",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t38",
+      "name": "The making of modern China, 1860–1997",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t39",
+      "name": "Civil rights and race relations in the USA, 1850–2009",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9hi0-t40",
+      "name": "Mass media and social change in Britain, 1882–2004",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "paper-1",
+      "name": "Paper 1 option (sets your route)",
+      "pick": 1,
+      "options": [
+        {
+          "id": "1a",
+          "name": "The crusades, c1095–1204",
+          "topicIds": [
+            "edexcel-9hi0-t01"
+          ]
+        },
+        {
+          "id": "1b",
+          "name": "England, 1509–1603: authority, nation and religion",
+          "topicIds": [
+            "edexcel-9hi0-t02"
+          ]
+        },
+        {
+          "id": "1c",
+          "name": "Britain, 1625–1701: conflict, revolution and settlement",
+          "topicIds": [
+            "edexcel-9hi0-t03"
+          ]
+        },
+        {
+          "id": "1d",
+          "name": "Britain, c1785–c1870: democracy, protest and reform",
+          "topicIds": [
+            "edexcel-9hi0-t04"
+          ]
+        },
+        {
+          "id": "1e",
+          "name": "Russia, 1917–91: from Lenin to Yeltsin",
+          "topicIds": [
+            "edexcel-9hi0-t05"
+          ]
+        },
+        {
+          "id": "1f",
+          "name": "In search of the American Dream: the USA, c1917–96",
+          "topicIds": [
+            "edexcel-9hi0-t06"
+          ]
+        },
+        {
+          "id": "1g",
+          "name": "Germany and West Germany, 1918–89",
+          "topicIds": [
+            "edexcel-9hi0-t07"
+          ]
+        },
+        {
+          "id": "1h",
+          "name": "Britain transformed, 1918–97",
+          "topicIds": [
+            "edexcel-9hi0-t08"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "paper-2",
+      "name": "Paper 2 option (same route as Paper 1)",
+      "pick": 1,
+      "options": [
+        {
+          "id": "2a1",
+          "name": "Anglo-Saxon England and the Anglo-Norman Kingdom, c1053–1106",
+          "topicIds": [
+            "edexcel-9hi0-t09"
+          ]
+        },
+        {
+          "id": "2a2",
+          "name": "England and the Angevin Empire in the reign of Henry II, 1154–89",
+          "topicIds": [
+            "edexcel-9hi0-t10"
+          ]
+        },
+        {
+          "id": "2b1",
+          "name": "Luther and the German Reformation, c1515–55",
+          "topicIds": [
+            "edexcel-9hi0-t11"
+          ]
+        },
+        {
+          "id": "2b2",
+          "name": "The Dutch Revolt, c1563–1609",
+          "topicIds": [
+            "edexcel-9hi0-t12"
+          ]
+        },
+        {
+          "id": "2c1",
+          "name": "France in revolution, 1774–99",
+          "topicIds": [
+            "edexcel-9hi0-t13"
+          ]
+        },
+        {
+          "id": "2c2",
+          "name": "Russia in revolution, 1894–1924",
+          "topicIds": [
+            "edexcel-9hi0-t14"
+          ]
+        },
+        {
+          "id": "2d1",
+          "name": "The unification of Italy, c1830–70",
+          "topicIds": [
+            "edexcel-9hi0-t15"
+          ]
+        },
+        {
+          "id": "2d2",
+          "name": "The unification of Germany, c1840–71",
+          "topicIds": [
+            "edexcel-9hi0-t16"
+          ]
+        },
+        {
+          "id": "2e1",
+          "name": "Mao's China, 1949–76",
+          "topicIds": [
+            "edexcel-9hi0-t17"
+          ]
+        },
+        {
+          "id": "2e2",
+          "name": "The German Democratic Republic, 1949–90",
+          "topicIds": [
+            "edexcel-9hi0-t18"
+          ]
+        },
+        {
+          "id": "2f1",
+          "name": "India, c1914–48: the road to independence",
+          "topicIds": [
+            "edexcel-9hi0-t19"
+          ]
+        },
+        {
+          "id": "2f2",
+          "name": "South Africa, 1948–94: from apartheid state to 'rainbow nation'",
+          "topicIds": [
+            "edexcel-9hi0-t20"
+          ]
+        },
+        {
+          "id": "2g1",
+          "name": "The rise and fall of fascism in Italy, c1911–46",
+          "topicIds": [
+            "edexcel-9hi0-t21"
+          ]
+        },
+        {
+          "id": "2g2",
+          "name": "Spain, 1930–78: republicanism, Francoism and the re-establishment of democracy",
+          "topicIds": [
+            "edexcel-9hi0-t22"
+          ]
+        },
+        {
+          "id": "2h1",
+          "name": "The USA, c1920–55: boom, bust and recovery",
+          "topicIds": [
+            "edexcel-9hi0-t23"
+          ]
+        },
+        {
+          "id": "2h2",
+          "name": "The USA, 1955–92: conformity and challenge",
+          "topicIds": [
+            "edexcel-9hi0-t24"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "paper-3",
+      "name": "Paper 3 option",
+      "pick": 1,
+      "options": [
+        {
+          "id": "30",
+          "name": "Lancastrians, Yorkists and Henry VII, 1399–1509",
+          "topicIds": [
+            "edexcel-9hi0-t25"
+          ]
+        },
+        {
+          "id": "31",
+          "name": "Rebellion and disorder under the Tudors, 1485–1603",
+          "topicIds": [
+            "edexcel-9hi0-t26"
+          ]
+        },
+        {
+          "id": "32",
+          "name": "The Golden Age of Spain, 1474–1598",
+          "topicIds": [
+            "edexcel-9hi0-t27"
+          ]
+        },
+        {
+          "id": "33",
+          "name": "The witch craze in Britain, Europe and North America, c1580–c1750",
+          "topicIds": [
+            "edexcel-9hi0-t28"
+          ]
+        },
+        {
+          "id": "34-1",
+          "name": "Industrialisation and social change in Britain, 1759–1928: forging a new society",
+          "topicIds": [
+            "edexcel-9hi0-t29"
+          ]
+        },
+        {
+          "id": "34-2",
+          "name": "Poverty, public health and the state in Britain, c1780–1939",
+          "topicIds": [
+            "edexcel-9hi0-t30"
+          ]
+        },
+        {
+          "id": "35-1",
+          "name": "Britain: losing and gaining an empire, 1763–1914",
+          "topicIds": [
+            "edexcel-9hi0-t31"
+          ]
+        },
+        {
+          "id": "35-2",
+          "name": "The British experience of warfare, c1790–1918",
+          "topicIds": [
+            "edexcel-9hi0-t32"
+          ]
+        },
+        {
+          "id": "36-1",
+          "name": "Protest, agitation and parliamentary reform in Britain, c1780–1928",
+          "topicIds": [
+            "edexcel-9hi0-t33"
+          ]
+        },
+        {
+          "id": "36-2",
+          "name": "Ireland and the Union, c1774–1923",
+          "topicIds": [
+            "edexcel-9hi0-t34"
+          ]
+        },
+        {
+          "id": "37-1",
+          "name": "The changing nature of warfare, 1859–1991: perception and reality",
+          "topicIds": [
+            "edexcel-9hi0-t35"
+          ]
+        },
+        {
+          "id": "37-2",
+          "name": "Germany, 1871–1990: united, divided and reunited",
+          "topicIds": [
+            "edexcel-9hi0-t36"
+          ]
+        },
+        {
+          "id": "38-1",
+          "name": "The making of modern Russia, 1855–1991",
+          "topicIds": [
+            "edexcel-9hi0-t37"
+          ]
+        },
+        {
+          "id": "38-2",
+          "name": "The making of modern China, 1860–1997",
+          "topicIds": [
+            "edexcel-9hi0-t38"
+          ]
+        },
+        {
+          "id": "39-1",
+          "name": "Civil rights and race relations in the USA, 1850–2009",
+          "topicIds": [
+            "edexcel-9hi0-t39"
+          ]
+        },
+        {
+          "id": "39-2",
+          "name": "Mass media and social change in Britain, 1882–2004",
+          "topicIds": [
+            "edexcel-9hi0-t40"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "edexcel-9hi0-m01",
+      "name": "Coursework (NEA)",
+      "kind": "nea"
+    }
+  ]
+}

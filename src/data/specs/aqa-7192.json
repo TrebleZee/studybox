@@ -1,0 +1,177 @@
+{
+  "id": "aqa-7192",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7192",
+  "subject": "Sociology",
+  "specName": "Sociology",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/sociology/specifications/AQA-7191-7192-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Education with theory and methods"
+    },
+    {
+      "id": "p2",
+      "name": "Topics in sociology"
+    },
+    {
+      "id": "p3",
+      "name": "Crime and deviance with theory and methods"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7192-t01",
+      "name": "Education",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t02",
+      "name": "Methods in context",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t03",
+      "name": "Theory and methods",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t04",
+      "name": "Crime and deviance",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t05",
+      "name": "Culture and identity",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t06",
+      "name": "Families and households",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t07",
+      "name": "Health",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t08",
+      "name": "Work, poverty and welfare",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t09",
+      "name": "Beliefs in society",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t10",
+      "name": "Global development",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t11",
+      "name": "The media",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7192-t12",
+      "name": "Stratification and differentiation",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "option-1",
+      "name": "Topics option 1",
+      "pick": 1,
+      "options": [
+        {
+          "id": "culture",
+          "name": "Culture and identity",
+          "topicIds": [
+            "aqa-7192-t05"
+          ]
+        },
+        {
+          "id": "families",
+          "name": "Families and households",
+          "topicIds": [
+            "aqa-7192-t06"
+          ]
+        },
+        {
+          "id": "health",
+          "name": "Health",
+          "topicIds": [
+            "aqa-7192-t07"
+          ]
+        },
+        {
+          "id": "work",
+          "name": "Work, poverty and welfare",
+          "topicIds": [
+            "aqa-7192-t08"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "option-2",
+      "name": "Topics option 2",
+      "pick": 1,
+      "options": [
+        {
+          "id": "beliefs",
+          "name": "Beliefs in society",
+          "topicIds": [
+            "aqa-7192-t09"
+          ]
+        },
+        {
+          "id": "global",
+          "name": "Global development",
+          "topicIds": [
+            "aqa-7192-t10"
+          ]
+        },
+        {
+          "id": "media",
+          "name": "The media",
+          "topicIds": [
+            "aqa-7192-t11"
+          ]
+        },
+        {
+          "id": "stratification",
+          "name": "Stratification and differentiation",
+          "topicIds": [
+            "aqa-7192-t12"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": []
+}

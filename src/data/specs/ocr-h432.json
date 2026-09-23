@@ -1,0 +1,285 @@
+{
+  "id": "ocr-h432",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H432",
+  "subject": "Chemistry",
+  "specName": "Chemistry A",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/171720-specification-accredited-a-level-gce-chemistry-a-h432.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Periodic table, elements and physical chemistry"
+    },
+    {
+      "id": "p2",
+      "name": "Synthesis and analytical techniques"
+    },
+    {
+      "id": "p3",
+      "name": "Unified chemistry"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h432-t01",
+      "name": "Practical skills assessed in a written exam",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t02",
+      "name": "Atoms, compounds, molecules and equations",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t03",
+      "name": "Amount of substance",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t04",
+      "name": "Acid-base and redox reactions",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t05",
+      "name": "Electrons, bonding and structure",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t06",
+      "name": "The periodic table and periodicity",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t07",
+      "name": "Group 2 and the halogens",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t08",
+      "name": "Qualitative analysis",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t09",
+      "name": "Enthalpy changes",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t10",
+      "name": "Reaction rates and equilibrium (qualitative)",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t11",
+      "name": "Basic concepts of organic chemistry",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t12",
+      "name": "Hydrocarbons",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t13",
+      "name": "Alcohols and haloalkanes",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t14",
+      "name": "Organic synthesis (core)",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t15",
+      "name": "Analytical techniques (IR and MS)",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t16",
+      "name": "Reaction rates and equilibrium (quantitative)",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t17",
+      "name": "pH and buffers",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t18",
+      "name": "Enthalpy, entropy and free energy",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t19",
+      "name": "Redox and electrode potentials",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t20",
+      "name": "Transition elements",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t21",
+      "name": "Aromatic compounds",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t22",
+      "name": "Carbonyl compounds",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t23",
+      "name": "Carboxylic acids and esters",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t24",
+      "name": "Nitrogen compounds",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t25",
+      "name": "Polymers",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t26",
+      "name": "Organic synthesis (advanced)",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h432-t27",
+      "name": "Chromatography and spectroscopy (NMR)",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "ocr-h432-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

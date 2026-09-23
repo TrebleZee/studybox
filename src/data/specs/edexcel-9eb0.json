@@ -1,0 +1,238 @@
+{
+  "id": "edexcel-9eb0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9EB0",
+  "subject": "Economics",
+  "specName": "Economics B",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Economics/2015/specification-and-sample-assessment-materials/9781446914410_GCE2015_A_ECOB_WEB%20spec.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Markets and how they work"
+    },
+    {
+      "id": "p2",
+      "name": "Competing in the global economy"
+    },
+    {
+      "id": "p3",
+      "name": "The economic environment and business"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9eb0-t01",
+      "name": "Scarcity, choice and potential conflicts",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t02",
+      "name": "Enterprise, business and the economy",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t03",
+      "name": "Introducing the market",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t04",
+      "name": "The role of credit in the economy",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t05",
+      "name": "Market failure and government intervention",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t06",
+      "name": "Revenue, costs, profits and cash",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t07",
+      "name": "Business growth and competitive advantage",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t08",
+      "name": "Firms, consumers and elasticities of demand",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t09",
+      "name": "Productive efficiency",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t10",
+      "name": "Life in a global economy",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t11",
+      "name": "The economic cycle",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t12",
+      "name": "Introduction to macroeconomic policy",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t13",
+      "name": "Globalisation",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t14",
+      "name": "Economic factors in business expansion",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t15",
+      "name": "Impact of globalisation on global companies",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t16",
+      "name": "Impact of globalisation on local and national economies",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t17",
+      "name": "Global labour markets",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t18",
+      "name": "Inequality and redistribution",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t19",
+      "name": "Competition and market power",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t20",
+      "name": "Market power and market failure",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t21",
+      "name": "Market failure across the economy",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t22",
+      "name": "Macroeconomic policies and their impact on firms and individuals",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9eb0-t23",
+      "name": "Risk and the financial sector",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}
