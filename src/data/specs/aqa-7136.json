@@ -1,0 +1,157 @@
+{
+  "id": "aqa-7136",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7136",
+  "subject": "Economics",
+  "specName": "Economics",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/economics/specifications/AQA-7135-7136-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Markets and market failure"
+    },
+    {
+      "id": "p2",
+      "name": "National and international economy"
+    },
+    {
+      "id": "p3",
+      "name": "Economic principles and issues"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7136-t01",
+      "name": "Economic methodology and the economic problem",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t02",
+      "name": "Individual economic decision making",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t03",
+      "name": "Price determination in a competitive market",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t04",
+      "name": "Production, costs and revenue",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t05",
+      "name": "Perfect competition, imperfectly competitive markets and monopoly",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t06",
+      "name": "The labour market",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t07",
+      "name": "The distribution of income and wealth: poverty and inequality",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t08",
+      "name": "The market mechanism, market failure and government intervention",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t09",
+      "name": "The measurement of macroeconomic performance",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t10",
+      "name": "How the macroeconomy works",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t11",
+      "name": "Economic performance",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t12",
+      "name": "Financial markets and monetary policy",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t13",
+      "name": "Fiscal policy and supply-side policies",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7136-t14",
+      "name": "The international economy",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

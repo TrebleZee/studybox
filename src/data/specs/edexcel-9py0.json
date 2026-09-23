@@ -1,0 +1,118 @@
+{
+  "id": "edexcel-9py0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9PY0",
+  "subject": "Art and Design",
+  "specName": "Photography",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Art%20and%20Design/2015/specification-and-sample-assessment-materials/gce-a-level-art-and-design-specification-issue-4.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9py0-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9py0-t02",
+      "name": "Personal investigation: personal study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9py0-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9py0-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9py0-t05",
+      "name": "Film-based photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9py0-t06",
+      "name": "Digital photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9py0-t07",
+      "name": "Film and video",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Discipline",
+      "pick": 1,
+      "options": [
+        {
+          "id": "film-based-photography",
+          "name": "Film-based photography",
+          "topicIds": [
+            "edexcel-9py0-t05"
+          ]
+        },
+        {
+          "id": "digital-photography",
+          "name": "Digital photography",
+          "topicIds": [
+            "edexcel-9py0-t06"
+          ]
+        },
+        {
+          "id": "film-and-video",
+          "name": "Film and video",
+          "topicIds": [
+            "edexcel-9py0-t07"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "edexcel-9py0-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "edexcel-9py0-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

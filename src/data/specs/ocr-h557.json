@@ -1,0 +1,197 @@
+{
+  "id": "ocr-h557",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H557",
+  "subject": "Physics",
+  "specName": "Physics B (Advancing Physics)",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/171729-specification-accredited-a-level-gce-physics-b-advancing-physics-h557.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Fundamentals of physics"
+    },
+    {
+      "id": "p2",
+      "name": "Scientific literacy in physics"
+    },
+    {
+      "id": "p3",
+      "name": "Practical skills in physics"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h557-t01",
+      "name": "Practical skills assessed in a written exam",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t02",
+      "name": "Fundamental data analysis",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t03",
+      "name": "Imaging and signalling",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t04",
+      "name": "Sensing",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t05",
+      "name": "Mechanical properties of materials",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t06",
+      "name": "Waves and quantum behaviour",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t07",
+      "name": "Space, time and motion",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t08",
+      "name": "Creating models",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t09",
+      "name": "Out into space",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t10",
+      "name": "Our place in the universe",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t11",
+      "name": "Matter: very simple",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t12",
+      "name": "Matter: hot or cold",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t13",
+      "name": "Electromagnetism",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t14",
+      "name": "Charge and field",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t15",
+      "name": "Probing deep into matter",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h557-t16",
+      "name": "Ionising radiation and risk",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "ocr-h557-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

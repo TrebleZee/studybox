@@ -1,0 +1,198 @@
+{
+  "id": "ocr-h604",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H604",
+  "subject": "Art and Design",
+  "specName": "Textile Design",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/170210-specification-accredited-a-level-gce-art-and-design-h600-h606.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set task"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h604-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t02",
+      "name": "Personal investigation: related study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t03",
+      "name": "Externally set task: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t04",
+      "name": "Externally set task: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t05",
+      "name": "Garments/fashion",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t06",
+      "name": "Accessories",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t07",
+      "name": "Soft furnishings",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t08",
+      "name": "Printed and/or dyed textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t09",
+      "name": "Constructed textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t10",
+      "name": "Textile installation",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t11",
+      "name": "Expressive textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h604-t12",
+      "name": "Digital textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "garments-fashion",
+          "name": "Garments/fashion",
+          "topicIds": [
+            "ocr-h604-t05"
+          ]
+        },
+        {
+          "id": "accessories",
+          "name": "Accessories",
+          "topicIds": [
+            "ocr-h604-t06"
+          ]
+        },
+        {
+          "id": "soft-furnishings",
+          "name": "Soft furnishings",
+          "topicIds": [
+            "ocr-h604-t07"
+          ]
+        },
+        {
+          "id": "printed-and-or-dyed-textiles",
+          "name": "Printed and/or dyed textiles",
+          "topicIds": [
+            "ocr-h604-t08"
+          ]
+        },
+        {
+          "id": "constructed-textiles",
+          "name": "Constructed textiles",
+          "topicIds": [
+            "ocr-h604-t09"
+          ]
+        },
+        {
+          "id": "textile-installation",
+          "name": "Textile installation",
+          "topicIds": [
+            "ocr-h604-t10"
+          ]
+        },
+        {
+          "id": "expressive-textiles",
+          "name": "Expressive textiles",
+          "topicIds": [
+            "ocr-h604-t11"
+          ]
+        },
+        {
+          "id": "digital-textiles",
+          "name": "Digital textiles",
+          "topicIds": [
+            "ocr-h604-t12"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ocr-h604-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "ocr-h604-m02",
+      "name": "Externally set task",
+      "kind": "other"
+    }
+  ]
+}

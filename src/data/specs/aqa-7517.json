@@ -1,0 +1,111 @@
+{
+  "id": "aqa-7517",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7517",
+  "subject": "Computer Science",
+  "specName": "Computer Science",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/computing/specifications/AQA-7516-7517-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Paper 1 (on-screen)"
+    },
+    {
+      "id": "p2",
+      "name": "Paper 2 (written)"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7517-t01",
+      "name": "Fundamentals of programming",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t02",
+      "name": "Fundamentals of data structures",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t03",
+      "name": "Fundamentals of algorithms",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t04",
+      "name": "Theory of computation",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t05",
+      "name": "Systematic approach to problem solving",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t06",
+      "name": "Fundamentals of data representation",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t07",
+      "name": "Fundamentals of computer systems",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t08",
+      "name": "Fundamentals of computer organisation and architecture",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t09",
+      "name": "Consequences of uses of computing",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t10",
+      "name": "Fundamentals of communication and networking",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t11",
+      "name": "Fundamentals of databases",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t12",
+      "name": "Big Data",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7517-t13",
+      "name": "Fundamentals of functional programming",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "aqa-7517-m01",
+      "name": "Computing practical project (NEA)",
+      "kind": "nea"
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "id": "aqa-7132",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7132",
+  "subject": "Business",
+  "specName": "Business",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/business/specifications/AQA-7131-7132-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Business 1"
+    },
+    {
+      "id": "p2",
+      "name": "Business 2"
+    },
+    {
+      "id": "p3",
+      "name": "Business 3"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7132-t01",
+      "name": "What is business?",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7132-t02",
+      "name": "Managers, leadership and decision making",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7132-t03",
+      "name": "Decision making to improve marketing performance",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7132-t04",
+      "name": "Decision making to improve operational performance",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7132-t05",
+      "name": "Decision making to improve financial performance",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7132-t06",
+      "name": "Decision making to improve human resource performance",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7132-t07",
+      "name": "Analysing the strategic position of a business",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7132-t08",
+      "name": "Choosing strategic direction",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7132-t09",
+      "name": "Strategic methods: how to pursue strategies",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7132-t10",
+      "name": "Managing strategic change",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": []
+}

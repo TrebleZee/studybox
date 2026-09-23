@@ -1,5 +1,141 @@
 [
   {
+    "id": "aqa-7042",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7042",
+    "subject": "History",
+    "specName": "History"
+  },
+  {
+    "id": "aqa-7132",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7132",
+    "subject": "Business",
+    "specName": "Business"
+  },
+  {
+    "id": "aqa-7136",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7136",
+    "subject": "Economics",
+    "specName": "Economics"
+  },
+  {
+    "id": "aqa-7182",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7182",
+    "subject": "Psychology",
+    "specName": "Psychology"
+  },
+  {
+    "id": "aqa-7192",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7192",
+    "subject": "Sociology",
+    "specName": "Sociology"
+  },
+  {
+    "id": "aqa-7201",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7201",
+    "subject": "Art and Design",
+    "specName": "Art, craft and design"
+  },
+  {
+    "id": "aqa-7202",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7202",
+    "subject": "Art and Design",
+    "specName": "Fine art"
+  },
+  {
+    "id": "aqa-7203",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7203",
+    "subject": "Art and Design",
+    "specName": "Graphic communication"
+  },
+  {
+    "id": "aqa-7204",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7204",
+    "subject": "Art and Design",
+    "specName": "Textile design"
+  },
+  {
+    "id": "aqa-7205",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7205",
+    "subject": "Art and Design",
+    "specName": "Three-dimensional design"
+  },
+  {
+    "id": "aqa-7206",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7206",
+    "subject": "Art and Design",
+    "specName": "Photography"
+  },
+  {
+    "id": "aqa-7357",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7357",
+    "subject": "Mathematics",
+    "specName": "Mathematics"
+  },
+  {
+    "id": "aqa-7367",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7367",
+    "subject": "Further Mathematics",
+    "specName": "Further Mathematics"
+  },
+  {
+    "id": "aqa-7402",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7402",
+    "subject": "Biology",
+    "specName": "Biology"
+  },
+  {
+    "id": "aqa-7405",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7405",
+    "subject": "Chemistry",
+    "specName": "Chemistry"
+  },
+  {
+    "id": "aqa-7408",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7408",
+    "subject": "Physics",
+    "specName": "Physics"
+  },
+  {
+    "id": "aqa-7517",
+    "qualification": "alevel",
+    "board": "AQA",
+    "spec": "7517",
+    "subject": "Computer Science",
+    "specName": "Computer Science"
+  },
+  {
     "id": "aqa-8300",
     "qualification": "gcse",
     "board": "AQA",
@@ -14,6 +150,14 @@
     "spec": "8464",
     "subject": "Combined Science",
     "specName": "Combined Science Trilogy"
+  },
+  {
+    "id": "aqa-8465",
+    "qualification": "gcse",
+    "board": "AQA",
+    "spec": "8465",
+    "subject": "Combined Science",
+    "specName": "Combined Science Synergy"
   },
   {
     "id": "aqa-8700",
@@ -64,12 +208,92 @@
     "specName": "Combined Science"
   },
   {
+    "id": "edexcel-9ad0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9AD0",
+    "subject": "Art and Design",
+    "specName": "Art, Craft and Design"
+  },
+  {
+    "id": "edexcel-9bi0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9BI0",
+    "subject": "Biology",
+    "specName": "Biology B"
+  },
+  {
+    "id": "edexcel-9bn0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9BN0",
+    "subject": "Biology",
+    "specName": "Biology A (Salters-Nuffield)"
+  },
+  {
+    "id": "edexcel-9bs0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9BS0",
+    "subject": "Business",
+    "specName": "Business"
+  },
+  {
+    "id": "edexcel-9ch0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9CH0",
+    "subject": "Chemistry",
+    "specName": "Chemistry"
+  },
+  {
+    "id": "edexcel-9eb0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9EB0",
+    "subject": "Economics",
+    "specName": "Economics B"
+  },
+  {
+    "id": "edexcel-9ec0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9EC0",
+    "subject": "Economics",
+    "specName": "Economics A"
+  },
+  {
+    "id": "edexcel-9fa0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9FA0",
+    "subject": "Art and Design",
+    "specName": "Fine Art"
+  },
+  {
     "id": "edexcel-9fm0",
     "qualification": "alevel",
     "board": "Edexcel",
     "spec": "9FM0",
     "subject": "Further Mathematics",
     "specName": "Further Mathematics"
+  },
+  {
+    "id": "edexcel-9gc0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9GC0",
+    "subject": "Art and Design",
+    "specName": "Graphic Communication"
+  },
+  {
+    "id": "edexcel-9hi0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9HI0",
+    "subject": "History",
+    "specName": "History"
   },
   {
     "id": "edexcel-9ma0",
@@ -80,6 +304,110 @@
     "specName": "Mathematics"
   },
   {
+    "id": "edexcel-9ph0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9PH0",
+    "subject": "Physics",
+    "specName": "Physics"
+  },
+  {
+    "id": "edexcel-9ps0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9PS0",
+    "subject": "Psychology",
+    "specName": "Psychology"
+  },
+  {
+    "id": "edexcel-9py0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9PY0",
+    "subject": "Art and Design",
+    "specName": "Photography"
+  },
+  {
+    "id": "edexcel-9td0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9TD0",
+    "subject": "Art and Design",
+    "specName": "Three-dimensional Design"
+  },
+  {
+    "id": "edexcel-9te0",
+    "qualification": "alevel",
+    "board": "Edexcel",
+    "spec": "9TE0",
+    "subject": "Art and Design",
+    "specName": "Textile Design"
+  },
+  {
+    "id": "ocr-h240",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H240",
+    "subject": "Mathematics",
+    "specName": "Mathematics A"
+  },
+  {
+    "id": "ocr-h245",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H245",
+    "subject": "Further Mathematics",
+    "specName": "Further Mathematics A"
+  },
+  {
+    "id": "ocr-h420",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H420",
+    "subject": "Biology",
+    "specName": "Biology A"
+  },
+  {
+    "id": "ocr-h422",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H422",
+    "subject": "Biology",
+    "specName": "Biology B (Advancing Biology)"
+  },
+  {
+    "id": "ocr-h431",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H431",
+    "subject": "Business",
+    "specName": "Business"
+  },
+  {
+    "id": "ocr-h432",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H432",
+    "subject": "Chemistry",
+    "specName": "Chemistry A"
+  },
+  {
+    "id": "ocr-h433",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H433",
+    "subject": "Chemistry",
+    "specName": "Chemistry B (Salters)"
+  },
+  {
+    "id": "ocr-h436",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H436",
+    "subject": "Business",
+    "specName": "Business"
+  },
+  {
     "id": "ocr-h446",
     "qualification": "alevel",
     "board": "OCR",
@@ -88,12 +416,124 @@
     "specName": "Computer Science"
   },
   {
+    "id": "ocr-h460",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H460",
+    "subject": "Economics",
+    "specName": "Economics"
+  },
+  {
+    "id": "ocr-h505",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H505",
+    "subject": "History",
+    "specName": "History A"
+  },
+  {
     "id": "ocr-h556",
     "qualification": "alevel",
     "board": "OCR",
     "spec": "H556",
     "subject": "Physics",
     "specName": "Physics A"
+  },
+  {
+    "id": "ocr-h557",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H557",
+    "subject": "Physics",
+    "specName": "Physics B (Advancing Physics)"
+  },
+  {
+    "id": "ocr-h567",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H567",
+    "subject": "Psychology",
+    "specName": "Psychology"
+  },
+  {
+    "id": "ocr-h580",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H580",
+    "subject": "Sociology",
+    "specName": "Sociology"
+  },
+  {
+    "id": "ocr-h600",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H600",
+    "subject": "Art and Design",
+    "specName": "Art, Craft and Design"
+  },
+  {
+    "id": "ocr-h601",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H601",
+    "subject": "Art and Design",
+    "specName": "Fine Art"
+  },
+  {
+    "id": "ocr-h602",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H602",
+    "subject": "Art and Design",
+    "specName": "Graphic Communication"
+  },
+  {
+    "id": "ocr-h603",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H603",
+    "subject": "Art and Design",
+    "specName": "Photography"
+  },
+  {
+    "id": "ocr-h604",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H604",
+    "subject": "Art and Design",
+    "specName": "Textile Design"
+  },
+  {
+    "id": "ocr-h605",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H605",
+    "subject": "Art and Design",
+    "specName": "Three-Dimensional Design"
+  },
+  {
+    "id": "ocr-h606",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H606",
+    "subject": "Art and Design",
+    "specName": "Critical and Contextual Studies"
+  },
+  {
+    "id": "ocr-h640",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H640",
+    "subject": "Mathematics",
+    "specName": "Mathematics B (MEI)"
+  },
+  {
+    "id": "ocr-h645",
+    "qualification": "alevel",
+    "board": "OCR",
+    "spec": "H645",
+    "subject": "Further Mathematics",
+    "specName": "Further Mathematics B (MEI)"
   },
   {
     "id": "ocr-j250",

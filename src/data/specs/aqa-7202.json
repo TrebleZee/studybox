@@ -1,0 +1,182 @@
+{
+  "id": "aqa-7202",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7202",
+  "subject": "Art and Design",
+  "specName": "Fine art",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/art-and-design/specifications/AQA-ART-A-LEVEL-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7202-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t02",
+      "name": "Personal investigation: written material",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t05",
+      "name": "Drawing and painting",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t06",
+      "name": "Mixed-media, including collage and assemblage",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t07",
+      "name": "Sculpture",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t08",
+      "name": "Ceramics",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t09",
+      "name": "Installation",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t10",
+      "name": "Printmaking",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7202-t11",
+      "name": "Moving image and photography",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "drawing-and-painting",
+          "name": "Drawing and painting",
+          "topicIds": [
+            "aqa-7202-t05"
+          ]
+        },
+        {
+          "id": "mixed-media-including-collage-and-assemblage",
+          "name": "Mixed-media, including collage and assemblage",
+          "topicIds": [
+            "aqa-7202-t06"
+          ]
+        },
+        {
+          "id": "sculpture",
+          "name": "Sculpture",
+          "topicIds": [
+            "aqa-7202-t07"
+          ]
+        },
+        {
+          "id": "ceramics",
+          "name": "Ceramics",
+          "topicIds": [
+            "aqa-7202-t08"
+          ]
+        },
+        {
+          "id": "installation",
+          "name": "Installation",
+          "topicIds": [
+            "aqa-7202-t09"
+          ]
+        },
+        {
+          "id": "printmaking",
+          "name": "Printmaking",
+          "topicIds": [
+            "aqa-7202-t10"
+          ]
+        },
+        {
+          "id": "moving-image-and-photography",
+          "name": "Moving image and photography",
+          "topicIds": [
+            "aqa-7202-t11"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "aqa-7202-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "aqa-7202-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

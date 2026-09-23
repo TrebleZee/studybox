@@ -1,0 +1,230 @@
+{
+  "id": "aqa-7204",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7204",
+  "subject": "Art and Design",
+  "specName": "Textile design",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/art-and-design/specifications/AQA-ART-A-LEVEL-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7204-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t02",
+      "name": "Personal investigation: written material",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t05",
+      "name": "Fashion design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t06",
+      "name": "Fashion textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t07",
+      "name": "Costume design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t08",
+      "name": "Digital textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t09",
+      "name": "Printed and/or dyed fabric and materials",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t10",
+      "name": "Domestic textiles and wallpaper",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t11",
+      "name": "Interior design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t12",
+      "name": "Constructed textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t13",
+      "name": "Art textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7204-t14",
+      "name": "Installed textiles",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Area of study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "fashion-design",
+          "name": "Fashion design",
+          "topicIds": [
+            "aqa-7204-t05"
+          ]
+        },
+        {
+          "id": "fashion-textiles",
+          "name": "Fashion textiles",
+          "topicIds": [
+            "aqa-7204-t06"
+          ]
+        },
+        {
+          "id": "costume-design",
+          "name": "Costume design",
+          "topicIds": [
+            "aqa-7204-t07"
+          ]
+        },
+        {
+          "id": "digital-textiles",
+          "name": "Digital textiles",
+          "topicIds": [
+            "aqa-7204-t08"
+          ]
+        },
+        {
+          "id": "printed-and-or-dyed-fabric-and-materials",
+          "name": "Printed and/or dyed fabric and materials",
+          "topicIds": [
+            "aqa-7204-t09"
+          ]
+        },
+        {
+          "id": "domestic-textiles-and-wallpaper",
+          "name": "Domestic textiles and wallpaper",
+          "topicIds": [
+            "aqa-7204-t10"
+          ]
+        },
+        {
+          "id": "interior-design",
+          "name": "Interior design",
+          "topicIds": [
+            "aqa-7204-t11"
+          ]
+        },
+        {
+          "id": "constructed-textiles",
+          "name": "Constructed textiles",
+          "topicIds": [
+            "aqa-7204-t12"
+          ]
+        },
+        {
+          "id": "art-textiles",
+          "name": "Art textiles",
+          "topicIds": [
+            "aqa-7204-t13"
+          ]
+        },
+        {
+          "id": "installed-textiles",
+          "name": "Installed textiles",
+          "topicIds": [
+            "aqa-7204-t14"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "aqa-7204-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "aqa-7204-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

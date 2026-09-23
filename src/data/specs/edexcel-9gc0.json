@@ -1,0 +1,134 @@
+{
+  "id": "edexcel-9gc0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9GC0",
+  "subject": "Art and Design",
+  "specName": "Graphic Communication",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Art%20and%20Design/2015/specification-and-sample-assessment-materials/gce-a-level-art-and-design-specification-issue-4.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "c1",
+      "name": "Personal investigation"
+    },
+    {
+      "id": "c2",
+      "name": "Externally set assignment"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9gc0-t01",
+      "name": "Personal investigation: practical work",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9gc0-t02",
+      "name": "Personal investigation: personal study",
+      "paper": "c1",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9gc0-t03",
+      "name": "Externally set assignment: preparatory period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9gc0-t04",
+      "name": "Externally set assignment: 15-hour supervised period",
+      "paper": "c2",
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9gc0-t05",
+      "name": "Advertising",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9gc0-t06",
+      "name": "Illustration",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9gc0-t07",
+      "name": "Branding",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9gc0-t08",
+      "name": "Information design",
+      "paper": [
+        "c1",
+        "c2"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "areas",
+      "name": "Discipline",
+      "pick": 1,
+      "options": [
+        {
+          "id": "advertising",
+          "name": "Advertising",
+          "topicIds": [
+            "edexcel-9gc0-t05"
+          ]
+        },
+        {
+          "id": "illustration",
+          "name": "Illustration",
+          "topicIds": [
+            "edexcel-9gc0-t06"
+          ]
+        },
+        {
+          "id": "branding",
+          "name": "Branding",
+          "topicIds": [
+            "edexcel-9gc0-t07"
+          ]
+        },
+        {
+          "id": "information-design",
+          "name": "Information design",
+          "topicIds": [
+            "edexcel-9gc0-t08"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "edexcel-9gc0-m01",
+      "name": "Personal investigation",
+      "kind": "coursework"
+    },
+    {
+      "id": "edexcel-9gc0-m02",
+      "name": "Externally set assignment",
+      "kind": "other"
+    }
+  ]
+}

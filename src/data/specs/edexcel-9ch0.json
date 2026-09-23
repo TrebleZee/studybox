@@ -1,0 +1,211 @@
+{
+  "id": "edexcel-9ch0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9CH0",
+  "subject": "Chemistry",
+  "specName": "Chemistry",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/Chemistry/2015/Specification%20and%20sample%20assessments/a-level-chemistry-2015-specification.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Advanced Inorganic and Physical Chemistry"
+    },
+    {
+      "id": "p2",
+      "name": "Advanced Organic and Physical Chemistry"
+    },
+    {
+      "id": "p3",
+      "name": "General and Practical Principles in Chemistry"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9ch0-t01",
+      "name": "Atomic structure and the periodic table",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t02",
+      "name": "Bonding and structure",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t03",
+      "name": "Redox I",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t04",
+      "name": "Inorganic chemistry and the periodic table",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t05",
+      "name": "Formulae, equations and amounts of substance",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t06",
+      "name": "Organic chemistry I",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t07",
+      "name": "Modern analytical techniques I",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t08",
+      "name": "Energetics I",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t09",
+      "name": "Kinetics I",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t10",
+      "name": "Equilibrium I",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t11",
+      "name": "Equilibrium II",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t12",
+      "name": "Acid-base equilibria",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t13",
+      "name": "Energetics II",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t14",
+      "name": "Redox II",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t15",
+      "name": "Transition metals",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t16",
+      "name": "Kinetics II",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t17",
+      "name": "Organic chemistry II",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t18",
+      "name": "Organic chemistry III",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9ch0-t19",
+      "name": "Modern analytical techniques II",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "edexcel-9ch0-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

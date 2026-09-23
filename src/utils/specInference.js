@@ -287,6 +287,8 @@ export function inferSpecCode(text = "", fileName = "") {
 
       let score = 1;
       if (near || inAqaLink) score += 4;
+      // AQA prints its canonical code in the aqa.org.uk/<code> link.
+      if (inAqaLink) score += 3;
       if (inBrackets) score += 2;
       if (index < fileNameEnd) score += 5;
       else if (index < fileNameEnd + FIRST_PAGES) score += 3;
@@ -308,11 +310,61 @@ export function inferSpecCode(text = "", fileName = "") {
     ...candidate,
     score: candidate.score + (levelMatches(codeLevel(candidate), qualification) ? 2 : 0),
   }));
-  const best = candidates.sort(
+  const sorted = candidates.sort(
     (a, b) => b.score - a.score || aqaJointTieBreak(a, b, qualification) || a.first - b.first
-  )[0];
-  return best ? { board: best.board, spec: best.spec } : null;
+  );
+  const [best] = sorted;
+  if (!best) return null;
+  // One PDF can cover several specs equally (e.g. AQA's A-level Art and
+  // Design spec lists 7201–7206 everywhere). Report the other equal-scoring
+  // codes so the caller can ask which one the student takes.
+  const alternatives = new Set(
+    sorted
+      .slice(1)
+      .filter((candidate) => candidate.board === best.board && candidate.score === best.score)
+      .map((candidate) => candidate.spec)
+  );
+  // A cover can also give a range ("H600–H606", "7201–7206"): every code in a
+  // short range that includes the winner is an alternative too.
+  codeRange(haystack, best).forEach((code) => code !== best.spec && alternatives.add(code));
+  // ...or a bracketed list ("(7201, 7202, 7203, 7204, 7205, 7206)").
+  codeList(haystack, best).forEach((code) => code !== best.spec && alternatives.add(code));
+  return {
+    board: best.board,
+    spec: best.spec,
+    ...(alternatives.size ? { alternatives: [...alternatives] } : {}),
+  };
 }
+
+// Codes in any bracketed, comma-separated list of same-shape codes that
+// includes the given code.
+const codeList = (text, { spec }) => {
+  const shape = spec.replace(/[A-Z]/g, "[A-Z]").replace(/\d/g, "\\d");
+  const pattern = new RegExp(String.raw`\(\s*(${shape}(?:\s*,\s*${shape})+)\s*\)`, "g");
+  for (const match of text.matchAll(pattern)) {
+    const codes = match[1].split(/\s*,\s*/);
+    if (codes.includes(spec) && codes.length <= MAX_RANGE) return codes;
+  }
+  return [];
+};
+
+const MAX_RANGE = 10;
+
+// Codes in any "<code>–<code>" range (same prefix, at most MAX_RANGE long)
+// that contains the given code.
+const codeRange = (text, { spec }) => {
+  const [, prefix, digits] = spec.match(/^([A-Z]?)(\d+)$/) || [];
+  if (digits === undefined) return [];
+  const pattern = new RegExp(String.raw`\b${prefix}(\d{${digits.length}})\s*[–-]\s*${prefix}?(\d{${digits.length}})\b`, "g");
+  for (const match of text.matchAll(pattern)) {
+    const [from, to] = [Number(match[1]), Number(match[2])];
+    const value = Number(digits);
+    if (to > from && to - from < MAX_RANGE && value >= from && value <= to) {
+      return Array.from({ length: to - from + 1 }, (_, i) => `${prefix}${String(from + i).padStart(digits.length, "0")}`);
+    }
+  }
+  return [];
+};
 
 // The level a code's shape implies: "gcse", "as", "alevel", "advanced" (AQA
 // 7xxx, which is used for both AS and A-level) or null.

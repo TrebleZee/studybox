@@ -1,0 +1,813 @@
+{
+  "id": "ocr-h505",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H505",
+  "subject": "History",
+  "specName": "History A",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/170128-specification-accredited-a-level-gce-history-a-h505.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "British period study and enquiry"
+    },
+    {
+      "id": "p2",
+      "name": "Non-British period study"
+    },
+    {
+      "id": "p3",
+      "name": "Thematic study and historical interpretations"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h505-t01",
+      "name": "Alfred and the Making of England 871–1016",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t02",
+      "name": "Anglo-Saxon England and the Norman Conquest 1035–1107",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t03",
+      "name": "England 1199–1272",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t04",
+      "name": "England 1377–1455",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t05",
+      "name": "England 1445–1509: Lancastrians, Yorkists and Henry VII",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t06",
+      "name": "England 1485–1558: the Early Tudors",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t07",
+      "name": "England 1547–1603: the Later Tudors",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t08",
+      "name": "The Early Stuarts and the Origins of the Civil War 1603–1660",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t09",
+      "name": "The Making of Georgian Britain 1678–c.1760",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t10",
+      "name": "From Pitt to Peel: Britain 1783–1853",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t11",
+      "name": "Liberals, Conservatives and the Rise of Labour 1846–1918",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t12",
+      "name": "Britain 1900–1951",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t13",
+      "name": "Britain 1930–1997",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t14",
+      "name": "The Rise of Islam c.550–750",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t15",
+      "name": "Charlemagne 768–814",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t16",
+      "name": "The Crusades and the Crusader States 1095–1192",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t17",
+      "name": "Genghis Khan and the Explosion from the Steppes c.1167–1405",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t18",
+      "name": "Exploration, Encounters and Empire 1445–1570",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t19",
+      "name": "Spain 1469–1556",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t20",
+      "name": "The German Reformation and the rule of Charles V 1500–1559",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t21",
+      "name": "Philip II 1556–1598",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t22",
+      "name": "African Kingdoms c.1400–c.1800: four case studies",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t23",
+      "name": "Russia 1645–1741",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t24",
+      "name": "The Rise and Decline of the Mughal Empire in India 1526–1739",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t25",
+      "name": "The American Revolution 1740–1796",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t26",
+      "name": "The French Revolution and the rule of Napoleon 1774–1815",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t27",
+      "name": "France 1814–1870",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t28",
+      "name": "Italy and Unification 1789–1896",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t29",
+      "name": "The USA in the 19th Century: Westward expansion and Civil War 1803–c.1890",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t30",
+      "name": "Japan 1853–1937",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t31",
+      "name": "International Relations 1890–1941",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t32",
+      "name": "Russia 1894–1941",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t33",
+      "name": "Italy 1896–1943",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t34",
+      "name": "Democracy and Dictatorships in Germany 1919–1963",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t35",
+      "name": "The Cold War in Asia 1945–1993",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t36",
+      "name": "The Cold War in Europe 1941–1995",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t37",
+      "name": "Apartheid and Reconciliation: South African Politics 1948–1999",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t38",
+      "name": "The Early Anglo-Saxons c.400–800",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t39",
+      "name": "The Viking Age c.790–1066",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t40",
+      "name": "English Government and the Church 1066–1216",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t41",
+      "name": "The Church and Medieval Heresy c.1100–1437",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t42",
+      "name": "The Renaissance c.1400–c.1600",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t43",
+      "name": "Rebellion and Disorder under the Tudors 1485–1603",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t44",
+      "name": "Tudor Foreign Policy 1485–1603",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t45",
+      "name": "The Catholic Reformation 1492–1610",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t46",
+      "name": "The Ascendancy of the Ottoman Empire 1453–1606",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t47",
+      "name": "The Development of the Nation State: France 1498–1610",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t48",
+      "name": "The Origins and Growth of the British Empire 1558–1783",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t49",
+      "name": "Popular Culture and the Witchcraze of the 16th and 17th Centuries",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t50",
+      "name": "The Ascendancy of France 1610–1715",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t51",
+      "name": "The Challenge of German Nationalism 1789–1919",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t52",
+      "name": "The Changing Nature of Warfare 1792–1945",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t53",
+      "name": "Britain and Ireland 1791–1921",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t54",
+      "name": "China and its Rulers 1839–1989",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t55",
+      "name": "Russia and its Rulers 1855–1964",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t56",
+      "name": "Civil Rights in the USA 1865–1992",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t57",
+      "name": "From Colonialism to Independence: The British Empire 1857–1965",
+      "paper": "p3",
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h505-t58",
+      "name": "The Middle East 1908–2011: Ottomans to Arab Spring",
+      "paper": "p3",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "british",
+      "name": "British period study and enquiry",
+      "pick": 1,
+      "options": [
+        {
+          "id": "y101",
+          "name": "Alfred and the Making of England 871–1016",
+          "topicIds": [
+            "ocr-h505-t01"
+          ]
+        },
+        {
+          "id": "y102",
+          "name": "Anglo-Saxon England and the Norman Conquest 1035–1107",
+          "topicIds": [
+            "ocr-h505-t02"
+          ]
+        },
+        {
+          "id": "y103",
+          "name": "England 1199–1272",
+          "topicIds": [
+            "ocr-h505-t03"
+          ]
+        },
+        {
+          "id": "y104",
+          "name": "England 1377–1455",
+          "topicIds": [
+            "ocr-h505-t04"
+          ]
+        },
+        {
+          "id": "y105",
+          "name": "England 1445–1509: Lancastrians, Yorkists and Henry VII",
+          "topicIds": [
+            "ocr-h505-t05"
+          ]
+        },
+        {
+          "id": "y106",
+          "name": "England 1485–1558: the Early Tudors",
+          "topicIds": [
+            "ocr-h505-t06"
+          ]
+        },
+        {
+          "id": "y107",
+          "name": "England 1547–1603: the Later Tudors",
+          "topicIds": [
+            "ocr-h505-t07"
+          ]
+        },
+        {
+          "id": "y108",
+          "name": "The Early Stuarts and the Origins of the Civil War 1603–1660",
+          "topicIds": [
+            "ocr-h505-t08"
+          ]
+        },
+        {
+          "id": "y109",
+          "name": "The Making of Georgian Britain 1678–c.1760",
+          "topicIds": [
+            "ocr-h505-t09"
+          ]
+        },
+        {
+          "id": "y110",
+          "name": "From Pitt to Peel: Britain 1783–1853",
+          "topicIds": [
+            "ocr-h505-t10"
+          ]
+        },
+        {
+          "id": "y111",
+          "name": "Liberals, Conservatives and the Rise of Labour 1846–1918",
+          "topicIds": [
+            "ocr-h505-t11"
+          ]
+        },
+        {
+          "id": "y112",
+          "name": "Britain 1900–1951",
+          "topicIds": [
+            "ocr-h505-t12"
+          ]
+        },
+        {
+          "id": "y113",
+          "name": "Britain 1930–1997",
+          "topicIds": [
+            "ocr-h505-t13"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "non-british",
+      "name": "Non-British period study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "y201",
+          "name": "The Rise of Islam c.550–750",
+          "topicIds": [
+            "ocr-h505-t14"
+          ]
+        },
+        {
+          "id": "y202",
+          "name": "Charlemagne 768–814",
+          "topicIds": [
+            "ocr-h505-t15"
+          ]
+        },
+        {
+          "id": "y203",
+          "name": "The Crusades and the Crusader States 1095–1192",
+          "topicIds": [
+            "ocr-h505-t16"
+          ]
+        },
+        {
+          "id": "y204",
+          "name": "Genghis Khan and the Explosion from the Steppes c.1167–1405",
+          "topicIds": [
+            "ocr-h505-t17"
+          ]
+        },
+        {
+          "id": "y205",
+          "name": "Exploration, Encounters and Empire 1445–1570",
+          "topicIds": [
+            "ocr-h505-t18"
+          ]
+        },
+        {
+          "id": "y206",
+          "name": "Spain 1469–1556",
+          "topicIds": [
+            "ocr-h505-t19"
+          ]
+        },
+        {
+          "id": "y207",
+          "name": "The German Reformation and the rule of Charles V 1500–1559",
+          "topicIds": [
+            "ocr-h505-t20"
+          ]
+        },
+        {
+          "id": "y208",
+          "name": "Philip II 1556–1598",
+          "topicIds": [
+            "ocr-h505-t21"
+          ]
+        },
+        {
+          "id": "y209",
+          "name": "African Kingdoms c.1400–c.1800: four case studies",
+          "topicIds": [
+            "ocr-h505-t22"
+          ]
+        },
+        {
+          "id": "y210",
+          "name": "Russia 1645–1741",
+          "topicIds": [
+            "ocr-h505-t23"
+          ]
+        },
+        {
+          "id": "y211",
+          "name": "The Rise and Decline of the Mughal Empire in India 1526–1739",
+          "topicIds": [
+            "ocr-h505-t24"
+          ]
+        },
+        {
+          "id": "y212",
+          "name": "The American Revolution 1740–1796",
+          "topicIds": [
+            "ocr-h505-t25"
+          ]
+        },
+        {
+          "id": "y213",
+          "name": "The French Revolution and the rule of Napoleon 1774–1815",
+          "topicIds": [
+            "ocr-h505-t26"
+          ]
+        },
+        {
+          "id": "y214",
+          "name": "France 1814–1870",
+          "topicIds": [
+            "ocr-h505-t27"
+          ]
+        },
+        {
+          "id": "y215",
+          "name": "Italy and Unification 1789–1896",
+          "topicIds": [
+            "ocr-h505-t28"
+          ]
+        },
+        {
+          "id": "y216",
+          "name": "The USA in the 19th Century: Westward expansion and Civil War 1803–c.1890",
+          "topicIds": [
+            "ocr-h505-t29"
+          ]
+        },
+        {
+          "id": "y217",
+          "name": "Japan 1853–1937",
+          "topicIds": [
+            "ocr-h505-t30"
+          ]
+        },
+        {
+          "id": "y218",
+          "name": "International Relations 1890–1941",
+          "topicIds": [
+            "ocr-h505-t31"
+          ]
+        },
+        {
+          "id": "y219",
+          "name": "Russia 1894–1941",
+          "topicIds": [
+            "ocr-h505-t32"
+          ]
+        },
+        {
+          "id": "y220",
+          "name": "Italy 1896–1943",
+          "topicIds": [
+            "ocr-h505-t33"
+          ]
+        },
+        {
+          "id": "y221",
+          "name": "Democracy and Dictatorships in Germany 1919–1963",
+          "topicIds": [
+            "ocr-h505-t34"
+          ]
+        },
+        {
+          "id": "y222",
+          "name": "The Cold War in Asia 1945–1993",
+          "topicIds": [
+            "ocr-h505-t35"
+          ]
+        },
+        {
+          "id": "y223",
+          "name": "The Cold War in Europe 1941–1995",
+          "topicIds": [
+            "ocr-h505-t36"
+          ]
+        },
+        {
+          "id": "y224",
+          "name": "Apartheid and Reconciliation: South African Politics 1948–1999",
+          "topicIds": [
+            "ocr-h505-t37"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "thematic",
+      "name": "Thematic study and historical interpretations",
+      "pick": 1,
+      "options": [
+        {
+          "id": "y301",
+          "name": "The Early Anglo-Saxons c.400–800",
+          "topicIds": [
+            "ocr-h505-t38"
+          ]
+        },
+        {
+          "id": "y302",
+          "name": "The Viking Age c.790–1066",
+          "topicIds": [
+            "ocr-h505-t39"
+          ]
+        },
+        {
+          "id": "y303",
+          "name": "English Government and the Church 1066–1216",
+          "topicIds": [
+            "ocr-h505-t40"
+          ]
+        },
+        {
+          "id": "y304",
+          "name": "The Church and Medieval Heresy c.1100–1437",
+          "topicIds": [
+            "ocr-h505-t41"
+          ]
+        },
+        {
+          "id": "y305",
+          "name": "The Renaissance c.1400–c.1600",
+          "topicIds": [
+            "ocr-h505-t42"
+          ]
+        },
+        {
+          "id": "y306",
+          "name": "Rebellion and Disorder under the Tudors 1485–1603",
+          "topicIds": [
+            "ocr-h505-t43"
+          ]
+        },
+        {
+          "id": "y307",
+          "name": "Tudor Foreign Policy 1485–1603",
+          "topicIds": [
+            "ocr-h505-t44"
+          ]
+        },
+        {
+          "id": "y308",
+          "name": "The Catholic Reformation 1492–1610",
+          "topicIds": [
+            "ocr-h505-t45"
+          ]
+        },
+        {
+          "id": "y309",
+          "name": "The Ascendancy of the Ottoman Empire 1453–1606",
+          "topicIds": [
+            "ocr-h505-t46"
+          ]
+        },
+        {
+          "id": "y310",
+          "name": "The Development of the Nation State: France 1498–1610",
+          "topicIds": [
+            "ocr-h505-t47"
+          ]
+        },
+        {
+          "id": "y311",
+          "name": "The Origins and Growth of the British Empire 1558–1783",
+          "topicIds": [
+            "ocr-h505-t48"
+          ]
+        },
+        {
+          "id": "y312",
+          "name": "Popular Culture and the Witchcraze of the 16th and 17th Centuries",
+          "topicIds": [
+            "ocr-h505-t49"
+          ]
+        },
+        {
+          "id": "y313",
+          "name": "The Ascendancy of France 1610–1715",
+          "topicIds": [
+            "ocr-h505-t50"
+          ]
+        },
+        {
+          "id": "y314",
+          "name": "The Challenge of German Nationalism 1789–1919",
+          "topicIds": [
+            "ocr-h505-t51"
+          ]
+        },
+        {
+          "id": "y315",
+          "name": "The Changing Nature of Warfare 1792–1945",
+          "topicIds": [
+            "ocr-h505-t52"
+          ]
+        },
+        {
+          "id": "y316",
+          "name": "Britain and Ireland 1791–1921",
+          "topicIds": [
+            "ocr-h505-t53"
+          ]
+        },
+        {
+          "id": "y317",
+          "name": "China and its Rulers 1839–1989",
+          "topicIds": [
+            "ocr-h505-t54"
+          ]
+        },
+        {
+          "id": "y318",
+          "name": "Russia and its Rulers 1855–1964",
+          "topicIds": [
+            "ocr-h505-t55"
+          ]
+        },
+        {
+          "id": "y319",
+          "name": "Civil Rights in the USA 1865–1992",
+          "topicIds": [
+            "ocr-h505-t56"
+          ]
+        },
+        {
+          "id": "y320",
+          "name": "From Colonialism to Independence: The British Empire 1857–1965",
+          "topicIds": [
+            "ocr-h505-t57"
+          ]
+        },
+        {
+          "id": "y321",
+          "name": "The Middle East 1908–2011: Ottomans to Arab Spring",
+          "topicIds": [
+            "ocr-h505-t58"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "ocr-h505-m01",
+      "name": "Topic based essay (NEA)",
+      "kind": "nea"
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "id": "edexcel-9bi0",
+  "qualification": "alevel",
+  "board": "Edexcel",
+  "spec": "9BI0",
+  "subject": "Biology",
+  "specName": "Biology B",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://qualifications.pearson.com/content/dam/pdf/A%20Level/biology-b/2015/specification-and-sample-assessment-materials/9781446930892-gce2015-a-biob-spec.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Advanced Biochemistry, Microbiology and Genetics"
+    },
+    {
+      "id": "p2",
+      "name": "Advanced Physiology, Evolution and Ecology"
+    },
+    {
+      "id": "p3",
+      "name": "General and Practical Principles in Biology"
+    }
+  ],
+  "topics": [
+    {
+      "id": "edexcel-9bi0-t01",
+      "name": "Biological molecules",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bi0-t02",
+      "name": "Cells, viruses and reproduction of living things",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bi0-t03",
+      "name": "Classification and biodiversity",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bi0-t04",
+      "name": "Exchange and transport",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bi0-t05",
+      "name": "Energy for biological processes",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bi0-t06",
+      "name": "Microbiology and pathogens",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bi0-t07",
+      "name": "Modern genetics",
+      "paper": [
+        "p1",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bi0-t08",
+      "name": "Origins of genetic variation",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bi0-t09",
+      "name": "Control systems",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "edexcel-9bi0-t10",
+      "name": "Ecosystems",
+      "paper": [
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "edexcel-9bi0-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}

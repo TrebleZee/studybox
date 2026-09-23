@@ -1,0 +1,438 @@
+{
+  "id": "aqa-7042",
+  "qualification": "alevel",
+  "board": "AQA",
+  "spec": "7042",
+  "subject": "History",
+  "specName": "History",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://filestore.aqa.org.uk/resources/history/specifications/AQA-7041-7042-SP-2015.PDF",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Breadth study"
+    },
+    {
+      "id": "p2",
+      "name": "Depth study"
+    }
+  ],
+  "topics": [
+    {
+      "id": "aqa-7042-t01",
+      "name": "The Age of the Crusades, c1071–1204",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t02",
+      "name": "Spain in the Age of Discovery, 1469–1598",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t03",
+      "name": "The Tudors: England, 1485–1603",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t04",
+      "name": "Stuart Britain and the Crisis of Monarchy, 1603–1702",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t05",
+      "name": "Russia in the Age of Absolutism and Enlightenment, 1682–1796",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t06",
+      "name": "Industrialisation and the people: Britain, c1783–1885",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t07",
+      "name": "Challenge and transformation: Britain, c1851–1964",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t08",
+      "name": "Tsarist and Communist Russia, 1855–1964",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t09",
+      "name": "The British Empire, c1857–1967",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t10",
+      "name": "The making of a Superpower: USA, 1865–1975",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t11",
+      "name": "The quest for political stability: Germany, 1871–1991",
+      "paper": "p1",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t12",
+      "name": "Royal Authority and the Angevin Kings, 1154–1216",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t13",
+      "name": "The Wars of the Roses, 1450–1499",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t14",
+      "name": "The Reformation in Europe, c1500–1564",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t15",
+      "name": "Religious conflict and the Church in England, c1529–c1570",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t16",
+      "name": "The English Revolution, 1625–1660",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t17",
+      "name": "The Sun King: Louis XIV, France and Europe, 1643–1715",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t18",
+      "name": "The Birth of the USA, 1760–1801",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t19",
+      "name": "France in Revolution, 1774–1815",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t20",
+      "name": "America: A Nation Divided, c1845–1877",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t21",
+      "name": "International Relations and Global Conflict, c1890–1941",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t22",
+      "name": "Italy and Fascism, c1900–1945",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t23",
+      "name": "Wars and Welfare: Britain in Transition, 1906–1957",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t24",
+      "name": "Revolution and dictatorship: Russia, 1917–1953",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t25",
+      "name": "Democracy and Nazism: Germany, 1918–1945",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t26",
+      "name": "The Transformation of China, 1936–1997",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t27",
+      "name": "The American Dream: reality and illusion, 1945–1980",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t28",
+      "name": "The Cold War, c1945–1991",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t29",
+      "name": "The Making of Modern Britain, 1951–2007",
+      "paper": "p2",
+      "higherOnly": false
+    },
+    {
+      "id": "aqa-7042-t30",
+      "name": "The Crisis of Communism: The USSR and the Soviet Empire, 1953–2000",
+      "paper": "p2",
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [
+    {
+      "id": "breadth",
+      "name": "Breadth study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "1a",
+          "name": "The Age of the Crusades, c1071–1204",
+          "topicIds": [
+            "aqa-7042-t01"
+          ]
+        },
+        {
+          "id": "1b",
+          "name": "Spain in the Age of Discovery, 1469–1598",
+          "topicIds": [
+            "aqa-7042-t02"
+          ]
+        },
+        {
+          "id": "1c",
+          "name": "The Tudors: England, 1485–1603",
+          "topicIds": [
+            "aqa-7042-t03"
+          ]
+        },
+        {
+          "id": "1d",
+          "name": "Stuart Britain and the Crisis of Monarchy, 1603–1702",
+          "topicIds": [
+            "aqa-7042-t04"
+          ]
+        },
+        {
+          "id": "1e",
+          "name": "Russia in the Age of Absolutism and Enlightenment, 1682–1796",
+          "topicIds": [
+            "aqa-7042-t05"
+          ]
+        },
+        {
+          "id": "1f",
+          "name": "Industrialisation and the people: Britain, c1783–1885",
+          "topicIds": [
+            "aqa-7042-t06"
+          ]
+        },
+        {
+          "id": "1g",
+          "name": "Challenge and transformation: Britain, c1851–1964",
+          "topicIds": [
+            "aqa-7042-t07"
+          ]
+        },
+        {
+          "id": "1h",
+          "name": "Tsarist and Communist Russia, 1855–1964",
+          "topicIds": [
+            "aqa-7042-t08"
+          ]
+        },
+        {
+          "id": "1j",
+          "name": "The British Empire, c1857–1967",
+          "topicIds": [
+            "aqa-7042-t09"
+          ]
+        },
+        {
+          "id": "1k",
+          "name": "The making of a Superpower: USA, 1865–1975",
+          "topicIds": [
+            "aqa-7042-t10"
+          ]
+        },
+        {
+          "id": "1l",
+          "name": "The quest for political stability: Germany, 1871–1991",
+          "topicIds": [
+            "aqa-7042-t11"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "depth",
+      "name": "Depth study",
+      "pick": 1,
+      "options": [
+        {
+          "id": "2a",
+          "name": "Royal Authority and the Angevin Kings, 1154–1216",
+          "topicIds": [
+            "aqa-7042-t12"
+          ]
+        },
+        {
+          "id": "2b",
+          "name": "The Wars of the Roses, 1450–1499",
+          "topicIds": [
+            "aqa-7042-t13"
+          ]
+        },
+        {
+          "id": "2c",
+          "name": "The Reformation in Europe, c1500–1564",
+          "topicIds": [
+            "aqa-7042-t14"
+          ]
+        },
+        {
+          "id": "2d",
+          "name": "Religious conflict and the Church in England, c1529–c1570",
+          "topicIds": [
+            "aqa-7042-t15"
+          ]
+        },
+        {
+          "id": "2e",
+          "name": "The English Revolution, 1625–1660",
+          "topicIds": [
+            "aqa-7042-t16"
+          ]
+        },
+        {
+          "id": "2f",
+          "name": "The Sun King: Louis XIV, France and Europe, 1643–1715",
+          "topicIds": [
+            "aqa-7042-t17"
+          ]
+        },
+        {
+          "id": "2g",
+          "name": "The Birth of the USA, 1760–1801",
+          "topicIds": [
+            "aqa-7042-t18"
+          ]
+        },
+        {
+          "id": "2h",
+          "name": "France in Revolution, 1774–1815",
+          "topicIds": [
+            "aqa-7042-t19"
+          ]
+        },
+        {
+          "id": "2j",
+          "name": "America: A Nation Divided, c1845–1877",
+          "topicIds": [
+            "aqa-7042-t20"
+          ]
+        },
+        {
+          "id": "2k",
+          "name": "International Relations and Global Conflict, c1890–1941",
+          "topicIds": [
+            "aqa-7042-t21"
+          ]
+        },
+        {
+          "id": "2l",
+          "name": "Italy and Fascism, c1900–1945",
+          "topicIds": [
+            "aqa-7042-t22"
+          ]
+        },
+        {
+          "id": "2m",
+          "name": "Wars and Welfare: Britain in Transition, 1906–1957",
+          "topicIds": [
+            "aqa-7042-t23"
+          ]
+        },
+        {
+          "id": "2n",
+          "name": "Revolution and dictatorship: Russia, 1917–1953",
+          "topicIds": [
+            "aqa-7042-t24"
+          ]
+        },
+        {
+          "id": "2o",
+          "name": "Democracy and Nazism: Germany, 1918–1945",
+          "topicIds": [
+            "aqa-7042-t25"
+          ]
+        },
+        {
+          "id": "2p",
+          "name": "The Transformation of China, 1936–1997",
+          "topicIds": [
+            "aqa-7042-t26"
+          ]
+        },
+        {
+          "id": "2q",
+          "name": "The American Dream: reality and illusion, 1945–1980",
+          "topicIds": [
+            "aqa-7042-t27"
+          ]
+        },
+        {
+          "id": "2r",
+          "name": "The Cold War, c1945–1991",
+          "topicIds": [
+            "aqa-7042-t28"
+          ]
+        },
+        {
+          "id": "2s",
+          "name": "The Making of Modern Britain, 1951–2007",
+          "topicIds": [
+            "aqa-7042-t29"
+          ]
+        },
+        {
+          "id": "2t",
+          "name": "The Crisis of Communism: The USSR and the Soviet Empire, 1953–2000",
+          "topicIds": [
+            "aqa-7042-t30"
+          ]
+        }
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "id": "aqa-7042-m01",
+      "name": "Historical investigation (NEA)",
+      "kind": "nea"
+    }
+  ]
+}

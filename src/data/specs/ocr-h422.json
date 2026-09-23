@@ -1,0 +1,367 @@
+{
+  "id": "ocr-h422",
+  "qualification": "alevel",
+  "board": "OCR",
+  "spec": "H422",
+  "subject": "Biology",
+  "specName": "Biology B (Advancing Biology)",
+  "specVersion": "2015",
+  "firstExam": 2017,
+  "lastExam": null,
+  "specUrl": "https://www.ocr.org.uk/Images/171714-specification-accredited-a-level-biology-b-advancing-biology-h422.pdf",
+  "tiers": null,
+  "papers": [
+    {
+      "id": "p1",
+      "name": "Fundamentals of biology"
+    },
+    {
+      "id": "p2",
+      "name": "Scientific literacy in biology"
+    },
+    {
+      "id": "p3",
+      "name": "Practical skills in biology"
+    }
+  ],
+  "topics": [
+    {
+      "id": "ocr-h422-t01",
+      "name": "Practical skills assessed in a written exam",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t02",
+      "name": "Cells and microscopy",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t03",
+      "name": "Water and its importance in plants and animals",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t04",
+      "name": "Proteins and enzymes",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t05",
+      "name": "Nucleic acids",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t06",
+      "name": "The heart and monitoring heart function",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t07",
+      "name": "Transport systems in mammals",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t08",
+      "name": "Gas exchange in mammals and plants",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t09",
+      "name": "Transport systems in plants",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t10",
+      "name": "The developing cell: cell division and differentiation",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t11",
+      "name": "The developing individual: meiosis, growth and development",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t12",
+      "name": "The development of species: evolution and classification",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t13",
+      "name": "Pathogenic microorganisms",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t14",
+      "name": "The immune system",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t15",
+      "name": "Controlling communicable diseases",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t16",
+      "name": "The cellular basis of cancer and treatment",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t17",
+      "name": "Respiratory diseases and treatment",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t18",
+      "name": "Cellular respiration",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t19",
+      "name": "Metabolism and exercise",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t20",
+      "name": "Fertility and assisted reproduction",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t21",
+      "name": "The effects of ageing on the reproductive system",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t22",
+      "name": "Photosynthesis, food production and managing the environment",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t23",
+      "name": "The impact of population increase",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t24",
+      "name": "Plant reproduction",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t25",
+      "name": "Patterns of inheritance",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t26",
+      "name": "Population genetics and epigenetics",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t27",
+      "name": "Gene technologies",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t28",
+      "name": "The nervous system and the effects of damage",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t29",
+      "name": "Monitoring visual function",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t30",
+      "name": "The effect of ageing on the nervous system",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t31",
+      "name": "The principles and importance of homeostasis",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t32",
+      "name": "Hormonal control of blood glucose and managing diabetes",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    },
+    {
+      "id": "ocr-h422-t33",
+      "name": "Kidney functions and malfunctions",
+      "paper": [
+        "p1",
+        "p2",
+        "p3"
+      ],
+      "higherOnly": false
+    }
+  ],
+  "optionGroups": [],
+  "milestones": [
+    {
+      "id": "ocr-h422-m01",
+      "name": "Practical endorsement",
+      "kind": "practical"
+    }
+  ]
+}
