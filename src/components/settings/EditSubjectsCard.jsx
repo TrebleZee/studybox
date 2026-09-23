@@ -1,3 +1,4 @@
+import PaperDatesFields from "./PaperDatesFields.jsx";
 import SubjectMetaFields from "./SubjectMetaFields.jsx";
 
 export default function EditSubjectsCard({ C, subjects, onUpdateSubject, onRemoveSubject }) {
@@ -73,6 +74,11 @@ export default function EditSubjectsCard({ C, subjects, onUpdateSubject, onRemov
                   C={C}
                   value={subject}
                   labelSuffix={subject.id}
+                  onChange={(patch) => onUpdateSubject(subject.id, patch)}
+                />
+                <PaperDatesFields
+                  C={C}
+                  subject={subject}
                   onChange={(patch) => onUpdateSubject(subject.id, patch)}
                 />
               </div>

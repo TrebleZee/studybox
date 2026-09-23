@@ -1,4 +1,5 @@
 import specIndex from "../data/specs/index.json";
+import { PUBLISHED_EXAM_YEAR } from "./pacing.js";
 import {
   BOARDS,
   MILESTONE_KINDS,
@@ -153,6 +154,15 @@ const matchesQuery = (entry, query) => {
 // Searches the lightweight index. Filters: qualification, board, query
 // (every word must appear in board/spec/subject/specName) and
 // includeDeprecated (off by default).
+// Summer series a student could sit a spec in: three years from the
+// published timetable's year (or the spec's first exam, if later), stopping
+// at its last exam. The first is the picker's default.
+export const examYearChoices = (spec, from = PUBLISHED_EXAM_YEAR) => {
+  const first = Math.max(from, spec?.firstExam || from);
+  const last = spec?.lastExam || Infinity;
+  return [first, first + 1, first + 2].filter((year) => year <= last);
+};
+
 export const listSpecs = (filters = {}, index = specIndex) =>
   index.filter(
     (entry) =>
@@ -218,7 +228,7 @@ export const loadSpec = async (id) => {
 // Builds a normalized subject from a catalogue spec. Topics that belong to an
 // option are only included when that option is picked. Every seeded topic
 // keeps its catalogueTopicId so a later "reset to spec" can match it up.
-export const subjectFromSpec = (spec, { tier = null, optionIds = [], color, id } = {}) => {
+export const subjectFromSpec = (spec, { tier = null, optionIds = [], color, id, examYear = null } = {}) => {
   const picked = new Set(optionIds);
   const optionTopicIds = new Set();
   const pickedTopicIds = new Set();
@@ -253,6 +263,7 @@ export const subjectFromSpec = (spec, { tier = null, optionIds = [], color, id }
     specName: spec.specName,
     tier: spec.tiers?.includes(tier) ? tier : null,
     color,
+    examYear,
     papers: spec.papers.map(({ id: paperId, name }) => ({ id: paperId, name })),
     // Seeded undated and not done; the student adds their own due dates.
     milestones: (spec.milestones || []).map((milestone, index) => ({

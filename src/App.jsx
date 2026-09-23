@@ -476,7 +476,7 @@ export default function StudyBox() {
         />
       ) : (
         <>
-          <TopBar C={C} view={view} onChangeView={setView} game={game} grandTotal={grandTotal} />
+          <TopBar C={C} view={view} onChangeView={setView} game={game} grandTotal={grandTotal} subjects={subjects} />
 
           {view === "planner" && (
             <PlannerView

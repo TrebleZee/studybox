@@ -311,9 +311,16 @@ const normalizePapers = (papers) => {
     .map((paper) => ({
       id: paper.id,
       name: isNonEmptyString(paper.name) ? paper.name : paper.id,
+      // The user's own exam date for this paper; it overrides the published
+      // timetable (see pacing.js). Kept only when it is a real calendar day.
+      ...(isIsoDate(paper.examDate) ? { examDate: paper.examDate } : {}),
     }));
   return valid.length ? valid : null;
 };
+
+// The summer exam series a subject is sat in (e.g. 2027), when the student
+// has said. Optional: published exam dates only apply once it's set.
+export const isExamYear = (value) => Number.isInteger(value) && value >= 2000 && value <= 2100;
 
 // A calendar date as stored for milestones: "YYYY-MM-DD" that is a real day.
 export const isIsoDate = (value) => {
@@ -382,6 +389,7 @@ export const normalizeSubject = (subject, index = 0) => {
     ...subjectMetadata(subject, preset),
     color: subject?.color || preset?.color || "#4F9CF9",
     ...(papers ? { papers } : {}),
+    ...(isExamYear(subject?.examYear) ? { examYear: subject.examYear } : {}),
     ...(milestones ? { milestones } : {}),
     topics: sourceTopics.map((topic, topicIndex) => ({
       id: topic?.id || `${subject?.id || "sub"}-${topicIndex}`,

@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  examYearChoices,
   groupSpecsBySubject,
   listSpecs,
   loadSpec,
   specAlreadyAdded,
   subjectFromSpec,
 } from "../utils/catalogue.js";
+import { PUBLISHED_EXAM_YEAR } from "../utils/pacing.js";
 import { pickColor } from "../utils/palette.js";
 import { QUALIFICATION_LABELS, subjectLabel, TIER_LABELS } from "../utils/subjects.js";
 
@@ -53,6 +55,7 @@ export default function SubjectPicker({ C, existingSubjects = [], mode = "single
   const [spec, setSpec] = useState(null);
   const [loadError, setLoadError] = useState("");
   const [tier, setTier] = useState("");
+  const [examYear, setExamYear] = useState(""); // "" = not sure yet
   const [optionIds, setOptionIds] = useState({}); // groupId -> [optionId]
   const [chosen, setChosen] = useState([]); // multi mode: subjects picked so far
   const headingRef = useRef(null);
@@ -92,6 +95,7 @@ export default function SubjectPicker({ C, existingSubjects = [], mode = "single
       if (!loaded) throw new Error("missing");
       setSpec(loaded);
       setTier("");
+      setExamYear(String(examYearChoices(loaded)[0] ?? ""));
       setOptionIds({});
       setStep("details");
     } catch {
@@ -130,6 +134,7 @@ export default function SubjectPicker({ C, existingSubjects = [], mode = "single
   const buildSubject = () =>
     subjectFromSpec(spec, {
       tier: tier || null,
+      examYear: examYear ? Number(examYear) : null,
       optionIds: Object.values(optionIds).flat(),
       color: pickColor(taken.map((subject) => subject.color)),
     });
@@ -322,6 +327,25 @@ export default function SubjectPicker({ C, existingSubjects = [], mode = "single
             </div>
           </fieldset>
         )}
+        <label style={{ display: "block", fontSize: "12px", margin: "0 0 10px" }}>
+          When do you sit the exams?{" "}
+          <select
+            value={examYear}
+            onChange={(e) => setExamYear(e.target.value)}
+            style={{ fontSize: "12px", marginLeft: "4px" }}
+          >
+            {examYearChoices(spec).map((year) => (
+              <option key={year} value={String(year)}>
+                Summer {year}
+              </option>
+            ))}
+            <option value="">Not sure yet</option>
+          </select>
+          <span style={{ display: "block", color: C.muted, fontSize: "11px", marginTop: "2px" }}>
+            Exam dates and pacing use the published timetable for summer {PUBLISHED_EXAM_YEAR}; you can change this
+            or set your own dates in Settings.
+          </span>
+        </label>
         {spec.optionGroups.map((optionGroup) => {
           const selected = optionIds[optionGroup.id] || [];
           return (
