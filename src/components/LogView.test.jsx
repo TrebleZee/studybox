@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderApp } from "../test/helpers.jsx";
 
@@ -50,6 +50,43 @@ describe("Log view", () => {
 
     expect(screen.getByText("No sessions yet.")).toBeTruthy();
     expect(JSON.parse(localStorage.getItem("sb-sessions"))).toEqual([]);
+  });
+
+  describe("Asana in By Subject", () => {
+    const asanaSession = {
+      id: 1,
+      subjectId: "asana",
+      subjectName: "Asana Tasks",
+      subjectColor: "#F06A6A",
+      duration: 5400,
+      date: "2026-06-19T09:00:00.000Z",
+      note: "",
+      tags: [],
+    };
+    const bySubject = () => screen.getByText("By Subject").nextElementSibling;
+
+    it("lists Asana tasks when Asana is enabled", () => {
+      localStorage.setItem("sb-asana", JSON.stringify({ enabled: true }));
+      renderApp();
+      fireEvent.click(screen.getByRole("button", { name: "Log" }));
+      expect(within(bySubject()).getByText("Asana Tasks")).toBeTruthy();
+    });
+
+    it("hides Asana tasks when disabled and nothing was logged against them", () => {
+      localStorage.setItem("sb-asana", JSON.stringify({ enabled: false }));
+      renderApp();
+      fireEvent.click(screen.getByRole("button", { name: "Log" }));
+      expect(within(bySubject()).queryByText("Asana Tasks")).toBeNull();
+    });
+
+    it("keeps Asana time visible after Asana is disabled", () => {
+      localStorage.setItem("sb-asana", JSON.stringify({ enabled: false }));
+      localStorage.setItem("sb-sessions", JSON.stringify([asanaSession]));
+      renderApp();
+      fireEvent.click(screen.getByRole("button", { name: "Log" }));
+      expect(within(bySubject()).getByText("Asana Tasks")).toBeTruthy();
+      expect(within(bySubject()).getByText("1h 30m")).toBeTruthy();
+    });
   });
 
   it("does not toggle the timer with space while the edit dialog is open", () => {
