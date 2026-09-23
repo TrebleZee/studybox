@@ -59,6 +59,7 @@ export default function PlannerView({
             onUpdate={actions.updateMilestone}
             onDelete={actions.deleteMilestone}
             onConvertTopic={actions.convertTopicToMilestone}
+            onKeepTopic={actions.keepAsTopic}
           />
           <TopicList
             key={sub.id}

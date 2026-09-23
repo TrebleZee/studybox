@@ -328,10 +328,25 @@ export const isIsoDate = (value) => {
 // only when there is at least one, so older subjects normalize as before.
 const normalizeMilestones = (milestones, subjectId) => {
   if (!Array.isArray(milestones)) return null;
-  const valid = milestones
-    .filter((milestone) => milestone && typeof milestone === "object")
-    .map((milestone, index) => ({
-      id: isNonEmptyString(milestone.id) ? milestone.id : `${subjectId || "sub"}-m${index}`,
+  // Ids must be unique within the subject (edits and deletes match by id):
+  // keep the first owner of an id, give missing or repeated ids fresh ones.
+  const entries = milestones.filter((milestone) => milestone && typeof milestone === "object");
+  const taken = new Set();
+  const explicit = new Set(entries.map((milestone) => milestone.id).filter(isNonEmptyString));
+  const freshId = (index) => {
+    let n = index;
+    let id = `${subjectId || "sub"}-m${n}`;
+    while (taken.has(id) || explicit.has(id)) id = `${subjectId || "sub"}-m${++n}`;
+    return id;
+  };
+  const valid = entries
+    .map((milestone, index) => {
+      const id = isNonEmptyString(milestone.id) && !taken.has(milestone.id) ? milestone.id : freshId(index);
+      taken.add(id);
+      return { milestone, id };
+    })
+    .map(({ milestone, id }) => ({
+      id,
       name: isNonEmptyString(milestone.name) ? milestone.name : "Untitled milestone",
       kind: MILESTONE_KINDS.includes(milestone.kind) ? milestone.kind : "other",
       due: isIsoDate(milestone.due) ? milestone.due : null,
@@ -350,6 +365,8 @@ const topicTierFields = (topic) => {
   return {
     ...(papers.length ? { paper: Array.isArray(topic.paper) ? papers : papers[0] } : {}),
     ...(topic?.higherOnly === true ? { higherOnly: true } : {}),
+    // Set when the user chose "Keep as topic" on the NEA-to-milestone offer.
+    ...(topic?.keepAsTopic === true ? { keepAsTopic: true } : {}),
   };
 };
 

@@ -33,7 +33,7 @@ const SUBJECTS = [
 ];
 
 const renderStrip = (props = {}) => {
-  const handlers = { onAdd: vi.fn(), onUpdate: vi.fn(), onDelete: vi.fn(), onConvertTopic: vi.fn() };
+  const handlers = { onAdd: vi.fn(), onUpdate: vi.fn(), onDelete: vi.fn(), onConvertTopic: vi.fn(), onKeepTopic: vi.fn() };
   render(<MilestoneStrip C={C} subjects={SUBJECTS} defaultSubjectId="cs" now={NOW} {...handlers} {...props} />);
   return handlers;
 };
@@ -148,8 +148,62 @@ describe("MilestoneStrip", () => {
     ];
     const h = renderStrip({ subjects });
     await user.click(screen.getByRole("button", { name: "Keep as topic" }));
-    expect(screen.queryByRole("group", { name: /Suggestion for/ })).toBeNull();
+    expect(h.onKeepTopic).toHaveBeenCalledWith("cs", "t9");
     expect(h.onConvertTopic).not.toHaveBeenCalled();
+  });
+
+  it("no longer offers a topic the user chose to keep", () => {
+    const subjects = [
+      {
+        id: "cs",
+        name: "Computer Science",
+        color: "#fff",
+        topics: [{ id: "t9", name: "NEA Programming Project", done: false, subtasks: [], keepAsTopic: true }],
+      },
+    ];
+    renderStrip({ subjects });
+    expect(screen.queryByRole("group", { name: /Suggestion for/ })).toBeNull();
+  });
+
+  it("warns how many subtasks a conversion deletes", async () => {
+    const user = userEvent.setup();
+    const topic = (subtasks) => ({
+      id: "t9",
+      name: "NEA Programming Project",
+      done: false,
+      subtasks: Array.from({ length: subtasks }, (_, i) => ({ id: `s${i}`, name: `S${i}`, done: false })),
+    });
+    const { unmount } = render(
+      <MilestoneStrip C={C} subjects={[{ id: "cs", name: "CS", color: "#fff", topics: [topic(5)] }]} now={NOW}
+        onAdd={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} onConvertTopic={vi.fn()} onKeepTopic={vi.fn()} />
+    );
+    await user.click(screen.getByRole("button", { name: "Convert to milestone" }));
+    expect(screen.getByText(/and delete its 5 subtasks, and add it as an NEA milestone\?/)).toBeTruthy();
+    unmount();
+
+    renderStrip({ subjects: [{ id: "cs", name: "CS", color: "#fff", topics: [topic(0)] }] });
+    await user.click(screen.getByRole("button", { name: "Convert to milestone" }));
+    const text = screen.getByText(/add it as an NEA milestone\?/).textContent;
+    expect(text).not.toMatch(/subtask/);
+  });
+
+  it("defaults each new milestone to the currently selected subject", async () => {
+    const user = userEvent.setup();
+    const onAdd = vi.fn();
+    const props = { C, subjects: SUBJECTS, now: NOW, onAdd, onUpdate: vi.fn(), onDelete: vi.fn(), onConvertTopic: vi.fn(), onKeepTopic: vi.fn() };
+    const { rerender } = render(<MilestoneStrip {...props} defaultSubjectId="cs" />);
+
+    await user.click(screen.getByRole("button", { name: "Add milestone" }));
+    await user.type(screen.getByLabelText("Milestone name"), "First");
+    await user.click(screen.getByRole("button", { name: "Add" }));
+    expect(onAdd).toHaveBeenLastCalledWith("cs", expect.objectContaining({ name: "First" }));
+
+    rerender(<MilestoneStrip {...props} defaultSubjectId="phys" />);
+    await user.click(screen.getByRole("button", { name: "Add milestone" }));
+    expect(screen.getByLabelText("Milestone subject").value).toBe("phys");
+    await user.type(screen.getByLabelText("Milestone name"), "Second");
+    await user.click(screen.getByRole("button", { name: "Add" }));
+    expect(onAdd).toHaveBeenLastCalledWith("phys", expect.objectContaining({ name: "Second" }));
   });
 
   it("renders nothing without subjects", () => {
@@ -181,6 +235,23 @@ describe("milestones in the app", () => {
     // Completing the milestone gives no XP.
     await user.click(screen.getByLabelText("Complete milestone NEA Programming Project"));
     expect(localStorage.getItem("sb-game")).toBe(gameBefore);
+  });
+
+  it("remembers 'Keep as topic' across views and reloads", async () => {
+    const user = userEvent.setup();
+    const first = renderApp();
+    await user.click(screen.getByRole("button", { name: "Keep as topic" }));
+    expect(screen.queryByRole("button", { name: "Convert to milestone" })).toBeNull();
+
+    await goTo(user, "Settings");
+    await goTo(user, "Planner");
+    expect(screen.queryByRole("button", { name: "Convert to milestone" })).toBeNull();
+
+    first.unmount();
+    renderApp();
+    expect(screen.queryByRole("button", { name: "Convert to milestone" })).toBeNull();
+    const cs = JSON.parse(localStorage.getItem("sb-subjects")).find((s) => s.id === "cs");
+    expect(cs.topics.find((t) => t.name === "NEA Programming Project")).toMatchObject({ keepAsTopic: true });
   });
 
   it("adds a milestone from the planner and persists it", async () => {

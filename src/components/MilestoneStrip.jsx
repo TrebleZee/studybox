@@ -69,6 +69,7 @@ export default function MilestoneStrip({
   onUpdate,
   onDelete,
   onConvertTopic,
+  onKeepTopic,
   now = new Date(),
 }) {
   const [adding, setAdding] = useState(false);
@@ -76,7 +77,6 @@ export default function MilestoneStrip({
   const [editing, setEditing] = useState(null); // { id, subjectId, name, kind, due }
   const [showDone, setShowDone] = useState(false);
   const [confirmingTopic, setConfirmingTopic] = useState(null);
-  const [dismissedTopics, setDismissedTopics] = useState([]);
 
   if (!subjects.length) return null;
 
@@ -84,15 +84,14 @@ export default function MilestoneStrip({
   const open = milestones.filter((milestone) => !milestone.done);
   const done = milestones.filter((milestone) => milestone.done);
   const overdueCount = open.filter((milestone) => isOverdue(milestone, now)).length;
-  const suggestions = neaTopicCandidates(subjects).filter(
-    ({ topic }) => !dismissedTopics.includes(topic.id)
-  );
+  const suggestions = neaTopicCandidates(subjects);
   const draftSubjectId = draft.subjectId || defaultSubjectId || subjects[0].id;
 
   const submitAdd = () => {
     if (!draft.name.trim()) return;
     onAdd(draftSubjectId, { name: draft.name, kind: draft.kind, due: draft.due });
-    setDraft({ subjectId: draftSubjectId, name: "", kind: draft.kind, due: null });
+    // Next time, default to whichever subject is selected then.
+    setDraft({ subjectId: "", name: "", kind: draft.kind, due: null });
     setAdding(false);
   };
 
@@ -258,7 +257,11 @@ export default function MilestoneStrip({
           {confirmingTopic === topic.id ? (
             <>
               <span style={{ flex: "1 1 200px", color: C.txt }}>
-                Remove the topic &ldquo;{topic.name}&rdquo; from {subjectName} and add it as an NEA milestone?
+                Remove the topic &ldquo;{topic.name}&rdquo; from {subjectName}
+                {topic.subtasks?.length
+                  ? ` and delete its ${topic.subtasks.length} subtask${topic.subtasks.length === 1 ? "" : "s"}`
+                  : ""}
+                , and add it as an NEA milestone?
               </span>
               <button
                 type="button"
@@ -291,7 +294,7 @@ export default function MilestoneStrip({
               <button
                 type="button"
                 className="nb"
-                onClick={() => setDismissedTopics((prev) => [...prev, topic.id])}
+                onClick={() => onKeepTopic(subjectId, topic.id)}
                 style={smallButton(C)}
               >
                 Keep as topic

@@ -52,11 +52,12 @@ export const dueLabel = (milestone, now = new Date()) => {
 const NEA_PATTERN = /\bNEA\b/i;
 
 // Topics that look like an NEA and could become a milestone instead. Only
-// ever offered to the user; conversion needs their confirmation.
+// ever offered to the user; conversion needs their confirmation. Topics the
+// user chose to keep (`keepAsTopic`) are never offered again.
 export const neaTopicCandidates = (subjects) =>
   subjects.flatMap((subject) =>
     subject.topics
-      .filter((topic) => NEA_PATTERN.test(topic.name))
+      .filter((topic) => NEA_PATTERN.test(topic.name) && !topic.keepAsTopic)
       .map((topic) => ({ subjectId: subject.id, subjectName: subject.name, topic }))
   );
 

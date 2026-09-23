@@ -252,6 +252,15 @@ export default function StudyBox() {
           })
         )
       ),
+    // "Keep as topic" on the NEA offer: remembered on the topic itself, so the
+    // offer stays gone across views, reloads and backups.
+    keepAsTopic: (subjectId, topicId) =>
+      setSubjects((prev) =>
+        mapSubject(prev, subjectId, (subject) => ({
+          ...subject,
+          topics: subject.topics.map((topic) => (topic.id === topicId ? { ...topic, keepAsTopic: true } : topic)),
+        }))
+      ),
     // Only called after the user confirms in the milestone strip.
     convertTopicToMilestone: (subjectId, topicId) => {
       if (expandedTopic === topicId) setExpandedTopic(null);

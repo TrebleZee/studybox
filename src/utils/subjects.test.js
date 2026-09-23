@@ -521,6 +521,29 @@ describe("papers and higher-tier topics", () => {
     expect(normalizeSubjects([{ id: "x", name: "X", milestones: [] }])[0]).not.toHaveProperty("milestones");
   });
 
+  it("gives every milestone a unique id, keeping the first owner of a repeated one", () => {
+    const [subject] = normalizeSubjects([
+      {
+        id: "cs",
+        name: "CS",
+        milestones: [{ name: "A" }, { id: "cs-m0", name: "B" }, { id: "x", name: "C" }, { id: "x", name: "D" }],
+      },
+    ]);
+    const ids = subject.milestones.map((m) => m.id);
+    expect(new Set(ids).size).toBe(4);
+    expect(subject.milestones.find((m) => m.name === "B").id).toBe("cs-m0");
+    expect(subject.milestones.find((m) => m.name === "C").id).toBe("x");
+    expect(normalizeSubjects([subject])).toEqual([subject]);
+  });
+
+  it("keeps keepAsTopic only when true", () => {
+    const [subject] = normalizeSubjects([
+      { id: "s", name: "S", topics: [{ id: "a", name: "NEA", keepAsTopic: true }, { id: "b", name: "B", keepAsTopic: "yes" }] },
+    ]);
+    expect(subject.topics[0].keepAsTopic).toBe(true);
+    expect(subject.topics[1]).not.toHaveProperty("keepAsTopic");
+  });
+
   it("leaves subjects without papers exactly as before (no new keys)", () => {
     const [subject] = normalizeSubjects([{ id: "x", name: "X", topics: [{ id: "a", name: "A" }] }]);
     expect(subject).not.toHaveProperty("papers");
