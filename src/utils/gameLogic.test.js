@@ -9,6 +9,7 @@ import {
   freezeStats,
   getLongestStreak,
   getStreakForDates,
+  inferFrozenDates,
   isStreakAtRisk,
   normalizeDateKey,
   normalizeGame,
@@ -50,7 +51,13 @@ describe("normalizeGame", () => {
   it("falls back to defaults for junk input", () => {
     expect(normalizeGame(null)).toEqual(DEFAULT_GAME);
     expect(normalizeGame("nope")).toEqual(DEFAULT_GAME);
-    expect(normalizeGame({})).toEqual(DEFAULT_GAME);
+    // An object without frozenDates is a pre-freeze-tracking save, flagged
+    // with null so buildInitialGame can infer the frozen days.
+    expect(normalizeGame({})).toEqual({ ...DEFAULT_GAME, frozenDates: null });
+  });
+
+  it("keeps valid frozenDates and drops junk entries", () => {
+    expect(normalizeGame({ frozenDates: ["2026-09-19", "junk", null] }).frozenDates).toEqual(["2026-09-19"]);
   });
 
   it("coerces numeric strings and drops bad values", () => {
@@ -210,5 +217,54 @@ describe("isStreakAtRisk", () => {
   it("is true when a freeze keeps the streak alive but today is still unlogged", () => {
     const g = game({ currentStreak: 3, lastStudyDate: studied, totalXP: 500 });
     expect(isStreakAtRisk(g, streakExpiry(studied) + 12 * 60 * 60 * 1000)).toBe(true);
+  });
+});
+
+describe("streak freezes survive a history rebuild", () => {
+  // Nine days (Sep 10-18), Sep 19 missed, then Sep 20 and 21.
+  const studyDays = [10, 11, 12, 13, 14, 15, 16, 17, 18, 20, 21];
+  const dates = studyDays.map((d) => `2026-09-${String(d).padStart(2, "0")}`);
+  const sessions = studyDays.map((d) => ({ date: localDay(2026, 9, d).toISOString(), duration: 3600 }));
+  const loadedAt = localDay(2026, 9, 22, 9).getTime();
+
+  it("bridges days covered by a freeze without counting them", () => {
+    expect(getStreakForDates(dates)).toBe(2);
+    expect(getStreakForDates(dates, ["2026-09-19"])).toBe(11);
+    expect(getLongestStreak(dates, ["2026-09-19"])).toBe(11);
+  });
+
+  it("a gap only partly covered by freezes still breaks the streak", () => {
+    const gappy = ["2026-09-10", "2026-09-13"];
+    expect(getStreakForDates(gappy, ["2026-09-11"])).toBe(1);
+  });
+
+  it("validateStreak records the day each freeze covered", () => {
+    const g = game({ currentStreak: 9, lastStudyDate: "2026-09-18", totalXP: 1000 });
+    const result = validateStreak(g, localDay(2026, 9, 20, 9).getTime());
+    expect(result.freezesUsed).toBe(1);
+    expect(result.frozenDates).toEqual(["2026-09-19"]);
+  });
+
+  it("rebuilds an 11-day streak when frozenDates is stored", () => {
+    const stored = { totalXP: 1000, freezesUsed: 1, frozenDates: ["2026-09-19"], currentStreak: 11, lastStudyDate: "2026-09-21" };
+    expect(buildInitialGame(stored, sessions, [], loadedAt).currentStreak).toBe(11);
+  });
+
+  it("infers the frozen day for saves made before frozenDates existed", () => {
+    const legacy = { totalXP: 1000, freezesUsed: 1, currentStreak: 2, lastStudyDate: "2026-09-21" };
+    const result = buildInitialGame(legacy, sessions, [], loadedAt);
+    expect(result.currentStreak).toBe(11);
+    expect(result.frozenDates).toEqual(["2026-09-19"]);
+  });
+
+  it("inference stops at a gap the used freezes could not have covered", () => {
+    expect(inferFrozenDates(["2026-09-01", "2026-09-05", "2026-09-07"], 2, "2026-09-07", null))
+      .toEqual(["2026-09-06"]);
+    expect(inferFrozenDates(dates, 0, "2026-09-21", null)).toEqual([]);
+  });
+
+  it("inference counts trailing days already protected by a freeze", () => {
+    const protectedUntil = streakExpiry("2026-09-21") + DAY_MS;
+    expect(inferFrozenDates(dates, 2, "2026-09-21", protectedUntil)).toEqual(["2026-09-19", "2026-09-22"]);
   });
 });
