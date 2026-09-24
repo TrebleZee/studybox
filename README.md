@@ -1,4 +1,4 @@
-# StudyBox - v1.12.1
+# StudyBox - v1.12.2
 
 StudyBox is a lightweight study planner and revision timer built with React and Vite. It is designed to help you track topics, mark progress, time revision sessions, and keep a simple local history of your study work.
 
