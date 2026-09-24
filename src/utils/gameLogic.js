@@ -5,6 +5,9 @@ export const DEFAULT_GAME = {
   streakProtectedUntil: null,
   totalXP: 0,
   freezesUsed: 0,
+  // Calendar days a streak freeze covered. Needed so rebuilding the streak
+  // from session history bridges those days instead of treating them as breaks.
+  frozenDates: [],
 };
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
@@ -44,38 +47,75 @@ export const calendarDayDistance = (from, to) => {
   ) / DAY_MS;
 };
 
-export const getStreakForDates = (dateStrings) => {
-  let streak = 0;
-  let previous = null;
-
-  dateStrings.forEach((date) => {
-    if (previous === null || calendarDayDistance(previous, date) !== 1) {
-      streak = 1;
-    } else {
-      streak += 1;
-    }
-    previous = date;
-  });
-
-  return streak;
+const addDays = (key, days) => {
+  const [year, month, day] = key.split("-").map(Number);
+  return dateKey(new Date(year, month - 1, day + days));
 };
 
-export const getLongestStreak = (dateStrings) => {
-  let longest = 0;
+// Two study days are part of the same run when every day between them was
+// covered by a freeze. Frozen days bridge the gap but don't add to the count.
+const isBridged = (previous, date, frozen) => {
+  const distance = calendarDayDistance(previous, date);
+  if (distance === 1) return true;
+  for (let offset = 1; offset < distance; offset += 1) {
+    if (!frozen.has(addDays(previous, offset))) return false;
+  }
+  return distance > 1;
+};
+
+const streakRuns = (dateStrings, frozenDates = []) => {
+  const frozen = new Set(frozenDates);
+  const runs = [];
   let streak = 0;
   let previous = null;
 
   dateStrings.forEach((date) => {
-    if (previous === null || calendarDayDistance(previous, date) !== 1) {
+    if (previous === null || !isBridged(previous, date, frozen)) {
       streak = 1;
     } else {
       streak += 1;
     }
-    longest = Math.max(longest, streak);
+    runs.push(streak);
     previous = date;
   });
 
-  return longest;
+  return runs;
+};
+
+export const getStreakForDates = (dateStrings, frozenDates = []) => {
+  const runs = streakRuns(dateStrings, frozenDates);
+  return runs.length ? runs[runs.length - 1] : 0;
+};
+
+export const getLongestStreak = (dateStrings, frozenDates = []) =>
+  streakRuns(dateStrings, frozenDates).reduce((longest, run) => Math.max(longest, run), 0);
+
+// Saves from before frozenDates existed only know how many freezes were used,
+// not when. Attribute them to the most recent gaps (including any trailing
+// days already protected), walking back from the latest study day and
+// stopping at the first gap the remaining freezes couldn't have covered.
+export const inferFrozenDates = (dateStrings, freezesUsed, lastStudyDate, streakProtectedUntil) => {
+  let budget = Number(freezesUsed) || 0;
+  const frozen = [];
+
+  if (lastStudyDate && streakProtectedUntil) {
+    const trailing = Math.round((streakProtectedUntil - streakExpiry(lastStudyDate)) / DAY_MS);
+    for (let offset = 1; offset <= trailing && budget > 0; offset += 1) {
+      frozen.push(addDays(lastStudyDate, offset));
+      budget -= 1;
+    }
+  }
+
+  for (let i = dateStrings.length - 1; i > 0 && budget > 0; i -= 1) {
+    const missed = calendarDayDistance(dateStrings[i - 1], dateStrings[i]) - 1;
+    if (missed > budget) break;
+    for (let offset = 1; offset <= missed; offset += 1) {
+      frozen.push(addDays(dateStrings[i - 1], offset));
+    }
+    budget -= missed;
+  }
+
+  return frozen.sort();
 };
 
 export const normalizeGame = (loaded) => {
@@ -87,6 +127,10 @@ export const normalizeGame = (loaded) => {
     streakProtectedUntil: Number(loaded.streakProtectedUntil) || null,
     totalXP: Number(loaded.totalXP) || 0,
     freezesUsed: Number(loaded.freezesUsed) || 0,
+    // null marks a save from before frozenDates was tracked (see buildInitialGame).
+    frozenDates: Array.isArray(loaded.frozenDates)
+      ? loaded.frozenDates.map(normalizeDateKey).filter(Boolean)
+      : null,
   };
 };
 
@@ -100,6 +144,7 @@ export const validateStreak = (game, nowMs = Date.now()) => {
   if (nowMs < nextCheckAt) return game;
 
   let freezesUsed = game.freezesUsed;
+  const frozenDates = [...(game.frozenDates || [])];
   let freezesAvailable = Math.min(
     Math.max(0, Math.floor(game.totalXP / 500) - freezesUsed),
     3
@@ -110,6 +155,9 @@ export const validateStreak = (game, nowMs = Date.now()) => {
   while (nowMs >= nextCheckAt && freezesAvailable > 0) {
     freezesUsed += 1;
     freezesAvailable -= 1;
+    // nextCheckAt is the end of the missed day; step back half a day so a
+    // DST shift can't push the key onto the neighbouring date.
+    frozenDates.push(dateKey(nextCheckAt - DAY_MS / 2));
     nextCheckAt += DAY_MS;
   }
 
@@ -119,12 +167,14 @@ export const validateStreak = (game, nowMs = Date.now()) => {
       currentStreak: 0,
       streakProtectedUntil: null,
       freezesUsed,
+      frozenDates,
     };
   }
 
   return {
     ...game,
     freezesUsed,
+    frozenDates,
     streakProtectedUntil: nextCheckAt,
   };
 };
@@ -155,11 +205,17 @@ export const buildInitialGame = (loaded, sessions, subjects, nowMs = Date.now())
     (sum, subject) => sum + subject.topics.filter((topic) => topic.done).length * 10,
     0
   );
+  const frozenDates = storedGame.frozenDates ?? inferFrozenDates(
+    dateStrings,
+    storedGame.freezesUsed,
+    lastStudyDate,
+    lastStudyDate === storedGame.lastStudyDate ? storedGame.streakProtectedUntil : null
+  );
   const historicalStreak = dateStrings.length
-    ? getStreakForDates(dateStrings)
+    ? getStreakForDates(dateStrings, frozenDates)
     : storedGame.currentStreak;
   const historicalLongest = dateStrings.length
-    ? getLongestStreak(dateStrings)
+    ? getLongestStreak(dateStrings, frozenDates)
     : storedGame.longestStreak;
   const calculatedTotalXP = minutesStudied + topicXP;
 
@@ -173,6 +229,7 @@ export const buildInitialGame = (loaded, sessions, subjects, nowMs = Date.now())
       // later deleted from the history.
       totalXP: Math.max(storedGame.totalXP, calculatedTotalXP),
       streakProtectedUntil: storedGame.streakProtectedUntil,
+      frozenDates,
     },
     nowMs
   );

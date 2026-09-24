@@ -37,6 +37,8 @@ const getMonToSunIndex = (d) => {
   return (day + 6) % 7; // 0 = Mon, 1 = Tue ... 6 = Sun
 };
 
+// Ice blue marks a consistency-grid day covered by a streak freeze.
+const FROZEN_BLUE = "#7DD3FC";
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_NAMES = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -371,6 +373,26 @@ export default function AnalysisPanel({
 
     return { gridDays, weeksCount: WEEKS_COUNT };
   }, [filteredSessions, timeframe]);
+
+  // Shared by every consistency grid. A day with no study that a streak
+  // freeze covered is shown in ice blue rather than as an empty day.
+  const frozenDays = useMemo(() => new Set(game?.frozenDates || []), [game?.frozenDates]);
+  const heatCell = (cell) => {
+    const hrs = cell.hours;
+    if (hrs <= 0 && frozenDays.has(cell.dateKey)) {
+      return { bg: FROZEN_BLUE, border: "rgba(125, 211, 252, 0.6)", title: `${cell.dateKey}: Streak freeze used ❄️` };
+    }
+    let bg = C.s2;
+    if (hrs > 4) bg = "#34D399";
+    else if (hrs > 2) bg = "rgba(52, 211, 153, 0.75)";
+    else if (hrs > 0.5) bg = "rgba(52, 211, 153, 0.5)";
+    else if (hrs > 0) bg = "rgba(52, 211, 153, 0.25)";
+    return {
+      bg,
+      border: hrs > 0 ? "rgba(52, 211, 153, 0.3)" : C.bdr,
+      title: `${cell.dateKey}: ${hrs > 0 ? fmtDur(cell.secs) : "No study"}`,
+    };
+  };
 
   // 5. Monthly Hours for Yearly View
   const monthlyTrendData = useMemo(() => {
@@ -980,18 +1002,13 @@ export default function AnalysisPanel({
                     const cellIndex = colWkIdx * 7 + dayRowIdx;
                     const cell = heatmapGrid.gridDays[cellIndex];
                     if (!cell) return <div key={colWkIdx} />;
-                    const hrs = cell.hours;
-                    let bg = C.s2;
-                    if (hrs > 4) bg = "#34D399";
-                    else if (hrs > 2) bg = "rgba(52, 211, 153, 0.75)";
-                    else if (hrs > 0.5) bg = "rgba(52, 211, 153, 0.5)";
-                    else if (hrs > 0) bg = "rgba(52, 211, 153, 0.25)";
+                    const { bg, border, title } = heatCell(cell);
 
                     return (
                       <div
                         key={colWkIdx}
-                        title={`${toYYYYMMDD(cell.date)}: ${hrs > 0 ? fmtDur(cell.secs) : "No study"}`}
-                        style={{ height: "18px", borderRadius: "3px", background: bg, border: `1px solid ${hrs > 0 ? "rgba(52, 211, 153, 0.3)" : C.bdr}` }}
+                        title={title}
+                        style={{ height: "18px", borderRadius: "3px", background: bg, border: `1px solid ${border}` }}
                       />
                     );
                   })}
@@ -1082,18 +1099,13 @@ export default function AnalysisPanel({
                       const cellIndex = colWkIdx * 7 + dayRowIdx;
                       const cell = heatmapGrid.gridDays[cellIndex];
                       if (!cell) return <div key={colWkIdx} />;
-                      const hrs = cell.hours;
-                      let bg = C.s2;
-                      if (hrs > 4) bg = "#34D399";
-                      else if (hrs > 2) bg = "rgba(52, 211, 153, 0.75)";
-                      else if (hrs > 0.5) bg = "rgba(52, 211, 153, 0.5)";
-                      else if (hrs > 0) bg = "rgba(52, 211, 153, 0.25)";
+                      const { bg, border, title } = heatCell(cell);
 
                       return (
                         <div
                           key={colWkIdx}
-                          title={`${toYYYYMMDD(cell.date)}: ${hrs > 0 ? fmtDur(cell.secs) : "No study"}`}
-                          style={{ height: "12px", borderRadius: "2px", background: bg, border: `1px solid ${hrs > 0 ? "rgba(52, 211, 153, 0.3)" : C.bdr}` }}
+                          title={title}
+                          style={{ height: "12px", borderRadius: "2px", background: bg, border: `1px solid ${border}` }}
                         />
                       );
                     })}
@@ -1177,18 +1189,13 @@ export default function AnalysisPanel({
                     const cellIndex = colWkIdx * 7 + dayRowIdx;
                     const cell = heatmapGrid.gridDays[cellIndex];
                     if (!cell) return <div key={colWkIdx} />;
-                    const hrs = cell.hours;
-                    let bg = C.s2;
-                    if (hrs > 4) bg = "#34D399";
-                    else if (hrs > 2) bg = "rgba(52, 211, 153, 0.75)";
-                    else if (hrs > 0.5) bg = "rgba(52, 211, 153, 0.5)";
-                    else if (hrs > 0) bg = "rgba(52, 211, 153, 0.25)";
+                    const { bg, border, title } = heatCell(cell);
 
                     return (
                       <div
                         key={colWkIdx}
-                        title={`${toYYYYMMDD(cell.date)}: ${hrs > 0 ? fmtDur(cell.secs) : "No study"}`}
-                        style={{ height: "14px", borderRadius: "2px", background: bg, border: `1px solid ${hrs > 0 ? "rgba(52, 211, 153, 0.3)" : C.bdr}` }}
+                        title={title}
+                        style={{ height: "14px", borderRadius: "2px", background: bg, border: `1px solid ${border}` }}
                       />
                     );
                   })}
