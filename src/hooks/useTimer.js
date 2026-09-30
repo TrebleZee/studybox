@@ -1,15 +1,41 @@
 import { useEffect, useRef, useState } from "react";
+import { loadJson, STORAGE_KEYS } from "../utils/storage.js";
+
+const nonNegative = (value) => (Number.isFinite(value) && value >= 0 ? value : null);
+
+// The timer is saved so a reload (an app update, a refresh, a closed tab)
+// resumes the session instead of losing it.
+const loadSavedTimer = () => {
+  const saved = loadJson(STORAGE_KEYS.timer, null);
+  return {
+    elapsed: nonNegative(saved?.elapsed) ?? 0,
+    startedAt: nonNegative(saved?.startedAt),
+    timedSubjectId: typeof saved?.timedSubjectId === "string" ? saved.timedSubjectId : null,
+  };
+};
 
 // The timer is anchored to a Date.now() start timestamp rather than counting
 // ticks, so a backgrounded tab or a throttled interval can't make it drift.
 export default function useTimer({ canTime, defaultSubjectId }) {
-  const [elapsed, setElapsed] = useState(0);
-  const [startedAt, setStartedAt] = useState(null);
+  const [saved] = useState(loadSavedTimer);
+  const [elapsed, setElapsed] = useState(saved.elapsed);
+  const [startedAt, setStartedAt] = useState(saved.startedAt);
   const [now, setNow] = useState(() => Date.now());
-  const [timedSubjectId, setTimedSubjectId] = useState(null);
+  const [timedSubjectId, setTimedSubjectId] = useState(saved.timedSubjectId);
   const intervalRef = useRef();
 
   const running = startedAt !== null;
+
+  useEffect(() => {
+    if (startedAt === null && elapsed === 0 && timedSubjectId === null) {
+      localStorage.removeItem(STORAGE_KEYS.timer);
+    } else {
+      localStorage.setItem(
+        STORAGE_KEYS.timer,
+        JSON.stringify({ elapsed, startedAt, timedSubjectId })
+      );
+    }
+  }, [elapsed, startedAt, timedSubjectId]);
 
   useEffect(() => {
     if (startedAt !== null) {

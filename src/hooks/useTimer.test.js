@@ -67,3 +67,58 @@ describe("useTimer", () => {
     expect(result.current.running).toBe(false);
   });
 });
+
+describe("useTimer persistence", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-19T09:00:00.000Z"));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  const setup = () =>
+    renderHook(() => useTimer({ canTime: true, defaultSubjectId: "physics" }));
+
+  it("resumes a running timer after a reload", () => {
+    const first = setup();
+    act(() => first.result.current.start());
+    act(() => vi.advanceTimersByTime(5000));
+    first.unmount();
+
+    vi.setSystemTime(Date.now() + 60 * 1000);
+    const { result } = setup();
+    expect(result.current.running).toBe(true);
+    expect(result.current.displaySecs).toBe(65);
+    expect(result.current.timedSubjectId).toBe("physics");
+  });
+
+  it("restores a paused timer after a reload", () => {
+    const first = setup();
+    act(() => first.result.current.start());
+    act(() => vi.advanceTimersByTime(7000));
+    act(() => first.result.current.pause());
+    first.unmount();
+
+    const { result } = setup();
+    expect(result.current.running).toBe(false);
+    expect(result.current.displaySecs).toBe(7);
+  });
+
+  it("clears the saved timer on reset", () => {
+    const { result } = setup();
+    act(() => result.current.start());
+    expect(localStorage.getItem("sb-timer")).not.toBeNull();
+    act(() => result.current.reset());
+    expect(localStorage.getItem("sb-timer")).toBeNull();
+  });
+
+  it("ignores a corrupted saved timer", () => {
+    localStorage.setItem(
+      "sb-timer",
+      JSON.stringify({ elapsed: "lots", startedAt: -5, timedSubjectId: 3 })
+    );
+    const { result } = setup();
+    expect(result.current.running).toBe(false);
+    expect(result.current.displaySecs).toBe(0);
+    expect(result.current.timedSubjectId).toBeNull();
+  });
+});

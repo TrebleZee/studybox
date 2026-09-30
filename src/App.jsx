@@ -6,6 +6,8 @@ import Onboarding from "./components/Onboarding.jsx";
 import PlannerView from "./components/PlannerView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import TopBar from "./components/TopBar.jsx";
+import UpdateBanner from "./components/UpdateBanner.jsx";
+import useAppUpdate from "./hooks/useAppUpdate.js";
 import useMilestoneReminder from "./hooks/useMilestoneReminder.js";
 import useStreakReminder from "./hooks/useStreakReminder.js";
 import useTimer from "./hooks/useTimer.js";
@@ -69,8 +71,15 @@ export default function StudyBox() {
   const [view, setView] = useState("planner");
   const [asanaTask, setAsanaTask] = useState(null);
   const [expandedTopic, setExpandedTopic] = useState(null);
-  const [note, setNote] = useState("");
-  const [sessionTags, setSessionTags] = useState([]);
+  // The unlogged session's note and tags are saved alongside the timer so a
+  // reload doesn't lose them.
+  const [savedDraft] = useState(() => loadJson(STORAGE_KEYS.sessionDraft, null));
+  const [note, setNote] = useState(() =>
+    typeof savedDraft?.note === "string" ? savedDraft.note : ""
+  );
+  const [sessionTags, setSessionTags] = useState(() =>
+    Array.isArray(savedDraft?.tags) ? savedDraft.tags.filter((tag) => typeof tag === "string") : []
+  );
   const [editingSession, setEditingSession] = useState(null);
   const [backupMessage, setBackupMessage] = useState(null);
 
@@ -98,6 +107,10 @@ export default function StudyBox() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.onboarded, JSON.stringify(onboarded));
   }, [onboarded]);
+  useEffect(() => {
+    if (!note && !sessionTags.length) localStorage.removeItem(STORAGE_KEYS.sessionDraft);
+    else localStorage.setItem(STORAGE_KEYS.sessionDraft, JSON.stringify({ note, tags: sessionTags }));
+  }, [note, sessionTags]);
 
   // Re-validate when the persisted streak window expires while the app is open;
   // buildInitialGame runs the same validator on launch.
@@ -133,6 +146,7 @@ export default function StudyBox() {
   const { running, displaySecs, timedSubjectId } = timer;
   const timedSubject = subjects.find((subject) => subject.id === timedSubjectId);
   const timingAsana = asanaEnabled && timedSubjectId === asanaCfg.id;
+  const appUpdate = useAppUpdate({ sessionInProgress: running || displaySecs > 0 });
 
   useEffect(() => {
     document.title = running ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
@@ -576,6 +590,8 @@ export default function StudyBox() {
           )}
         </>
       )}
+
+      {appUpdate.updateReady && <UpdateBanner C={C} onUpdate={appUpdate.applyNow} />}
     </div>
   );
 }

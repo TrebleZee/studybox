@@ -1,6 +1,7 @@
 import { act, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { markUpdateReady } from "./pwa/updateStore.js";
 import { goTo, renderApp } from "./test/helpers.jsx";
 
 describe("StudyBox shell", () => {
@@ -97,5 +98,45 @@ describe("StudyBox shell", () => {
     vi.setSystemTime(expiry + 86400000);
     renderApp();
     expect(screen.getByTitle("Current streak: 0 day(s)")).toBeTruthy();
+  });
+});
+
+describe("surviving an app update", () => {
+  it("keeps the session note and tags across a reload", () => {
+    const first = renderApp();
+    fireEvent.change(screen.getByPlaceholderText("Session note (optional)"), {
+      target: { value: "Chapter 3" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Recap" }));
+    first.unmount();
+
+    renderApp();
+    expect(screen.getByPlaceholderText("Session note (optional)").value).toBe("Chapter 3");
+    expect(screen.getByRole("button", { name: "Remove tag Recap" })).toBeTruthy();
+  });
+
+  it("holds an update during a session and offers it in a banner", () => {
+    vi.useFakeTimers();
+    const apply = vi.fn();
+    renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+
+    act(() => markUpdateReady(apply));
+    expect(apply).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Update now" }));
+    expect(apply).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies the update once the session is logged", () => {
+    vi.useFakeTimers();
+    const apply = vi.fn();
+    renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    act(() => vi.advanceTimersByTime(60000));
+    act(() => markUpdateReady(apply));
+    expect(apply).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Log Session" }));
+    expect(apply).toHaveBeenCalledTimes(1);
   });
 });

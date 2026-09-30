@@ -6,7 +6,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt' so a new version waits until no study session is in
+      // progress; main.jsx registers the worker and useAppUpdate applies it.
+      registerType: 'prompt',
+      injectRegister: false,
       workbox: {
         // Spec catalogue files are lazy chunks; they must be precached too so
         // catalogue-backed onboarding templates work offline.
