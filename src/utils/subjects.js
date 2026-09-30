@@ -489,3 +489,8 @@ export const groupTopicsByPaper = (subject, topics = subject.topics) => {
     return diff < 0 ? 0 : order.get(a.paperIds[diff]) - order.get(b.paperIds[diff]);
   });
 };
+
+// Label shown under the timer: the selected topic's name, like the Asana task
+// name is shown for Asana, falling back to the subject name.
+export const topicTimerLabel = (subject, topicId) =>
+  subject?.topics?.find((topic) => topic.id === topicId)?.name || subject?.name || "-";

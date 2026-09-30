@@ -26,6 +26,7 @@ import {
   normalizeSessions,
   normalizeSubject,
   normalizeSubjects,
+  topicTimerLabel,
   updateSubjectFields,
 } from "./utils/subjects.js";
 import { subjectsForTemplate } from "./utils/catalogue.js";
@@ -169,10 +170,10 @@ export default function StudyBox() {
     (asanaSelected ? asanaCfg.color : sub?.color) ||
     "#888888";
   const timerLabel = timedSubject
-    ? timedSubject.name
+    ? topicTimerLabel(timedSubject, expandedTopic)
     : timingAsana || asanaSelected
       ? asanaTask?.name || asanaCfg.name
-      : sub?.name || "-";
+      : topicTimerLabel(sub, expandedTopic);
 
   const updateCurrentSubject = (fn) => {
     if (sub) setSubjects((prev) => mapSubject(prev, sub.id, fn));

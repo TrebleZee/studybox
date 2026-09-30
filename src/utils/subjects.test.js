@@ -16,6 +16,7 @@ import {
   subjectProgress,
   subjectsFromPresets,
   topicList,
+  topicTimerLabel,
   updateSubjectFields,
 } from "./subjects.js";
 
@@ -549,5 +550,31 @@ describe("papers and higher-tier topics", () => {
     expect(subject).not.toHaveProperty("papers");
     expect(Object.keys(subject.topics[0]).sort()).toEqual(["done", "id", "name", "subtasks"]);
     expect(isUntouchedDefaultSubjects(normalizeSubjects(defaultSubjects()))).toBe(true);
+  });
+});
+
+describe("topicTimerLabel", () => {
+  const subject = {
+    name: "Maths",
+    topics: [
+      { id: "t1", name: "Algebra" },
+      { id: "t2", name: "Calculus" },
+    ],
+  };
+
+  it("shows the selected topic's name", () => {
+    expect(topicTimerLabel(subject, "t2")).toBe("Calculus");
+  });
+
+  it("falls back to the subject name when no topic is selected", () => {
+    expect(topicTimerLabel(subject, null)).toBe("Maths");
+  });
+
+  it("falls back to the subject name when the topic belongs to another subject", () => {
+    expect(topicTimerLabel(subject, "other")).toBe("Maths");
+  });
+
+  it("shows a dash with no subject", () => {
+    expect(topicTimerLabel(undefined, "t1")).toBe("-");
   });
 });
