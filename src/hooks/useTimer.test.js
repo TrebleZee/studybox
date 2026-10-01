@@ -121,4 +121,54 @@ describe("useTimer persistence", () => {
     expect(result.current.displaySecs).toBe(0);
     expect(result.current.timedSubjectId).toBeNull();
   });
+
+  // R1: a forgotten running timer must not resume with days on the clock.
+  it("restores a long-forgotten running timer as paused at the time last seen", () => {
+    const first = setup();
+    act(() => first.result.current.start());
+    act(() => vi.advanceTimersByTime(20 * 60 * 1000));
+    first.unmount();
+
+    vi.setSystemTime(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const { result } = setup();
+    expect(result.current.running).toBe(false);
+    expect(result.current.displaySecs).toBe(20 * 60);
+    expect(result.current.timedSubjectId).toBe("physics");
+  });
+
+  it("still resumes a running timer closed within the resume window", () => {
+    const first = setup();
+    act(() => first.result.current.start());
+    act(() => vi.advanceTimersByTime(60 * 1000));
+    first.unmount();
+
+    vi.setSystemTime(Date.now() + 2 * 60 * 60 * 1000);
+    const { result } = setup();
+    expect(result.current.running).toBe(true);
+    expect(result.current.displaySecs).toBe(2 * 60 * 60 + 60);
+  });
+
+  it("falls back to the last paused value when there is no heartbeat", () => {
+    localStorage.setItem(
+      "sb-timer",
+      JSON.stringify({ elapsed: 300, startedAt: Date.now() - 5 * 24 * 60 * 60 * 1000, timedSubjectId: "physics" })
+    );
+    const { result } = setup();
+    expect(result.current.running).toBe(false);
+    expect(result.current.displaySecs).toBe(300);
+  });
+
+  // R4: startedAt 0 and future timestamps pass a plain non-negative check.
+  it.each([
+    ["at the epoch", 0],
+    ["in the future", Date.parse("2026-06-20T09:00:00.000Z")],
+  ])("does not resume a timer started %s", (_label, startedAt) => {
+    localStorage.setItem(
+      "sb-timer",
+      JSON.stringify({ elapsed: 42, startedAt, lastSeenAt: startedAt, timedSubjectId: "physics" })
+    );
+    const { result } = setup();
+    expect(result.current.running).toBe(false);
+    expect(result.current.displaySecs).toBe(42);
+  });
 });
