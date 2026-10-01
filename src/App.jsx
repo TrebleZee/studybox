@@ -6,6 +6,8 @@ import Onboarding from "./components/Onboarding.jsx";
 import PlannerView from "./components/PlannerView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import TopBar from "./components/TopBar.jsx";
+import UpdateBanner from "./components/UpdateBanner.jsx";
+import useAppUpdate from "./hooks/useAppUpdate.js";
 import useMilestoneReminder from "./hooks/useMilestoneReminder.js";
 import useStreakReminder from "./hooks/useStreakReminder.js";
 import useTimer from "./hooks/useTimer.js";
@@ -65,12 +67,27 @@ export default function StudyBox() {
   );
   const [onboarded, setOnboarded] = useState(() => loadJson(STORAGE_KEYS.onboarded, false));
   const templateRequest = useRef(0);
-  const [sel, setSel] = useState(() => subjects[0]?.id ?? null);
+  // The unlogged session's note, tags and timed topic are saved alongside the
+  // timer so a reload doesn't lose them.
+  const [savedDraft] = useState(() => loadJson(STORAGE_KEYS.sessionDraft, null));
+  // The timed topic comes back (with its subject selected, so the topic list
+  // keeps it expanded) only if it still exists on the timed subject.
+  const [restoredTopic] = useState(() => {
+    const timedSubjectId = loadJson(STORAGE_KEYS.timer, null)?.timedSubjectId;
+    const subject = subjects.find((item) => item.id === timedSubjectId);
+    const topicId = savedDraft?.topicId;
+    return subject?.topics.some((topic) => topic.id === topicId) ? { subjectId: subject.id, topicId } : null;
+  });
+  const [sel, setSel] = useState(() => restoredTopic?.subjectId ?? subjects[0]?.id ?? null);
   const [view, setView] = useState("planner");
   const [asanaTask, setAsanaTask] = useState(null);
-  const [expandedTopic, setExpandedTopic] = useState(null);
-  const [note, setNote] = useState("");
-  const [sessionTags, setSessionTags] = useState([]);
+  const [expandedTopic, setExpandedTopic] = useState(() => restoredTopic?.topicId ?? null);
+  const [note, setNote] = useState(() =>
+    typeof savedDraft?.note === "string" ? savedDraft.note : ""
+  );
+  const [sessionTags, setSessionTags] = useState(() =>
+    Array.isArray(savedDraft?.tags) ? savedDraft.tags.filter((tag) => typeof tag === "string") : []
+  );
   const [editingSession, setEditingSession] = useState(null);
   const [backupMessage, setBackupMessage] = useState(null);
 
@@ -133,6 +150,27 @@ export default function StudyBox() {
   const { running, displaySecs, timedSubjectId } = timer;
   const timedSubject = subjects.find((subject) => subject.id === timedSubjectId);
   const timingAsana = asanaEnabled && timedSubjectId === asanaCfg.id;
+  const sessionInProgress = running || displaySecs > 0;
+  const needsOnboarding =
+    !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
+  const appUpdate = useAppUpdate({
+    sessionInProgress,
+    idle: view === "planner" && !needsOnboarding,
+  });
+
+  // The timed topic is only saved while a session is in progress; outside one
+  // the expanded topic is just navigation.
+  const draftTopicId = sessionInProgress && timedSubject ? expandedTopic : null;
+  useEffect(() => {
+    if (!note && !sessionTags.length && !draftTopicId) {
+      localStorage.removeItem(STORAGE_KEYS.sessionDraft);
+    } else {
+      localStorage.setItem(
+        STORAGE_KEYS.sessionDraft,
+        JSON.stringify({ note, tags: sessionTags, topicId: draftTopicId })
+      );
+    }
+  }, [note, sessionTags, draftTopicId]);
 
   useEffect(() => {
     document.title = running ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
@@ -449,9 +487,6 @@ export default function StudyBox() {
     }
   };
 
-  const needsOnboarding =
-    !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
-
   return (
     <div
       style={{
@@ -576,6 +611,8 @@ export default function StudyBox() {
           )}
         </>
       )}
+
+      {appUpdate.updateReady && <UpdateBanner C={C} onUpdate={appUpdate.applyNow} />}
     </div>
   );
 }

@@ -1,15 +1,61 @@
 import { useEffect, useRef, useState } from "react";
+import { loadJson, STORAGE_KEYS } from "../utils/storage.js";
+
+const nonNegative = (value) => (Number.isFinite(value) && value >= 0 ? value : null);
+
+// A running timer only resumes by itself if it started recently on a sane
+// clock. Anything older (a tab closed and forgotten for days) or implausible
+// (a corrupted or future timestamp) comes back paused, so a forgotten session
+// can't be logged as days of study.
+const MAX_RESUME_MS = 12 * 60 * 60 * 1000;
+const EARLIEST_START = Date.UTC(2020, 0, 1);
+
+// The timer is saved so a reload (an app update, a refresh, a closed tab)
+// resumes the session instead of losing it. `lastSeenAt` is a heartbeat
+// written while the timer runs, marking when the app was last open.
+const loadSavedTimer = (now) => {
+  const saved = loadJson(STORAGE_KEYS.timer, null);
+  const elapsed = nonNegative(saved?.elapsed) ?? 0;
+  const timedSubjectId = typeof saved?.timedSubjectId === "string" ? saved.timedSubjectId : null;
+  const startedAt = nonNegative(saved?.startedAt);
+  if (startedAt === null) return { elapsed, startedAt: null, timedSubjectId };
+
+  const plausible = startedAt >= EARLIEST_START && startedAt <= now;
+  if (plausible && now - startedAt <= MAX_RESUME_MS) return { elapsed, startedAt, timedSubjectId };
+
+  // Restore paused at the time the timer was actually seen running, or at the
+  // last paused value when there's no trustworthy heartbeat.
+  const lastSeenAt = nonNegative(saved?.lastSeenAt);
+  const seenSecs =
+    plausible && lastSeenAt !== null && lastSeenAt >= startedAt && lastSeenAt <= now
+      ? Math.floor((lastSeenAt - startedAt) / 1000)
+      : null;
+  return { elapsed: seenSecs ?? elapsed, startedAt: null, timedSubjectId };
+};
 
 // The timer is anchored to a Date.now() start timestamp rather than counting
 // ticks, so a backgrounded tab or a throttled interval can't make it drift.
 export default function useTimer({ canTime, defaultSubjectId }) {
-  const [elapsed, setElapsed] = useState(0);
-  const [startedAt, setStartedAt] = useState(null);
+  const [saved] = useState(() => loadSavedTimer(Date.now()));
+  const [elapsed, setElapsed] = useState(saved.elapsed);
+  const [startedAt, setStartedAt] = useState(saved.startedAt);
   const [now, setNow] = useState(() => Date.now());
-  const [timedSubjectId, setTimedSubjectId] = useState(null);
+  const [timedSubjectId, setTimedSubjectId] = useState(saved.timedSubjectId);
   const intervalRef = useRef();
 
   const running = startedAt !== null;
+  const lastSeenAt = running ? now : null;
+
+  useEffect(() => {
+    if (startedAt === null && elapsed === 0 && timedSubjectId === null) {
+      localStorage.removeItem(STORAGE_KEYS.timer);
+    } else {
+      localStorage.setItem(
+        STORAGE_KEYS.timer,
+        JSON.stringify({ elapsed, startedAt, timedSubjectId, lastSeenAt })
+      );
+    }
+  }, [elapsed, startedAt, timedSubjectId, lastSeenAt]);
 
   useEffect(() => {
     if (startedAt !== null) {

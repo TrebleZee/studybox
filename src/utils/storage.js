@@ -8,6 +8,8 @@ export const STORAGE_KEYS = {
   onboarded: "sb-onboarded",
   lastStreakReminder: "sb-last-streak-reminder",
   lastMilestoneReminder: "sb-last-milestone-reminder",
+  timer: "sb-timer",
+  sessionDraft: "sb-session-draft",
 };
 
 export const loadJson = (key, fallback) => {
