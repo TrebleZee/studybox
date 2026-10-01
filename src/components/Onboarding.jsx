@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TEMPLATES } from "../utils/subjects.js";
 import SubjectPicker from "./SubjectPicker.jsx";
+import VersionTag from "./VersionTag.jsx";
 
 const optionStyle = (C) => ({
   textAlign: "left",
@@ -56,6 +57,7 @@ export default function Onboarding({ C, onStartBlank, onUseTemplate, onChooseSub
       >
         <h1 style={{ fontSize: "20px", fontWeight: 700, letterSpacing: "-0.3px" }}>
           Welcome to StudyBox
+          <VersionTag C={C} style={{ marginLeft: "6px" }} />
         </h1>
         <p style={{ color: C.muted, fontSize: "12px", lineHeight: 1.6, margin: "6px 0 18px" }}>
           Plan your revision, time your study sessions and see your progress. Everything is

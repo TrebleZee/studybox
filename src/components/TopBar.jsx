@@ -1,6 +1,7 @@
 import { fmtDur } from "../utils/format.js";
 import { freezeStats } from "../utils/gameLogic.js";
 import ExamCountdown from "./ExamCountdown.jsx";
+import VersionTag from "./VersionTag.jsx";
 
 const VIEWS = [
   ["planner", "Planner"],
@@ -35,6 +36,7 @@ export default function TopBar({ C, view, onChangeView, game, grandTotal, subjec
         }}
       >
         StudyBox
+        <VersionTag C={C} style={{ marginLeft: "5px" }} />
       </span>
       {VIEWS.map(([v, label]) => (
         <button
