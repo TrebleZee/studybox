@@ -127,6 +127,26 @@ describe("surviving an app update", () => {
     expect(apply).toHaveBeenCalledTimes(1);
   });
 
+  // R3: the timed topic (shown under the timer, tagged on log) survives a reload.
+  it("keeps the timed topic across a reload", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-19T09:00:00.000Z"));
+    const first = renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Computer Science" }));
+    fireEvent.click(screen.getByText("Components of a Computer"));
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    act(() => vi.advanceTimersByTime(60000));
+    first.unmount();
+
+    renderApp();
+    expect(screen.getAllByText("Components of a Computer").length).toBeGreaterThan(1);
+    fireEvent.click(screen.getByRole("button", { name: "Log Session" }));
+    const saved = JSON.parse(localStorage.getItem("sb-sessions"));
+    expect(saved[0].subjectId).toBe("cs");
+    expect(saved[0].tags).toContain("Components of a Computer");
+    expect(localStorage.getItem("sb-session-draft")).toBeNull();
+  });
+
   // R2: an unsaved Add subject form in Settings must not be reloaded away.
   it("holds an update while the user is away from the planner", async () => {
     const user = userEvent.setup();
