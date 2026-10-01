@@ -1,4 +1,4 @@
-# StudyBox - v1.12.2
+# StudyBox [![Latest release](https://img.shields.io/github/v/release/TrebleZee/studybox?label=version)](https://github.com/TrebleZee/studybox/releases/latest)
 
 StudyBox is a lightweight study planner and revision timer built with React and Vite. It is designed to help you track topics, mark progress, time revision sessions, and keep a simple local history of your study work.
 
@@ -16,10 +16,11 @@ StudyBox is a lightweight study planner and revision timer built with React and 
   - The topic reader understands the layouts the boards use: numbered headings (`3.1.2 Memory`), labelled ones (`Topic 1 – Key concepts in biology`, `Unit Y101: …`, `Chapter B1: …`), history option codes (`1A The Age of the Crusades…`) and unnumbered headings above "What students need to learn". It skips admin sections, learning statements, maths notation appendices, page numbers and running footers, and picks the heading level that gives a usable checklist
   - Specs whose content isn't organised as headings (English set texts, Art and Design components, some maths specs laid out as tables) give few or no topics from the PDF; use the catalogue list, or add topics by hand
 - Includes several theme presets so you can change the app's overall look
-- Includes a built-in timer for focused study sessions
+- Includes a built-in timer for focused study sessions, showing the selected topic (or Asana task) underneath
 - Logs each session with duration, date, subject, tags, and an optional note
 - Shows progress and time summaries per subject
-- Works offline as a PWA once installed
+- Works offline as a PWA once installed, and updates itself while open without interrupting a study session
+- Shows the running version (e.g. `v1.14.0`) next to the StudyBox name on every screen
 - Can nudge you in the evening with a browser notification if today's streak is still unlogged
 - Tracks milestones such as NEA deadlines, required practicals and spoken language endorsements, with due dates, overdue highlighting and a browser reminder three days before; catalogue specs come with their milestones, and an "NEA" topic can be turned into a milestone with one confirmed click
 - Counts down to your next exam and shows, per subject, how many topics you have left, how many to cover each week and whether you're ahead, on track or behind; for subjects you sit in summer 2027, dates come from the boards' published timetables, and you can set your own exam year and dates for any paper
@@ -44,7 +45,9 @@ StudyBox has four main views:
 - `Analysis` for streaks, XP and time breakdowns
 - `Settings` for themes, editing or deleting subjects, importing a subject spec PDF, backup and restore, and the optional Asana integration
 
-The timer is based on timestamps rather than a simple interval counter, so it stays accurate even if the tab is backgrounded or the app is opened in standalone mode.
+The timer is based on timestamps rather than a simple interval counter, so it stays accurate even if the tab is backgrounded or the app is opened in standalone mode. It is also saved locally, so a refresh or app update resumes the session.
+
+The version shown next to the StudyBox name in the top bar is read from `package.json` at build time, so it always matches the release you're running.
 
 All data is stored locally in `localStorage`. Nothing is synced to a server. Use **Settings > Backup & Restore** to download a JSON backup, since browsers can clear site data.
 
@@ -122,7 +125,8 @@ An open app checks for a new version every 15 minutes and whenever it comes back
 
 - `src/App.jsx` - app shell: state, persistence effects, handlers and the view switch
 - `src/components/` - `PlannerView`, `LogView`, `SettingsView` (with `settings/` cards), `Onboarding`, `TopBar`, `AnalysisPanel`, `AsanaTasksPanel` and smaller pieces
-- `src/hooks/useTimer.js` - timestamp-anchored study timer
+- `src/hooks/useTimer.js` - timestamp-anchored study timer, saved across reloads
+- `src/hooks/useAppUpdate.js` and `src/pwa/updateStore.js` - checks for new versions and applies them only when it's safe
 - `src/utils/` - formatting, storage, subject normalisation, spec catalogue, streak/XP logic, backup and themes
 - `src/utils/specImport.js`, `pdfLines.js`, `topicExtraction.js`, `specInference.js` - spec PDF import: text lines from pdf.js, the topic checklist, and board/spec code/qualification detection
 - `src/data/specs/` - the spec catalogue (one JSON file per specification plus a generated search index)
@@ -141,5 +145,6 @@ StudyBox saves:
 - imported subject definitions and custom subjects
 - streak and XP progress
 - whether first-run setup has been completed
+- the current timer and the unlogged session's note, tags and topic
 
 Because storage is local to the browser, clearing site data will reset the app.
