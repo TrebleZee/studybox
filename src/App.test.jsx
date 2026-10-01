@@ -127,6 +127,37 @@ describe("surviving an app update", () => {
     expect(apply).toHaveBeenCalledTimes(1);
   });
 
+  // R2: an unsaved Add subject form in Settings must not be reloaded away.
+  it("holds an update while the user is away from the planner", async () => {
+    const user = userEvent.setup();
+    const apply = vi.fn();
+    renderApp();
+    await goTo(user, "Settings");
+    fireEvent.change(screen.getByPlaceholderText("Subject name"), {
+      target: { value: "Further Maths" },
+    });
+
+    act(() => markUpdateReady(apply));
+    expect(apply).not.toHaveBeenCalled();
+    expect(screen.getByPlaceholderText("Subject name").value).toBe("Further Maths");
+  });
+
+  it("holds an update during onboarding", () => {
+    const apply = vi.fn();
+    renderApp({ onboarded: false });
+
+    act(() => markUpdateReady(apply));
+    expect(apply).not.toHaveBeenCalled();
+  });
+
+  it("applies an update straight away on the idle planner", () => {
+    const apply = vi.fn();
+    renderApp();
+
+    act(() => markUpdateReady(apply));
+    expect(apply).toHaveBeenCalledTimes(1);
+  });
+
   it("applies the update once the session is logged", () => {
     vi.useFakeTimers();
     const apply = vi.fn();

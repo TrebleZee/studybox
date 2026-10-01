@@ -155,6 +155,7 @@ export default function TimerPanel({
       <textarea
         rows={2}
         placeholder="Session note (optional)"
+        data-autosaved=""
         value={note}
         onChange={(e) => setNote(e.target.value)}
         style={{

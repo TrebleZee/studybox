@@ -146,7 +146,12 @@ export default function StudyBox() {
   const { running, displaySecs, timedSubjectId } = timer;
   const timedSubject = subjects.find((subject) => subject.id === timedSubjectId);
   const timingAsana = asanaEnabled && timedSubjectId === asanaCfg.id;
-  const appUpdate = useAppUpdate({ sessionInProgress: running || displaySecs > 0 });
+  const needsOnboarding =
+    !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
+  const appUpdate = useAppUpdate({
+    sessionInProgress: running || displaySecs > 0,
+    idle: view === "planner" && !needsOnboarding,
+  });
 
   useEffect(() => {
     document.title = running ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
@@ -462,9 +467,6 @@ export default function StudyBox() {
       return { ok: false, error: "That template couldn't be loaded. Check your connection and try again." };
     }
   };
-
-  const needsOnboarding =
-    !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
 
   return (
     <div

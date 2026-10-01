@@ -9,8 +9,63 @@ describe("useAppUpdate", () => {
     document.body.innerHTML = "";
   });
 
-  const setup = (sessionInProgress) =>
-    renderHook((props) => useAppUpdate(props), { initialProps: { sessionInProgress } });
+  const setup = (sessionInProgress, idle = true) =>
+    renderHook((props) => useAppUpdate(props), { initialProps: { sessionInProgress, idle } });
+
+  const addField = (tag, value, attrs = {}) => {
+    const field = document.createElement(tag);
+    Object.entries(attrs).forEach(([key, val]) => field.setAttribute(key, val));
+    field.value = value;
+    document.body.appendChild(field);
+    return field;
+  };
+
+  // R2: reloading away from the idle planner can lose unsaved forms (adding a
+  // subject, a spec PDF import, onboarding), none of which are persisted.
+  it("waits until the app is back on the idle planner", () => {
+    const apply = vi.fn();
+    const { rerender } = setup(false, false);
+
+    act(() => markUpdateReady(apply));
+    act(() => vi.advanceTimersByTime(60 * 1000));
+    expect(apply).not.toHaveBeenCalled();
+
+    rerender({ sessionInProgress: false, idle: true });
+    expect(apply).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits while a field holds unsaved text, then retries", () => {
+    const apply = vi.fn();
+    const field = addField("input", "Further Maths");
+    setup(false);
+
+    act(() => markUpdateReady(apply));
+    act(() => vi.advanceTimersByTime(30 * 1000));
+    expect(apply).not.toHaveBeenCalled();
+
+    field.value = "";
+    act(() => vi.advanceTimersByTime(30 * 1000));
+    expect(apply).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits while the user is typing in a field", () => {
+    const apply = vi.fn();
+    addField("textarea", "").focus();
+    setup(false);
+
+    act(() => markUpdateReady(apply));
+    expect(apply).not.toHaveBeenCalled();
+  });
+
+  it("ignores fields whose text is saved across a reload", () => {
+    const apply = vi.fn();
+    addField("textarea", "Chapter 3", { "data-autosaved": "" });
+    addField("input", "on", { type: "checkbox" });
+    setup(false);
+
+    act(() => markUpdateReady(apply));
+    expect(apply).toHaveBeenCalledTimes(1);
+  });
 
   it("does nothing until an update is ready", () => {
     const { result } = setup(false);
@@ -35,7 +90,7 @@ describe("useAppUpdate", () => {
     act(() => vi.advanceTimersByTime(60 * 1000));
     expect(apply).not.toHaveBeenCalled();
 
-    rerender({ sessionInProgress: false });
+    rerender({ sessionInProgress: false, idle: true });
     expect(apply).toHaveBeenCalledTimes(1);
   });
 

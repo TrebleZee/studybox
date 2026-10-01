@@ -110,7 +110,7 @@ npm test
 
 StudyBox includes PWA support through `vite-plugin-pwa`. On a supported browser, you can install it to the home screen or launch it in a standalone window.
 
-An open app checks for a new version every 15 minutes and whenever it comes back to the foreground. A new version installs itself (with a reload) as soon as no study session is in progress; during a session a banner offers **Update now** instead. The running timer, session note and tags are saved locally, so a reload or refresh never loses a session.
+An open app checks for a new version every 15 minutes and whenever it comes back to the foreground. A new version installs itself (with a reload) as soon as no study session is in progress and the app is idle on the planner with nothing half-typed; otherwise (mid-session, in Settings or onboarding, or with an unsaved form) a banner offers **Update now** instead. The running timer, session note and tags are saved locally, so a reload or refresh never loses a session.
 
 ## Tech stack
 
