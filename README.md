@@ -20,7 +20,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Logs each session with duration, date, subject, tags, and an optional note
 - Shows progress and time summaries per subject
 - Works offline as a PWA once installed, and updates itself while open without interrupting a study session
-- Shows the running version (e.g. `v1.15.1`) next to the StudyBox name on every screen
+- Shows the running version (e.g. `v1.17.1`) next to the StudyBox name on every screen
 - Can nudge you in the evening with a browser notification if today's streak is still unlogged
 - Tracks milestones such as NEA deadlines, required practicals and spoken language endorsements, with due dates, overdue highlighting and a browser reminder three days before; catalogue specs come with their milestones, and an "NEA" topic can be turned into a milestone with one confirmed click
 - Counts down to your next exam and shows, per subject, how many topics you have left, how many to cover each week and whether you're ahead, on track or behind; for subjects you sit in summer 2027, dates come from the boards' published timetables, and you can set your own exam year and dates for any paper
@@ -60,16 +60,16 @@ If you have a live streak and haven't logged a session by 8pm local time, StudyB
 ## Quick Start
 
 - Go to [studybox-sigma.vercel.app](https://studybox-sigma.vercel.app) for a fully working version with no set up required
-- Click the "Add Subject" button to add a new subject
-- Click the "Add Topic" button to add a new topic to the subject
-- Click the "Start Timer" button to start a new study session
+- Pick how to start (your exact specs, a template, or blank); more subjects can be added later from **Settings > Add Subject**, from the catalogue, by hand or from a spec PDF
+- In the **Planner**, type a topic name and press **Add** to add it to the selected subject
+- Press **Start** (or Space) to time a session, then **Log Session** to save it
 - Study away!
 
 ## Development
 
 ### Requirements
 
-- Node.js 18 or newer
+- Node.js 20.19+ or 22.12+ (what Vite 8 requires; CI runs Node 22)
 - npm
 
 ### Install
@@ -118,14 +118,16 @@ An open app checks for a new version every 15 minutes and whenever it comes back
 ## Tech stack
 
 - React 19
-- Vite
+- Vite 8
 - `vite-plugin-pwa`
 
 ## Project structure
 
+- `src/main.jsx` - runs stored-data migrations, registers the service worker and mounts the app inside `ErrorBoundary`
 - `src/App.jsx` - app shell: state, persistence effects, handlers and the view switch
-- `src/components/` - `PlannerView`, `LogView`, `SettingsView` (with `settings/` cards), `Onboarding`, `TopBar`, `AnalysisPanel`, `AsanaTasksPanel` and smaller pieces
+- `src/components/` - `PlannerView`, `LogView`, `SettingsView` (with `settings/` cards), `Onboarding`, `TopBar`, `AnalysisPanel`, `AsanaTasksPanel`, `ErrorBoundary`, `UndoBar`, `SaveFailedBanner` and smaller pieces
 - `src/hooks/useTimer.js` - timestamp-anchored study timer, saved across reloads
+- `src/hooks/` also holds the reminders (`useStreakReminder`, `useMilestoneReminder`), undo (`useUndoDelete`), the failed-save banner state (`useSaveFailure`) and the Space shortcut (`useSpaceToggle`)
 - `src/hooks/useAppUpdate.js` and `src/pwa/updateStore.js` - checks for new versions and applies them only when it's safe
 - `src/store/` - the only code that touches `localStorage`: keys, scopes (account / device / secret), a change subscription, and how each key loads and merges changes from other tabs
 - `src/utils/` - formatting, subject normalisation, spec catalogue, streak/XP logic, backup and themes
@@ -135,6 +137,8 @@ An open app checks for a new version every 15 minutes and whenever it comes back
 - `scripts/` - dev scripts (`build-spec-index.js`, `draft-spec.js` with its pure parser in `scripts/lib/`)
 - `src/services/asanaClient.js` - optional Asana API client
 - `public/` - icons and favicon assets
+- `vercel.json` - security headers (Content-Security-Policy and friends) for the deployed app
+- `docs/readiness/` - the V2 readiness findings ledger and dated reports; `docs/reviews/` - pre-merge review reports
 
 ## Data persistence
 
@@ -147,6 +151,8 @@ StudyBox saves:
 - streak and XP progress
 - whether first-run setup has been completed
 - the current timer and the unlogged session's note, tags and topic
+- what was deleted and when, so merging an older backup doesn't bring it back
+- the day each reminder last fired, and the stored-data schema version
 
 Because storage is local to the browser, clearing site data will reset the app.
 

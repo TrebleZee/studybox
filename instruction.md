@@ -47,6 +47,7 @@ This file documents the app structure so future changes stay consistent.
   - `groupTopicsByPaper(subject, topics)` returns one group per distinct paper combination in paper order ("All papers" when a topic is on every paper), then "Other" for topics without a known paper; it returns `[]` when no topic has a paper, and `TopicList` then renders the flat list exactly as before (pinned by a snapshot recorded before papers existed).
   - Foundation subjects hide higher-only topics by default behind a "Show higher-tier topics" toggle (state lives in `TopicList`).
 - Subjects may carry `milestones: [{ id, name, kind, due, done }]` (plus `catalogueMilestoneId` when seeded from the catalogue). `kind` is one of `MILESTONE_KINDS` (`nea`, `practical`, `coursework`, `other`); `due` is a local calendar date `YYYY-MM-DD` or `null`. The key is omitted when there are none. Milestones never award XP or affect streaks (`gameLogic.js` doesn't know about them).
+- Sessions include `id`, `subjectId`, `subjectName`, `subjectColor`, `duration`, `date`, `note` and `tags`, plus the optional `createdAt` / `updatedAt` stamps (see Sync-safe records).
 - Topics include `id`, `name`, `done` and `subtasks`. Topics seeded from the spec catalogue also carry `catalogueTopicId` (the catalogue topic they came from, so a later "reset to spec" can match them up); user-created topics have none. Seeded topics are freely editable. `normalizeSubjects` keeps `catalogueTopicId` only when it is a string.
 - Backups carry `version: 3` (`BACKUP_VERSION` in `src/utils/backup.js`). `parseBackup` loads unversioned, v1, v2 and v3 files (v1 subjects are migrated; pre-v3 files load with empty tombstones), and refuses a higher version rather than silently dropping fields it doesn't know. Optional, additive fields (e.g. `catalogueTopicId`, `papers`, topic `paper`, `higherOnly`, `createdAt`/`updatedAt`) don't bump the version: older builds ignore them and the rest of the backup still loads. Bump `BACKUP_VERSION` only for changes an older build would misread (renamed, removed or re-typed fields, or changed meaning). v3 was a bump because an older build would drop `tombstones` on re-export, and a later merge would then resurrect deleted records.
 
@@ -73,7 +74,6 @@ These rules exist so two copies of a user's data can be merged using only what i
 - `game.legacyXP` holds XP an install earned before derivation that its records can't explain. `settleLegacyXP` fixes it once, the first time a pre-1.15.1 save (or backup) is loaded, so nobody's total drops on upgrade; after that it never grows. `totalXP = deriveXP(...) + legacyXP`.
 - This is deliberate in both directions: deleting a subject or a completed topic (including converting one to a milestone) removes that topic XP, the same as unticking it. Freezes already used stay used; freezes available never go below zero.
 - For V2: a leaderboard must be computed from session records on the server and must ignore `legacyXP`, which is unverifiable by construction.
-- Sessions include `id`, `subjectId`, `subjectName`, `subjectColor`, `duration`, `date`, `note`, and `tags`.
 
 ## Spec catalogue
 
@@ -163,5 +163,12 @@ These rules exist so two copies of a user's data can be merged using only what i
 
 ## Code layout
 
-- Keep pure logic in `src/utils/` with a sibling `*.test.js`; keep views in `src/components/` with a `*.test.jsx`.
-- `App.jsx` should stay a thin shell; move view-specific state into the view that uses it.
+- Keep pure logic in `src/utils/*.js` or `src/store/*.js` with a sibling `*.test.js`; keep views in `src/components/*.jsx` with a sibling `*.test.jsx`; React hooks live in `src/hooks/`.
+- `App.jsx` should stay a thin shell and only ever get smaller; move view-specific state into the view that uses it, and record logic into `src/utils/` or `src/store/`.
+- Every storage key in `STORAGE_KEYS` and `SECRET_KEYS` is listed under Storage keys above, and nothing else is: `src/store/storageKeysDocs.test.js` compares them (and `docs/project-instructions.md`).
+
+## Workflow
+
+- Every change goes through the `git-workflow` skill (`.claude/skills/git-workflow/SKILL.md`): a `fix/`, `feat/`, `refactor/` or `chore/` branch off an up-to-date `master`, a PR, and a tag for anything that changes the shipped app (`fix/` patch, `feat/` minor, `refactor/` major, `chore/` no tag). `feat/` and `refactor/` PRs pass the review gate (`release-reviewer`, then `release-fixer`) before merging. `v2.0.0` is reserved for accounts and sync.
+- `npm run lint`, `npm test` and `npm run build` must pass before a PR; CI runs the same three.
+- Before starting a phase of the V2 plan, run the `readiness-pass` skill: it re-audits `master` against `docs/readiness/findings.md` and writes a dated report next to it.
