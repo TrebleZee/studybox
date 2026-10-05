@@ -187,7 +187,9 @@ describe("undo merge", () => {
     await goTo(user, "Settings");
     await user.upload(screen.getByLabelText("Merge backup file"), mergeFile());
     expect(await screen.findByText("Backup merged with the data on this device.")).toBeTruthy();
-    expect(snapshot()).not.toEqual(before);
+    // The merge lands in state after an await, so its storage write is a passive
+    // effect that can run just after the message renders.
+    await waitFor(() => expect(snapshot()).not.toEqual(before));
 
     await user.click(screen.getByRole("button", { name: "Undo merge" }));
     await waitFor(() => expect(snapshot()).toEqual(before));
