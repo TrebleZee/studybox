@@ -164,6 +164,24 @@ describe("mergeData", () => {
     expect(leftFirst.subjects[0].topics.find((t) => t.id === "t2").done).toBe(true);
   });
 
+  // Known limit, pinned so a change to it is deliberate (see instruction.md).
+  it("can forget one copy's rename when three copies meet around a deleted subject", () => {
+    const a = copy({
+      subjects: [subject("phys", [topic("t1"), topic("mine", { done: true, updatedAt: at(3) })], { name: "Renamed", updatedAt: at(4) })],
+    });
+    const b = copy({ tombstones: addTombstone(emptyTombstones(), "subjects", "phys", at(6)) });
+    const c = copy({ subjects: [subject("phys", [topic("t1", { done: true, updatedAt: at(7) })])] });
+
+    const dropFirst = merge(merge(a, b), c).subjects[0];
+    const reviveFirst = merge(a, merge(b, c)).subjects[0];
+    expect(dropFirst.name).toBe("phys");
+    expect(ids(dropFirst.topics)).toEqual(["t1"]);
+    expect(reviveFirst.name).toBe("Renamed");
+    expect(ids(reviveFirst.topics).sort()).toEqual(["mine", "t1"]);
+    // Either way the work done after the deletion survives.
+    [dropFirst, reviveFirst].forEach((result) => expect(result.topics.find((t) => t.id === "t1").done).toBe(true));
+  });
+
   it("collapses a repeated id the same way whichever copy has it", () => {
     const a = copy({
       sessions: [session("x", 5, { note: "v1", updatedAt: at(5) }), session("x", 5, { note: "v2", updatedAt: at(1) })],

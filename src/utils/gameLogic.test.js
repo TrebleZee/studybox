@@ -258,6 +258,23 @@ describe("buildInitialGame", () => {
     expect(third.frozenDates).toEqual(first.frozenDates);
   });
 
+  it("does not spend another freeze when a lapsed streak's newest session is deleted", () => {
+    const sessions = [
+      { date: localDay(2026, 9, 1).toISOString(), duration: 60 * 60 * 45 },
+      { date: localDay(2026, 9, 2).toISOString(), duration: 60 * 60 },
+    ];
+    const lapsed = buildInitialGame({ currentStreak: 2, lastStudyDate: "2026-09-02", legacyXP: 0, frozenDates: [] }, sessions, [], now);
+    const after = buildInitialGame(lapsed, sessions.slice(0, 1), [], now);
+    expect(after.currentStreak).toBe(0);
+    expect(after.freezesUsed).toBe(lapsed.freezesUsed);
+  });
+
+  it("rebuilds a lapsed streak once something newer is studied", () => {
+    const lapsed = { currentStreak: 0, lastStudyDate: "2026-09-02", legacyXP: 0, frozenDates: [] };
+    const sessions = [{ date: localDay(2026, 9, 14).toISOString(), duration: 600 }];
+    expect(buildInitialGame(lapsed, sessions, [], now).currentStreak).toBe(1);
+  });
+
   it("still rebuilds the streak from history when the saved game is missing", () => {
     const sessions = [
       { date: localDay(2026, 9, 13).toISOString(), duration: 600 },

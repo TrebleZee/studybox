@@ -243,8 +243,13 @@ export const buildInitialGame = (loaded, sessions, subjects, nowMs = Date.now())
   // A streak the saved game already recorded as lapsed stays lapsed. Without
   // this, the history would revive it on every launch and validateStreak
   // would spend the user's freezes on the same missed days again.
+  // (Also when the newest session was since deleted: nothing newer than the
+  // lapse has been studied.)
   const alreadyLapsed =
-    storedGame.currentStreak === 0 && Boolean(lastStudyDate) && storedGame.lastStudyDate === lastStudyDate;
+    storedGame.currentStreak === 0 &&
+    Boolean(lastStudyDate) &&
+    Boolean(storedGame.lastStudyDate) &&
+    lastStudyDate <= storedGame.lastStudyDate;
   const historicalStreak = alreadyLapsed
     ? 0
     : dateStrings.length
