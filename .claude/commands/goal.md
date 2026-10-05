@@ -36,19 +36,19 @@ Phase M2 (confirm the scope answer by 9 Oct, B1/V1 check-in 15 Oct, device check
 
 Each lane is one session's queue: its branches run in order, because they share files. Different lanes don't share files, so they can run at the same time; each needs its own worktree. The files every PR edits (`docs/STATUS.md`, `docs/readiness/findings.md`, `instruction.md`, `README.md`) are handled by the git-workflow skill's merge step, not by lanes.
 
-| Lane | Branches, in order | Main files | Waits for |
-| --- | --- | --- | --- |
-| 1. Normalizers and storage | A2.1 (done, #39) → A2.9 → A3.2 → A3.3 → Phase C: `fix/bound-imported-values` (N14, N28) | normalizers in `src/utils/`, `src/store/appState.js`, `localStore.js`, `usePersistedState.js`, `migrations.js`; N28 also `EditSessionModal.jsx` | nothing for A2.9. `fix/bound-imported-values` is Phase C and also waits for A2.6 (same modal) |
-| 2. Undo and replacing data | A2.3 (done, #42) → `fix/undo-merge-offer-two-tabs` (C14) → A2.4 → A3.1 | `src/utils/undo.js`, `src/hooks/useUndoDelete.js`, Settings Backup & Restore, `Onboarding.jsx`, restore and onboarding handlers in `App.jsx` | nothing for A2.4. A3.1 waits for A2.4 live, and for A3.2 if their normalizer changes overlap |
-| 3. Timer and logging | A2.5 → A2.7 → A2.8 → Phase C: `fix/asana-session-tags` (N27) | `src/hooks/useTimer.js`, `TimerPanel.jsx`, `UndoBar.jsx`, `logSession` in `App.jsx` | A2.5 adds to the undo bar: while lane 2 is open, touch `useUndoDelete.js` only to add the timer case. `fix/asana-session-tags` waits for the 25 Oct B1 decision and is dropped if it says "keep" |
-| 4. Session edit | A2.6 | `EditSessionModal.jsx` | nothing |
-| 5. Reminders | A2.11 | `useStreakReminder.js`, `useMilestoneReminder.js` | nothing |
-| 6. App update | A2.10 | `useAppUpdate.js`, `UpdateBanner.jsx`, `main.jsx` | nothing. It reads whether a timer, edit or undo is active; it doesn't change those |
-| 7. Docs and repo chores | A2.2 (done, #41) → `chore/ignore-drafts` → `chore/document-known-gaps` | `.gitignore`, `instruction.md` (known limits, a new Asana section) | nothing |
-| 8. Status page | `chore/status-post-merge` | `docs/STATUS.md`, `.claude/skills/git-workflow/SKILL.md`, `.claude/skills/readiness-pass/SKILL.md`, `src/statusDoc.test.js` | nothing. Merge it alone, by 9 Oct; PRs open at that point then sync and follow the new STATUS rule |
-| 9. Safari backup | A2.12 | `src/utils/backup.js` (download only) | a reproduction on Safari or an iPhone (maintainer, 23 Oct) |
+| Lane | Branches, in order | Main files | Waits for | Model (tier) |
+| --- | --- | --- | --- | --- |
+| 1. Normalizers and storage | A2.1 (done, #39) → A2.9 → A3.2 → A3.3 → Phase C: `fix/bound-imported-values` (N14, N28) | normalizers in `src/utils/`, `src/store/appState.js`, `localStore.js`, `usePersistedState.js`, `migrations.js`; N28 also `EditSessionModal.jsx` | nothing for A2.9. `fix/bound-imported-values` is Phase C and also waits for A2.6 (same modal) | `claude-opus-5-5` (High) for A2.9 and `fix/bound-imported-values`; `claude-fable-5-1` (Critical) for A3.2 and A3.3 |
+| 2. Undo and replacing data | A2.3 (done, #42) → `fix/undo-merge-offer-two-tabs` (C14) → A2.4 → A3.1 | `src/utils/undo.js`, `src/hooks/useUndoDelete.js`, Settings Backup & Restore, `Onboarding.jsx`, restore and onboarding handlers in `App.jsx` | nothing for A2.4. A3.1 waits for A2.4 live, and for A3.2 if their normalizer changes overlap | `claude-opus-5-5` (High) for C14 and A2.4; `claude-fable-5-1` (Critical) for A3.1 |
+| 3. Timer and logging | A2.5 → A2.7 → A2.8 → Phase C: `fix/asana-session-tags` (N27) | `src/hooks/useTimer.js`, `TimerPanel.jsx`, `UndoBar.jsx`, `logSession` in `App.jsx` | A2.5 adds to the undo bar: while lane 2 is open, touch `useUndoDelete.js` only to add the timer case. `fix/asana-session-tags` waits for the 25 Oct B1 decision and is dropped if it says "keep" | `claude-opus-5-5` (High) |
+| 4. Session edit | A2.6 | `EditSessionModal.jsx` | nothing | `claude-sonnet-5-5` (Standard) |
+| 5. Reminders | A2.11 | `useStreakReminder.js`, `useMilestoneReminder.js` | nothing | `claude-sonnet-5-5` (Standard) |
+| 6. App update | A2.10 | `useAppUpdate.js`, `UpdateBanner.jsx`, `main.jsx` | nothing. It reads whether a timer, edit or undo is active; it doesn't change those | `claude-opus-5-5` (High) |
+| 7. Docs and repo chores | A2.2 (done, #41) → `chore/ignore-drafts` → `chore/document-known-gaps` | `.gitignore`, `instruction.md` (known limits, a new Asana section) | nothing | `claude-haiku-4-5-20251001` (Mechanical) for `chore/ignore-drafts`; `claude-sonnet-5-5` (Standard) for `chore/document-known-gaps` |
+| 8. Status page | `chore/status-post-merge` | `docs/STATUS.md`, `.claude/skills/git-workflow/SKILL.md`, `.claude/skills/readiness-pass/SKILL.md`, `src/statusDoc.test.js` | nothing. Merge it alone, by 9 Oct; PRs open at that point then sync and follow the new STATUS rule | `claude-sonnet-5-5` (Standard) |
+| 9. Safari backup | A2.12 | `src/utils/backup.js` (download only) | a reproduction on Safari or an iPhone (maintainer, 23 Oct) | `claude-sonnet-5-5` (Standard) |
 
-Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every lane is empty.
+Lane 1's A2.9 starts once A2.1 has merged. The Model column follows the risk tiers in the `orchestrate` skill: the tier of the riskiest branch a session runs, never below High for a `high` finding. A coordinator can run these lanes as separate full sessions with that skill. The exit check (A3.4) runs once every lane is empty.
 
 ## Decisions already made (do not re-ask)
 

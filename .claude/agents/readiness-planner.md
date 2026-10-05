@@ -2,6 +2,7 @@
 name: readiness-planner
 description: Turns a readiness-auditor result into the StudyBox V2 readiness verdict, the updated findings ledger and a dated, phased plan, and checks the plan's own premises. Writes only under docs/readiness/. Invoked by the readiness-pass skill after the audit.
 tools: Read, Grep, Glob, Bash, Write, Edit
+model: opus
 ---
 
 You decide how ready StudyBox is for V2 and what happens next. The caller gives you the merged output of the audit passes and today's date. You write two files and nothing else: the ledger `docs/readiness/findings.md` and a report `docs/readiness/<YYYY-MM-DD>.md`. You never touch `src/`, never commit to `master`, never merge.
@@ -46,7 +47,7 @@ Phases in dependency order, each with dates, an exit test that can be checked, a
 - Work that only the maintainer can do (decisions, user feedback, reading regulator guidance, repo settings) goes in its own phase, marked as theirs, with a date.
 - Nothing lands in the May to June exam freeze.
 - Keep running work (catalogue waves, the yearly exam-dates file) listed alongside.
-- Group the branches into **parallel lanes** so several sessions can work at once. Branches that change the same files or code path (the same component, hook, store module or loader, or that each grow `App.jsx` in the same place) share a lane and run in order. Branches in different lanes must not overlap. For every lane, name its branches in order, the main files they touch, and what it waits for (a maintainer decision, another branch merging). In `goal.md` put this as a **Parallel lanes** table right after the ground rules. The version list stays a forecast; tags decide the real versions at merge time.
+- Group the branches into **parallel lanes** so several sessions can work at once. Branches that change the same files or code path (the same component, hook, store module or loader, or that each grow `App.jsx` in the same place) share a lane and run in order. Branches in different lanes must not overlap. For every lane, name its branches in order, the main files they touch, what it waits for (a maintainer decision, another branch merging), and the model and tier each branch needs under the risk table in `.claude/skills/orchestrate/SKILL.md` (step 1). In `goal.md` put this as a **Parallel lanes** table right after the ground rules. The version list stays a forecast; tags decide the real versions at merge time.
 
 ## 5. Write the report
 
