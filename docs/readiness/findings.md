@@ -11,7 +11,6 @@ Last pass: 2026-10-05, `master` @ `84abc1d`, `v1.15.1`. Report: `docs/readiness/
 | ID | Severity | Area | Finding | Evidence | Planned branch |
 | --- | --- | --- | --- | --- | --- |
 | N3 | medium | failure paths | No error boundary, and a storage write that throws (quota) blanks the app | No `componentDidCatch` in `src/`; `saveJson` does not catch | `feat/error-boundary` |
-| N4 | medium | hosting | No security headers: no `vercel.json`, so no Content-Security-Policy | File absent | `chore/security-headers` |
 | N5 | medium | sync seam | The store reports whole arrays, not which records changed, and subjects and topics have no order field | `src/store/localStore.js` `notify`; `src/utils/merge.js` known limits | `chore/record-actions`, `feat/record-order` |
 | N6 | low | untrusted input | `normalizeSubject` throws on a subject whose id is `__proto__`, `constructor` or `toString` | Reproduced with `node -e` on `normalizeSubjects` | `fix/preset-lookup-own-keys` |
 | N8 | medium | destructive actions | Undo keeps the record's stamps unchanged, so with any other tab or the installed app open, even idle, an undone delete and an undone merge are reverted in every tab, including the one that pressed Undo, within one round of storage events; undo is reliable only with a single tab open | Reasoned from `src/store/appState.js` tab merges and `src/utils/undo.js`; documented limit in `instruction.md` | sync design: an "undeleted at" stamp |
@@ -30,6 +29,7 @@ Last pass: 2026-10-05, `master` @ `84abc1d`, `v1.15.1`. Report: `docs/readiness/
 
 | ID | Finding | Closed by | Verified |
 | --- | --- | --- | --- |
+| N4 | No security headers: no `vercel.json`, so no Content-Security-Policy | #35 | 2026-10-05: `src/securityHeaders.test.js` (no wildcard, no `unsafe-eval`, inline for styles only, Asana the only foreign origin); built app checked with the policy enforced, zero violations (see PR) |
 | N2 | Deleting a subject or session was one click with no confirmation or undo | #32 | 2026-10-05: `src/App.undo.test.jsx` (delete then undo leaves `sb-subjects`, `sb-sessions`, `sb-tombstones`, `sb-game` byte-identical for subjects, topics, milestones and sessions) |
 | N7 | Merge from file could not be undone | #32 | 2026-10-05: `src/App.undo.test.jsx` "undo merge" restores the exact pre-merge storage |
 | N1 | Two open tabs overwrote each other: nothing listened for storage changes and each tab wrote its whole in-memory array | #31 | 2026-10-05: reproduced and fixed in `src/App.multiTab.test.jsx` (two apps over one storage: concurrent sessions, stale-tab delete, at most one write per external change); checked in real Chrome with two pages; installed-PWA window not checked |
