@@ -87,7 +87,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 
 ### Agent (next steps)
 
-Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1). To run them as separate full sessions, a coordinator uses the `orchestrate` skill (at most 3 workers; the lanes table gives each one's model by risk; only the coordinator merges).
+Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1). To run them as separate full sessions, a coordinator uses the `orchestrate` skill (at most 3 workers; the lanes table gives each one's model by risk). The maintainer's local session merges and tags; the cloud coordinator launches workers and starts each lane's next item as soon as its PR merges.
 
 1. Lane 2: A2.4 `feat/undo-restore` (N11), then A3.1. C14 is fixed (#47, v1.18.1).
 2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
