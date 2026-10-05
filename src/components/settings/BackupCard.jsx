@@ -72,7 +72,8 @@ export default function BackupCard({ C, message, onExport, onImport, onMerge }) 
       <div style={{ color: C.muted, fontSize: "11px", lineHeight: 1.6, marginTop: "10px" }}>
         Restore replaces everything here with the file. Merge combines the file with what&apos;s
         already here, keeping the most recent version of anything changed in both. Use it to
-        bring two devices together.
+        bring two devices together. Changes made before version 1.15 have no edit time recorded,
+        so check anything you changed on both devices before then.
       </div>
       {message && (
         <div
