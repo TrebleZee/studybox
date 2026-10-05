@@ -57,7 +57,7 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed, re-planned as A2 and A3 |
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
-| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0) and A2.3b (#47, v1.18.1) merged; every lane open except 9 |
+| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0) and A2.3b (#47, v1.18.1) merged; every lane open except 9; A2.4 (#48, N11) ready for review |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | Not started |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
@@ -65,7 +65,7 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | D | Backend spike on test data | 30 Nov to 11 Dec | Ready by its gate; not before the B1 decision |
 | E | v2.0.0 accounts and sync | 4 Jan to 30 Apr 2027 | Blocked on B1, V1 |
 
-Open findings: 3 `high` (N9, N10, N11), 2 `blocker` (B1, V1). The full list is `docs/readiness/findings.md`.
+Open findings: 2 `high` (N9, N10) once #48 merges, 2 `blocker` (B1, V1). The full list is `docs/readiness/findings.md`.
 
 ## Needs actioning
 
@@ -84,12 +84,13 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 | 7 | Make the design gate doc (`claude/v2-design-gate.md`) available to the exit check | Missing for three passes, so B1's wording has never been checked against it | 6 Nov |
 | 8 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
 | 9 | Decide whether the timer Reset undo (#46) should survive an accidental restart: today pressing Start or Space after Reset withdraws the offer at once, so Undo can never overwrite a new session. Options: fold the new seconds into the restored session, or let Undo replace a session under a few seconds | Review finding R1 on #46 (`docs/reviews/feat-undo-timer-reset.md`); not in the goal, so not decided by an agent | any time |
+| 10 | Decide whether a bigger streak or legacy XP that a restored (or merged) file brought should be taken back by Undo with another tab open. Today the other tab keeps the larger values, because the game has no edit stamps and tabs merge it by taking the larger values; records and theme are restored. Fixing it means stamping the game and changing its merge (Critical tier) | Found building A2.4 (#48); pinned in `src/App.multiTab.test.jsx`; not in the goal, so not decided by an agent | before A3.1 |
 
 ### Agent (next steps)
 
 Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1). To run them as separate full sessions, a coordinator uses the `orchestrate` skill (at most 3 workers; the lanes table gives each one's model by risk; only the coordinator merges).
 
-1. Lane 2: A2.4 `feat/undo-restore` (N11), then A3.1. C14 is fixed (#47, v1.18.1).
+1. Lane 2: A2.4 `feat/undo-restore` (N11) is #48, ready for review; then A3.1. C14 is fixed (#47, v1.18.1).
 2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
 3. Lane 1: A3.2 (A2.9 merged in #45).
 4. Open now: A2.7 (lane 3), A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
@@ -97,7 +98,7 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 ## Known risks
 
 - **Undo merge with two tabs open keeps the file's new records** (by decision). Records the merged file added come back from the other tab after Undo merge; everything that was here before is restored.
-- **Restore from file has no undo** (N11). Picking the wrong backup replaces everything; restoring an old (pre-v3) backup also forgets what was deleted (N10).
+- **Restore from file can be undone only until something changes** (N11 fixed by #48). Picking the wrong backup replaces everything; "Undo restore" brings it back until the next import, change or reload. Restoring an old (pre-v3) backup also forgets what was deleted (N10), and with another tab open, records only the file had and a bigger streak from the file stay after Undo.
 - **Reminders may crash the app on Android** (N20, proven with a stub, not on a device).
 - **Streaks can change after a timezone change** (N26). A trip abroad can shorten the shown streak, and occasionally lapse it.
 - **The Asana task name is saved in the session's tags** (N27), and so in every backup.
