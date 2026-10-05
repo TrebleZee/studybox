@@ -6,12 +6,15 @@ import Onboarding from "./components/Onboarding.jsx";
 import PlannerView from "./components/PlannerView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import TopBar from "./components/TopBar.jsx";
+import SaveFailedBanner from "./components/SaveFailedBanner.jsx";
 import UndoBar from "./components/UndoBar.jsx";
 import UpdateBanner from "./components/UpdateBanner.jsx";
 import useAppUpdate from "./hooks/useAppUpdate.js";
 import useMilestoneReminder from "./hooks/useMilestoneReminder.js";
 import useStreakReminder from "./hooks/useStreakReminder.js";
 import useTimer from "./hooks/useTimer.js";
+import useSaveFailure from "./hooks/useSaveFailure.js";
+import useSpaceToggle from "./hooks/useSpaceToggle.js";
 import useUndoDelete from "./hooks/useUndoDelete.js";
 import { buildCss } from "./utils/appCss.js";
 import { buildBackup, downloadBackup, parseBackup, readFileText } from "./utils/backup.js";
@@ -144,6 +147,7 @@ export default function StudyBox() {
   const sessionInProgress = running || displaySecs > 0;
   const needsOnboarding =
     !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
+  const saveFailed = useSaveFailure();
   const appUpdate = useAppUpdate({
     sessionInProgress,
     idle: view === "planner" && !needsOnboarding,
@@ -164,27 +168,7 @@ export default function StudyBox() {
     document.title = running ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
   }, [running, displaySecs]);
 
-  // Space toggles the timer unless the user is typing or a dialog is open.
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.code !== "Space") return;
-      if (document.querySelector('[role="dialog"]')) return;
-      if (e.target?.closest?.("[data-own-keys]")) return;
-
-      const target = e.target;
-      const tag = target?.tagName;
-      if (target?.isContentEditable || tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") {
-        return;
-      }
-
-      e.preventDefault();
-      if (running) timer.pause();
-      else timer.start();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  });
+  useSpaceToggle(() => (running ? timer.pause() : timer.start()));
 
   const subTotal = (id) =>
     sessions
@@ -494,6 +478,7 @@ export default function StudyBox() {
       }}
     >
       <style>{buildCss(C)}</style>
+      {saveFailed && <SaveFailedBanner C={C} onDownload={exportData} />}
 
       {needsOnboarding ? (
         <Onboarding
