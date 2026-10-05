@@ -63,7 +63,7 @@ describe("undo for timer Reset (N22)", () => {
     fireEvent.click(within(undoBar()).getByRole("button", { name: "Undo" }));
     act(() => vi.advanceTimersByTime(60_000));
     expect(screen.getByText(fmt(TWO_HOURS))).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Start" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Resume" })).toBeTruthy();
   });
 
   it("survives a reload after Undo", () => {
@@ -117,10 +117,20 @@ describe("undo for timer Reset (N22)", () => {
     expect(screen.getByText(fmt(10))).toBeTruthy();
   });
 
-  it("is replaced by a later delete and cleared when the view changes", () => {
+  it("is cleared when the view changes", () => {
     studyTwoHours();
     click("Reset");
     click("Analysis");
     expect(undoBar()).toBeNull();
+  });
+
+  it("is replaced by a later delete, whose undo leaves the timer alone", () => {
+    studyTwoHours();
+    click("Reset");
+    const [other] = screen.getAllByRole("button", { name: /^Delete topic / }).filter((b) => !b.getAttribute("aria-label").endsWith(TOPIC));
+    fireEvent.click(other);
+    expect(undoBar()).toBeNull();
+    fireEvent.click(within(screen.getByRole("status", { name: /Deleted/ })).getByRole("button", { name: "Undo" }));
+    expect(screen.getByText(fmt(0))).toBeTruthy();
   });
 });

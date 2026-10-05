@@ -12,10 +12,11 @@ const button = (C, strong) => ({
   flexShrink: 0,
 });
 
-// "Deleted <name>. Undo" after a delete. One at a time: the app replaces it
-// on the next delete and clears it when the view changes. Space on its
-// buttons presses them rather than toggling the timer (data-own-keys).
-export default function UndoBar({ C, name, onUndo, onDismiss, raised = false }) {
+// "Deleted <name>. Undo" after a delete, or `message` instead ("Reset timer."
+// after a timer Reset). One at a time: the app replaces it on the next
+// delete or Reset and clears it when the view changes. Space on its buttons
+// presses them rather than toggling the timer (data-own-keys).
+export default function UndoBar({ C, name, message, onUndo, onDismiss, raised = false }) {
   const labelId = useId();
   return (
     <div
@@ -42,7 +43,7 @@ export default function UndoBar({ C, name, onUndo, onDismiss, raised = false }) 
       }}
     >
       <span id={labelId} style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-        Deleted {name}.
+        {message ?? `Deleted ${name}.`}
       </span>
       <button type="button" className="nb" onClick={onUndo} style={button(C, true)}>
         Undo
