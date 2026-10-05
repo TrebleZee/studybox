@@ -231,3 +231,20 @@ describe("exit test: two profiles converge through backup files", () => {
     expect(comparable(again)).toEqual(comparable(first));
   });
 });
+
+describe("merging XP", () => {
+  it("re-derives XP from the merged records and never double counts legacy XP", () => {
+    const a = copy({ sessions: [session("a", 18)], game: { ...DEFAULT_GAME, totalXP: 130, legacyXP: 100 } });
+    const b = copy({ sessions: [session("b", 19)], game: { ...DEFAULT_GAME, totalXP: 90, legacyXP: 60 } });
+    const merged = merge(a, b);
+    expect(merged.game.legacyXP).toBe(100);
+    expect(merged.game.totalXP).toBe(100 + 30 + 30);
+    expect(merge(b, a).game.totalXP).toBe(merged.game.totalXP);
+  });
+
+  it("settles a pre-derivation backup against its own records before merging", () => {
+    const a = copy({ sessions: [session("a", 18)], game: { ...DEFAULT_GAME, totalXP: 30, legacyXP: 0 } });
+    const b = copy({ sessions: [session("b", 19)], game: { totalXP: 530 } });
+    expect(merge(a, b).game).toMatchObject({ legacyXP: 500, totalXP: 560 });
+  });
+});

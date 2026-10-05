@@ -57,6 +57,12 @@ These rules exist so two copies of a user's data can be merged using only what i
 - **Merge.** `mergeData` in `src/utils/merge.js` is the single merge implementation: last write wins per record on `updatedAt`, a tombstone removes a record unless it was edited after the deletion, and a subject's own fields, topics and milestones merge separately. It is commutative and idempotent, and `merge.test.js` holds the two-profile convergence test. Settings > Backup & Restore > "Merge from file" uses it; sync will use the same function.
 - **Stored schema version.** `sb-schema` holds `SCHEMA_VERSION` (`src/store/migrations.js`); `runMigrations()` runs from `main.jsx` before the app reads storage. Field defaults still belong in the normalizers. Add a migration step only for a change a normalizer can't express (moving a key, reshaping stored data).
 - Known limit: last-write-wins trusts device clocks. A device with a wrong clock can win or lose merges it shouldn't. Sync should stamp on the server.
+
+### XP is derived, never incremented (from 1.15.1)
+
+- `deriveXP(sessions, subjects)` in `gameLogic.js` is the only definition of XP: one per whole minute of each session (at least one for any session) plus `TOPIC_XP` (10) per completed topic. `game.totalXP` is kept in step with it by one effect in `App.jsx`; nothing may add to `totalXP` directly. Unticking a topic or deleting a session takes its XP back, so there is nothing to farm.
+- `game.legacyXP` holds XP an install earned before derivation that its records can't explain. `settleLegacyXP` fixes it once, the first time a pre-1.15.1 save (or backup) is loaded, so nobody's total drops on upgrade; after that it never grows. `totalXP = deriveXP(...) + legacyXP`.
+- For V2: a leaderboard must be computed from session records on the server and must ignore `legacyXP`, which is unverifiable by construction.
 - Sessions include `id`, `subjectId`, `subjectName`, `subjectColor`, `duration`, `date`, `note`, and `tags`.
 
 ## Spec catalogue

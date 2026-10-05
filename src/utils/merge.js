@@ -1,4 +1,4 @@
-import { buildInitialGame, normalizeGame } from "./gameLogic.js";
+import { buildInitialGame, normalizeGame, settleLegacyXP } from "./gameLogic.js";
 import { childKey, deletedAt, mergeTombstones } from "./tombstones.js";
 
 // Deterministic merge of two copies of a user's data (schema v3), using only
@@ -66,9 +66,12 @@ const bySessionOrder = (a, b) => {
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 };
 
-const mergeGame = (a, b, sessions, subjects, nowMs) => {
-  const left = normalizeGame(a);
-  const right = normalizeGame(b);
+// Each side's legacy XP is settled against its own records first; the merged
+// total is then re-derived from the merged records. Legacy XP takes the larger
+// side rather than the sum, so two copies of one history never double count.
+const mergeGame = (local, incoming, sessions, subjects, nowMs) => {
+  const left = settleLegacyXP(normalizeGame(local.game), local.sessions, local.subjects);
+  const right = settleLegacyXP(normalizeGame(incoming.game), incoming.sessions, incoming.subjects);
   const later = (x, y) => (!x ? y : !y ? x : x > y ? x : y);
   const frozenDates =
     left.frozenDates === null && right.frozenDates === null
@@ -80,7 +83,7 @@ const mergeGame = (a, b, sessions, subjects, nowMs) => {
       longestStreak: Math.max(left.longestStreak, right.longestStreak),
       lastStudyDate: later(left.lastStudyDate, right.lastStudyDate),
       streakProtectedUntil: Math.max(left.streakProtectedUntil || 0, right.streakProtectedUntil || 0) || null,
-      totalXP: Math.max(left.totalXP, right.totalXP),
+      legacyXP: Math.max(left.legacyXP, right.legacyXP),
       freezesUsed: Math.max(left.freezesUsed, right.freezesUsed),
       frozenDates,
     },
@@ -112,6 +115,6 @@ export const mergeData = (local, incoming, nowMs = Date.now()) => {
     subjects,
     sessions,
     tombstones,
-    game: mergeGame(local.game, incoming.game, sessions, subjects, nowMs),
+    game: mergeGame(local, incoming, sessions, subjects, nowMs),
   };
 };

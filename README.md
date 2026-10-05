@@ -20,7 +20,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Logs each session with duration, date, subject, tags, and an optional note
 - Shows progress and time summaries per subject
 - Works offline as a PWA once installed, and updates itself while open without interrupting a study session
-- Shows the running version (e.g. `v1.15.0`) next to the StudyBox name on every screen
+- Shows the running version (e.g. `v1.15.1`) next to the StudyBox name on every screen
 - Can nudge you in the evening with a browser notification if today's streak is still unlogged
 - Tracks milestones such as NEA deadlines, required practicals and spoken language endorsements, with due dates, overdue highlighting and a browser reminder three days before; catalogue specs come with their milestones, and an "NEA" topic can be turned into a milestone with one confirmed click
 - Counts down to your next exam and shows, per subject, how many topics you have left, how many to cover each week and whether you're ahead, on track or behind; for subjects you sit in summer 2027, dates come from the boards' published timetables, and you can set your own exam year and dates for any paper

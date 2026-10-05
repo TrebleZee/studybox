@@ -68,6 +68,50 @@ describe("StudyBox shell", () => {
     expect(screen.getByText("⚡ 12 XP")).toBeTruthy();
   });
 
+  it("takes topic XP back on untick, so ticking repeatedly can't farm XP", () => {
+    renderApp();
+    const name = screen.getAllByRole("checkbox")[0].getAttribute("aria-label").replace("Complete topic ", "");
+    const tick = () =>
+      fireEvent.click(screen.getByRole("checkbox", { name: new RegExp(`^(Complete|Reopen) topic ${name}$`) }));
+
+    tick();
+    expect(screen.getByText("⚡ 10 XP")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Completed \(1\)/ }));
+    tick();
+    expect(screen.getByText("⚡ 0 XP")).toBeTruthy();
+    for (let i = 0; i < 9; i += 1) tick();
+    expect(screen.getByText("⚡ 10 XP")).toBeTruthy();
+    expect(JSON.parse(localStorage.getItem("sb-game")).totalXP).toBe(10);
+  });
+
+  it("takes a session's XP back when the session is deleted", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-14T10:00:00.000Z"));
+    renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    act(() => vi.advanceTimersByTime(300000));
+    fireEvent.click(screen.getByRole("button", { name: "Log Session" }));
+    expect(screen.getByText("⚡ 5 XP")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Log" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delete session Physics" }));
+    expect(screen.getByText("⚡ 0 XP")).toBeTruthy();
+  });
+
+  it("keeps the XP an existing install had already earned", () => {
+    localStorage.setItem("sb-game", JSON.stringify({ totalXP: 740, currentStreak: 0 }));
+    renderApp();
+    expect(screen.getByText("⚡ 740 XP")).toBeTruthy();
+
+    const name = screen.getAllByRole("checkbox")[0].getAttribute("aria-label").replace("Complete topic ", "");
+    fireEvent.click(screen.getByRole("checkbox", { name: `Complete topic ${name}` }));
+    expect(screen.getByText("⚡ 750 XP")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Completed \(1\)/ }));
+    fireEvent.click(screen.getByRole("checkbox", { name: `Reopen topic ${name}` }));
+    expect(screen.getByText("⚡ 740 XP")).toBeTruthy();
+    expect(JSON.parse(localStorage.getItem("sb-game")).legacyXP).toBe(740);
+  });
+
   it("does not reset a streak before the post-23:59 24-hour deadline", () => {
     vi.useFakeTimers();
     const expiry = new Date(2026, 8, 14, 23, 59, 59, 999).getTime() + 86400000;
