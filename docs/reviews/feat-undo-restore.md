@@ -2,6 +2,7 @@
 
 Date: 2026-10-05 · Reviewer: release-reviewer · Fixer: release-fixer
 Verdict: fixed. Three in-diff findings (two medium, one low) fixed with a regression test each; nothing left open.
+Round 2 (release-reviewer on the fix commits `c8d4aab..bcc9ba9`, run as Fable): clean, no findings.
 
 ## Findings
 
