@@ -53,7 +53,7 @@ export const keysInScope = (scope) =>
 
 const listeners = new Set();
 
-// Listeners get { key, scope, type: "write" | "remove" | "external", value }.
+// Listeners get { key, scope, type: "write" | "remove" | "external" | "error", value }.
 // Secret values are never handed to listeners: they only learn that the key
 // changed.
 const notify = (key, type, value) => {
@@ -84,17 +84,25 @@ export const loadJson = (key, fallback) => {
   }
 };
 
-export const saveJson = (key, value) => {
-  localStorage.setItem(key, JSON.stringify(value));
+// A write that throws (storage full, or blocked) must not take the app down:
+// the value stays in memory and subscribers hear { key, type: "error" } so
+// the app can say so. Returns whether the write reached storage.
+const write = (key, raw, value) => {
+  try {
+    localStorage.setItem(key, raw);
+  } catch {
+    notify(key, "error", undefined);
+    return false;
+  }
   notify(key, "write", value);
+  return true;
 };
+
+export const saveJson = (key, value) => write(key, JSON.stringify(value), value);
 
 export const loadText = (key) => localStorage.getItem(key) || "";
 
-export const saveText = (key, value) => {
-  localStorage.setItem(key, value);
-  notify(key, "write", value);
-};
+export const saveText = (key, value) => write(key, value, value);
 
 export const removeKey = (key) => {
   localStorage.removeItem(key);

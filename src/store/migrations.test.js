@@ -50,6 +50,28 @@ describe("schema migrations", () => {
     expect(loadJson(STORAGE_KEYS.schema, null)).toBe(3);
   });
 
+  it("does not stamp a step as finished when one of its writes fails, so it retries next launch", () => {
+    saveJson(STORAGE_KEYS.schema, 3);
+    const oldSubjects = [{ id: "old" }];
+    saveJson(STORAGE_KEYS.subjects, oldSubjects);
+    const setItem = Storage.prototype.setItem;
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (key, value) {
+      if (key === STORAGE_KEYS.subjects) throw new DOMException("full", "QuotaExceededError");
+      return setItem.call(this, key, value);
+    });
+    const steps = [{ version: 4, up: ({ saveJson: save, STORAGE_KEYS: keys }) => save(keys.subjects, [{ id: "new" }]) }];
+
+    try {
+      expect(() => runMigrations(steps, 4)).toThrow();
+    } finally {
+      spy.mockRestore();
+    }
+    expect(loadJson(STORAGE_KEYS.schema, null)).toBe(3);
+    expect(loadJson(STORAGE_KEYS.subjects, null)).toEqual(oldSubjects);
+    expect(runMigrations(steps, 4).ran).toEqual([4]);
+    expect(loadJson(STORAGE_KEYS.subjects, null)).toEqual([{ id: "new" }]);
+  });
+
   it("leaves data from a newer build alone", () => {
     saveJson(STORAGE_KEYS.schema, 99);
     expect(runMigrations()).toEqual({ from: 99, to: 99, newer: true, ran: [] });
