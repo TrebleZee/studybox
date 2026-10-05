@@ -56,7 +56,11 @@ These rules exist so two copies of a user's data can be merged using only what i
 - **Soft deletes.** Deleting a subject, topic, milestone or session writes a tombstone (`sb-tombstones`: `{ subjects, topics, milestones, sessions }`, each `id -> deletedAt`; topics and milestones are keyed `subjectId::id` via `childKey`). Tombstones live beside the data rather than as a `deletedAt` flag on each record, so no view filters deleted rows. Any new delete path must call `entomb` in `App.jsx`.
 - **Merge.** `mergeData` in `src/utils/merge.js` is the single merge implementation: last write wins per record on `updatedAt`, a tombstone removes a record unless it was edited after the deletion, and a subject's own fields, topics and milestones merge separately. It is commutative and idempotent, and `merge.test.js` holds the two-profile convergence test. Settings > Backup & Restore > "Merge from file" uses it; sync will use the same function.
 - **Stored schema version.** `sb-schema` holds `SCHEMA_VERSION` (`src/store/migrations.js`); `runMigrations()` runs from `main.jsx` before the app reads storage. Field defaults still belong in the normalizers. Add a migration step only for a change a normalizer can't express (moving a key, reshaping stored data).
-- Known limit: last-write-wins trusts device clocks. A device with a wrong clock can win or lose merges it shouldn't. Sync should stamp on the server.
+- A deleted subject comes back if it, or any topic or milestone in it, was edited after the deletion. A merge never discards work done since.
+- Known limits, to settle in the V2 sync design:
+  - Last-write-wins trusts device clocks. A device with a wrong clock can win or lose merges it shouldn't. Sync should stamp on the server.
+  - Records from before v3 have no edit time. Where two copies differ on such a record the winner is arbitrary, though the same on every device.
+  - The records converge whatever order copies are merged in, but the *order* of subjects and topics does not: two devices can hold the same data in a different order. Sync needs an explicit order field.
 
 ### XP is derived, never incremented (from 1.15.1)
 

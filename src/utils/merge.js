@@ -15,6 +15,13 @@ import { childKey, deletedAt, mergeTombstones } from "./tombstones.js";
 // - A subject's own fields, its topics and its milestones merge separately,
 //   so ticking a topic on one device and renaming the subject on another
 //   both survive.
+// - A deleted subject stays deleted unless it, or anything in it, was edited
+//   after the deletion: work done since is never thrown away by a merge.
+//
+// Known limits (see instruction.md): records from before v3 have no edit
+// time, so where two copies differ on those the winner is arbitrary (but the
+// same on every device); and the order of subjects and topics can differ
+// between copies that hold the same records.
 
 const stamp = (record) => record?.updatedAt || "";
 
@@ -28,9 +35,26 @@ const survives = (record, tombstones, kind, key) => {
   return !removed || stamp(record) > removed;
 };
 
+// A hand-edited or corrupt file can repeat an id. Collapse repeats with the
+// same rule as a merge, so the result doesn't depend on which copy had them.
+const dedupe = (list) => {
+  const byId = new Map();
+  list.forEach((item) => byId.set(item.id, byId.has(item.id) ? pick(byId.get(item.id), item) : item));
+  return byId.size === list.length ? list : [...byId.values()];
+};
+
+// The latest edit to a subject or anything inside it.
+const lastActivity = (subject) =>
+  [subject, ...(subject.topics || []), ...(subject.milestones || [])].reduce(
+    (latest, record) => (stamp(record) > latest ? stamp(record) : latest),
+    ""
+  );
+
 // Union by id. The winner's order comes first, then anything only the other
 // side has, in that side's order.
-const mergeById = (winnerList, otherList, combine) => {
+const mergeById = (winnerRaw, otherRaw, combine) => {
+  const winnerList = dedupe(winnerRaw);
+  const otherList = dedupe(otherRaw);
   const others = new Map(otherList.map((item) => [item.id, item]));
   const seen = new Set();
   const merged = [];
@@ -105,7 +129,10 @@ export const mergeData = (local, incoming, nowMs = Date.now()) => {
       : [incoming.subjects, local.subjects];
   const subjects = mergeById(first, second, (a, b) => mergeSubject(a, b, tombstones))
     .map((subject) => mergeSubject(subject, subject, tombstones))
-    .filter((subject) => survives(subject, tombstones, "subjects", subject.id));
+    .filter((subject) => {
+      const removed = deletedAt(tombstones, "subjects", subject.id);
+      return !removed || lastActivity(subject) > removed;
+    });
 
   const sessions = mergeById(local.sessions, incoming.sessions, pick)
     .filter((session) => survives(session, tombstones, "sessions", session.id))

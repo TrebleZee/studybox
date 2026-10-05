@@ -128,6 +128,51 @@ describe("mergeData", () => {
     expect(merged.subjects[0]).not.toHaveProperty("milestones");
   });
 
+  it("keeps a deleted subject whose topics were worked on after the deletion", () => {
+    const tombstones = addTombstone(emptyTombstones(), "subjects", "physics", at(5));
+    const phone = copy({ tombstones });
+    const laptop = copy({
+      subjects: [subject("physics", [topic("t1", { done: true, updatedAt: at(10) }), topic("t2")])],
+    });
+    [merge(laptop, phone), merge(phone, laptop)].forEach((merged) => {
+      expect(ids(merged.subjects)).toEqual(["physics"]);
+      expect(merged.subjects[0].topics[0].done).toBe(true);
+    });
+  });
+
+  it("still deletes a subject when the only edits in it came before the deletion", () => {
+    const tombstones = addTombstone(emptyTombstones(), "subjects", "physics", at(12));
+    const laptop = copy({ subjects: [subject("physics", [topic("t1", { done: true, updatedAt: at(10) })])] });
+    expect(merge(laptop, copy({ tombstones })).subjects).toEqual([]);
+  });
+
+  it("gives the same records whatever order three copies are merged in", () => {
+    const a = copy({ subjects: [subject("c", [topic("t1"), topic("t2", { done: true, updatedAt: at(9) })])] });
+    const b = copy({ tombstones: addTombstone(emptyTombstones(), "subjects", "c", at(4)) });
+    const c = copy({
+      subjects: [subject("c", [topic("t1"), topic("t2", { updatedAt: at(3) })], { name: "C2", updatedAt: at(5) })],
+      sessions: [session("s", 6)],
+    });
+    const flat = (data) => ({
+      sessions: data.sessions,
+      tombstones: data.tombstones,
+      subjects: data.subjects.map((s) => ({ ...s, topics: [...s.topics].sort((x, y) => (x.id < y.id ? -1 : 1)) })),
+    });
+    const leftFirst = merge(merge(a, b), c);
+    expect(flat(merge(a, merge(b, c)))).toEqual(flat(leftFirst));
+    expect(flat(merge(merge(c, a), b))).toEqual(flat(leftFirst));
+    expect(leftFirst.subjects[0].topics.find((t) => t.id === "t2").done).toBe(true);
+  });
+
+  it("collapses a repeated id the same way whichever copy has it", () => {
+    const a = copy({
+      sessions: [session("x", 5, { note: "v1", updatedAt: at(5) }), session("x", 5, { note: "v2", updatedAt: at(1) })],
+    });
+    const b = copy({ sessions: [session("x", 5, { note: "v3", updatedAt: at(3) })] });
+    expect(merge(a, b).sessions.map((s) => s.note)).toEqual(["v1"]);
+    expect(merge(b, a).sessions.map((s) => s.note)).toEqual(["v1"]);
+  });
+
   it("does not confuse the same topic id in two subjects", () => {
     const a = copy({ subjects: [subject("physics", [topic("t0")]), subject("maths", [topic("t0")])] });
     const b = copy({ tombstones: addTombstone(emptyTombstones(), "topics", childKey("physics", "t0"), at(4)) });
