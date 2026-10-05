@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Claude Code state (skills and agents are tracked, the rest is per-machine)
+.claude/worktrees/
+.claude/settings.local.json
