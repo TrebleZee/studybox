@@ -17,7 +17,6 @@ Last pass: 2026-10-05, `master` @ `84abc1d`, `v1.15.1`. Report: `docs/readiness/
 | C1 | low | structure | `App.jsx` is 651 lines against a 480 target; all record mutations live in it | `wc -l` | `chore/record-actions` |
 | C2 | low | performance | Main bundle is 878 kB in one chunk | `npm run build` | `chore/code-split` |
 | C3 | medium | accessibility | Topic tick boxes are `div`s with `role="checkbox"` and no key handling, so they look unreachable by keyboard | Reasoned from `TopicList.jsx`; needs a real accessibility pass | `fix/keyboard-topic-checkboxes` |
-| C4 | low | docs | Project instructions describe v1.2.1, 8 storage keys and no store layer | Project instructions vs `instruction.md` | `chore/docs-sync` |
 | C5 | low | merge | Id-less sessions in a foreign file duplicate on repeated merge; restore skips streak validation until reload | `docs/reviews/feat-schema-v3.md` follow-ups P3, P4 | `fix/` each |
 | C6 | low | dependencies | Nine `npm audit` findings, all in dev tooling that does not ship | `npm audit` | `chore/dev-deps` |
 | C7 | unknown | process | Whether the CI check is a required status on `master` could not be read | Branch protection API returned 403 | maintainer to confirm |
@@ -27,6 +26,7 @@ Last pass: 2026-10-05, `master` @ `84abc1d`, `v1.15.1`. Report: `docs/readiness/
 
 | ID | Finding | Closed by | Verified |
 | --- | --- | --- | --- |
+| C4 | Project instructions described v1.2.1, 8 storage keys and no store layer | #36 | 2026-10-05: `docs/project-instructions.md` written for the maintainer to paste in; `src/store/storageKeysDocs.test.js` fails if `instruction.md` or it lists a key the code lacks or misses one; root `CLAUDE.md` imports `instruction.md` |
 | N4 | No security headers: no `vercel.json`, so no Content-Security-Policy | #35 | 2026-10-05: `src/securityHeaders.test.js` (no wildcard, no `unsafe-eval`, inline for styles only, Asana the only foreign origin); built app checked with the policy enforced, zero violations (see PR) |
 | N6 | Ids named `__proto__`, `constructor`, `toString` or `hasOwnProperty` crashed `normalizeSubjects`, so the app could not start; the same ids corrupted the Analysis tallies | #34 | 2026-10-05: `src/utils/ownKeys.test.js` (normalize, parse, round-trip, merge, score with every such id; `Object.prototype` unchanged) and `src/App.ownKeys.test.jsx` (app starts, Analysis shares correct) |
 | N3 | No error boundary, and a storage write that threw (quota) blanked the app | #33 | 2026-10-05: `src/components/ErrorBoundary.test.jsx` (fallback backup from storage) and `src/App.storageFull.test.jsx` (quota error keeps the app running, banner, in-memory export, banner clears) |
