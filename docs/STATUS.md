@@ -8,13 +8,13 @@ Last updated: 2026-10-05
 
 | | |
 | --- | --- |
-| Current version | 1.17.2 |
-| Latest tag on GitHub | v1.17.2 |
+| Current version | 1.17.3 |
+| Latest tag on GitHub | v1.17.2 (v1.17.3 is tagged when #42 merges) |
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `a9280f5` (1.17.1) |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3 |
-| Readiness | Phase A exit check failed on 2026-10-05: four new `high` findings (N9, N10, N11, N13); N13 closed by #39. Report: `docs/readiness/2026-10-05-phase-a-exit.md` |
-| Open PRs | [#41](https://github.com/TrebleZee/studybox/pull/41) CI runs on `master` are never cancelled (C7); [#40](https://github.com/TrebleZee/studybox/pull/40) make the workflow safe for parallel sessions |
-| Checks on `master` | Lint, test (690 tests with #41), build: green. Every `master` run now completes (#41); CI is not a required check yet (C7) |
+| Readiness | Phase A exit check failed on 2026-10-05: four new `high` findings (N9, N10, N11, N13); N13 closed by #39, N8 by #42. Report: `docs/readiness/2026-10-05-phase-a-exit.md` |
+| Open PRs | [#42](https://github.com/TrebleZee/studybox/pull/42) undo survives a second open tab (N8); [#43](https://github.com/TrebleZee/studybox/pull/43) readiness pass: scope and on-track review (draft) |
+| Checks on `master` | Lint, test (705 tests with #42), build: green. Every `master` run now completes (#41); CI is not a required check yet (C7) |
 
 ## Recent changes
 
@@ -22,6 +22,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#42](https://github.com/TrebleZee/studybox/pull/42) | Undo of a delete or a merge now holds with a second tab or the installed app open, instead of being reverted in every tab | N8 | v1.17.3 |
 | [#40](https://github.com/TrebleZee/studybox/pull/40) | Workflow for parallel sessions: one worktree per session, claims as draft PRs, the goal split into parallel lanes, versions set at merge time and merges one at a time. No user-facing change | none | none |
 | [#41](https://github.com/TrebleZee/studybox/pull/41) | CI runs for commits on `master` are never cancelled by a newer push, so every merged commit is verified. No user-facing change | C7 (agent half) | none |
 | [#39](https://github.com/TrebleZee/studybox/pull/39) | A backup or stored record with the wrong type of value in a name, colour, note or tag no longer crashes the app on every launch | N13 | v1.17.2 |
