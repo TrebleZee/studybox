@@ -210,6 +210,15 @@ const qualificationFromText = (text) => {
   return "other";
 };
 
+// Fields read from storage or a backup file are untrusted (N13): a value of
+// the wrong type is replaced, never rendered. `text` keeps any string as-is,
+// so valid data normalizes exactly as before.
+const text = (value) => (typeof value === "string" ? value : "");
+// Record ids are strings (older builds wrote `Date.now().toString()`); a
+// non-empty string or a finite number is kept, anything else is replaced.
+const isRecordId = (value) =>
+  (typeof value === "string" && value !== "") || (Number.isFinite(value) && value !== 0);
+
 // Kept untrimmed so editing a field never swallows a space mid-typing.
 const cleanString = (value) => (typeof value === "string" && value.trim() ? value : null);
 
@@ -241,7 +250,7 @@ const subjectMetadata = (subject, preset) => {
     const board = boardFromText(exam);
     meta = {
       qualification:
-        board === "Custom" ? "other" : qualificationFromText(`${exam} ${subject?.name || ""}`),
+        board === "Custom" ? "other" : qualificationFromText(`${exam} ${text(subject?.name)}`),
       board,
       spec: null,
       specName: null,
@@ -388,24 +397,27 @@ export const normalizeSubject = (subject, index = 0) => {
   const preset = SUBJECT_PRESETS.find((item) => item.id === subject?.id);
   const sourceTopics = Array.isArray(subject?.topics) ? subject.topics : [];
   const papers = normalizePapers(subject?.papers);
-  const milestones = normalizeMilestones(subject?.milestones, subject?.id);
+  const subjectId = isRecordId(subject?.id) ? subject.id : null;
+  const milestones = normalizeMilestones(subject?.milestones, subjectId);
 
   return {
-    id: subject?.id || `sub-${Date.now().toString(36)}-${index}`,
-    name: subject?.name || preset?.name || "Untitled subject",
+    id: subjectId ?? `sub-${Date.now().toString(36)}-${index}`,
+    name: text(subject?.name) || preset?.name || "Untitled subject",
     ...subjectMetadata(subject, preset),
-    color: subject?.color || preset?.color || "#4F9CF9",
+    color: text(subject?.color) || preset?.color || "#4F9CF9",
     ...(papers ? { papers } : {}),
     ...(isExamYear(subject?.examYear) ? { examYear: subject.examYear } : {}),
     ...(milestones ? { milestones } : {}),
     topics: sourceTopics.map((topic, topicIndex) => ({
-      id: topic?.id || `${subject?.id || "sub"}-${topicIndex}`,
-      name: topic?.name || "Untitled topic",
+      id: isRecordId(topic?.id) ? topic.id : `${subjectId || "sub"}-${topicIndex}`,
+      name: text(topic?.name) || "Untitled topic",
       done: Boolean(topic?.done),
       subtasks: (Array.isArray(topic?.subtasks) ? topic.subtasks : []).map(
         (subtask, subtaskIndex) => ({
-          id: subtask?.id || `${topic?.id || topicIndex}-st${subtaskIndex}`,
-          name: subtask?.name || "Untitled subtask",
+          id: isRecordId(subtask?.id)
+            ? subtask.id
+            : `${isRecordId(topic?.id) ? topic.id : topicIndex}-st${subtaskIndex}`,
+          name: text(subtask?.name) || "Untitled subtask",
           done: Boolean(subtask?.done),
         })
       ),
@@ -448,14 +460,16 @@ export const normalizeSessions = (input) => {
   if (!Array.isArray(input)) return [];
 
   return input.map((session, index) => ({
-    id: session?.id || `sess-${Date.now().toString(36)}-${index}`,
-    subjectId: session?.subjectId || "",
-    subjectName: session?.subjectName || "",
-    subjectColor: session?.subjectColor || "#888888",
+    id: isRecordId(session?.id) ? session.id : `sess-${Date.now().toString(36)}-${index}`,
+    subjectId: isRecordId(session?.subjectId) ? session.subjectId : "",
+    subjectName: text(session?.subjectName),
+    subjectColor: text(session?.subjectColor) || "#888888",
     duration: Number(session?.duration) || 0,
-    date: session?.date || new Date().toISOString(),
-    note: session?.note || "",
-    tags: Array.isArray(session?.tags) ? session.tags.filter(Boolean) : [],
+    date: text(session?.date) || new Date().toISOString(),
+    note: text(session?.note),
+    tags: Array.isArray(session?.tags)
+      ? session.tags.filter((tag) => typeof tag === "string" && tag !== "")
+      : [],
     ...keepStamps(session),
   }));
 };
