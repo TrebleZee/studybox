@@ -127,7 +127,8 @@ An open app checks for a new version every 15 minutes and whenever it comes back
 - `src/components/` - `PlannerView`, `LogView`, `SettingsView` (with `settings/` cards), `Onboarding`, `TopBar`, `AnalysisPanel`, `AsanaTasksPanel` and smaller pieces
 - `src/hooks/useTimer.js` - timestamp-anchored study timer, saved across reloads
 - `src/hooks/useAppUpdate.js` and `src/pwa/updateStore.js` - checks for new versions and applies them only when it's safe
-- `src/utils/` - formatting, storage, subject normalisation, spec catalogue, streak/XP logic, backup and themes
+- `src/store/` - the only code that touches `localStorage`: keys, scopes (account / device / secret) and a change subscription
+- `src/utils/` - formatting, subject normalisation, spec catalogue, streak/XP logic, backup and themes
 - `src/utils/specImport.js`, `pdfLines.js`, `topicExtraction.js`, `specInference.js` - spec PDF import: text lines from pdf.js, the topic checklist, and board/spec code/qualification detection
 - `src/data/specs/` - the spec catalogue (one JSON file per specification plus a generated search index)
 - `src/data/exam-dates-2027.json` - published summer 2027 exam dates per spec and paper

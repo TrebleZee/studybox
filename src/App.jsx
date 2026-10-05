@@ -21,7 +21,7 @@ import {
   streakExpiry,
   validateStreak,
 } from "./utils/gameLogic.js";
-import { loadJson, STORAGE_KEYS } from "./utils/storage.js";
+import { loadJson, removeKey, saveJson, STORAGE_KEYS, usePersistedState } from "./store/index.js";
 import {
   addUniqueTag,
   isUntouchedDefaultSubjects,
@@ -47,25 +47,25 @@ const mapSubject = (subjects, id, fn) =>
   subjects.map((subject) => (subject.id === id ? fn(subject) : subject));
 
 export default function StudyBox() {
-  const [themeId, setThemeId] = useState(() => loadJson(STORAGE_KEYS.theme, "midnight"));
-  const [subjects, setSubjects] = useState(() =>
+  const [themeId, setThemeId] = usePersistedState(STORAGE_KEYS.theme, () => loadJson(STORAGE_KEYS.theme, "midnight"));
+  const [subjects, setSubjects] = usePersistedState(STORAGE_KEYS.subjects, () =>
     normalizeSubjects(loadJson(STORAGE_KEYS.subjects, null))
   );
-  const [sessions, setSessions] = useState(() =>
+  const [sessions, setSessions] = usePersistedState(STORAGE_KEYS.sessions, () =>
     normalizeSessions(loadJson(STORAGE_KEYS.sessions, []))
   );
-  const [asanaCfg, setAsanaCfg] = useState(() =>
+  const [asanaCfg, setAsanaCfg] = usePersistedState(STORAGE_KEYS.asana, () =>
     normalizeAsanaConfig(loadJson(STORAGE_KEYS.asana, null))
   );
-  const [asanaStats, setAsanaStats] = useState(() => loadJson(STORAGE_KEYS.asanaStats, null));
-  const [game, setGame] = useState(() =>
+  const [asanaStats, setAsanaStats] = usePersistedState(STORAGE_KEYS.asanaStats, () => loadJson(STORAGE_KEYS.asanaStats, null));
+  const [game, setGame] = usePersistedState(STORAGE_KEYS.game, () =>
     buildInitialGame(
       loadJson(STORAGE_KEYS.game, null),
       normalizeSessions(loadJson(STORAGE_KEYS.sessions, [])),
       normalizeSubjects(loadJson(STORAGE_KEYS.subjects, null))
     )
   );
-  const [onboarded, setOnboarded] = useState(() => loadJson(STORAGE_KEYS.onboarded, false));
+  const [onboarded, setOnboarded] = usePersistedState(STORAGE_KEYS.onboarded, () => loadJson(STORAGE_KEYS.onboarded, false));
   const templateRequest = useRef(0);
   // The unlogged session's note, tags and timed topic are saved alongside the
   // timer so a reload doesn't lose them.
@@ -94,28 +94,6 @@ export default function StudyBox() {
   const theme = THEMES.find((item) => item.id === themeId) || THEMES[0];
   const C = theme.colors;
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.theme, JSON.stringify(themeId));
-  }, [themeId]);
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.subjects, JSON.stringify(subjects));
-  }, [subjects]);
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(sessions));
-  }, [sessions]);
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.asana, JSON.stringify(asanaCfg));
-  }, [asanaCfg]);
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.asanaStats, JSON.stringify(asanaStats));
-  }, [asanaStats]);
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.game, JSON.stringify(game));
-  }, [game]);
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.onboarded, JSON.stringify(onboarded));
-  }, [onboarded]);
-
   // Re-validate when the persisted streak window expires while the app is open;
   // buildInitialGame runs the same validator on launch.
   useEffect(() => {
@@ -130,7 +108,7 @@ export default function StudyBox() {
       Math.max(0, nextCheckAt - Date.now())
     );
     return () => clearTimeout(timeout);
-  }, [game.currentStreak, game.freezesUsed, game.lastStudyDate, game.streakProtectedUntil]);
+  }, [game.currentStreak, game.freezesUsed, game.lastStudyDate, game.streakProtectedUntil, setGame]);
 
   const sub = subjects.find((subject) => subject.id === sel) || subjects[0] || null;
   const asanaEnabled = asanaCfg.enabled;
@@ -163,12 +141,9 @@ export default function StudyBox() {
   const draftTopicId = sessionInProgress && timedSubject ? expandedTopic : null;
   useEffect(() => {
     if (!note && !sessionTags.length && !draftTopicId) {
-      localStorage.removeItem(STORAGE_KEYS.sessionDraft);
+      removeKey(STORAGE_KEYS.sessionDraft);
     } else {
-      localStorage.setItem(
-        STORAGE_KEYS.sessionDraft,
-        JSON.stringify({ note, tags: sessionTags, topicId: draftTopicId })
-      );
+      saveJson(STORAGE_KEYS.sessionDraft, { note, tags: sessionTags, topicId: draftTopicId });
     }
   }, [note, sessionTags, draftTopicId]);
 

@@ -1,5 +1,7 @@
 // Verified in-browser (Step 0): Asana's API answers cross-origin requests
 // with real HTTP statuses, so direct calls work — no proxy needed.
+import { loadText, removeKey, saveText, SECRET_KEYS } from "../store/index.js";
+
 const ASANA_API_BASE = "https://app.asana.com/api/1.0";
 
 export const ASANA_DEFAULTS = {
@@ -43,17 +45,19 @@ const normalizeAsanaFields = (input, enabled) => ({
     input?.subtaskSort === "alpha" ? "alpha" : ASANA_DEFAULTS.subtaskSort,
 });
 
-const TOKEN_KEY = "studybox_asana_pat";
+// The token is a "secret"-scope key: the store keeps it on this device only,
+// so it is never part of a backup and can never be picked up by sync.
+const TOKEN_KEY = SECRET_KEYS.asanaToken;
 
 export function getAsanaToken() {
-  return localStorage.getItem(TOKEN_KEY) || "";
+  return loadText(TOKEN_KEY);
 }
 
 export function setAsanaToken(token) {
   if (token) {
-    localStorage.setItem(TOKEN_KEY, token.trim());
+    saveText(TOKEN_KEY, token.trim());
   } else {
-    localStorage.removeItem(TOKEN_KEY);
+    removeKey(TOKEN_KEY);
   }
 }
 

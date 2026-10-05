@@ -1,23 +1,2 @@
-export const STORAGE_KEYS = {
-  subjects: "sb-subjects",
-  sessions: "sb-sessions",
-  theme: "sb-theme",
-  asana: "sb-asana",
-  asanaStats: "sb-asana-stats",
-  game: "sb-game",
-  onboarded: "sb-onboarded",
-  lastStreakReminder: "sb-last-streak-reminder",
-  lastMilestoneReminder: "sb-last-milestone-reminder",
-  timer: "sb-timer",
-  sessionDraft: "sb-session-draft",
-};
-
-export const loadJson = (key, fallback) => {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-};
+// Kept so existing imports keep working; the store lives in src/store/.
+export { STORAGE_KEYS, loadJson } from "../store/localStore.js";
