@@ -1,5 +1,5 @@
 import { normalizeAsanaConfig } from "../services/asanaClient.js";
-import { buildBackup } from "../utils/backup.js";
+import { BACKUP_VERSION, buildBackup } from "../utils/backup.js";
 import { buildInitialGame, normalizeGame } from "../utils/gameLogic.js";
 import { mergeGameStates, mergeSessionLists, mergeSubjectLists } from "../utils/merge.js";
 import { normalizeSessions, normalizeSubjects } from "../utils/subjects.js";
@@ -24,16 +24,32 @@ export const loaders = {
 };
 
 // A backup built straight from storage, not from React state, for when
-// rendering is what broke. The Asana token is never in it (buildBackup only
-// takes study data).
-export const storedBackup = () =>
-  buildBackup({
-    subjects: loaders.subjects(),
-    sessions: loaders.sessions(),
-    themeId: loaders.theme(),
-    game: loaders.game(),
-    tombstones: loaders.tombstones(),
-  });
+// rendering is what broke. The Asana token is never in it: both paths read
+// only the account-scope study keys.
+//
+// If loading or normalizing the stored data throws (bad stored data can be
+// exactly what crashed the app), the backup falls back to the raw parsed
+// values, so the download still holds what is on disk.
+export const storedBackup = () => {
+  try {
+    return buildBackup({
+      subjects: loaders.subjects(),
+      sessions: loaders.sessions(),
+      themeId: loaders.theme(),
+      game: loaders.game(),
+      tombstones: loaders.tombstones(),
+    });
+  } catch {
+    return {
+      subjects: loadJson(K.subjects, null),
+      sessions: loadJson(K.sessions, null),
+      theme: loadJson(K.theme, null),
+      game: loadJson(K.game, null),
+      tombstones: loadJson(K.tombstones, null),
+      version: BACKUP_VERSION,
+    };
+  }
+};
 
 // How a tab folds another tab's change into its own state (see
 // usePersistedState). Records merge exactly as a backup merge does, against
