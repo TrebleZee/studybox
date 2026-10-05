@@ -132,7 +132,7 @@ describe("undo restore", () => {
     expect(screen.getByRole("button", { name: "Undo restore" })).toBeTruthy();
 
     await goTo(user, "Log");
-    await user.click(screen.getByRole("button", { name: "Delete session Physics" }));
+    await user.click(screen.getAllByRole("button", { name: "Delete session Physics" })[0]);
     await goTo(user, "Settings");
     expect(screen.queryByRole("button", { name: "Undo restore" })).toBeNull();
     expect(screen.getByText("Backup restored.")).toBeTruthy();
@@ -159,7 +159,7 @@ describe("undo restore", () => {
     await user.click(screen.getByRole("button", { name: "Undo restore" }));
     expect(JSON.parse(localStorage.getItem("sb-timer")).timedSubjectId).toBe(subjects[1].id);
     await goTo(user, "Planner");
-    expect(screen.getByRole("heading", { name: subjects[1].name })).toBeTruthy();
+    expect(screen.getByRole("button", { name: `Delete topic ${subjects[1].topics[0].name}` })).toBeTruthy();
   });
 
   it("is announced with the message and can be pressed from the keyboard without starting the timer", async () => {
