@@ -8,12 +8,12 @@ Last updated: 2026-10-05
 
 | | |
 | --- | --- |
-| Current version | 1.17.3 |
-| Latest tag on GitHub | v1.17.3 |
+| Current version | 1.17.4 |
+| Latest tag on GitHub | v1.17.4 |
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `661e26a` (1.17.2) at the time of the 5 Oct scope review |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
-| Open PRs | [#44](https://github.com/TrebleZee/studybox/pull/44) orchestrated parallel sessions with models chosen by risk |
+| Open PRs | [#46](https://github.com/TrebleZee/studybox/pull/46) undo for timer Reset (N22), [#47](https://github.com/TrebleZee/studybox/pull/47) undo merge offer with a second tab (C14, draft) |
 | Checks on `master` | Lint, test (711 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
 
 ## Recent changes
@@ -22,6 +22,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#45](https://github.com/TrebleZee/studybox/pull/45) | Stored data that can't be read is left as it was, with a banner and a backup that carries it, instead of being silently replaced; a browser that blocks storage no longer stops the app starting | N16, N17 | v1.17.4 |
 | [#44](https://github.com/TrebleZee/studybox/pull/44) | A coordinator can run the goal's lanes as separate full sessions (`orchestrate` skill), each on a model chosen by risk: Fable for the stored data model and merge, Opus for anything that can lose data and for every review, Sonnet for single-component fixes, Haiku for config. No user-facing change | none | none |
 | [#43](https://github.com/TrebleZee/studybox/pull/43) | Scope review: closes C9, N13 and C7 in the ledger, adds N26, N27, N28 and C13, folds them into the A2/A3 lanes and sets a process budget. No user-facing change | none | none |
 | [#42](https://github.com/TrebleZee/studybox/pull/42) | Undo of a delete or a merge now holds with a second tab or the installed app open, instead of being reverted in every tab | N8 | v1.17.3 |
