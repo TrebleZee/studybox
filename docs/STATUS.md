@@ -8,13 +8,13 @@ Last updated: 2026-10-05
 
 | | |
 | --- | --- |
-| Current version | 1.17.1 |
-| Latest tag on GitHub | v1.17.1, with releases for v1.17.0 and v1.17.1 |
-| Production | studybox-sigma.vercel.app, deployed from `master` @ `b8d07fb` (1.17.1) |
-| Current goal | `.claude/commands/goal.md`: Phases A2 and A3, worked in the parallel lanes it lists |
-| Readiness | Phase A exit check failed on 2026-10-05: four new `high` findings (N9, N10, N11, N13). Report: `docs/readiness/2026-10-05-phase-a-exit.md` |
-| Open PRs | [#40](https://github.com/TrebleZee/studybox/pull/40) parallel workflow (this change). A2.1 `fix/normalize-field-types` is in progress in a local worktree, not yet pushed |
-| Checks on `master` | Lint, test (674 tests), build: green. CI is not a required check yet (C7) |
+| Current version | 1.17.2 |
+| Latest tag on GitHub | v1.17.2 |
+| Production | studybox-sigma.vercel.app, deployed from `master` @ `a9280f5` (1.17.1) |
+| Current goal | `.claude/commands/goal.md`: Phases A2 and A3 |
+| Readiness | Phase A exit check failed on 2026-10-05: four new `high` findings (N9, N10, N11, N13); N13 closed by #39. Report: `docs/readiness/2026-10-05-phase-a-exit.md` |
+| Open PRs | [#41](https://github.com/TrebleZee/studybox/pull/41) CI runs on `master` are never cancelled (C7); [#40](https://github.com/TrebleZee/studybox/pull/40) make the workflow safe for parallel sessions |
+| Checks on `master` | Lint, test (690 tests with #41), build: green. Every `master` run now completes (#41); CI is not a required check yet (C7) |
 
 ## Recent changes
 
@@ -23,6 +23,9 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
 | [#40](https://github.com/TrebleZee/studybox/pull/40) | Workflow for parallel sessions: one worktree per session, claims as draft PRs, the goal split into parallel lanes, versions set at merge time and merges one at a time. No user-facing change | none | none |
+| [#41](https://github.com/TrebleZee/studybox/pull/41) | CI runs for commits on `master` are never cancelled by a newer push, so every merged commit is verified. No user-facing change | C7 (agent half) | none |
+| [#39](https://github.com/TrebleZee/studybox/pull/39) | A backup or stored record with the wrong type of value in a name, colour, note or tag no longer crashes the app on every launch | N13 | v1.17.2 |
+| [#37](https://github.com/TrebleZee/studybox/pull/37) | Phase A exit check (failed) and the A2/A3 re-plan. No user-facing change | none | none |
 | [#38](https://github.com/TrebleZee/studybox/pull/38) | This status page, updated by every PR and readiness pass. No user-facing change | none | none |
 | [#36](https://github.com/TrebleZee/studybox/pull/36) | Docs synced with the code; root `CLAUDE.md`; replacement Claude project instructions. No user-facing change | C4 | none |
 | [#35](https://github.com/TrebleZee/studybox/pull/35) | Security headers (Content-Security-Policy and others) on every route of the live app | N4 | none |
@@ -55,7 +58,7 @@ From `docs/readiness/2026-10-05-phase-a-exit.md`. Dates are the plan's.
 | D | Backend spike on test data | 30 Nov to 11 Dec | Blocked on B1 |
 | E | v2.0.0 accounts and sync | 4 Jan to 30 Apr 2027 | Blocked on B1, V1 |
 
-Open findings: 4 `high` (N9, N10, N11, N13), 2 `blocker` (B1, V1). The full list is `docs/readiness/findings.md`.
+Open findings: 3 `high` (N9, N10, N11), 2 `blocker` (B1, V1). The full list is `docs/readiness/findings.md`.
 
 ## Needs actioning
 
@@ -80,10 +83,20 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 1. Lane 1: finish A2.1 `fix/normalize-field-types` (N13), then A2.9.
 2. Open now: A2.5 timer-reset undo (lane 3), A2.6 session seconds (lane 4), A2.11 Android reminders (lane 5), A2.10 update reload guard (lane 6), A2.2 and `chore/ignore-drafts` (lane 7).
 3. Lane 2 (A2.3, A2.4, A3.1) once maintainer item 1 is answered; lane 8 (A2.12) once Safari is checked.
+| 1 | Make "Lint, test, build" a required status check on `master` (Settings → Branches → master → Require status checks) | CI is not required today; every `master` run now completes (#41), so this is the last half of C7 | 9 Oct |
+| 2 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up) | 9 Oct |
+| 3 | On real devices: the installed PWA beside a browser tab; reminders on an Android phone; a backup download on an iPhone | Not testable from a session (N1 check, N20, N25) | 23 Oct |
+| 4 | The four design-gate decisions: data controller and account holder, minimum age and assurance, Online Safety Act scope, reminders for signed-in users | Gates the backend spike and 2.0 (B1) | 25 Oct |
+| 5 | Five-user feedback round, including how many use Android | Gates 2.x and sets N20's urgency (V1) | 25 Oct |
+| 6 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
+
+### Agent (next steps)
+
+1. Merge #41 (no tag).
+2. The rest of Phase A2 in goal order, starting with A2.3 `fix/undo-restamps` (N8).
 
 ## Known risks
 
 - **Undo with two tabs open is unreliable** (N8). Undo works with one tab; with a second tab or the installed app open, the delete comes back.
 - **Restore from file has no undo** (N11). Picking the wrong backup replaces everything.
-- **A malformed backup can crash the app on every launch** (N13). Merge or restore only files StudyBox made until A2.1 ships.
 - **Reminders may crash the app on Android** (N20, proven with a stub, not on a device).
