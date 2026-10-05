@@ -79,3 +79,53 @@ export const restoreDeletion = ({ subjects, sessions, tombstones }, entry, now =
 // state must still be the very objects the merge produced (`after`).
 const MERGED_KEYS = ["subjects", "sessions", "tombstones", "game"];
 export const unchangedSinceMerge = (after, state) => !!after && MERGED_KEYS.every((key) => after[key] === state[key]);
+
+// A stamp later than `now` and than every given time, so the record it marks
+// wins a merge against any of them.
+const stampPast = (times, now) => {
+  const latest = times.filter(Boolean).reduce((max, time) => (time > max ? time : max), "");
+  return now > latest ? now : new Date(Date.parse(latest) + 1).toISOString();
+};
+
+const byId = (list = []) => new Map(list.map((record) => [record.id, record]));
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const ownFields = (subject) => {
+  const fields = { ...subject };
+  delete fields.topics;
+  delete fields.milestones;
+  return fields;
+};
+
+// Re-stamps each record of `list` that the merge changed or removed, past the
+// merged copy and any tombstone for it, so the pre-merge copy wins in a tab
+// that already took the merge. Unchanged records keep their stamps.
+const restampChanged = (list, mergedList, tombstoneOf, now) => {
+  const merged = byId(mergedList);
+  return list.map((record) => {
+    const mergedRecord = merged.get(record.id);
+    if (mergedRecord && same(record, mergedRecord)) return record;
+    return touch(record, stampPast([mergedRecord?.updatedAt, tombstoneOf(record.id)], now));
+  });
+};
+
+// The state to put back on Undo merge (N8). Records only the file had are
+// left out but not tombstoned (maintainer decision, 2026-10-05): with another
+// tab open they come back from it, and a later merge of that file, or sync
+// with the device it came from, never deletes them there.
+export const restoreBeforeMerge = ({ before, after }, now = nowIso()) => {
+  const { tombstones } = after;
+  const mergedSubjects = byId(after.subjects);
+  const subjects = before.subjects.map((subject) => {
+    const merged = mergedSubjects.get(subject.id);
+    const child = (kind) => (id) => deletedAt(tombstones, kind, childKey(subject.id, id));
+    const topics = restampChanged(subject.topics, merged?.topics, child("topics"), now);
+    const milestones = subject.milestones && restampChanged(subject.milestones, merged?.milestones, child("milestones"), now);
+    const fieldsChanged = !merged || !same(ownFields(subject), ownFields(merged));
+    const restored = { ...subject, topics, ...(milestones ? { milestones } : {}) };
+    return fieldsChanged
+      ? touch(restored, stampPast([merged?.updatedAt, deletedAt(tombstones, "subjects", subject.id)], now))
+      : restored;
+  });
+  const sessions = restampChanged(before.sessions, after.sessions, (id) => deletedAt(tombstones, "sessions", id), now);
+  return { ...before, subjects, sessions };
+};

@@ -49,8 +49,8 @@ From `docs/readiness/2026-10-05-phase-a-exit.md`. Dates are the plan's.
 | Phase | What | Dates | State |
 | --- | --- | --- | --- |
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed |
-| M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Tags, releases and plan approval done; N8 decision and required CI open |
-| A2 | Fix today's data loss (N13, N8, N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C7) | 6 to 23 Oct | A2.1 in progress; lanes 3 to 7 open (the goal's Parallel lanes); lane 2 waits for N8 |
+| M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Tags, releases, plan approval and the N8 decision (undo may re-stamp) done 5 Oct; required CI open |
+| A2 | Fix today's data loss (N13, N8, N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C7) | 6 to 23 Oct | A2.1 (v1.17.2) and A2.2 (#41) done; A2.3 (N8) in #42; lanes 3 to 7 open (the goal's Parallel lanes) |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | Not started |
 | B | Design-gate decisions (B1) and five-user feedback (V1) | by 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds) | 9 to 27 Nov | Blocked on the A3 exit check |
@@ -68,23 +68,8 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 
 | # | Action | Why | By |
 | --- | --- | --- | --- |
-| 1 | Decide: may undo re-stamp the record it restores? | Without it, undo is reverted whenever a second tab is open (N8); it also decides how N11 is fixed. Lane 2 of the goal waits for it | 7 Oct |
-| 2 | Make "Lint, test, build" a required status check on `master`, and turn on "Require branches to be up to date before merging" | CI is not required today (C7); the up-to-date rule stops two parallel PRs merging on the same base and claiming the same version | 9 Oct |
-| 3 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up); it now also describes the parallel workflow | 9 Oct |
-| 4 | On real devices: the installed PWA beside a browser tab; reminders on an Android phone; a backup download on an iPhone | Not testable from a session (N1 check, N20, N25) | 23 Oct |
-| 5 | The four design-gate decisions: data controller and account holder, minimum age and assurance, Online Safety Act scope, reminders for signed-in users | Gates the backend spike and 2.0 (B1) | 25 Oct |
-| 6 | Five-user feedback round, including how many use Android | Gates 2.x and sets N20's urgency (V1) | 25 Oct |
-| 7 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
-
-### Agent (next steps)
-
-Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1).
-
-1. Lane 1: finish A2.1 `fix/normalize-field-types` (N13), then A2.9.
-2. Open now: A2.5 timer-reset undo (lane 3), A2.6 session seconds (lane 4), A2.11 Android reminders (lane 5), A2.10 update reload guard (lane 6), A2.2 and `chore/ignore-drafts` (lane 7).
-3. Lane 2 (A2.3, A2.4, A3.1) once maintainer item 1 is answered; lane 8 (A2.12) once Safari is checked.
-| 1 | Make "Lint, test, build" a required status check on `master` (Settings → Branches → master → Require status checks) | CI is not required today; every `master` run now completes (#41), so this is the last half of C7 | 9 Oct |
-| 2 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up) | 9 Oct |
+| 1 | Make "Lint, test, build" a required status check on `master`, and turn on "Require branches to be up to date before merging" (Settings → Branches → master) | CI is not required today; every `master` run now completes (#41), so this is the last half of C7. The up-to-date rule stops two parallel PRs merging on the same base and claiming the same version | 9 Oct |
+| 2 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up); it now also describes the parallel workflow | 9 Oct |
 | 3 | On real devices: the installed PWA beside a browser tab; reminders on an Android phone; a backup download on an iPhone | Not testable from a session (N1 check, N20, N25) | 23 Oct |
 | 4 | The four design-gate decisions: data controller and account holder, minimum age and assurance, Online Safety Act scope, reminders for signed-in users | Gates the backend spike and 2.0 (B1) | 25 Oct |
 | 5 | Five-user feedback round, including how many use Android | Gates 2.x and sets N20's urgency (V1) | 25 Oct |
@@ -92,11 +77,14 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 
 ### Agent (next steps)
 
-1. Merge #41 (no tag).
-2. The rest of Phase A2 in goal order, starting with A2.3 `fix/undo-restamps` (N8).
+Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1).
+
+1. Lane 1: A2.9 `fix/guard-storage-reads` (N16, N17); A2.1 shipped in v1.17.2.
+2. Lane 2: A2.3 (N8) in #42, then A2.4 `feat/undo-restore` (N11) and A3.1.
+3. Open now: A2.5 timer-reset undo (lane 3), A2.6 session seconds (lane 4), A2.11 Android reminders (lane 5), A2.10 update reload guard (lane 6), `chore/ignore-drafts` (lane 7); lane 8 (A2.12) once Safari is checked.
 
 ## Known risks
 
-- **Undo with two tabs open is unreliable** (N8). Undo works with one tab; with a second tab or the installed app open, the delete comes back.
+- **Undo merge with two tabs open keeps the file's new records** (by decision). Records the merged file added come back from the other tab after Undo merge; everything that was here before is restored.
 - **Restore from file has no undo** (N11). Picking the wrong backup replaces everything.
 - **Reminders may crash the app on Android** (N20, proven with a stub, not on a device).

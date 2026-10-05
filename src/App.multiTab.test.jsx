@@ -214,6 +214,66 @@ describe("a change from another tab", () => {
   });
 });
 
+// N8, for Merge from file: Undo merge used to put the pre-merge records back
+// with their old stamps, so the other tab merged the file's newer copies (and
+// its tombstones) straight back in.
+describe("undo merge with a second tab open", () => {
+  const at = (day) => `2026-09-${day}T10:00:00.000Z`;
+  const sessionOf = (id, note, stamp) => ({
+    id,
+    subjectId: "maths",
+    subjectName: "Maths",
+    subjectColor: "#4f8cff",
+    duration: 600,
+    date: at(13),
+    note,
+    tags: [],
+    createdAt: at(13),
+    updatedAt: stamp,
+  });
+
+  it("restores every pre-merge record in both tabs", async () => {
+    localStorage.setItem(
+      STORAGE_KEYS.sessions,
+      JSON.stringify([sessionOf("sess-edited", "mine", at(13)), sessionOf("sess-deleted", "keep me", at(13))])
+    );
+    const [a, b] = openTabs();
+    const before = stored(STORAGE_KEYS.subjects);
+    const topic = before[0].topics[0];
+    const file = {
+      version: 3,
+      // The file's copy of a topic and a session are newer; it deleted another
+      // session and has one this device never had.
+      subjects: [{ ...before[0], topics: [{ ...topic, done: true, updatedAt: at(20) }] }],
+      sessions: [sessionOf("sess-edited", "theirs", at(20)), sessionOf("sess-file", "only in the file", at(20))],
+      tombstones: { sessions: { "sess-deleted": at(20) } },
+    };
+
+    fireEvent.click(a.getByRole("button", { name: "Settings" }));
+    fireEvent.change(a.getByLabelText("Merge backup file"), {
+      target: { files: [new File([JSON.stringify(file)], "other.json", { type: "application/json" })] },
+    });
+    await a.findByRole("button", { name: "Undo merge" });
+    deliver();
+    expect(stored(STORAGE_KEYS.sessions).find((s) => s.id === "sess-edited").note).toBe("theirs");
+
+    fireEvent.click(a.getByRole("button", { name: "Undo merge" }));
+    deliver();
+    // Tab B writes again from its own state: the pre-merge records must hold there too.
+    fireEvent.click(b.getAllByRole("checkbox")[1]);
+    deliver();
+
+    const sessions = stored(STORAGE_KEYS.sessions);
+    expect(sessions.find((s) => s.id === "sess-edited").note).toBe("mine");
+    expect(sessions.find((s) => s.id === "sess-deleted")?.note).toBe("keep me");
+    expect(stored(STORAGE_KEYS.subjects)[0].topics.find((t) => t.id === topic.id).done).toBe(false);
+    // Records only the file had are not deleted (maintainer decision, 2026-10-05):
+    // with another tab open they come back from it.
+    expect(sessions.some((s) => s.id === "sess-file")).toBe(true);
+    [a, b].forEach((tab) => expect(loggedIn(tab)).toBe(3));
+  });
+});
+
 // N8: undo used to put the record back with its old stamps, so the other tab,
 // which had already merged the tombstone, deleted it again everywhere.
 describe("undo with a second tab open", () => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_GAME } from "./gameLogic.js";
 import { mergeData } from "./merge.js";
 import { addTombstone, childKey, emptyTombstones, removeTombstone } from "./tombstones.js";
-import { describeDeletion, restoreDeletion, unchangedSinceMerge } from "./undo.js";
+import { describeDeletion, restoreBeforeMerge, restoreDeletion, unchangedSinceMerge } from "./undo.js";
 
 describe("unchangedSinceMerge", () => {
   const after = { subjects: [], sessions: [], tombstones: emptyTombstones(), game: { totalXP: 0 } };
@@ -139,5 +139,69 @@ describe("undoing a delete", () => {
   it("ignores ids that are not there", () => {
     expect(describeDeletion(state(), "sessions", "nope")).toBeNull();
     expect(describeDeletion(state(), "topics", "t1", "nope")).toBeNull();
+  });
+});
+
+describe("undoing a merge", () => {
+  const undoMergeAt = "2026-09-21T09:00:00.000Z";
+  const fileAt = "2026-09-20T10:00:00.000Z";
+  const setup = () => {
+    const before = { ...state(), game: DEFAULT_GAME, sel: "maths", timedSubjectId: null };
+    const file = {
+      subjects: [
+        {
+          ...before.subjects[0],
+          topics: [{ ...before.subjects[0].topics[0], done: true, updatedAt: fileAt }, before.subjects[0].topics[1]],
+        },
+        { id: "art", name: "Art", topics: [], updatedAt: fileAt },
+      ],
+      sessions: [{ id: "s1", subjectName: "Maths (theirs)", updatedAt: fileAt }],
+      tombstones: { ...emptyTombstones(), sessions: { s2: fileAt } },
+      game: DEFAULT_GAME,
+    };
+    return { before, after: mergeData(before, file) };
+  };
+
+  it("restamps only the records the merge changed or removed, past the merged copy", () => {
+    const { before, after } = setup();
+    const restored = restoreBeforeMerge({ before, after }, undoMergeAt);
+    const [maths, physics] = restored.subjects;
+    expect(maths.topics[0]).toEqual({ ...before.subjects[0].topics[0], updatedAt: undoMergeAt });
+    expect(maths.topics[1]).toBe(before.subjects[0].topics[1]);
+    expect(maths.milestones[0]).toBe(before.subjects[0].milestones[0]);
+    // A changed topic doesn't stamp its subject.
+    expect(maths).not.toHaveProperty("updatedAt");
+    expect(physics).toEqual(before.subjects[1]);
+    expect(restored.sessions).toEqual([
+      { id: "s1", subjectName: "Maths", updatedAt: undoMergeAt },
+      { id: "s2", subjectName: "Physics", updatedAt: undoMergeAt },
+    ]);
+  });
+
+  it("puts back the pre-merge tombstones, game and selection, and tombstones nothing new", () => {
+    const { before, after } = setup();
+    const restored = restoreBeforeMerge({ before, after }, undoMergeAt);
+    expect(restored.tombstones).toBe(before.tombstones);
+    expect(restored.game).toBe(before.game);
+    expect(restored.sel).toBe("maths");
+    expect(restored.subjects.map((s) => s.id)).toEqual(["maths", "physics"]);
+  });
+
+  it("wins against a tab that already took the merge, except for records only the file had", () => {
+    const { before, after } = setup();
+    const restored = restoreBeforeMerge({ before, after }, undoMergeAt);
+    const otherTab = mergeData(after, { ...restored, tombstones: after.tombstones });
+    expect(otherTab.subjects.find((s) => s.id === "maths").topics[0].done).toBe(false);
+    expect(otherTab.sessions.map((s) => [s.id, s.subjectName])).toEqual([
+      ["s1", "Maths"],
+      ["s2", "Physics"],
+    ]);
+    expect(otherTab.subjects.some((s) => s.id === "art")).toBe(true);
+  });
+
+  it("stamps past the merged copy when the file's stamp is in the future", () => {
+    const { before, after } = setup();
+    const restored = restoreBeforeMerge({ before, after }, "2026-09-15T00:00:00.000Z");
+    expect(restored.sessions[0].updatedAt).toBe("2026-09-20T10:00:00.001Z");
   });
 });

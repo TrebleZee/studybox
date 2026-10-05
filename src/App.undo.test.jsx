@@ -74,7 +74,8 @@ const expectRestored = (before, id) => {
           JSON.stringify(
             JSON.parse(text, (k, value) => {
               if (!value || typeof value !== "object" || Array.isArray(value) || value.id !== id) return value;
-              const { updatedAt: _updatedAt, ...rest } = value;
+              const rest = { ...value };
+              delete rest.updatedAt;
               return rest;
             })
           ),
@@ -229,7 +230,8 @@ describe("undo merge", () => {
     await waitFor(() => expect(snapshot()).not.toEqual(before));
 
     await user.click(screen.getByRole("button", { name: "Undo merge" }));
-    await waitFor(() => expect(snapshot()).toEqual(before));
+    // The file deleted s-old: it comes back stamped as edited now (N8).
+    await waitFor(() => expectRestored(before, "s-old"));
     expect(screen.queryByRole("button", { name: "Undo merge" })).toBeNull();
   });
 
