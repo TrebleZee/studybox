@@ -60,7 +60,8 @@ These rules exist so two copies of a user's data can be merged using only what i
 - Known limits, to settle in the V2 sync design:
   - Last-write-wins trusts device clocks. A device with a wrong clock can win or lose merges it shouldn't. Sync should stamp on the server.
   - Records from before v3 have no edit time. Where two copies differ on such a record the winner is arbitrary, though the same on every device.
-  - The records converge whatever order copies are merged in, but the *order* of subjects and topics does not: two devices can hold the same data in a different order. Sync needs an explicit order field.
+  - Two copies always converge on the same records, but the *order* of subjects and topics may differ between them. Sync needs an explicit order field.
+  - With three or more copies and a deleted subject, the result can depend on merge order: a pairwise merge that drops the subject forgets that copy's rename and its own topics, and a third copy can bring the subject back without them (pinned in `merge.test.js`). File merges between two devices are unaffected. Sync should keep deleted rows server-side so nothing is forgotten.
 - Sessions include `id`, `subjectId`, `subjectName`, `subjectColor`, `duration`, `date`, `note`, and `tags`.
 
 ## Spec catalogue

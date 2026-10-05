@@ -1,7 +1,7 @@
 # Review: feat/schema-v3 (PR #28, target v1.15.0)
 
 Date: 2026-10-05 · Reviewer: independent read-only agent (release-reviewer brief) · Fixes: same session
-Verdict: fixes-needed, now fixed. One high finding in the new merge (a deleted subject could take later work with it) and one low were fixed with regression tests. Three lows are documented limits. The review covered the stack `chore/store-layer` → `feat/schema-v3` → `fix/xp-derivation` at 9206851; upgrade invariants held (previous-release data loads unchanged, ids untouched, no XP or streak drop on upgrade, Asana token stays out of backups and store subscribers).
+Verdict: fixes-needed, now fixed (two rounds). One high finding in the new merge (a deleted subject could take later work with it) and one low were fixed with regression tests. Three lows are documented limits. The review covered the stack `chore/store-layer` → `feat/schema-v3` → `fix/xp-derivation` at 9206851; upgrade invariants held (previous-release data loads unchanged, ids untouched, no XP or streak drop on upgrade, Asana token stays out of backups and store subscribers).
 
 ## Findings
 
@@ -11,8 +11,10 @@ Verdict: fixes-needed, now fixed. One high finding in the new merge (a deleted s
 | R2 | low | correctness | src/utils/merge.js | Records from before v3 have no edit time, so a tie between two differing copies is broken on content, not recency; the UI text promised "most recent". | Documented. UI text and instruction.md now say so. Not stamping at upgrade, since that would make untouched default subjects look touched. |
 | R4 | low | correctness | src/utils/merge.js | A repeated id inside one list (hand-edited file) merged differently depending on side. | Fixed. Each side is de-duplicated with the merge rule first. Test added. |
 | R5 | low | correctness | src/utils/merge.js | Records converge in any merge order, but the order of subjects and topics does not. | Documented as a known limit; needs an explicit order field in the sync design. |
+| N1 | medium | correctness | src/utils/merge.js | Re-check: with three copies and a deleted subject, the result can still depend on merge order (a pairwise drop forgets that copy's rename and own topics). Two-copy merges are unaffected. | Documented as a known limit and pinned with a test. A full fix would discard untouched topics when a subject is revived, which is worse for the two-device case this release serves; sync resolves it by keeping deleted rows server-side. |
+| N3 | low | correctness | src/utils/merge.js | A merged game could carry a repeated frozen date. | Fixed: de-duplicated after the merge. |
 
-R3 and R6 belong to `fix/xp-derivation` and are handled there.
+R3, R6 and N2 belong to `fix/xp-derivation` and are handled there.
 
 ## Follow-ups (pre-existing, not fixed on this branch)
 

@@ -21,7 +21,11 @@ import { childKey, deletedAt, mergeTombstones } from "./tombstones.js";
 // Known limits (see instruction.md): records from before v3 have no edit
 // time, so where two copies differ on those the winner is arbitrary (but the
 // same on every device); and the order of subjects and topics can differ
-// between copies that hold the same records.
+// between copies that hold the same records. With three or more copies and a
+// deleted subject, the result can also depend on merge order: a pairwise
+// merge that drops the subject forgets that copy's rename and its own topics,
+// and a third copy can then bring the subject back without them. Two-copy
+// merges are unaffected. Sync avoids this by keeping deleted rows server-side.
 
 const stamp = (record) => record?.updatedAt || "";
 
@@ -98,7 +102,7 @@ const mergeGame = (a, b, sessions, subjects, nowMs) => {
     left.frozenDates === null && right.frozenDates === null
       ? null
       : [...new Set([...(left.frozenDates || []), ...(right.frozenDates || [])])].sort();
-  return buildInitialGame(
+  const merged = buildInitialGame(
     {
       currentStreak: Math.max(left.currentStreak, right.currentStreak),
       longestStreak: Math.max(left.longestStreak, right.longestStreak),
@@ -112,6 +116,8 @@ const mergeGame = (a, b, sessions, subjects, nowMs) => {
     subjects,
     nowMs
   );
+  // validateStreak may add a date that is already there.
+  return { ...merged, frozenDates: [...new Set(merged.frozenDates || [])].sort() };
 };
 
 // Both inputs: { subjects, sessions, tombstones, game }, already normalized.
