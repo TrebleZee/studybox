@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AnalysisPanel from "./components/AnalysisPanel.jsx";
 import EditSessionModal from "./components/EditSessionModal.jsx";
 import LogView from "./components/LogView.jsx";
@@ -413,8 +413,8 @@ export default function StudyBox() {
 
   // Undo merge or Undo restore (N11), beside the import's message.
   const offer = backupMessage?.undo;
-  const current = { subjects, sessions, tombstones, game, themeId };
-  const canUndo = canUndoImport(offer, current);
+  const current = useMemo(() => ({ subjects, sessions, tombstones, game, themeId }), [subjects, sessions, tombstones, game, themeId]);
+  const canUndo = useMemo(() => canUndoImport(offer, current), [offer, current]); // not on every timer tick (R2)
   const undoImport = () => {
     if (!canUndo) return;
     const before = stateBeforeImport(offer, current);
