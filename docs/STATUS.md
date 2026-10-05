@@ -13,8 +13,8 @@ Last updated: 2026-10-05
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `a9280f5` (1.17.1) |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3 |
 | Readiness | Phase A exit check failed on 2026-10-05: four new `high` findings (N9, N10, N11, N13); N13 closed by #39. Report: `docs/readiness/2026-10-05-phase-a-exit.md` |
-| Open PRs | [#40](https://github.com/TrebleZee/studybox/pull/40) CI runs on `master` are never cancelled (C7) |
-| Checks on `master` | Lint, test (690 tests with #40), build: green. Every `master` run now completes (#40); CI is not a required check yet (C7) |
+| Open PRs | [#41](https://github.com/TrebleZee/studybox/pull/41) CI runs on `master` are never cancelled (C7); [#40](https://github.com/TrebleZee/studybox/pull/40) make the workflow safe for parallel sessions |
+| Checks on `master` | Lint, test (690 tests with #41), build: green. Every `master` run now completes (#41); CI is not a required check yet (C7) |
 
 ## Recent changes
 
@@ -22,7 +22,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
-| [#40](https://github.com/TrebleZee/studybox/pull/40) | CI runs for commits on `master` are never cancelled by a newer push, so every merged commit is verified. No user-facing change | C7 (agent half) | none |
+| [#41](https://github.com/TrebleZee/studybox/pull/41) | CI runs for commits on `master` are never cancelled by a newer push, so every merged commit is verified. No user-facing change | C7 (agent half) | none |
 | [#39](https://github.com/TrebleZee/studybox/pull/39) | A backup or stored record with the wrong type of value in a name, colour, note or tag no longer crashes the app on every launch | N13 | v1.17.2 |
 | [#37](https://github.com/TrebleZee/studybox/pull/37) | Phase A exit check (failed) and the A2/A3 re-plan. No user-facing change | none | none |
 | [#38](https://github.com/TrebleZee/studybox/pull/38) | This status page, updated by every PR and readiness pass. No user-facing change | none | none |
@@ -49,7 +49,7 @@ From `docs/readiness/2026-10-05-phase-a-exit.md`. Dates are the plan's.
 | --- | --- | --- | --- |
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed |
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Tags, N8 (undo may re-stamp) and plan approval done 5 Oct; required CI open |
-| A2 | Fix today's data loss (N13, N8, N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C7) | 6 to 23 Oct | A2.1 (N13) shipped in v1.17.2; A2.2 (C7, agent half) in #40 |
+| A2 | Fix today's data loss (N13, N8, N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C7) | 6 to 23 Oct | A2.1 (N13) shipped in v1.17.2; A2.2 (C7, agent half) in #41 |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | Not started |
 | B | Design-gate decisions (B1) and five-user feedback (V1) | by 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds) | 9 to 27 Nov | Blocked on the A3 exit check |
@@ -67,7 +67,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 
 | # | Action | Why | By |
 | --- | --- | --- | --- |
-| 1 | Make "Lint, test, build" a required status check on `master` (Settings → Branches → master → Require status checks) | CI is not required today; every `master` run now completes (#40), so this is the last half of C7 | 9 Oct |
+| 1 | Make "Lint, test, build" a required status check on `master` (Settings → Branches → master → Require status checks) | CI is not required today; every `master` run now completes (#41), so this is the last half of C7 | 9 Oct |
 | 2 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up) | 9 Oct |
 | 3 | On real devices: the installed PWA beside a browser tab; reminders on an Android phone; a backup download on an iPhone | Not testable from a session (N1 check, N20, N25) | 23 Oct |
 | 4 | The four design-gate decisions: data controller and account holder, minimum age and assurance, Online Safety Act scope, reminders for signed-in users | Gates the backend spike and 2.0 (B1) | 25 Oct |
@@ -76,7 +76,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 
 ### Agent (next steps)
 
-1. Merge #40 (no tag).
+1. Merge #41 (no tag).
 2. The rest of Phase A2 in goal order, starting with A2.3 `fix/undo-restamps` (N8).
 
 ## Known risks
