@@ -83,7 +83,7 @@ export default function BackupCard({ C, message, onExport, onImport, onMerge, on
           >
             {message.text}
           </div>
-          {/* A merge keeps what was here before it until the next import or a reload. */}
+          {/* App passes onUndoMerge only while nothing has changed since the merge. */}
           {message.undo && onUndoMerge && (
             <button
               type="button"

@@ -62,3 +62,8 @@ export const restoreDeletion = ({ subjects, sessions, tombstones }, entry) => {
     ),
   };
 };
+
+// Undo merge is only safe while nothing has changed since the merge: the
+// state must still be the very objects the merge produced (`after`).
+const MERGED_KEYS = ["subjects", "sessions", "tombstones", "game"];
+export const unchangedSinceMerge = (after, state) => !!after && MERGED_KEYS.every((key) => after[key] === state[key]);

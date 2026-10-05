@@ -32,6 +32,7 @@ import { mergeData } from "./utils/merge.js";
 import { convertTopicToMilestone } from "./utils/milestones.js";
 import { newId, nowIso, stampNew, touch } from "./utils/records.js";
 import { addTombstone, childKey, emptyTombstones, mergeTombstones } from "./utils/tombstones.js";
+import { unchangedSinceMerge } from "./utils/undo.js";
 import { THEMES } from "./utils/themes.js";
 
 const mapSubject = (subjects, id, fn) =>
@@ -390,15 +391,9 @@ export default function StudyBox() {
       const restored = parseBackup(await readFileText(file));
       templateRequest.current += 1;
       if (merge) {
-        const merged = mergeData(
-          { subjects, sessions, tombstones, game },
-          {
-            subjects: restored.subjects ?? [],
-            sessions: restored.sessions ?? [],
-            tombstones: restored.tombstones,
-            game: restored.game ?? game,
-          }
-        );
+        const theirs = { subjects: restored.subjects ?? [], sessions: restored.sessions ?? [] };
+        const incoming = { ...theirs, tombstones: restored.tombstones, game: restored.game ?? game };
+        const merged = mergeData({ subjects, sessions, tombstones, game }, incoming);
         setSubjects(merged.subjects);
         setSessions(merged.sessions);
         setTombstones(merged.tombstones);
@@ -408,9 +403,10 @@ export default function StudyBox() {
           timer.setTimedSubjectId(null);
         }
         setOnboarded(true);
-        // Kept in memory only, until the next import or a reload.
+        // Undo is offered only while nothing has changed since (utils/undo.js).
         const before = { subjects, sessions, tombstones, game, sel, timedSubjectId };
-        setBackupMessage({ type: "success", text: "Backup merged with the data on this device.", undo: before });
+        const text = "Backup merged with the data on this device.";
+        setBackupMessage({ type: "success", text, undo: { before, after: merged } });
         return { ok: true };
       }
       setTombstones(restored.tombstones ?? emptyTombstones());
@@ -433,8 +429,10 @@ export default function StudyBox() {
     }
   };
 
+  const canUndoMerge = unchangedSinceMerge(backupMessage?.undo?.after, { subjects, sessions, tombstones, game });
   const undoMerge = () => {
-    const before = backupMessage.undo;
+    if (!canUndoMerge) return;
+    const { before } = backupMessage.undo;
     setSubjects(before.subjects);
     setSessions(before.sessions);
     setTombstones(before.tombstones);
@@ -589,7 +587,7 @@ export default function StudyBox() {
               onExport={exportData}
               onImport={importData}
               onMerge={(file) => importData(file, { merge: true })}
-              onUndoMerge={undoMerge}
+              onUndoMerge={canUndoMerge ? undoMerge : undefined}
             />
           )}
 

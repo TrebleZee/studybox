@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { addTombstone, childKey, emptyTombstones, removeTombstone } from "./tombstones.js";
-import { describeDeletion, restoreDeletion } from "./undo.js";
+import { describeDeletion, restoreDeletion, unchangedSinceMerge } from "./undo.js";
+
+describe("unchangedSinceMerge", () => {
+  const after = { subjects: [], sessions: [], tombstones: emptyTombstones(), game: { totalXP: 0 } };
+  it("is true only while every merged record list is the same object", () => {
+    expect(unchangedSinceMerge(after, { ...after })).toBe(true);
+    expect(unchangedSinceMerge(after, { ...after, sessions: [] })).toBe(false);
+    expect(unchangedSinceMerge(after, { ...after, game: { totalXP: 0 } })).toBe(false);
+    expect(unchangedSinceMerge(undefined, after)).toBe(false);
+  });
+});
 
 const at = "2026-09-14T10:00:00.000Z";
 const later = "2026-09-14T11:00:00.000Z";

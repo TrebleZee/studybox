@@ -166,29 +166,48 @@ describe("undo for deletes", () => {
   });
 });
 
+const mergeFile = () =>
+  new File(
+    [
+      JSON.stringify({
+        version: 3,
+        subjects: [],
+        sessions: [session("s-there", "Physics", "2026-09-14T09:00:00.000Z")],
+        tombstones: { sessions: { "s-old": "2026-09-14T10:00:00.000Z" } },
+        game: { currentStreak: 5, longestStreak: 9, lastStudyDate: "2026-09-14", totalXP: 999, legacyXP: 900 },
+      }),
+    ],
+    "other.json",
+    { type: "application/json" }
+  );
+
 describe("undo merge", () => {
   it("restores exactly what was here before the merge", async () => {
     const { user, before } = start();
     await goTo(user, "Settings");
-    const file = new File(
-      [
-        JSON.stringify({
-          version: 3,
-          subjects: [],
-          sessions: [session("s-there", "Physics", "2026-09-14T09:00:00.000Z")],
-          tombstones: { sessions: { "s-old": "2026-09-14T10:00:00.000Z" } },
-          game: { currentStreak: 5, longestStreak: 9, lastStudyDate: "2026-09-14", totalXP: 999, legacyXP: 900 },
-        }),
-      ],
-      "other.json",
-      { type: "application/json" }
-    );
-    await user.upload(screen.getByLabelText("Merge backup file"), file);
+    await user.upload(screen.getByLabelText("Merge backup file"), mergeFile());
     expect(await screen.findByText("Backup merged with the data on this device.")).toBeTruthy();
     expect(snapshot()).not.toEqual(before);
 
     await user.click(screen.getByRole("button", { name: "Undo merge" }));
     await waitFor(() => expect(snapshot()).toEqual(before));
     expect(screen.queryByRole("button", { name: "Undo merge" })).toBeNull();
+  });
+
+  it("is withdrawn once anything changes after the merge, so later work survives", async () => {
+    const { user } = start();
+    await goTo(user, "Settings");
+    await user.upload(screen.getByLabelText("Merge backup file"), mergeFile());
+    expect(await screen.findByRole("button", { name: "Undo merge" })).toBeTruthy();
+
+    await goTo(user, "Planner");
+    const xp = JSON.parse(localStorage.getItem("sb-game")).totalXP;
+    await user.click(screen.getAllByRole("checkbox", { name: /^Complete topic / })[0]);
+    const afterTick = snapshot();
+    expect(JSON.parse(afterTick["sb-game"]).totalXP).toBe(xp + 10);
+
+    await goTo(user, "Settings");
+    expect(screen.queryByRole("button", { name: "Undo merge" })).toBeNull();
+    expect(snapshot()).toEqual(afterTick);
   });
 });
