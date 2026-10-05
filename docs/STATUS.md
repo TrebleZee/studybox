@@ -78,7 +78,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 
 ### Agent (next steps)
 
-Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1).
+Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1). To run them as separate full sessions, a coordinator uses the `orchestrate` skill (at most 3 workers; the lanes table gives each one's model by risk; only the coordinator merges).
 
 1. Lane 1: A2.9 `fix/guard-storage-reads` (N16, N17); A2.1 shipped in v1.17.2.
 2. Lane 2: A2.3 (N8) in #42, then A2.4 `feat/undo-restore` (N11) and A3.1.

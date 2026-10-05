@@ -33,18 +33,18 @@ Work may start on every lane in **Parallel lanes** below except where it says it
 
 Each lane is one session's queue: its branches run in order, because they share files. Different lanes don't share files, so they can run at the same time; each needs its own worktree. The files every PR edits (`docs/STATUS.md`, `docs/readiness/findings.md`, `instruction.md`, `README.md`) are handled by the git-workflow skill's merge step, not by lanes.
 
-| Lane | Branches, in order | Main files | Waits for |
-| --- | --- | --- | --- |
-| 1. Normalizers and storage | A2.1 → A2.9 → A3.2 → A3.3 | normalizers in `src/utils/`, `src/store/appState.js`, `localStore.js`, `usePersistedState.js`, `migrations.js` | nothing (A2.1 is in flight) |
-| 2. Undo and replacing data | A2.3 → A2.4 → A3.1 | `src/utils/undo.js`, `src/hooks/useUndoDelete.js`, Settings Backup & Restore, `Onboarding.jsx`, `App.jsx` | the N8 decision; A3.1 also waits for A3.2's normalizer changes if they overlap |
-| 3. Timer | A2.5 → A2.7 → A2.8 | `src/hooks/useTimer.js`, `TimerPanel.jsx`, `UndoBar.jsx`, Log Session in `App.jsx` | nothing. A2.5 adds to the undo bar: if lane 2 is open, touch `useUndoDelete.js` only to add the timer case |
-| 4. Session edit | A2.6 | `EditSessionModal.jsx` | nothing |
-| 5. Reminders | A2.11 | `useStreakReminder.js`, `useMilestoneReminder.js` | nothing |
-| 6. App update | A2.10 | `useAppUpdate.js`, `UpdateBanner.jsx`, `main.jsx` | nothing. It reads whether a timer, edit or undo is active; it doesn't change those |
-| 7. Chores | A2.2, `chore/ignore-drafts` | `.github/workflows/ci.yml`, `.gitignore` | nothing |
-| 8. Safari backup | A2.12 | `src/utils/backup.js` (download only) | a reproduction on Safari or an iPhone (maintainer) |
+| Lane | Branches, in order | Main files | Waits for | Model (tier) |
+| --- | --- | --- | --- | --- |
+| 1. Normalizers and storage | A2.1 → A2.9 → A3.2 → A3.3 | normalizers in `src/utils/`, `src/store/appState.js`, `localStore.js`, `usePersistedState.js`, `migrations.js` | nothing (A2.1 is in flight) | `claude-opus-5-5` (High) for A2.9; `claude-fable-5-1` (Critical) for A3.2 and A3.3 |
+| 2. Undo and replacing data | A2.3 → A2.4 → A3.1 | `src/utils/undo.js`, `src/hooks/useUndoDelete.js`, Settings Backup & Restore, `Onboarding.jsx`, `App.jsx` | the N8 decision; A3.1 also waits for A3.2's normalizer changes if they overlap | `claude-opus-5-5` (High) for A2.3, A2.4; `claude-fable-5-1` (Critical) for A3.1 |
+| 3. Timer | A2.5 → A2.7 → A2.8 | `src/hooks/useTimer.js`, `TimerPanel.jsx`, `UndoBar.jsx`, Log Session in `App.jsx` | nothing. A2.5 adds to the undo bar: if lane 2 is open, touch `useUndoDelete.js` only to add the timer case | `claude-opus-5-5` (High) |
+| 4. Session edit | A2.6 | `EditSessionModal.jsx` | nothing | `claude-sonnet-5-5` (Standard) |
+| 5. Reminders | A2.11 | `useStreakReminder.js`, `useMilestoneReminder.js` | nothing | `claude-sonnet-5-5` (Standard) |
+| 6. App update | A2.10 | `useAppUpdate.js`, `UpdateBanner.jsx`, `main.jsx` | nothing. It reads whether a timer, edit or undo is active; it doesn't change those | `claude-opus-5-5` (High) |
+| 7. Chores | A2.2, `chore/ignore-drafts` | `.github/workflows/ci.yml`, `.gitignore` | nothing | `claude-haiku-4-5-20251001` (Mechanical) |
+| 8. Safari backup | A2.12 | `src/utils/backup.js` (download only) | a reproduction on Safari or an iPhone (maintainer) | `claude-sonnet-5-5` (Standard) |
 
-Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every lane is empty.
+Lane 1's A2.9 starts once A2.1 has merged. The Model column follows the risk tiers in the `orchestrate` skill: the tier of the riskiest branch a session runs, never below High for a `high` finding. A coordinator can run these lanes as separate full sessions with that skill. The exit check (A3.4) runs once every lane is empty.
 
 ## Decisions already made (do not re-ask)
 

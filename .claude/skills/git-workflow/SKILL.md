@@ -156,6 +156,10 @@ Then spawn the `release-publisher` agent with `v<new-version>` to publish the Gi
 
 **f. Clean up.** Leave the worktree (`ExitWorktree`, or `git worktree remove <path>` from another checkout) so its branch name is free.
 
+## 4b. When a coordinator is running the lanes
+
+If you were started as a worker by the `orchestrate` skill (your prompt says so), stop after step 3b with a ready PR: **don't merge or tag**. The coordinator runs step 4 for every lane, one at a time, and tells you if you need to merge `origin/master` again.
+
 ## 5. If merging is blocked
 
 If the PR can't be merged automatically - failing checks, a merge conflict, or branch protection that requires a manual review - stop there, leave the PR open, and say so plainly rather than forcing it through or tagging a commit that isn't actually on `master` yet.
