@@ -54,6 +54,7 @@ export const keysInScope = (scope) =>
 const listeners = new Set();
 
 // Listeners get { key, scope, type: "write" | "remove" | "external" | "error", value }.
+// "error" is a write or removal that threw.
 // Secret values are never handed to listeners: they only learn that the key
 // changed.
 const notify = (key, type, value) => {
@@ -74,14 +75,64 @@ export const subscribe = (listener) => {
   return () => listeners.delete(listener);
 };
 
-export const loadJson = (key, fallback) => {
+// What the store knows is wrong with storage, so the app can say so:
+// - blocked: the last read threw (the browser denies storage), so nothing
+//   will be saved this visit.
+// - failed: keys whose last write threw (storage full, or blocked).
+// - unreadable: account keys whose stored text doesn't parse, with that text.
+//   It is left in storage untouched, and storedBackup() carries it, until the
+//   key is next written.
+let blocked = false;
+const failed = new Set();
+const unreadable = new Map();
+
+// Every access goes through here: reading `localStorage` itself can throw
+// when the browser blocks storage, not just its methods.
+const storage = () => globalThis.localStorage;
+
+const readRaw = (key) => {
   try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw);
+    const raw = storage().getItem(key);
+    blocked = false;
+    return raw;
   } catch {
+    blocked = true;
+    return null;
+  }
+};
+
+export const loadJson = (key, fallback) => {
+  const raw = readRaw(key);
+  if (!raw) {
+    unreadable.delete(key);
     return fallback;
   }
+  try {
+    const value = JSON.parse(raw);
+    unreadable.delete(key);
+    return value;
+  } catch {
+    if (scopeOf(key) === "account") unreadable.set(key, raw);
+    return fallback;
+  }
+};
+
+// True while `key` holds account data that didn't parse when last loaded.
+// usePersistedState then skips its write-back on mount, so the text survives
+// until the user changes that data.
+export const isUnreadable = (key) => unreadable.has(key);
+
+// The stored text of every unreadable account key, by key.
+export const unreadableText = () => Object.fromEntries(unreadable);
+
+// The one problem the user should hear about, worst first: "blocked",
+// "full" (a write failed), "unreadable" (stored data didn't parse), or null.
+// A string, so React can compare snapshots (useSyncExternalStore).
+export const storageProblem = () => {
+  if (blocked) return "blocked";
+  if (failed.size) return "full";
+  if (unreadable.size) return "unreadable";
+  return null;
 };
 
 // A write that throws (storage full, or blocked) must not take the app down:
@@ -89,24 +140,37 @@ export const loadJson = (key, fallback) => {
 // the app can say so. Returns whether the write reached storage.
 const write = (key, raw, value) => {
   try {
-    localStorage.setItem(key, raw);
+    storage().setItem(key, raw);
   } catch {
+    failed.add(key);
     notify(key, "error", undefined);
     return false;
   }
+  failed.delete(key);
+  unreadable.delete(key);
   notify(key, "write", value);
   return true;
 };
 
 export const saveJson = (key, value) => write(key, JSON.stringify(value), value);
 
-export const loadText = (key) => localStorage.getItem(key) || "";
+export const loadText = (key) => readRaw(key) || "";
 
 export const saveText = (key, value) => write(key, value, value);
 
+// Like a write, a removal that throws is reported, never thrown.
 export const removeKey = (key) => {
-  localStorage.removeItem(key);
+  try {
+    storage().removeItem(key);
+  } catch {
+    failed.add(key);
+    notify(key, "error", undefined);
+    return false;
+  }
+  failed.delete(key);
+  unreadable.delete(key);
   notify(key, "remove", undefined);
+  return true;
 };
 
 // Another tab, or the installed app beside a tab, changed a key this store
@@ -122,7 +186,11 @@ const parseStored = (raw) => {
 };
 
 const onStorage = (event) => {
-  if (event.storageArea && event.storageArea !== localStorage) return;
+  try {
+    if (event.storageArea && event.storageArea !== storage()) return;
+  } catch {
+    return;
+  }
   const { key } = event;
   if (!key || !Object.hasOwn(KEY_SCOPES, key)) return;
   notify(key, "external", event.newValue === null ? undefined : parseStored(event.newValue));

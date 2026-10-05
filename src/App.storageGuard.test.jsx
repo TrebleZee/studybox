@@ -27,9 +27,9 @@ describe("stored data that can't be read", () => {
     localStorage.setItem("sb-sessions", TRUNCATED_SESSIONS);
     renderApp();
 
-    expect(screen.getByRole("alert", { name: /couldn't be read/ })).toBeTruthy();
     expect(localStorage.getItem("sb-subjects")).toBe(TRUNCATED_SUBJECTS);
     expect(localStorage.getItem("sb-sessions")).toBe(TRUNCATED_SESSIONS);
+    expect(screen.getByRole("alert", { name: /couldn't be read/ })).toBeTruthy();
   });
 
   it("downloads the unreadable text as it is stored", async () => {
