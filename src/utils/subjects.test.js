@@ -5,6 +5,7 @@ import {
   SUBJECT_PRESETS,
   TEMPLATES,
   addUniqueTag,
+  buildNewSubjects,
   defaultSubjects,
   groupTopicsByPaper,
   inTierTopics,
@@ -19,6 +20,37 @@ import {
   topicTimerLabel,
   updateSubjectFields,
 } from "./subjects.js";
+
+describe("buildNewSubjects", () => {
+  const now = "2026-09-14T10:00:00.000Z";
+  const list = [
+    { name: "Physics", color: "#4F9CF9", topics: ["Forces", { name: "Waves", catalogueTopicId: "w-1", paper: "1", higherOnly: true }] },
+    { name: "Art", color: "#F97316", topics: [] },
+  ];
+
+  it("gives each subject a fresh custom- id and its topics `${id}-topic-${i}` ids", () => {
+    const [a, b] = buildNewSubjects(list, now);
+    const [c] = buildNewSubjects(list, now);
+    expect(a.id).toMatch(/^custom-/);
+    expect(new Set([a.id, b.id, c.id]).size).toBe(3);
+    expect(a.topics.map((t) => t.id)).toEqual([`${a.id}-topic-0`, `${a.id}-topic-1`]);
+    expect(b.topics).toEqual([]);
+  });
+
+  it("accepts string and object topics, unticked, keeping catalogue fields", () => {
+    const [a] = buildNewSubjects(list, now);
+    expect(a.name).toBe("Physics");
+    expect(a.topics.map((t) => t.name)).toEqual(["Forces", "Waves"]);
+    expect(a.topics.every((t) => t.done === false && t.subtasks.length === 0)).toBe(true);
+    expect(a.topics[1]).toMatchObject({ catalogueTopicId: "w-1", paper: "1", higherOnly: true });
+    expect(a.topics[0].catalogueTopicId).toBeUndefined();
+  });
+
+  it("stamps the subject and every topic with the `now` passed in", () => {
+    const [a] = buildNewSubjects(list, now);
+    expect([a, ...a.topics].every((r) => r.createdAt === now && r.updatedAt === now)).toBe(true);
+  });
+});
 
 describe("defaultSubjects", () => {
   it("builds the A-Level example subjects with unchecked topics and no dead flags", () => {
