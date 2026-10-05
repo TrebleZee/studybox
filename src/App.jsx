@@ -134,7 +134,7 @@ export default function StudyBox() {
   const needsOnboarding =
     !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
   const { undo, noteDeletion, noteTimerReset, undoDelete, clearUndo } = useUndoDelete({
-    ...{ subjects, sessions, tombstones, setSubjects, setSessions, setTombstones, timerBusy: sessionInProgress },
+    ...{ subjects, sessions, tombstones, setSubjects, setSessions, setTombstones, timerBusy: sessionInProgress || timer.elsewhere },
     onRestore: ({ id, selected, timed, timer: reset, topicId }) => {
       if (reset) timer.restore(reset);
       // Undoing a Reset brings its timed topic back the way a reload does.
@@ -517,8 +517,7 @@ export default function StudyBox() {
                 color: timerColor,
                 label: timerLabel,
                 highlightedSubjectId: asanaSelected ? null : sub?.id ?? null,
-                start: timer.start,
-                pause: timer.pause,
+                ...{ start: timer.start, pause: timer.pause, elsewhere: timer.elsewhere, takeOver: timer.takeOver },
                 reset: () => noteTimerReset(timer.reset(), { topicId: draftTopicId }),
               }}
               session={{

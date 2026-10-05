@@ -16,7 +16,8 @@ export default function TimerPanel({
   subjects,
   running,
   displaySecs,
-  canTime,
+  canTime: canTimeHere,
+  elsewhere,
   timerColor,
   timerLabel,
   highlightedSubjectId,
@@ -30,8 +31,12 @@ export default function TimerPanel({
   onStart,
   onPause,
   onReset,
+  onTakeOver,
   onLog,
 }) {
+  // While another window owns the session in progress, this one can't start
+  // a second timer; it can only continue that session here.
+  const canTime = canTimeHere && !elsewhere;
   const [tagDraft, setTagDraft] = useState("");
   const addTag = (raw) => {
     const next = raw.trim();
@@ -152,6 +157,27 @@ export default function TimerPanel({
           Reset
         </button>
       </div>
+      {elsewhere && (
+        <div style={{ margin: "0 13px 8px", fontSize: "11px", color: C.muted, lineHeight: 1.5 }}>
+          A session is being timed in another window.{" "}
+          <button
+            className="nb"
+            onClick={onTakeOver}
+            style={{
+              border: "none",
+              background: "transparent",
+              color: C.txt,
+              cursor: "pointer",
+              fontSize: "11px",
+              fontWeight: 700,
+              padding: 0,
+              textDecoration: "underline",
+            }}
+          >
+            Continue here
+          </button>
+        </div>
+      )}
       <textarea
         rows={2}
         placeholder="Session note (optional)"
