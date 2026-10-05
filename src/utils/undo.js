@@ -75,10 +75,22 @@ export const restoreDeletion = ({ subjects, sessions, tombstones }, entry, now =
   };
 };
 
+// Key order doesn't matter when asking "is this the same record?".
+const canonical = (value) =>
+  JSON.stringify(value, (_, v) =>
+    v && typeof v === "object" && !Array.isArray(v)
+      ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, v[k]]))
+      : v
+  );
+
 // Undo merge is only safe while nothing has changed since the merge: the
-// state must still be the very objects the merge produced (`after`).
+// state must still hold exactly what the merge produced (`after`). It is
+// compared by content, not identity (C14): another tab's write that only
+// echoes records this tab already has is merged in as a new but identical
+// object, and must not withdraw the offer.
 const MERGED_KEYS = ["subjects", "sessions", "tombstones", "game"];
-export const unchangedSinceMerge = (after, state) => !!after && MERGED_KEYS.every((key) => after[key] === state[key]);
+export const unchangedSinceMerge = (after, state) =>
+  !!after && MERGED_KEYS.every((key) => after[key] === state[key] || canonical(after[key]) === canonical(state[key]));
 
 // A stamp later than `now` and than every given time, so the record it marks
 // wins a merge against any of them.
