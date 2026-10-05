@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { isUnreadable, saveJson, subscribe } from "./localStore.js";
+import { storedSchemaIsNewer } from "./migrations.js";
 
 // Key order doesn't matter when asking "did the merge add anything?".
 const canonical = (value) =>
@@ -14,7 +15,9 @@ const canonical = (value) =>
 // Stored data that didn't parse is the exception: the mount write would
 // replace it with a default, so it is skipped and the text stays in storage
 // until the user changes that data (the app tells them first; see
-// storageProblem in localStore.js).
+// storageProblem in localStore.js). So is data a newer build wrote
+// (storedSchemaIsNewer): a key this build has not changed is left exactly as
+// stored, and is only written once the user changes it here.
 //
 // `load` reads and normalizes the stored value. When another tab changes the
 // key, it is loaded again and, if `merge(local, theirs)` is given, merged with
@@ -33,7 +36,7 @@ export default function usePersistedState(key, load, merge) {
 
   useEffect(() => {
     if (value === fromOutside.current) return;
-    if (value === loaded.current && isUnreadable(key)) return;
+    if (value === loaded.current && (isUnreadable(key) || storedSchemaIsNewer())) return;
     saveJson(key, value);
   }, [key, value]);
 
