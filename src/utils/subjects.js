@@ -137,10 +137,14 @@ export const topicList = (seed, prefix) =>
     subtasks: [],
   }));
 
+// Ids reach these tables from storage and imported files, so they can be any
+// string, "__proto__" and "constructor" included: only own keys count.
+const lookup = (table, key) => (typeof key === "string" && Object.hasOwn(table, key) ? table[key] : undefined);
+
 export const subjectsFromPresets = (presets) =>
   presets.map((subject) => ({
     ...subject,
-    topics: topicList(TOPIC_SEED[subject.id] || [], subject.id.slice(0, 2)),
+    topics: topicList(lookup(TOPIC_SEED, subject.id) || [], subject.id.slice(0, 2)),
   }));
 
 export const defaultSubjects = () => subjectsFromPresets(ALEVEL_PRESETS);
@@ -231,8 +235,8 @@ const subjectMetadata = (subject, preset) => {
       specName: cleanString(subject.specName),
       tier: TIERS.includes(subject.tier) ? subject.tier : null,
     };
-  } else if (PRESET_METADATA[subject?.id] && exam === preset.exam) {
-    meta = { ...PRESET_METADATA[subject.id], tier: null };
+  } else if (lookup(PRESET_METADATA, subject?.id) && exam === preset?.exam) {
+    meta = { ...lookup(PRESET_METADATA, subject.id), tier: null };
   } else {
     const board = boardFromText(exam);
     meta = {
@@ -260,10 +264,10 @@ export const subjectLabel = (subject) => {
     return subject.exam || "Custom";
   }
   const level =
-    subject.qualification === "other" ? null : QUALIFICATION_LABELS[subject.qualification];
+    subject.qualification === "other" ? null : lookup(QUALIFICATION_LABELS, subject.qualification);
   const tier =
-    subject.qualification === "gcse" && TIER_LABELS[subject.tier]
-      ? `(${TIER_LABELS[subject.tier]})`
+    subject.qualification === "gcse" && lookup(TIER_LABELS, subject.tier)
+      ? `(${lookup(TIER_LABELS, subject.tier)})`
       : null;
   return [subject.board, level, subject.specName || subject.name, tier]
     .filter(Boolean)
