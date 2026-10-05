@@ -8,12 +8,12 @@ Last updated: 2026-10-05
 
 | | |
 | --- | --- |
-| Current version | 1.18.1 |
-| Latest tag on GitHub | v1.18.1 |
+| Current version | 1.19.0 |
+| Latest tag on GitHub | v1.19.0 |
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `661e26a` (1.17.2) at the time of the 5 Oct scope review |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
-| Open PRs | none |
+| Open PRs | [#49](https://github.com/TrebleZee/studybox/pull/49) one tab owns the running timer (N12, draft), [#50](https://github.com/TrebleZee/studybox/pull/50) older builds never strip newer fields (N9, draft) |
 | Checks on `master` | Lint, test (711 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
 
 ## Recent changes
@@ -22,6 +22,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#48](https://github.com/TrebleZee/studybox/pull/48) | Restore from file can be undone: "Undo restore" puts back the subjects, sessions, game, theme and selection from before the restore | N11 | v1.19.0 |
 | [#47](https://github.com/TrebleZee/studybox/pull/47) | "Undo merge" no longer disappears when another open tab only re-saves records this tab already has; fixes a flaky two-tab test | C14 | v1.18.1 |
 | [#46](https://github.com/TrebleZee/studybox/pull/46) | Resetting the timer with time on it shows "Reset timer. Undo", which brings back the elapsed time, subject and timed topic | N22 | v1.18.0 |
 | [#45](https://github.com/TrebleZee/studybox/pull/45) | Stored data that can't be read is left as it was, with a banner and a backup that carries it, instead of being silently replaced; a browser that blocks storage no longer stops the app starting | N16, N17 | v1.17.4 |
@@ -57,7 +58,7 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed, re-planned as A2 and A3 |
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
-| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0) and A2.3b (#47, v1.18.1) merged; every lane open except 9; A2.4 (#48, N11) ready to merge |
+| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0), A2.3b (#47, v1.18.1) and A2.4 (#48, v1.19.0) merged; every lane open except 9 |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | Not started |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
