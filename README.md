@@ -149,3 +149,5 @@ StudyBox saves:
 - the current timer and the unlogged session's note, tags and topic
 
 Because storage is local to the browser, clearing site data will reset the app.
+
+The deployed app is served with a strict Content-Security-Policy (see `vercel.json`): it can only load code from its own origin and only talk to the network for the optional Asana integration (`https://app.asana.com`).

@@ -154,6 +154,7 @@ These rules exist so two copies of a user's data can be merged using only what i
 - Keep the planner layout focused on subjects, topics, and the timer.
 - Keep history entries compact, with tags shown as chips.
 - Preserve the existing PWA support and local-only data model.
+- `vercel.json` sets security headers on every route: a Content-Security-Policy (own origin only, plus `connect-src https://app.asana.com` for the opt-in Asana API), `nosniff`, `Referrer-Policy: no-referrer`, no framing and a `Permissions-Policy` that turns off device features. `'unsafe-inline'` is allowed for styles only, because the theme is a runtime `<style>` element built from the chosen colours and `index.html` has inline `style` attributes. Never add `'unsafe-eval'`, a wildcard source or inline scripts; `src/securityHeaders.test.js` enforces this. A new network origin (another API, a CDN, a font host) needs its own entry in the policy.
 - `vite.config.js`'s workbox config must keep `navigateFallback: 'index.html'` set - without it, an offline reload or a fresh open of the installed PWA hits the browser's own offline error page instead of the cached app shell.
 
 ## Line endings
