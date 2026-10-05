@@ -14,6 +14,8 @@ export const STORAGE_KEYS = {
   lastMilestoneReminder: "sb-last-milestone-reminder",
   timer: "sb-timer",
   sessionDraft: "sb-session-draft",
+  tombstones: "sb-tombstones",
+  schema: "sb-schema",
 };
 
 // Stored as plain text, not JSON, and under a legacy name that predates the
@@ -33,6 +35,7 @@ export const KEY_SCOPES = {
   [STORAGE_KEYS.sessions]: "account",
   [STORAGE_KEYS.game]: "account",
   [STORAGE_KEYS.theme]: "account",
+  [STORAGE_KEYS.tombstones]: "account",
   [STORAGE_KEYS.asana]: "device",
   [STORAGE_KEYS.asanaStats]: "device",
   [STORAGE_KEYS.onboarded]: "device",
@@ -40,6 +43,7 @@ export const KEY_SCOPES = {
   [STORAGE_KEYS.lastMilestoneReminder]: "device",
   [STORAGE_KEYS.timer]: "device",
   [STORAGE_KEYS.sessionDraft]: "device",
+  [STORAGE_KEYS.schema]: "device",
   [SECRET_KEYS.asanaToken]: "secret",
 };
 

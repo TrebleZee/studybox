@@ -29,9 +29,9 @@ describe("backup", () => {
   it("builds valid JSON containing subjects, sessions, theme, game and a version", () => {
     const state = sampleState();
     const parsed = JSON.parse(JSON.stringify(buildBackup(state)));
-    expect(Object.keys(parsed).sort()).toEqual(["game", "sessions", "subjects", "theme", "version"]);
+    expect(Object.keys(parsed).sort()).toEqual(["game", "sessions", "subjects", "theme", "tombstones", "version"]);
     expect(parsed.theme).toBe("forest");
-    expect(parsed.version).toBe(2);
+    expect(parsed.version).toBe(3);
   });
 
   it("round-trips through export and import to identical state", () => {

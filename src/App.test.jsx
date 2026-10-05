@@ -191,3 +191,62 @@ describe("surviving an app update", () => {
     expect(apply).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("sync-safe records (schema v3)", () => {
+  const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}";
+  const stored = (key) => JSON.parse(localStorage.getItem(key));
+
+  it("logs sessions with a UUID id and createdAt/updatedAt stamps", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-05T10:00:00.000Z"));
+    renderApp();
+
+    fireEvent.click(screen.getByRole("button", { name: "Start" }));
+    act(() => vi.advanceTimersByTime(60000));
+    fireEvent.click(screen.getByRole("button", { name: "Log Session" }));
+
+    const [session] = stored("sb-sessions");
+    expect(session.id).toMatch(new RegExp(`^sess-${UUID}$`));
+    expect(session.createdAt).toBe("2026-10-05T10:01:00.000Z");
+    expect(session.updatedAt).toBe(session.createdAt);
+  });
+
+  it("stamps only the topic that was ticked, and leaves existing ids alone", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-05T10:00:00.000Z"));
+    renderApp();
+    const before = stored("sb-subjects");
+
+    fireEvent.click(screen.getAllByRole("checkbox")[0]);
+
+    const after = stored("sb-subjects");
+    expect(after.map((s) => s.id)).toEqual(before.map((s) => s.id));
+    expect(after[0].topics.map((t) => t.id)).toEqual(before[0].topics.map((t) => t.id));
+    expect(after[0].topics[0]).toMatchObject({ done: true, updatedAt: "2026-10-05T10:00:00.000Z" });
+    expect(after[0].topics[1]).not.toHaveProperty("updatedAt");
+    expect(after[0]).not.toHaveProperty("updatedAt");
+  });
+
+  it("leaves a tombstone when a session is deleted, and exports nothing else of it", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-05T10:00:00.000Z"));
+    localStorage.setItem(
+      "sb-sessions",
+      JSON.stringify([{ id: "sess-old", subjectId: "physics", subjectName: "Physics", duration: 600, date: "2026-10-01T09:00:00.000Z" }])
+    );
+    renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Log" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delete session Physics" }));
+
+    expect(stored("sb-sessions")).toEqual([]);
+    expect(stored("sb-tombstones").sessions).toEqual({ "sess-old": "2026-10-05T10:00:00.000Z" });
+  });
+
+  it("starts an existing install with empty tombstones and untouched data", () => {
+    const sessions = [{ id: "sess-old", subjectId: "physics", subjectName: "Physics", subjectColor: "#4F9CF9", duration: 600, date: "2026-10-01T09:00:00.000Z", note: "", tags: [] }];
+    localStorage.setItem("sb-sessions", JSON.stringify(sessions));
+    renderApp();
+    expect(stored("sb-sessions")).toEqual(sessions);
+    expect(stored("sb-tombstones")).toEqual({ subjects: {}, topics: {}, milestones: {}, sessions: {} });
+  });
+});

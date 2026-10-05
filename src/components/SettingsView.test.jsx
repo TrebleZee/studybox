@@ -247,6 +247,75 @@ describe("Settings", () => {
       );
       expect(localStorage.getItem("sb-subjects")).toBe(before);
     });
+
+    const storedSession = (id, extra = {}) => ({
+      id,
+      subjectId: "physics",
+      subjectName: "Physics",
+      subjectColor: "#4F9CF9",
+      duration: 1800,
+      date: "2026-06-19T09:00:00.000Z",
+      note: "",
+      tags: [],
+      ...extra,
+    });
+    const backupFile = (backup) =>
+      new File([JSON.stringify({ version: 3, ...backup })], "other-device.json", { type: "application/json" });
+
+    it("merges another device's backup into this one instead of replacing it", async () => {
+      const user = userEvent.setup();
+      localStorage.setItem("sb-sessions", JSON.stringify([storedSession("here"), storedSession("gone-there")]));
+      renderApp();
+      await goTo(user, "Settings");
+
+      await user.upload(
+        screen.getByLabelText("Merge backup file"),
+        backupFile({
+          subjects: [],
+          sessions: [storedSession("there", { date: "2026-06-20T09:00:00.000Z" })],
+          tombstones: { sessions: { "gone-there": "2026-06-21T09:00:00.000Z" } },
+        })
+      );
+
+      expect(await screen.findByText("Backup merged with the data on this device.")).toBeTruthy();
+      await waitFor(() =>
+        expect(JSON.parse(localStorage.getItem("sb-sessions")).map((s) => s.id)).toEqual(["there", "here"])
+      );
+      // This device's subjects are still here, and the deletion is remembered.
+      expect(JSON.parse(localStorage.getItem("sb-subjects")).length).toBeGreaterThan(0);
+      expect(JSON.parse(localStorage.getItem("sb-tombstones")).sessions).toHaveProperty("gone-there");
+    });
+
+    it("leaves everything untouched when the file to merge is malformed", async () => {
+      const user = userEvent.setup();
+      localStorage.setItem("sb-sessions", JSON.stringify([storedSession("here")]));
+      renderApp();
+      await goTo(user, "Settings");
+      const before = localStorage.getItem("sb-sessions");
+
+      await user.upload(
+        screen.getByLabelText("Merge backup file"),
+        new File(["{not json"], "bad.json", { type: "application/json" })
+      );
+      expect((await screen.findByRole("alert")).textContent).toMatch(/valid JSON/);
+      expect(localStorage.getItem("sb-sessions")).toBe(before);
+    });
+
+    it("restoring a file replaces this device's tombstones with the file's", async () => {
+      const user = userEvent.setup();
+      localStorage.setItem(
+        "sb-tombstones",
+        JSON.stringify({ subjects: {}, topics: {}, milestones: {}, sessions: { old: "2026-06-01T09:00:00.000Z" } })
+      );
+      renderApp();
+      await goTo(user, "Settings");
+      await user.upload(
+        screen.getByLabelText("Restore backup file"),
+        backupFile({ subjects: [], sessions: [storedSession("there")], version: 2 })
+      );
+      expect(await screen.findByText("Backup restored.")).toBeTruthy();
+      await waitFor(() => expect(JSON.parse(localStorage.getItem("sb-tombstones")).sessions).toEqual({}));
+    });
   });
 
   describe("Asana integration", () => {

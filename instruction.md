@@ -19,13 +19,15 @@ This file documents the app structure so future changes stay consistent.
 - `sb-last-streak-reminder` - the local date (`YYYY-MM-DD`) the streak-reminder notification last fired, so it never fires twice in one day
 - `sb-last-milestone-reminder` - the local date (`YYYY-MM-DD`) the milestone-reminder notification last fired, so it never fires twice in one day
 - `sb-subjects` also stores subjects created from uploaded specification PDFs, including inferred exam board and topic checklist
+- `sb-tombstones` - what was deleted and when (see Sync-safe records)
+- `sb-schema` - the stored-data schema version
 - `sb-timer`, `sb-session-draft` - the running timer and the unlogged session's note, tags and timed topic, so a reload resumes the session
 - `studybox_asana_pat` - the Asana personal access token (plain text, legacy name). Lives in `SECRET_KEYS`, not `STORAGE_KEYS`
 
 ### Store layer (`src/store/`)
 
 - `src/store/localStore.js` is the only module that touches `localStorage`. ESLint (`no-restricted-globals`) fails any direct use elsewhere in `src/`, tests excepted. Read with `loadJson` / `loadText`, write with `saveJson` / `saveText` / `removeKey`, and use `usePersistedState(key, init)` for React state that persists itself.
-- Every key has a scope in `KEY_SCOPES`: `account` (subjects, sessions, game, theme: what backups carry and what sync will carry), `device` (timer, draft, reminder bookkeeping, Asana config and stats, onboarded) or `secret` (the Asana token: never backed up, never synced, and its value is never passed to store subscribers). A new key must be given a scope; a test fails otherwise.
+- Every key has a scope in `KEY_SCOPES`: `account` (subjects, sessions, game, theme, tombstones: what backups carry and what sync will carry), `device` (timer, draft, reminder bookkeeping, Asana config and stats, onboarded, schema version) or `secret` (the Asana token: never backed up, never synced, and its value is never passed to store subscribers). A new key must be given a scope; a test fails otherwise.
 - `subscribe(listener)` reports every write and removal as `{ key, scope, type, value }`. This is the seam the V2 sync engine attaches to; nothing uses it yet.
 
 ## Data model
@@ -43,7 +45,18 @@ This file documents the app structure so future changes stay consistent.
   - Foundation subjects hide higher-only topics by default behind a "Show higher-tier topics" toggle (state lives in `TopicList`).
 - Subjects may carry `milestones: [{ id, name, kind, due, done }]` (plus `catalogueMilestoneId` when seeded from the catalogue). `kind` is one of `MILESTONE_KINDS` (`nea`, `practical`, `coursework`, `other`); `due` is a local calendar date `YYYY-MM-DD` or `null`. The key is omitted when there are none. Milestones never award XP or affect streaks (`gameLogic.js` doesn't know about them).
 - Topics include `id`, `name`, `done` and `subtasks`. Topics seeded from the spec catalogue also carry `catalogueTopicId` (the catalogue topic they came from, so a later "reset to spec" can match them up); user-created topics have none. Seeded topics are freely editable. `normalizeSubjects` keeps `catalogueTopicId` only when it is a string.
-- Backups carry `version: 2` (`BACKUP_VERSION` in `src/utils/backup.js`). `parseBackup` loads unversioned, v1 and v2 files (v1 subjects are migrated), and refuses a higher version rather than silently dropping fields it doesn't know. Optional, additive fields (e.g. `catalogueTopicId`, `papers`, topic `paper`, `higherOnly`) don't bump the version: older builds ignore them and the rest of the backup still loads. Bump `BACKUP_VERSION` only for changes an older build would misread (renamed, removed or re-typed fields, or changed meaning).
+- Backups carry `version: 3` (`BACKUP_VERSION` in `src/utils/backup.js`). `parseBackup` loads unversioned, v1, v2 and v3 files (v1 subjects are migrated; pre-v3 files load with empty tombstones), and refuses a higher version rather than silently dropping fields it doesn't know. Optional, additive fields (e.g. `catalogueTopicId`, `papers`, topic `paper`, `higherOnly`, `createdAt`/`updatedAt`) don't bump the version: older builds ignore them and the rest of the backup still loads. Bump `BACKUP_VERSION` only for changes an older build would misread (renamed, removed or re-typed fields, or changed meaning). v3 was a bump because an older build would drop `tombstones` on re-export, and a later merge would then resurrect deleted records.
+
+### Sync-safe records (schema v3, from 1.15.0)
+
+These rules exist so two copies of a user's data can be merged using only what is on the records. V2 sync depends on them; don't weaken them.
+
+- **Ids.** New records get `newId(prefix)` from `src/utils/records.js` (a prefixed `crypto.randomUUID()`), never `Date.now()`. Existing ids are permanent and are never rewritten; template and catalogue subjects keep their fixed ids, so the same template on two devices is the same subject.
+- **Stamps.** Subjects, topics, milestones and sessions may carry `createdAt` / `updatedAt` (ISO UTC strings). Every action that changes a record stamps that record with `touch()`, and only that record: ticking a topic stamps the topic, not its subject; a subtask change stamps its topic. Stamps are optional and the normalizers never invent them, so pre-v3 records stay exactly as they were and `isUntouchedDefaultSubjects` still works. A missing `updatedAt` means "older than any real edit".
+- **Soft deletes.** Deleting a subject, topic, milestone or session writes a tombstone (`sb-tombstones`: `{ subjects, topics, milestones, sessions }`, each `id -> deletedAt`; topics and milestones are keyed `subjectId::id` via `childKey`). Tombstones live beside the data rather than as a `deletedAt` flag on each record, so no view filters deleted rows. Any new delete path must call `entomb` in `App.jsx`.
+- **Merge.** `mergeData` in `src/utils/merge.js` is the single merge implementation: last write wins per record on `updatedAt`, a tombstone removes a record unless it was edited after the deletion, and a subject's own fields, topics and milestones merge separately. It is commutative and idempotent, and `merge.test.js` holds the two-profile convergence test. Settings > Backup & Restore > "Merge from file" uses it; sync will use the same function.
+- **Stored schema version.** `sb-schema` holds `SCHEMA_VERSION` (`src/store/migrations.js`); `runMigrations()` runs from `main.jsx` before the app reads storage. Field defaults still belong in the normalizers. Add a migration step only for a change a normalizer can't express (moving a key, reshaping stored data).
+- Known limit: last-write-wins trusts device clocks. A device with a wrong clock can win or lose merges it shouldn't. Sync should stamp on the server.
 - Sessions include `id`, `subjectId`, `subjectName`, `subjectColor`, `duration`, `date`, `note`, and `tags`.
 
 ## Spec catalogue

@@ -18,6 +18,7 @@ export default function SettingsView({
   backupMessage,
   onExport,
   onImport,
+  onMerge,
 }) {
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
@@ -41,7 +42,7 @@ export default function SettingsView({
         </div>
 
         <AsanaSettingsCard C={C} cfg={asanaCfg} onUpdate={onUpdateAsana} />
-        <BackupCard C={C} message={backupMessage} onExport={onExport} onImport={onImport} />
+        <BackupCard C={C} message={backupMessage} onExport={onExport} onImport={onImport} onMerge={onMerge} />
 
         <Card C={C} style={{ marginTop: "12px" }}>
           <SectionLabel C={C}>What changes with themes</SectionLabel>

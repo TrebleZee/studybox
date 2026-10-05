@@ -32,7 +32,10 @@ import {
   updateSubjectFields,
 } from "./utils/subjects.js";
 import { subjectsForTemplate } from "./utils/catalogue.js";
+import { mergeData } from "./utils/merge.js";
 import { convertTopicToMilestone } from "./utils/milestones.js";
+import { newId, nowIso, stampNew, touch } from "./utils/records.js";
+import { addTombstone, childKey, emptyTombstones, normalizeTombstones } from "./utils/tombstones.js";
 import { THEMES } from "./utils/themes.js";
 
 const readFileText = (file) =>
@@ -45,6 +48,12 @@ const readFileText = (file) =>
 
 const mapSubject = (subjects, id, fn) =>
   subjects.map((subject) => (subject.id === id ? fn(subject) : subject));
+
+// Edits stamp the record they change (updatedAt), which is what sync merges on.
+const mapTopic = (subject, topicId, fn) => ({
+  ...subject,
+  topics: subject.topics.map((topic) => (topic.id === topicId ? touch(fn(topic)) : topic)),
+});
 
 export default function StudyBox() {
   const [themeId, setThemeId] = usePersistedState(STORAGE_KEYS.theme, () => loadJson(STORAGE_KEYS.theme, "midnight"));
@@ -65,6 +74,12 @@ export default function StudyBox() {
       normalizeSubjects(loadJson(STORAGE_KEYS.subjects, null))
     )
   );
+  // Soft deletes: what was removed and when, so a merge can tell "deleted
+  // here" from "never existed here".
+  const [tombstones, setTombstones] = usePersistedState(STORAGE_KEYS.tombstones, () =>
+    normalizeTombstones(loadJson(STORAGE_KEYS.tombstones, null))
+  );
+  const entomb = (kind, id) => setTombstones((prev) => addTombstone(prev, kind, id));
   const [onboarded, setOnboarded] = usePersistedState(STORAGE_KEYS.onboarded, () => loadJson(STORAGE_KEYS.onboarded, false));
   const templateRequest = useRef(0);
   // The unlogged session's note, tags and timed topic are saved alongside the
@@ -193,12 +208,9 @@ export default function StudyBox() {
   };
 
   const updateTopicSubtasks = (topicId, updater) =>
-    updateCurrentSubject((subject) => ({
-      ...subject,
-      topics: subject.topics.map((topic) =>
-        topic.id === topicId ? { ...topic, subtasks: updater(topic.subtasks) } : topic
-      ),
-    }));
+    updateCurrentSubject((subject) =>
+      mapTopic(subject, topicId, (topic) => ({ ...topic, subtasks: updater(topic.subtasks) }))
+    );
 
   const actions = {
     selectSubject: (id) => {
@@ -213,10 +225,7 @@ export default function StudyBox() {
       const topic = subjects.find((s) => s.id === subjectId)?.topics.find((t) => t.id === topicId);
       if (topic && !topic.done) setGame((g) => ({ ...g, totalXP: g.totalXP + 10 }));
       setSubjects((prev) =>
-        mapSubject(prev, subjectId, (subject) => ({
-          ...subject,
-          topics: subject.topics.map((t) => (t.id === topicId ? { ...t, done: !t.done } : t)),
-        }))
+        mapSubject(prev, subjectId, (subject) => mapTopic(subject, topicId, (t) => ({ ...t, done: !t.done })))
       );
     },
     addTopic: (name) => {
@@ -226,7 +235,7 @@ export default function StudyBox() {
         ...subject,
         topics: [
           ...subject.topics,
-          { id: Date.now().toString(), name: topicName, done: false, subtasks: [] },
+          stampNew({ id: newId("topic"), name: topicName, done: false, subtasks: [] }),
         ],
       }));
     },
@@ -240,7 +249,7 @@ export default function StudyBox() {
             ...subject,
             milestones: [
               ...(subject.milestones || []),
-              { id: `ms-${Date.now().toString(36)}`, name: cleanName, kind, due: due || null, done: false },
+              stampNew({ id: newId("ms"), name: cleanName, kind, due: due || null, done: false }),
             ],
           })
         )
@@ -252,12 +261,13 @@ export default function StudyBox() {
           normalizeSubject({
             ...subject,
             milestones: (subject.milestones || []).map((milestone) =>
-              milestone.id === milestoneId ? { ...milestone, ...patch } : milestone
+              milestone.id === milestoneId ? touch({ ...milestone, ...patch }) : milestone
             ),
           })
         )
       ),
-    deleteMilestone: (subjectId, milestoneId) =>
+    deleteMilestone: (subjectId, milestoneId) => {
+      entomb("milestones", childKey(subjectId, milestoneId));
       setSubjects((prev) =>
         mapSubject(prev, subjectId, (subject) =>
           normalizeSubject({
@@ -265,34 +275,36 @@ export default function StudyBox() {
             milestones: (subject.milestones || []).filter((milestone) => milestone.id !== milestoneId),
           })
         )
-      ),
+      );
+    },
     // "Keep as topic" on the NEA offer: remembered on the topic itself, so the
     // offer stays gone across views, reloads and backups.
     keepAsTopic: (subjectId, topicId) =>
       setSubjects((prev) =>
-        mapSubject(prev, subjectId, (subject) => ({
-          ...subject,
-          topics: subject.topics.map((topic) => (topic.id === topicId ? { ...topic, keepAsTopic: true } : topic)),
-        }))
+        mapSubject(prev, subjectId, (subject) =>
+          mapTopic(subject, topicId, (topic) => ({ ...topic, keepAsTopic: true }))
+        )
       ),
     // Only called after the user confirms in the milestone strip.
     convertTopicToMilestone: (subjectId, topicId) => {
       if (expandedTopic === topicId) setExpandedTopic(null);
+      entomb("topics", childKey(subjectId, topicId));
       setSubjects((prev) =>
-        mapSubject(prev, subjectId, (subject) => normalizeSubject(convertTopicToMilestone(subject, topicId)))
+        mapSubject(prev, subjectId, (subject) =>
+          normalizeSubject(convertTopicToMilestone(subject, topicId, newId("ms"), nowIso()))
+        )
       );
     },
     // Patch a topic's own fields (e.g. paper, higherOnly); `undefined` removes one.
     updateTopic: (topicId, patch) =>
-      updateCurrentSubject((subject) => ({
-        ...subject,
-        topics: subject.topics.map((topic) => (topic.id === topicId ? { ...topic, ...patch } : topic)),
-      })),
-    deleteTopic: (topicId) =>
+      updateCurrentSubject((subject) => mapTopic(subject, topicId, (topic) => ({ ...topic, ...patch }))),
+    deleteTopic: (topicId) => {
+      if (sub) entomb("topics", childKey(sub.id, topicId));
       updateCurrentSubject((subject) => ({
         ...subject,
         topics: subject.topics.filter((topic) => topic.id !== topicId),
-      })),
+      }));
+    },
     toggleSubtask: (topicId, subtaskId) =>
       updateTopicSubtasks(topicId, (subtasks) =>
         subtasks.map((st) => (st.id === subtaskId ? { ...st, done: !st.done } : st))
@@ -302,7 +314,7 @@ export default function StudyBox() {
       if (!subtaskName) return;
       updateTopicSubtasks(topicId, (subtasks) => [
         ...subtasks,
-        { id: `st-${Date.now().toString(36)}`, name: subtaskName, done: false },
+        { id: newId("st"), name: subtaskName, done: false },
       ]);
     },
     deleteSubtask: (topicId, subtaskId) =>
@@ -324,8 +336,8 @@ export default function StudyBox() {
       const extraTag = isAsana ? asanaTask?.name : selectedTopic?.name;
 
       setSessions((prev) => [
-        {
-          id: `sess-${Date.now().toString(36)}`,
+        stampNew({
+          id: newId("sess"),
           subjectId: subjectToLog.id,
           subjectName: subjectToLog.name,
           subjectColor: subjectToLog.color,
@@ -333,7 +345,7 @@ export default function StudyBox() {
           date: new Date().toISOString(),
           note: note.trim(),
           tags: extraTag ? addUniqueTag(sessionTags, extraTag) : sessionTags,
-        },
+        }),
         ...prev,
       ]);
 
@@ -344,20 +356,24 @@ export default function StudyBox() {
   };
 
   // New subjects from the add form, a PDF import or the catalogue picker.
-  // Each gets a fresh id (unique within the batch) and fresh topic ids.
+  // Each gets a fresh globally unique id and fresh topic ids.
   const buildNewSubjects = (list) => {
-    const stamp = Date.now().toString(36);
-    return list.map(({ topics, ...fields }, index) => {
-      const id = list.length === 1 ? `custom-${stamp}` : `custom-${stamp}-${index}`;
+    const now = nowIso();
+    return list.map(({ topics, ...fields }) => {
+      const id = newId("custom");
       return normalizeSubject({
         ...fields,
         id,
+        createdAt: now,
+        updatedAt: now,
         // Topics are names, or objects (catalogueTopicId, paper, higherOnly) when seeded from the catalogue.
         topics: topics.map((topic, i) => ({
           ...(typeof topic === "string" ? { name: topic } : topic),
           id: `${id}-topic-${i}`,
           done: false,
           subtasks: [],
+          createdAt: now,
+          updatedAt: now,
         })),
       });
     });
@@ -373,6 +389,7 @@ export default function StudyBox() {
 
   const removeSubject = (id) => {
     const next = subjects.filter((subject) => subject.id !== id);
+    entomb("subjects", id);
     setSubjects(next);
     if (sel === id) setSel(next[0]?.id || null);
     if (timedSubjectId === id) timer.setTimedSubjectId(null);
@@ -388,12 +405,17 @@ export default function StudyBox() {
   };
 
   const saveSession = (id, patch) => {
-    setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+    setSessions((prev) => prev.map((s) => (s.id === id ? touch({ ...s, ...patch }) : s)));
     setEditingSession(null);
   };
 
+  const deleteSession = (id) => {
+    entomb("sessions", id);
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+  };
+
   const exportData = () => {
-    const backup = buildBackup({ subjects, sessions, themeId, game });
+    const backup = buildBackup({ subjects, sessions, themeId, game, tombstones });
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -404,11 +426,36 @@ export default function StudyBox() {
     setBackupMessage({ type: "success", text: "Backup downloaded." });
   };
 
-  const importData = async (file) => {
+  // Restore replaces everything with the file. Merge ({ merge: true }) folds
+  // the file into what's here, record by record (see utils/merge.js).
+  const importData = async (file, { merge = false } = {}) => {
     if (!file) return { ok: false };
     try {
       const restored = parseBackup(await readFileText(file));
       templateRequest.current += 1;
+      if (merge) {
+        const merged = mergeData(
+          { subjects, sessions, tombstones, game },
+          {
+            subjects: restored.subjects ?? [],
+            sessions: restored.sessions ?? [],
+            tombstones: restored.tombstones,
+            game: restored.game ?? game,
+          }
+        );
+        setSubjects(merged.subjects);
+        setSessions(merged.sessions);
+        setTombstones(merged.tombstones);
+        setGame(merged.game);
+        if (!merged.subjects.some((subject) => subject.id === sel)) setSel(merged.subjects[0]?.id ?? null);
+        if (timedSubjectId && !merged.subjects.some((subject) => subject.id === timedSubjectId)) {
+          timer.setTimedSubjectId(null);
+        }
+        setOnboarded(true);
+        setBackupMessage({ type: "success", text: "Backup merged with the data on this device." });
+        return { ok: true };
+      }
+      setTombstones(restored.tombstones ?? emptyTombstones());
       if (restored.subjects) {
         setSubjects(restored.subjects);
         setSel(restored.subjects[0]?.id ?? null);
@@ -539,7 +586,7 @@ export default function StudyBox() {
               grandTotal={grandTotal}
               subTotal={subTotal}
               onEditSession={setEditingSession}
-              onDeleteSession={(id) => setSessions((prev) => prev.filter((s) => s.id !== id))}
+              onDeleteSession={deleteSession}
             />
           )}
 
@@ -562,7 +609,7 @@ export default function StudyBox() {
               subjects={subjects}
               onAddSubject={addSubject}
               onUpdateSubject={(id, patch) =>
-                setSubjects((prev) => mapSubject(prev, id, (s) => updateSubjectFields(s, patch)))
+                setSubjects((prev) => mapSubject(prev, id, (s) => touch(updateSubjectFields(s, patch))))
               }
               onRemoveSubject={removeSubject}
               asanaCfg={asanaCfg}
@@ -570,6 +617,7 @@ export default function StudyBox() {
               backupMessage={backupMessage}
               onExport={exportData}
               onImport={importData}
+              onMerge={(file) => importData(file, { merge: true })}
             />
           )}
 
