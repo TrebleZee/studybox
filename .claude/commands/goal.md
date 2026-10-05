@@ -2,7 +2,7 @@
 
 Close every finding the Phase A exit check found that loses, duplicates or misattributes a user's data today (Phase A2), then the sync-safety `high` rows that a merge or an older client would turn into loss (Phase A3), and re-run the exit check. Each item is its own branch, PR and, where it changes the shipped app, release. When done, no one-click action destroys a session or a whole profile without an undo, a poisoned or unreadable file or store never takes the app down, a timer is owned by one tab, and replacing data or running an older build never brings back or strips records. Everything stays local-first: no backend, no accounts, no network calls beyond the opt-in Asana API.
 
-Readiness report: `docs/readiness/2026-10-05-phase-a-exit.md`
+Readiness report: `docs/readiness/2026-10-05-phase-a-exit.md`, amended by the scope review `docs/readiness/2026-10-05-scope-review.md` (same phases and dates; adds C13, N26, N27 and N28 to the lanes below)
 Findings ledger: `docs/readiness/findings.md`
 Previous goal (Phase A shipped, Phase C re-planned): `docs/goals/2026-10-phase-a-c-harden-and-shape.md`
 
@@ -13,11 +13,14 @@ Work may start on every lane in **Parallel lanes** below except where it says it
 - [x] pushed tags `v1.17.0` (`42f6159`) and `v1.17.1` (`251deed`) and published their releases (C9). Until then, do not merge any `fix/` or `feat/` branch: its version would be computed from `v1.16.0`.
 - [x] answered the N8 decision below and recorded it under "Decisions already made".
 - [x] approved this plan (the previous goal's "stop and ask" applies to N9, N10 and N11).
+- [x] made "Lint, test, build" a required check on `master` (ruleset 23821221; C7 closed).
+
+Phase M2 (confirm the scope answer by 9 Oct, B1/V1 check-in 15 Oct, device checks 23 Oct, B1 and V1 by 25 Oct) is the maintainer's and is tracked in the scope-review report and `docs/STATUS.md`, not here. No agent branch in this goal waits for it except A2.12.
 
 ## Ground rules (apply to every branch)
 
 1. **Use the `/git-workflow` skill for every branch.** Never commit to `master`. Work in your own worktree, check the item isn't claimed, branch off `origin/master` with the name given below and claim it with a draft PR at once; never reuse a branch name that already exists on `origin`. `fix/` is a patch bump, `feat/` a minor bump, `chore/` no bump and no tag. `feat/` branches go through the review gate before merging. Branches merge one at a time and set their version at merge time (skill step 4).
-2. **Expected versions, if merged in plan order** (a forecast only: lanes run in parallel and merge in whatever order they finish, and the latest tag at merge time decides each version): A2.1 `v1.17.2` → A2.2 (no bump) → A2.3 `v1.17.3` → A2.4 `v1.18.0` → A2.5 `v1.19.0` → A2.6 `v1.19.1` → A2.7 `v1.19.2` → A2.8 `v1.19.3` → A2.9 `v1.19.4` → A2.10 `v1.19.5` → A2.11 `v1.19.6` → A2.12 `v1.19.7` (or skipped) → A3.1 `v1.19.8` → A3.2 `v1.19.9` → A3.3 `v1.19.10` → **exit check**. `chore/ignore-drafts` can land any time.
+2. **Expected versions, if merged in plan order** (a forecast only: lanes run in parallel and merge in whatever order they finish, and the latest tag at merge time decides each version): A2.1 `v1.17.2` → A2.2 (no bump) → A2.3 `v1.17.3` → A2.4 `v1.18.0` → A2.5 `v1.19.0` → A2.6 `v1.19.1` → A2.7 `v1.19.2` → A2.8 `v1.19.3` → A2.9 `v1.19.4` → A2.10 `v1.19.5` → A2.11 `v1.19.6` → A2.12 `v1.19.7` (or skipped) → A3.1 `v1.19.8` → A3.2 `v1.19.9` → A3.3 `v1.19.10` → **exit check**. `chore/ignore-drafts`, `chore/status-post-merge` and `chore/document-known-gaps` are `chore/` (no bump) and can land any time; `chore/status-post-merge` should land first, by 9 Oct.
 3. **Green before PR:** `npm run lint`, `npm test`, `npm run build` all pass locally and in CI. Never hand over a red branch. If a tag can't be pushed from the session, say so and give the maintainer the exact command; never route around a policy denial.
 4. **Reproduce before fixing.** Every finding gets a failing test that shows the auditor's scenario first, then the fix. The audit's scratch tests may be gone; write the test in the repo. A finding marked "reasoned" in the ledger must be reproduced or disproved before any code changes; if disproved, close it as rejected and skip the branch.
 5. **Conventions:** pure logic in `src/utils/*.js` or `src/store/*.js` with a sibling `*.test.js`; JSX in `src/components/*.jsx` with a sibling `*.test.jsx`. `App.jsx` gets smaller or stays the same size, never larger.
@@ -35,14 +38,15 @@ Each lane is one session's queue: its branches run in order, because they share 
 
 | Lane | Branches, in order | Main files | Waits for |
 | --- | --- | --- | --- |
-| 1. Normalizers and storage | A2.1 → A2.9 → A3.2 → A3.3 | normalizers in `src/utils/`, `src/store/appState.js`, `localStore.js`, `usePersistedState.js`, `migrations.js` | nothing (A2.1 is in flight) |
-| 2. Undo and replacing data | A2.3 → A2.4 → A3.1 | `src/utils/undo.js`, `src/hooks/useUndoDelete.js`, Settings Backup & Restore, `Onboarding.jsx`, `App.jsx` | the N8 decision; A3.1 also waits for A3.2's normalizer changes if they overlap |
-| 3. Timer | A2.5 → A2.7 → A2.8 | `src/hooks/useTimer.js`, `TimerPanel.jsx`, `UndoBar.jsx`, Log Session in `App.jsx` | nothing. A2.5 adds to the undo bar: if lane 2 is open, touch `useUndoDelete.js` only to add the timer case |
+| 1. Normalizers and storage | A2.1 (done, #39) → A2.9 → A3.2 → A3.3 → Phase C: `fix/bound-imported-values` (N14, N28) | normalizers in `src/utils/`, `src/store/appState.js`, `localStore.js`, `usePersistedState.js`, `migrations.js`; N28 also `EditSessionModal.jsx` | nothing for A2.9. `fix/bound-imported-values` is Phase C and also waits for A2.6 (same modal) |
+| 2. Undo and replacing data | A2.3 (#42) → A2.4 → A3.1 | `src/utils/undo.js`, `src/hooks/useUndoDelete.js`, Settings Backup & Restore, `Onboarding.jsx`, restore and onboarding handlers in `App.jsx` | #42 merging. A3.1 waits for A2.4 live, and for A3.2 if their normalizer changes overlap |
+| 3. Timer and logging | A2.5 → A2.7 → A2.8 → Phase C: `fix/asana-session-tags` (N27) | `src/hooks/useTimer.js`, `TimerPanel.jsx`, `UndoBar.jsx`, `logSession` in `App.jsx` | A2.5 adds to the undo bar: while lane 2 is open, touch `useUndoDelete.js` only to add the timer case. `fix/asana-session-tags` waits for the 25 Oct B1 decision and is dropped if it says "keep" |
 | 4. Session edit | A2.6 | `EditSessionModal.jsx` | nothing |
 | 5. Reminders | A2.11 | `useStreakReminder.js`, `useMilestoneReminder.js` | nothing |
 | 6. App update | A2.10 | `useAppUpdate.js`, `UpdateBanner.jsx`, `main.jsx` | nothing. It reads whether a timer, edit or undo is active; it doesn't change those |
-| 7. Chores | A2.2, `chore/ignore-drafts` | `.github/workflows/ci.yml`, `.gitignore` | nothing |
-| 8. Safari backup | A2.12 | `src/utils/backup.js` (download only) | a reproduction on Safari or an iPhone (maintainer) |
+| 7. Docs and repo chores | A2.2 (done, #41) → `chore/ignore-drafts` → `chore/document-known-gaps` | `.gitignore`, `instruction.md` (known limits, a new Asana section) | nothing |
+| 8. Status page | `chore/status-post-merge` | `docs/STATUS.md`, `.claude/skills/git-workflow/SKILL.md`, `.claude/skills/readiness-pass/SKILL.md`, `src/statusDoc.test.js` | nothing. Merge it alone, by 9 Oct; PRs open at that point then sync and follow the new STATUS rule |
+| 9. Safari backup | A2.12 | `src/utils/backup.js` (download only) | a reproduction on Safari or an iPhone (maintainer, 23 Oct) |
 
 Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every lane is empty.
 
@@ -88,9 +92,9 @@ Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every
 - [ ] Two quick pushes to a PR still cancel; the workflow expression shows `master` runs are never cancelled (say how it was checked).
 - [ ] The final report reminds the maintainer to make the check required (C7's other half).
 
-## A2.3 Undo re-stamps what it restores (only if the maintainer says yes)
+## A2.3 Undo re-stamps what it restores
 
-**Branch:** `fix/undo-restamps` · **Closes:** N8
+**Branch:** `fix/undo-restamps` · **Closes:** N8 · **Claimed:** draft #42
 
 **Build**
 
@@ -176,7 +180,7 @@ Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every
 
 **Build**
 
-- Reproduce first from `vite-plugin-pwa`'s register client. A tab that is mid-session, mid-edit or holding an undo offer is not reloaded when another tab applies the update; it shows the update banner instead. Correct `README.md:116`.
+- Reproduce first from `vite-plugin-pwa`'s register client. A tab that is mid-session, mid-edit or holding an undo offer is not reloaded when another tab applies the update; it shows the update banner instead. Correct `README.md:120` and `README.md:22` (the exit-check report cited `:116`; #38 moved the line).
 
 **Done when**
 
@@ -207,6 +211,33 @@ Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every
 
 - [ ] Reproduced and fixed with a test that the URL is revoked only after the click, or closed as rejected with the evidence.
 
+## Alongside: the status page stops going stale on merge
+
+**Branch:** `chore/status-post-merge` · **Closes:** C13 · **By 9 Oct, merged on its own**
+
+**Build**
+
+- `docs/STATUS.md` keeps only what is true once the PR that writes it has merged. Drop the facts that only become true afterwards (production sha, open PRs, "merge this PR", required-check state) or move them into a post-merge step of the git-workflow skill, and make the readiness-pass skill's step 4b match. The `findings.md` header follows the same rule.
+- Extend `src/statusDoc.test.js` so it fails if those rows come back.
+
+**Done when**
+
+- [ ] `statusDoc.test.js` fails on a STATUS page that carries an "Open PRs" row or a production sha (say how it was checked), and passes on the new page.
+- [ ] The git-workflow skill's step 2b and the readiness-pass skill's step 4b describe the same rule.
+
+## Alongside: known gaps written down
+
+**Branch:** `chore/document-known-gaps` · **Contains:** N26, N27 (docs only; closes neither)
+
+**Build**
+
+- `instruction.md` known limits: streaks, freezes and `lastStudyDate` are derived from session instants in the device's current timezone, so the same records can give a different streak after a timezone change or on another device (N26). No code change.
+- A new `instruction.md` section for the Asana panel: what it reads, the `PUT` that marks a task complete in Asana, the `asana` pseudo-subject id on sessions, and that the selected task's name is copied into the session's tags, which are account scope and in every backup (N27). No code change.
+
+**Done when**
+
+- [ ] Both are in `instruction.md` and the N26 and N27 ledger rows point at them, still open.
+
 ## Alongside: `drafts/` is ignored again
 
 **Branch:** `chore/ignore-drafts` · **Closes:** C10
@@ -231,6 +262,7 @@ Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every
 
 - [ ] The auditor's two-tab scenarios (restore, Start blank, Use template) end with only the replacing data in both tabs (tests).
 - [ ] Undo restore still restores exactly, including removing the tombstones restore wrote (test).
+- [ ] Restoring a pre-v3 file (no tombstones) keeps the current tombstones, and a merge afterwards does not bring deleted records back (test; the wider N10 from the scope review).
 - [ ] Onboarding guard test passes.
 
 ## A3.2 Older builds never strip newer fields
@@ -269,7 +301,8 @@ Run the `readiness-pass` skill. Phase C (re-planned in the report for 9 to 27 No
 
 - A fix would drop, rename or re-type any stored field, change `defaultSubjects()` output, or change an existing record's id.
 - A finding cannot be reproduced and cannot be disproved either.
-- The N8 decision has not been recorded and you reach A2.3.
+- You are about to start a Phase C branch (`feat/record-order`, `feat/session-local-day`, `fix/asana-session-tags`, `fix/bound-imported-values`): those are not in this goal and wait for the A3.4 exit check, and the V2-only ones also for the 25 Oct decision.
+- You are about to open a process or workflow PR this goal does not list. The scope review set a process budget until the 6 Nov exit check, unless a gap shipped unverified code or lost data.
 - Anything needs a backend, an account, a new third-party service or a new runtime dependency.
 - Lint, test or build cannot be made green without disabling a rule or skipping or weakening a test.
 - The review gate returns `blocked`, or a critical or high finding is still open after two rounds.
@@ -286,5 +319,5 @@ After A3.4, report:
 - `App.jsx` line count before and after;
 - anything stashed under rule 11;
 - tags that could not be pushed;
-- what still needs the maintainer: the CI required check, B1 and V1 by 25 Oct, and the device checks (installed PWA beside a tab, Android reminders, iPhone backup);
+- what still needs the maintainer: B1 (including the Asana data question, N27) and V1 by 25 Oct, the design gate doc for the exit check, and the device checks (installed PWA beside a tab, Android reminders, iPhone backup);
 - any deviation from this file.
