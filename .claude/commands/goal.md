@@ -10,9 +10,9 @@ Previous goal (Phase A shipped, Phase C re-planned): `docs/goals/2026-10-phase-a
 
 Work may start on A2.1 (`fix/normalize-field-types`) and A2.2 (`chore/ci-master-runs`) at once. Everything from A2.3 on waits until the maintainer has:
 
-- [ ] pushed tags `v1.17.0` (`42f6159`) and `v1.17.1` (`251deed`) and published their releases (C9). Until then, do not merge any `fix/` or `feat/` branch: its version would be computed from `v1.16.0`.
-- [ ] answered the N8 decision below and recorded it under "Decisions already made".
-- [ ] approved this plan (the previous goal's "stop and ask" applies to N9, N10 and N11).
+- [x] pushed tags `v1.17.0` (`42f6159`) and `v1.17.1` (`251deed`) and published their releases (C9). Until then, do not merge any `fix/` or `feat/` branch: its version would be computed from `v1.16.0`.
+- [x] answered the N8 decision below and recorded it under "Decisions already made".
+- [x] approved this plan (the previous goal's "stop and ask" applies to N9, N10 and N11).
 
 ## Ground rules (apply to every branch)
 
@@ -37,7 +37,7 @@ Work may start on A2.1 (`fix/normalize-field-types`) and A2.2 (`chore/ci-master-
 - Zero-behaviour-change restructures ship as `chore/`, not `refactor/`, because `v2.0.0` is reserved for accounts and sync.
 - The Asana token stays in `localStorage` under its current key, behind the CSP in `vercel.json`.
 - The running timer and the session draft are per-tab state, not reconciled across tabs (N12 makes that true rather than changing it).
-- **Pending (maintainer, by 7 Oct): may undo re-stamp the record it restores?** This amends the previous goal's "undo puts the record back with its stamps unchanged". Yes → A2.3 and A2.4 as written. No → skip A2.3 (N8 stays a documented limit), and A2.4 becomes `feat/confirm-restore`: a confirmation step before restore instead of an undo.
+- **Undo re-stamps the record it restores** (maintainer, 2026-10-05). This amends the previous goal's "undo puts the record back with its stamps unchanged": A2.3 and A2.4 go ahead as written.
 
 ---
 
