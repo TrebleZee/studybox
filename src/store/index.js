@@ -15,4 +15,4 @@ export {
   unreadableText,
 } from "./localStore.js";
 export { default as usePersistedState } from "./usePersistedState.js";
-export { MIGRATIONS, SCHEMA_VERSION, runMigrations } from "./migrations.js";
+export { MIGRATIONS, SCHEMA_VERSION, runMigrations, storedSchemaIsNewer } from "./migrations.js";
