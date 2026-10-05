@@ -17,6 +17,16 @@ export const readFileText = (file) =>
     reader.readAsText(file);
   });
 
+export const downloadBackup = (backup) => {
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = backupFileName();
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
 export const buildBackup = ({ subjects, sessions, themeId, game, tombstones }) => ({
   subjects,
   sessions,

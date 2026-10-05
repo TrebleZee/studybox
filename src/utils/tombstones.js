@@ -36,6 +36,15 @@ export const addTombstone = (tombstones, kind, id, now = nowIso()) => ({
 export const deletedAt = (tombstones, kind, id) =>
   Object.hasOwn(tombstones[kind] || {}, id) ? tombstones[kind][id] : null;
 
+// Undo of a delete. Unchanged (same object) when there is nothing to remove.
+export const removeTombstone = (tombstones, kind, id) => {
+  if (!Object.hasOwn(tombstones[kind] || {}, id)) return tombstones;
+  return {
+    ...tombstones,
+    [kind]: Object.fromEntries(Object.entries(tombstones[kind]).filter(([key]) => key !== id)),
+  };
+};
+
 // Per id, the later deletion wins.
 export const mergeTombstones = (a, b) => {
   const result = emptyTombstones();
