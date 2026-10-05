@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { goTo, renderApp } from "./test/helpers.jsx";
 import { defaultSubjects, normalizeSubjects } from "./utils/subjects.js";
 
@@ -136,6 +136,22 @@ describe("undo restore", () => {
     await goTo(user, "Settings");
     expect(screen.queryByRole("button", { name: "Undo restore" })).toBeNull();
     expect(screen.getByText("Backup restored.")).toBeTruthy();
+  });
+
+  it("stays offered after Download backup (R3)", async () => {
+    URL.createObjectURL = vi.fn(() => "blob:test");
+    URL.revokeObjectURL = vi.fn();
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    const { user, before } = await start();
+    await goTo(user, "Settings");
+    await restore(user, backupFile({ subjects: [{ id: "other", name: "Other", color: "#123456", topics: [] }], sessions: [] }));
+    await waitFor(() => expect(snapshot()).not.toEqual(before));
+
+    await user.click(screen.getByRole("button", { name: "Download backup" }));
+    expect(screen.getByText("Backup downloaded.")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Undo restore" }));
+    await waitFor(() => expect(snapshot()).toEqual(before));
+    click.mockRestore();
   });
 
   it("is replaced by the next import", async () => {

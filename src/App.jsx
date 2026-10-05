@@ -364,7 +364,7 @@ export default function StudyBox() {
   const exportData = () => {
     const backup = buildBackup({ subjects, sessions, themeId, game, tombstones });
     downloadBackup(backup);
-    setBackupMessage({ type: "success", text: "Backup downloaded." });
+    setBackupMessage((message) => ({ type: "success", text: "Backup downloaded.", undo: message?.undo }));
   };
 
   const setData = (data) => {
