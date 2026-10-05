@@ -39,7 +39,7 @@ Each lane is one session's queue: its branches run in order, because they share 
 | Lane | Branches, in order | Main files | Waits for |
 | --- | --- | --- | --- |
 | 1. Normalizers and storage | A2.1 (done, #39) → A2.9 → A3.2 → A3.3 → Phase C: `fix/bound-imported-values` (N14, N28) | normalizers in `src/utils/`, `src/store/appState.js`, `localStore.js`, `usePersistedState.js`, `migrations.js`; N28 also `EditSessionModal.jsx` | nothing for A2.9. `fix/bound-imported-values` is Phase C and also waits for A2.6 (same modal) |
-| 2. Undo and replacing data | A2.3 (#42) → A2.4 → A3.1 | `src/utils/undo.js`, `src/hooks/useUndoDelete.js`, Settings Backup & Restore, `Onboarding.jsx`, restore and onboarding handlers in `App.jsx` | #42 merging. A3.1 waits for A2.4 live, and for A3.2 if their normalizer changes overlap |
+| 2. Undo and replacing data | A2.3 (done, #42) → `fix/undo-merge-offer-two-tabs` (C14) → A2.4 → A3.1 | `src/utils/undo.js`, `src/hooks/useUndoDelete.js`, Settings Backup & Restore, `Onboarding.jsx`, restore and onboarding handlers in `App.jsx` | nothing for A2.4. A3.1 waits for A2.4 live, and for A3.2 if their normalizer changes overlap |
 | 3. Timer and logging | A2.5 → A2.7 → A2.8 → Phase C: `fix/asana-session-tags` (N27) | `src/hooks/useTimer.js`, `TimerPanel.jsx`, `UndoBar.jsx`, `logSession` in `App.jsx` | A2.5 adds to the undo bar: while lane 2 is open, touch `useUndoDelete.js` only to add the timer case. `fix/asana-session-tags` waits for the 25 Oct B1 decision and is dropped if it says "keep" |
 | 4. Session edit | A2.6 | `EditSessionModal.jsx` | nothing |
 | 5. Reminders | A2.11 | `useStreakReminder.js`, `useMilestoneReminder.js` | nothing |
@@ -59,6 +59,7 @@ Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every
 - The Asana token stays in `localStorage` under its current key, behind the CSP in `vercel.json`.
 - The running timer and the session draft are per-tab state, not reconciled across tabs (N12 makes that true rather than changing it).
 - **Undo re-stamps the record it restores** (maintainer, 2026-10-05). This amends the previous goal's "undo puts the record back with its stamps unchanged": A2.3 and A2.4 go ahead as written.
+- **Undo merge does not tombstone records only the file had** (maintainer, 2026-10-05). With another tab open they come back; a tombstone would delete them on the device they came from at the next merge or sync.
 
 ---
 
@@ -94,7 +95,7 @@ Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every
 
 ## A2.3 Undo re-stamps what it restores
 
-**Branch:** `fix/undo-restamps` · **Closes:** N8 · **Claimed:** draft #42
+**Branch:** `fix/undo-restamps` · **Closes:** N8 · **Done:** #42, v1.17.3
 
 **Build**
 
@@ -105,6 +106,19 @@ Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every
 - [ ] With a second idle tab, delete then undo leaves the record restored in both tabs and in storage after storage events are delivered (test, two-app harness as in `App.multiTab.test.jsx`).
 - [ ] Undo merge with a second tab open restores the pre-merge records in both tabs (test).
 - [ ] The existing single-tab undo tests still pass, updated only where they asserted unchanged stamps (say which).
+
+## A2.3b The Undo merge offer survives a second tab (or its test stops flaking)
+
+**Branch:** `fix/undo-merge-offer-two-tabs` · **Closes:** C14
+
+**Build**
+
+- Reproduce first: `src/App.multiTab.test.jsx` "restores every pre-merge record in both tabs" fails at random at line 260 ("Undo merge" button not found after `deliver()`). Find out whether, with a second tab open, the offer is withdrawn whenever that tab's merged write-back arrives. If so, it is a product bug: keep the offer while the other tab's change only echoes the merge. If not, make the test deterministic. Never weaken the assertion.
+
+**Done when**
+
+- [ ] The test passes 50 runs in a row (say how it was run), and a test pins whether Undo merge stays offered after the other tab's echo.
+- [ ] `instruction.md`'s Undo merge paragraph matches the behaviour.
 
 ## A2.4 Undo for Restore from file
 

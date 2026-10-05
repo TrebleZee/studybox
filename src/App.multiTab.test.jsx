@@ -213,3 +213,153 @@ describe("a change from another tab", () => {
     expect(stored(STORAGE_KEYS.theme)).toBe("paper");
   });
 });
+
+// N8, for Merge from file: Undo merge used to put the pre-merge records back
+// with their old stamps, so the other tab merged the file's newer copies (and
+// its tombstones) straight back in.
+describe("undo merge with a second tab open", () => {
+  const at = (day) => `2026-09-${day}T10:00:00.000Z`;
+  const sessionOf = (id, note, stamp) => ({
+    id,
+    subjectId: "maths",
+    subjectName: "Maths",
+    subjectColor: "#4f8cff",
+    duration: 600,
+    date: at(13),
+    note,
+    tags: [],
+    createdAt: at(13),
+    updatedAt: stamp,
+  });
+
+  it("restores every pre-merge record in both tabs", async () => {
+    localStorage.setItem(
+      STORAGE_KEYS.sessions,
+      JSON.stringify([sessionOf("sess-edited", "mine", at(13)), sessionOf("sess-deleted", "keep me", at(13))])
+    );
+    const [a, b] = openTabs();
+    const before = stored(STORAGE_KEYS.subjects);
+    const topic = before[0].topics[0];
+    const file = {
+      version: 3,
+      // The file's copy of a topic and a session are newer; it deleted another
+      // session and has one this device never had.
+      subjects: [{ ...before[0], topics: [{ ...topic, done: true, updatedAt: at(20) }] }],
+      sessions: [sessionOf("sess-edited", "theirs", at(20)), sessionOf("sess-file", "only in the file", at(20))],
+      tombstones: { sessions: { "sess-deleted": at(20) } },
+    };
+
+    fireEvent.click(a.getByRole("button", { name: "Settings" }));
+    fireEvent.change(a.getByLabelText("Merge backup file"), {
+      target: { files: [new File([JSON.stringify(file)], "other.json", { type: "application/json" })] },
+    });
+    await a.findByRole("button", { name: "Undo merge" });
+    deliver();
+    expect(stored(STORAGE_KEYS.sessions).find((s) => s.id === "sess-edited").note).toBe("theirs");
+
+    fireEvent.click(a.getByRole("button", { name: "Undo merge" }));
+    deliver();
+    // Tab B writes again from its own state: the pre-merge records must hold there too.
+    fireEvent.click(b.getAllByRole("checkbox")[1]);
+    deliver();
+
+    const sessions = stored(STORAGE_KEYS.sessions);
+    expect(sessions.find((s) => s.id === "sess-edited").note).toBe("mine");
+    expect(sessions.find((s) => s.id === "sess-deleted")?.note).toBe("keep me");
+    expect(stored(STORAGE_KEYS.subjects)[0].topics.find((t) => t.id === topic.id).done).toBe(false);
+    // Records only the file had are not deleted (maintainer decision, 2026-10-05):
+    // with another tab open they come back from it.
+    expect(sessions.some((s) => s.id === "sess-file")).toBe(true);
+    [a, b].forEach((tab) => expect(loggedIn(tab)).toBe(3));
+  });
+});
+
+// N8: undo used to put the record back with its old stamps, so the other tab,
+// which had already merged the tombstone, deleted it again everywhere.
+describe("undo with a second tab open", () => {
+  const oldSession = {
+    id: "sess-old",
+    subjectId: "maths",
+    subjectName: "Maths",
+    subjectColor: "#4f8cff",
+    duration: 600,
+    date: "2026-09-13T10:00:00.000Z",
+    note: "",
+    tags: [],
+    createdAt: "2026-09-13T10:00:00.000Z",
+    updatedAt: "2026-09-13T10:00:00.000Z",
+  };
+  const undoIn = (tab) => fireEvent.click(tab.getByRole("button", { name: "Undo" }));
+  const later = () => act(() => vi.advanceTimersByTime(2000));
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-14T10:00:00.000Z"));
+  });
+
+  it.each([
+    ["after the other tab has merged the delete", true],
+    ["before the other tab has heard of it", false],
+  ])("keeps an undone session delete in both tabs, %s", (_, deliverFirst) => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify([oldSession]));
+    const [a, b] = openTabs();
+    fireEvent.click(a.getByRole("button", { name: "Log" }));
+    fireEvent.click(a.getByRole("button", { name: "Delete session Maths" }));
+    if (deliverFirst) deliver();
+    later();
+    undoIn(a);
+    deliver();
+
+    expect(stored(STORAGE_KEYS.sessions).map((s) => s.id)).toEqual(["sess-old"]);
+    fireEvent.click(a.getByRole("button", { name: "Planner" }));
+    expect(loggedIn(a)).toBe(1);
+    expect(loggedIn(b)).toBe(1);
+  });
+
+  it("keeps an undone session delete when Undo comes in the same millisecond", () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify([oldSession]));
+    const [a, b] = openTabs();
+    fireEvent.click(a.getByRole("button", { name: "Log" }));
+    fireEvent.click(a.getByRole("button", { name: "Delete session Maths" }));
+    deliver();
+    undoIn(a);
+    deliver();
+
+    expect(stored(STORAGE_KEYS.sessions)).toHaveLength(1);
+    fireEvent.click(a.getByRole("button", { name: "Planner" }));
+    expect(loggedIn(b)).toBe(1);
+  });
+
+  it("keeps an undone topic delete in both tabs", () => {
+    const [a, b] = openTabs();
+    const topic = stored(STORAGE_KEYS.subjects)[0].topics[0];
+    fireEvent.click(a.getByRole("button", { name: `Delete topic ${topic.name}` }));
+    deliver();
+    later();
+    undoIn(a);
+    deliver();
+
+    // Back in both tabs; a merge may put it at the end (order is not synced yet).
+    expect(stored(STORAGE_KEYS.subjects)[0].topics.map((t) => t.id)).toContain(topic.id);
+    [a, b].forEach((tab) =>
+      expect(tab.getByRole("button", { name: `Delete topic ${topic.name}` })).toBeTruthy()
+    );
+  });
+
+  it("keeps an undone subject delete in both tabs", () => {
+    const [a, b] = openTabs();
+    const subject = stored(STORAGE_KEYS.subjects)[0];
+    fireEvent.click(a.getByRole("button", { name: "Settings" }));
+    fireEvent.click(b.getByRole("button", { name: "Settings" }));
+    fireEvent.click(a.getByRole("button", { name: `Delete subject ${subject.id}` }));
+    deliver();
+    later();
+    undoIn(a);
+    deliver();
+
+    expect(stored(STORAGE_KEYS.subjects).map((s) => s.id)).toContain(subject.id);
+    [a, b].forEach((tab) =>
+      expect(tab.getByRole("button", { name: `Delete subject ${subject.id}` })).toBeTruthy()
+    );
+  });
+});

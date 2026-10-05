@@ -238,6 +238,10 @@ Exit test (unchanged, plus the Asana row): restore, merge, every tick box and to
 - Catalogue Wave 3: before 1 May 2027.
 - Exam freeze: 1 May to 30 Jun 2027, no merges to `master`.
 
+## Found after the audit
+
+While this pass's branch was merged with `master` after #42 (`e316a41`, N8, v1.17.3), the full suite failed once in `src/App.multiTab.test.jsx` "undo merge with a second tab open > restores every pre-merge record in both tabs", then passed and failed intermittently in isolated runs (1 in 5, then 1 in 1). This branch changes only docs, so the flake is on `master`. It is opened as **C14 (medium)**: "Lint, test, build" is now a required check, so a flaky test blocks unrelated PRs at random, and the likely cause (tab B's write-back withdrawing the Undo merge offer) may also mean Undo merge is unreachable in real use with a second tab open. It goes first in lane 2, as `fix/undo-merge-offer-two-tabs`, before A2.4. Reproduce it first. Fix the product if the offer really disappears, or the test if only the timing is wrong. Never weaken the assertion.
+
 ## Changes from the previous plan
 
 - **Phase M is done**, 1 to 4 days early: C9 tags and releases, the N8 decision, plan approval, and the C7 required check (ruleset 23821221). The project-instructions paste is carried into the new Phase M2.

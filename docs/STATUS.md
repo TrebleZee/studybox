@@ -8,13 +8,13 @@ Last updated: 2026-10-05
 
 | | |
 | --- | --- |
-| Current version | 1.17.2 |
-| Latest tag on GitHub | v1.17.2 (releases published for v1.17.0 to v1.17.2) |
+| Current version | 1.17.3 |
+| Latest tag on GitHub | v1.17.3 |
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `661e26a` (1.17.2) at the time of the 5 Oct scope review |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
-| Open PRs | [#42](https://github.com/TrebleZee/studybox/pull/42) undo re-stamps (N8, draft); [#43](https://github.com/TrebleZee/studybox/pull/43) this scope review |
-| Checks on `master` | Lint, test (690 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
+| Open PRs | [#43](https://github.com/TrebleZee/studybox/pull/43) this scope review |
+| Checks on `master` | Lint, test (705 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
 
 ## Recent changes
 
@@ -23,6 +23,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
 | [#43](https://github.com/TrebleZee/studybox/pull/43) | Scope review: closes C9, N13 and C7 in the ledger, adds N26, N27, N28 and C13, folds them into the A2/A3 lanes and sets a process budget. No user-facing change | none | none |
+| [#42](https://github.com/TrebleZee/studybox/pull/42) | Undo of a delete or a merge now holds with a second tab or the installed app open, instead of being reverted in every tab | N8 | v1.17.3 |
 | [#40](https://github.com/TrebleZee/studybox/pull/40) | Workflow for parallel sessions: one worktree per session, claims as draft PRs, the goal split into parallel lanes, versions set at merge time and merges one at a time. No user-facing change | none | none |
 | [#41](https://github.com/TrebleZee/studybox/pull/41) | CI runs for commits on `master` are never cancelled by a newer push, so every merged commit is verified. No user-facing change | C7 (agent half) | none |
 | [#39](https://github.com/TrebleZee/studybox/pull/39) | A backup or stored record with the wrong type of value in a name, colour, note or tag no longer crashes the app on every launch | N13 | v1.17.2 |
@@ -52,7 +53,7 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed, re-planned as A2 and A3 |
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
-| A2 | Fix today's data loss (N8, N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39) and A2.2 (#41) merged; A2.3 in flight (#42); lanes 1 and 3 to 8 open |
+| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41) and A2.3 (#42, v1.17.3) merged; every lane open except 9 |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | Not started |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
@@ -83,13 +84,14 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 
 Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1).
 
-1. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
-2. Lane 2: finish #42 (N8), then A2.4 `feat/undo-restore` (N11).
+1. Lane 2: `fix/undo-merge-offer-two-tabs` (C14). The #42 two-tab Undo merge test fails at random, and CI is required, so it blocks other PRs. Then A2.4 `feat/undo-restore` (N11) and A3.1.
+2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
 3. Open now: A2.9 (lane 1), A2.5 (lane 3), A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
 
 ## Known risks
 
-- **Undo with two tabs open is unreliable** (N8, fix in #42). Undo works with one tab; with a second tab or the installed app open, the delete comes back.
+- **Undo merge with two tabs open keeps the file's new records** (by decision). Records the merged file added come back from the other tab after Undo merge; everything that was here before is restored.
+- **Undo merge may vanish with a second tab open** (C14, reasoned from a flaky test). Its test fails at random on `master`, which can also block PRs until it is fixed.
 - **Restore from file has no undo** (N11). Picking the wrong backup replaces everything; restoring an old (pre-v3) backup also forgets what was deleted (N10).
 - **Reminders may crash the app on Android** (N20, proven with a stub, not on a device).
 - **Streaks can change after a timezone change** (N26). A trip abroad can shorten the shown streak, and occasionally lapse it.
