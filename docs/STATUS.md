@@ -80,6 +80,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 | 6 | Five-user feedback round, including devices used and whether anyone wants friends features | Gates 2.0 and 2.x and sets N20's urgency (V1) | 25 Oct |
 | 7 | Make the design gate doc (`claude/v2-design-gate.md`) available to the exit check | Missing for three passes, so B1's wording has never been checked against it | 6 Nov |
 | 8 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
+| 9 | Decide whether the timer Reset undo (#46) should survive an accidental restart: today pressing Start or Space after Reset withdraws the offer at once, so Undo can never overwrite a new session. Options: fold the new seconds into the restored session, or let Undo replace a session under a few seconds | Review finding R1 on #46 (`docs/reviews/feat-undo-timer-reset.md`); not in the goal, so not decided by an agent | any time |
 
 ### Agent (next steps)
 
