@@ -515,7 +515,7 @@ describe("undo restore with a second tab open", () => {
   // Known limit: the game has no edit stamps and tabs merge it by taking the
   // larger streak and legacy XP, so with another tab open Undo restore can't
   // take back a bigger streak the file brought (Undo merge can't either).
-  // Pinned so a fix shows up here; deciding one is the maintainer's.
+  // Kept as a known limit (maintainer decision, 2026-10-05); pinned so a fix shows up here.
   it("keeps the file's bigger streak when another tab is open (known limit)", async () => {
     const [a] = openTabs();
     queued.splice(0);
