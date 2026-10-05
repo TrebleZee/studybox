@@ -19,6 +19,14 @@ This file documents the app structure so future changes stay consistent.
 - `sb-last-streak-reminder` - the local date (`YYYY-MM-DD`) the streak-reminder notification last fired, so it never fires twice in one day
 - `sb-last-milestone-reminder` - the local date (`YYYY-MM-DD`) the milestone-reminder notification last fired, so it never fires twice in one day
 - `sb-subjects` also stores subjects created from uploaded specification PDFs, including inferred exam board and topic checklist
+- `sb-timer`, `sb-session-draft` - the running timer and the unlogged session's note, tags and timed topic, so a reload resumes the session
+- `studybox_asana_pat` - the Asana personal access token (plain text, legacy name). Lives in `SECRET_KEYS`, not `STORAGE_KEYS`
+
+### Store layer (`src/store/`)
+
+- `src/store/localStore.js` is the only module that touches `localStorage`. ESLint (`no-restricted-globals`) fails any direct use elsewhere in `src/`, tests excepted. Read with `loadJson` / `loadText`, write with `saveJson` / `saveText` / `removeKey`, and use `usePersistedState(key, init)` for React state that persists itself.
+- Every key has a scope in `KEY_SCOPES`: `account` (subjects, sessions, game, theme: what backups carry and what sync will carry), `device` (timer, draft, reminder bookkeeping, Asana config and stats, onboarded) or `secret` (the Asana token: never backed up, never synced, and its value is never passed to store subscribers). A new key must be given a scope; a test fails otherwise.
+- `subscribe(listener)` reports every write and removal as `{ key, scope, type, value }`. This is the seam the V2 sync engine attaches to; nothing uses it yet.
 
 ## Data model
 

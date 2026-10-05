@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { loadJson, STORAGE_KEYS } from "../utils/storage.js";
+import { loadJson, removeKey, saveJson, STORAGE_KEYS } from "../store/index.js";
 
 const nonNegative = (value) => (Number.isFinite(value) && value >= 0 ? value : null);
 
@@ -48,12 +48,9 @@ export default function useTimer({ canTime, defaultSubjectId }) {
 
   useEffect(() => {
     if (startedAt === null && elapsed === 0 && timedSubjectId === null) {
-      localStorage.removeItem(STORAGE_KEYS.timer);
+      removeKey(STORAGE_KEYS.timer);
     } else {
-      localStorage.setItem(
-        STORAGE_KEYS.timer,
-        JSON.stringify({ elapsed, startedAt, timedSubjectId, lastSeenAt })
-      );
+      saveJson(STORAGE_KEYS.timer, { elapsed, startedAt, timedSubjectId, lastSeenAt });
     }
   }, [elapsed, startedAt, timedSubjectId, lastSeenAt]);
 

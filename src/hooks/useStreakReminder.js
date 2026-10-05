@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { dateKey, isStreakAtRisk } from "../utils/gameLogic.js";
 import { shouldShowStreakReminder } from "../utils/reminders.js";
-import { loadJson, STORAGE_KEYS } from "../utils/storage.js";
+import { loadJson, saveJson, STORAGE_KEYS } from "../store/index.js";
 
 const CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -37,7 +37,7 @@ export default function useStreakReminder(game) {
       const lastReminderDate = loadJson(STORAGE_KEYS.lastStreakReminder, null);
       if (!shouldShowStreakReminder(currentGame, { now, lastReminderDate })) return;
 
-      localStorage.setItem(STORAGE_KEYS.lastStreakReminder, JSON.stringify(dateKey(now)));
+      saveJson(STORAGE_KEYS.lastStreakReminder, dateKey(now));
       const notification = new Notification("Your streak is waiting", {
         body: `You're on a ${currentGame.currentStreak}-day streak. Log a session today to keep it going.`,
         tag: "studybox-streak-reminder",

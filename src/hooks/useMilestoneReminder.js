@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { dateKey } from "../utils/gameLogic.js";
 import { milestonesToRemind } from "../utils/reminders.js";
-import { loadJson, STORAGE_KEYS } from "../utils/storage.js";
+import { loadJson, saveJson, STORAGE_KEYS } from "../store/index.js";
 
 const CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -35,7 +35,7 @@ export default function useMilestoneReminder(subjects) {
       }
       if (Notification.permission !== "granted") return;
 
-      localStorage.setItem(STORAGE_KEYS.lastMilestoneReminder, JSON.stringify(dateKey(now)));
+      saveJson(STORAGE_KEYS.lastMilestoneReminder, dateKey(now));
       const [first] = due;
       const notification = new Notification(
         due.length === 1 ? `${first.name} is due soon` : `${due.length} milestones are due soon`,
