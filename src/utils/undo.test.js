@@ -289,6 +289,36 @@ describe("undoing a restore", () => {
     expect(unchangedSinceRestore(undefined, after, nowMs)).toBe(false);
   });
 
+  it("is withdrawn by edits even when the file's stamps are ahead of this device's clock (R1)", () => {
+    const now = new Date(nowMs).toISOString();
+    const ahead = "2026-09-21T12:00:00.000Z";
+    const skewed = {
+      subjects: [{ ...subject, updatedAt: ahead, topics: [{ id: "t1", name: "Algebra", done: false, updatedAt: ahead }] }],
+      sessions: [session("skewed", "from a fast clock", ahead)],
+      tombstones: emptyTombstones(),
+      game,
+      themeId: "dark",
+    };
+    const restoredState = stateAfterRestore(skewed, before);
+    const skewedOffer = { kind: "restore", before, after: restoredState };
+    const [restoredSubject] = restoredState.subjects;
+    const ticked = {
+      ...restoredState,
+      subjects: [
+        {
+          ...restoredSubject,
+          topics: [{ ...restoredSubject.topics[0], done: true, updatedAt: now }, { id: "t2", name: "New", done: false, createdAt: now, updatedAt: now }],
+        },
+      ],
+    };
+    const editedSession = { ...restoredState, sessions: [session("skewed", "edited here", now)] };
+    const renamed = { ...restoredState, subjects: [{ ...restoredSubject, name: "Maths here", updatedAt: now }] };
+    [ticked, editedSession, renamed].forEach((state) => expect(unchangedSinceRestore(skewedOffer, state, nowMs)).toBe(false));
+    // Another tab's echo of the same restore still leaves the offer in place.
+    const echo = { ...mergeData(restoredState, before, nowMs), themeId: "dark" };
+    expect(unchangedSinceRestore(skewedOffer, echo, nowMs)).toBe(true);
+  });
+
   it("puts back what was here, re-stamping only what the file had another copy of", () => {
     const restored = stateBeforeImport(offer, after, undoneAt);
     expect(restored.themeId).toBe("dark");
