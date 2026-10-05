@@ -1,4 +1,4 @@
-import { keepStamps, newId, nowIso } from "./records.js";
+import { keepStamps, newId, nowIso, unknownFields } from "./records.js";
 
 const TOPIC_SEED = {
   physics: [
@@ -222,6 +222,25 @@ const isRecordId = (value) =>
 // Kept untrimmed so editing a field never swallows a space mid-typing.
 const cleanString = (value) => (typeof value === "string" && value.trim() ? value : null);
 
+// Every field each normalizer reads, whether it keeps, coerces or drops it.
+// Any other own key on a stored or imported record is one a newer build wrote
+// (N9): it is carried through as-is by unknownFields, never read. A key must
+// be listed here before this build gives it a meaning, or the check that
+// drops an invalid value would be bypassed by the carry-through.
+const SUBJECT_KEYS = new Set([
+  "id", "name", "qualification", "board", "spec", "specName", "tier", "exam", "color",
+  "papers", "examYear", "milestones", "topics", "createdAt", "updatedAt",
+]);
+const PAPER_KEYS = new Set(["id", "name", "examDate"]);
+const MILESTONE_KEYS = new Set(["id", "name", "kind", "due", "done", "catalogueMilestoneId", "createdAt", "updatedAt"]);
+const TOPIC_KEYS = new Set([
+  "id", "name", "done", "subtasks", "catalogueTopicId", "paper", "higherOnly", "keepAsTopic", "createdAt", "updatedAt",
+]);
+const SUBTASK_KEYS = new Set(["id", "name", "done"]);
+const SESSION_KEYS = new Set([
+  "id", "subjectId", "subjectName", "subjectColor", "duration", "date", "note", "tags", "createdAt", "updatedAt",
+]);
+
 // The legacy `exam` string, still written so older app versions reading a
 // backup show something sensible. Custom subjects keep their own free text
 // (possibly empty while being edited - subjectLabel falls back to "Custom").
@@ -329,6 +348,7 @@ const normalizePapers = (papers) => {
       // The user's own exam date for this paper; it overrides the published
       // timetable (see pacing.js). Kept only when it is a real calendar day.
       ...(isIsoDate(paper.examDate) ? { examDate: paper.examDate } : {}),
+      ...unknownFields(paper, PAPER_KEYS),
     }));
   return valid.length ? valid : null;
 };
@@ -377,6 +397,7 @@ const normalizeMilestones = (milestones, subjectId) => {
         ? { catalogueMilestoneId: milestone.catalogueMilestoneId }
         : {}),
       ...keepStamps(milestone),
+      ...unknownFields(milestone, MILESTONE_KEYS),
     }));
   return valid.length ? valid : null;
 };
@@ -419,6 +440,7 @@ export const normalizeSubject = (subject, index = 0) => {
             : `${isRecordId(topic?.id) ? topic.id : topicIndex}-st${subtaskIndex}`,
           name: text(subtask?.name) || "Untitled subtask",
           done: Boolean(subtask?.done),
+          ...unknownFields(subtask, SUBTASK_KEYS),
         })
       ),
       // Only topics seeded from the catalogue carry this.
@@ -427,9 +449,12 @@ export const normalizeSubject = (subject, index = 0) => {
         : {}),
       ...topicTierFields(topic),
       ...keepStamps(topic),
+      ...unknownFields(topic, TOPIC_KEYS),
     })),
     // Schema v3 stamps: optional, so pre-v3 subjects normalize exactly as before.
     ...keepStamps(subject),
+    // Fields a newer build wrote (N9): kept as stored, never read.
+    ...unknownFields(subject, SUBJECT_KEYS),
   };
 };
 
@@ -471,6 +496,7 @@ export const normalizeSessions = (input) => {
       ? session.tags.filter((tag) => typeof tag === "string" && tag !== "")
       : [],
     ...keepStamps(session),
+    ...unknownFields(session, SESSION_KEYS),
   }));
 };
 

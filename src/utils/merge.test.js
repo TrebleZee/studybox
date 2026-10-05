@@ -147,12 +147,16 @@ describe("mergeData", () => {
   });
 
   it("gives the same records whatever order three copies are merged in", () => {
-    const a = copy({ subjects: [subject("c", [topic("t1"), topic("t2", { done: true, updatedAt: at(9) })])] });
+    // Fields this build doesn't know (N9) ride along and don't affect the order independence.
+    const a = copy({ subjects: [subject("c", [topic("t1", { notes: "from a" }), topic("t2", { done: true, updatedAt: at(9) })])] });
     const b = copy({ tombstones: addTombstone(emptyTombstones(), "subjects", "c", at(4)) });
     const c = copy({
-      subjects: [subject("c", [topic("t1"), topic("t2", { updatedAt: at(3) })], { name: "C2", updatedAt: at(5) })],
-      sessions: [session("s", 6)],
+      subjects: [subject("c", [topic("t1"), topic("t2", { updatedAt: at(3) })], { name: "C2", updatedAt: at(5), order: 1 })],
+      sessions: [session("s", 6, { topicId: "t1" })],
     });
+    // Stamp ties around an unknown field: t1 is unstamped on a (with notes) and
+    // c (without); session s is stamped at(6) on both, with topicId only on c.
+    a.sessions = normalizeSessions([session("s", 6)]);
     const flat = (data) => ({
       sessions: data.sessions,
       tombstones: data.tombstones,
@@ -162,6 +166,28 @@ describe("mergeData", () => {
     expect(flat(merge(a, merge(b, c)))).toEqual(flat(leftFirst));
     expect(flat(merge(merge(c, a), b))).toEqual(flat(leftFirst));
     expect(leftFirst.subjects[0].topics.find((t) => t.id === "t2").done).toBe(true);
+    expect(leftFirst.subjects[0].order).toBe(1);
+    expect(leftFirst.subjects[0].topics.find((t) => t.id === "t1").notes).toBe("from a");
+    expect(leftFirst.sessions[0].topicId).toBe("t1");
+  });
+
+  // Review finding R4 on #50: three stamp-tied copies of one subject, one of
+  // them with milestones. The winner is picked on the subject's own fields,
+  // so the `milestones` key a merged copy gains cannot tip a later tie.
+  it("gives the same subject fields whatever order three stamp-tied copies with milestones meet in", () => {
+    const milestone = { id: "m1", name: "NEA", kind: "nea", due: null, done: false };
+    const a = copy({ subjects: [subject("s", [topic("t")], { milestones: [milestone] })] });
+    const b = copy({ subjects: [subject("s", [topic("t")], { examYear: 2027, notes: "y" })] });
+    const c = copy({ subjects: [subject("s", [topic("t")], { order: 0, notes: "x" })] });
+    const own = (data) => {
+      const { topics, milestones, ...fields } = data.subjects[0];
+      return { fields, topicIds: ids(topics), milestoneIds: ids(milestones || []) };
+    };
+    const leftFirst = own(merge(merge(a, b), c));
+    expect(own(merge(a, merge(b, c)))).toEqual(leftFirst);
+    expect(own(merge(merge(c, a), b))).toEqual(leftFirst);
+    expect(own(merge(merge(b, c), a))).toEqual(leftFirst);
+    expect(leftFirst.milestoneIds).toEqual(["m1"]);
   });
 
   // Known limit, pinned so a change to it is deliberate (see instruction.md).
@@ -209,14 +235,88 @@ describe("mergeData", () => {
 
   it("is idempotent: merging a copy with itself changes nothing", () => {
     const a = copy({
-      subjects: [subject("physics", [topic("t1", { updatedAt: at(3) })], { updatedAt: at(2) })],
-      sessions: [session("s1", 18), session("s2", 19)],
+      subjects: [subject("physics", [topic("t1", { updatedAt: at(3), notes: "unknown here" })], { updatedAt: at(2), order: 3 })],
+      sessions: [session("s1", 18, { topicId: "t1" }), session("s2", 19)],
       tombstones: addTombstone(emptyTombstones(), "sessions", "gone", at(4)),
     });
     const once = merge(a, a);
     expect(once.subjects).toEqual(a.subjects);
     expect(once.sessions).toEqual([...a.sessions].reverse());
     expect(merge(once, once)).toEqual(once);
+    expect(once.subjects[0]).toMatchObject({ order: 3 });
+    expect(once.subjects[0].topics[0].notes).toBe("unknown here");
+  });
+
+  // N9: a newer build's fields are opaque to the merge. They travel with the
+  // record that wins (last write wins whole, with or without the field) and
+  // stay on records only one side has.
+  it("keeps fields it does not know on the winning record and on records only one side has", () => {
+    const a = copy({
+      subjects: [
+        subject("physics", [topic("t1", { notes: "a", updatedAt: at(3) }), topic("only-a", { order: 4 })], { order: 1, updatedAt: at(2) }),
+      ],
+      sessions: [session("s1", 18, { topicId: "t1" })],
+    });
+    const older = copy({
+      subjects: [subject("physics", [topic("t1", { updatedAt: at(1) })], { name: "Old", updatedAt: at(1) })],
+      sessions: [session("s1", 18, { updatedAt: at(1) })],
+    });
+    const withOlder = merge(a, older);
+    expect(withOlder.subjects[0]).toMatchObject({ name: "physics", order: 1 });
+    expect(withOlder.subjects[0].topics.find((t) => t.id === "t1").notes).toBe("a");
+    expect(withOlder.subjects[0].topics.find((t) => t.id === "only-a").order).toBe(4);
+    expect(withOlder.sessions[0].topicId).toBe("t1");
+    expect(merge(older, a)).toEqual(withOlder);
+
+    const newer = copy({
+      subjects: [subject("physics", [topic("t1", { updatedAt: at(5) })], { name: "Renamed", updatedAt: at(6) })],
+      sessions: [session("s1", 18, { note: "edited later", updatedAt: at(19) })],
+    });
+    const withNewer = merge(a, newer);
+    expect(withNewer.subjects[0].name).toBe("Renamed");
+    expect(withNewer.subjects[0]).not.toHaveProperty("order");
+    expect(withNewer.subjects[0].topics.find((t) => t.id === "t1")).not.toHaveProperty("notes");
+    expect(withNewer.subjects[0].topics.find((t) => t.id === "only-a").order).toBe(4);
+    expect(withNewer.sessions[0]).not.toHaveProperty("topicId");
+    expect(merge(newer, a)).toEqual(withNewer);
+  });
+
+  // N9, the other half: an older build that restored this copy strips the
+  // fields it doesn't know without restamping, so the two copies tie on
+  // updatedAt. The tie must go to the copy with more fields, whichever side
+  // it is on, or merging with the stripped copy spreads the stripping back.
+  describe("on a stamp tie keeps the copy with more fields, so a stripped copy never wins", () => {
+    const unstamped = (record) => {
+      const bare = { ...record };
+      delete bare.createdAt;
+      delete bare.updatedAt;
+      return bare;
+    };
+    const cases = {
+      "stamped equal": { subjectExtra: { updatedAt: at(2) }, topicExtra: { updatedAt: at(3) }, sessionExtra: {} },
+      "both unstamped": { subjectExtra: {}, topicExtra: {}, sessionExtra: null },
+    };
+    Object.entries(cases).forEach(([label, { subjectExtra, topicExtra, sessionExtra }]) => {
+      it(label, () => {
+        const sess = (extra) => (sessionExtra ? session("s1", 18, { ...sessionExtra, ...extra }) : unstamped(session("s1", 18, extra)));
+        const full = copy({
+          subjects: [subject("physics", [topic("t1", { notes: "n", ...topicExtra })], { order: 2, ...subjectExtra })],
+          sessions: [sess({ topicId: "t1" })],
+        });
+        const stripped = copy({
+          subjects: [subject("physics", [topic("t1", topicExtra)], subjectExtra)],
+          sessions: [sess({})],
+        });
+        [merge(full, stripped), merge(stripped, full)].forEach((merged) => {
+          expect(merged.subjects[0].order).toBe(2);
+          expect(merged.subjects[0].topics[0].notes).toBe("n");
+          expect(merged.sessions[0].topicId).toBe("t1");
+        });
+        expect(merge(full, stripped)).toEqual(merge(stripped, full));
+        // The full copy is exactly what comes out, so the merge is idempotent on it.
+        expect(merge(full, stripped).subjects).toEqual(full.subjects);
+      });
+    });
   });
 });
 
@@ -233,14 +333,15 @@ describe("exit test: two profiles converge through backup files", () => {
     subjects: [
       subject(
         "physics",
-        [topic("ph0", { done: true, updatedAt: at(10) }), topic("ph1"), topic("topic-laptop", { updatedAt: at(11) })],
-        { name: "Physics (OCR A)", updatedAt: at(12) }
+        [topic("ph0", { done: true, updatedAt: at(10) }), topic("ph1"), topic("topic-laptop", { updatedAt: at(11), notes: "laptop only" })],
+        // `order`, `notes`, `topicId` and `sharedWith`: fields a newer build wrote (N9).
+        { name: "Physics (OCR A)", updatedAt: at(12), order: 1 }
       ),
       shared[1],
     ],
     sessions: [
       session("sess-shared", 9, { note: "laptop wording", updatedAt: at(13) }),
-      session("sess-laptop", 18),
+      session("sess-laptop", 18, { topicId: "ph0" }),
     ],
     tombstones: addTombstone(emptyTombstones(), "topics", childKey("physics", "ph2"), at(11)),
   });
@@ -248,7 +349,7 @@ describe("exit test: two profiles converge through backup files", () => {
   const phone = copy({
     subjects: [
       subject("physics", [topic("ph0"), topic("ph1", { done: true, updatedAt: at(14) }), topic("ph2")]),
-      subject("custom-phone", [topic("custom-phone-topic-0", { updatedAt: at(15) })], { updatedAt: at(15) }),
+      subject("custom-phone", [topic("custom-phone-topic-0", { updatedAt: at(15) })], { updatedAt: at(15), sharedWith: ["mum"] }),
     ],
     sessions: [
       session("sess-shared", 9, { note: "phone wording", updatedAt: at(12) }),
@@ -286,6 +387,11 @@ describe("exit test: two profiles converge through backup files", () => {
     expect(ids(merged.sessions)).toEqual(["sess-phone", "sess-laptop", "sess-shared"]);
     expect(merged.sessions.find((s) => s.id === "sess-shared").note).toBe("laptop wording");
     expect(merged.game.currentStreak).toBe(2);
+    // Fields neither build in this test knows came through the files and the merge untouched.
+    expect(physics.order).toBe(1);
+    expect(physics.topics.find((t) => t.id === "topic-laptop").notes).toBe("laptop only");
+    expect(merged.sessions.find((s) => s.id === "sess-laptop").topicId).toBe("ph0");
+    expect(merged.subjects.find((s) => s.id === "custom-phone").sharedWith).toEqual(["mum"]);
   });
 
   it("a second round trip changes nothing", () => {
