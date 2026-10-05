@@ -6,12 +6,31 @@ import { describeDeletion, restoreBeforeMerge, restoreDeletion, unchangedSinceMe
 
 describe("unchangedSinceMerge", () => {
   const after = { subjects: [], sessions: [], tombstones: emptyTombstones(), game: { totalXP: 0 } };
-  it("is true only while every merged record list is the same object", () => {
+  it("is true only while every merged record list holds what the merge produced", () => {
     expect(unchangedSinceMerge(after, { ...after })).toBe(true);
-    expect(unchangedSinceMerge(after, { ...after, sessions: [] })).toBe(false);
-    expect(unchangedSinceMerge(after, { ...after, game: { totalXP: 0 } })).toBe(false);
+    expect(unchangedSinceMerge(after, { ...after, sessions: [{ id: "s1" }] })).toBe(false);
+    expect(unchangedSinceMerge(after, { ...after, game: { totalXP: 1 } })).toBe(false);
+    expect(unchangedSinceMerge(after, { ...after, tombstones: { ...emptyTombstones(), sessions: { s1: at } } })).toBe(false);
     expect(unchangedSinceMerge(undefined, after)).toBe(false);
   });
+
+  // C14: another tab's echo comes back as new objects with the same records.
+  it("is still true when the same records come back as new objects, in any key order", () => {
+    const merged = {
+      subjects: [{ id: "maths", name: "Maths", topics: [{ id: "t1", name: "Algebra", done: true }] }],
+      sessions: [{ id: "s1", duration: 60, updatedAt: at }],
+      tombstones: emptyTombstones(),
+      game: { totalXP: 11, legacyXP: 0 },
+    };
+    const echoed = JSON.parse(JSON.stringify(merged));
+    echoed.game = { legacyXP: 0, totalXP: 11 };
+    echoed.subjects[0] = { topics: echoed.subjects[0].topics, name: "Maths", id: "maths" };
+    expect(unchangedSinceMerge(merged, echoed)).toBe(true);
+
+    echoed.subjects[0].topics[0].done = false;
+    expect(unchangedSinceMerge(merged, echoed)).toBe(false);
+  });
+
 });
 
 const at = "2026-09-14T10:00:00.000Z";

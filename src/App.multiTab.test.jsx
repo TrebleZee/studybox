@@ -272,6 +272,73 @@ describe("undo merge with a second tab open", () => {
     expect(sessions.some((s) => s.id === "sess-file")).toBe(true);
     [a, b].forEach((tab) => expect(loggedIn(tab)).toBe(3));
   });
+
+  // C14: the offer is withdrawn by a real change, but not by a write from the
+  // other tab that only echoes what this tab already has. Such a write can
+  // land before this tab has saved the merge (the other tab opening, or the
+  // test harness delivering its mount writes late); merging it in leaves this
+  // tab's records exactly as the merge left them.
+  const mergeFileIn = async (tab) => {
+    const before = stored(STORAGE_KEYS.subjects);
+    const file = {
+      version: 3,
+      subjects: [{ ...before[0], topics: [{ ...before[0].topics[0], done: true, updatedAt: at(20) }] }],
+      sessions: [sessionOf("sess-edited", "theirs", at(20)), sessionOf("sess-file", "only in the file", at(20))],
+      tombstones: { sessions: { "sess-deleted": at(20) } },
+    };
+    fireEvent.click(tab.getByRole("button", { name: "Settings" }));
+    fireEvent.change(tab.getByLabelText("Merge backup file"), {
+      target: { files: [new File([JSON.stringify(file)], "other.json", { type: "application/json" })] },
+    });
+    await tab.findByRole("button", { name: "Undo merge" });
+    // Let this tab save the merge before anything else happens.
+    await act(async () => {});
+  };
+  const preMerge = () => [sessionOf("sess-edited", "mine", at(13)), sessionOf("sess-deleted", "keep me", at(13))];
+  const external = (key, value) =>
+    act(() => {
+      localStorage.setItem(key, JSON.stringify(value));
+      window.dispatchEvent(new StorageEvent("storage", { key, newValue: JSON.stringify(value), storageArea: localStorage }));
+    });
+
+  it("stays offered after the other tab takes the merge", async () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(preMerge()));
+    const [a, b] = openTabs();
+    queued.splice(0);
+    await mergeFileIn(a);
+    deliver();
+
+    // Tab B shows the merge (the file deleted one session and added another).
+    expect(loggedIn(b)).toBe(2);
+    expect(a.getByRole("button", { name: "Undo merge" })).toBeTruthy();
+  });
+
+  it("stays offered when the other tab writes only records this tab already has", async () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(preMerge()));
+    const [a] = openTabs();
+    await mergeFileIn(a);
+    const merged = stored(STORAGE_KEYS.sessions);
+
+    // The other tab's stale pre-merge list: older copies and a deleted session.
+    external(STORAGE_KEYS.sessions, preMerge());
+
+    expect(a.getByRole("button", { name: "Undo merge" })).toBeTruthy();
+    // ...and the merge is written back over the stale list.
+    expect(stored(STORAGE_KEYS.sessions)).toEqual(merged);
+    fireEvent.click(a.getByRole("button", { name: "Undo merge" }));
+    expect(a.getByText("Merge undone.")).toBeTruthy();
+    expect(stored(STORAGE_KEYS.sessions).find((s) => s.id === "sess-edited").note).toBe("mine");
+  });
+
+  it("is withdrawn when the other tab changes something", async () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(preMerge()));
+    const [a] = openTabs();
+    await mergeFileIn(a);
+
+    external(STORAGE_KEYS.sessions, [...stored(STORAGE_KEYS.sessions), sessionOf("sess-new", "logged there", at(21))]);
+
+    expect(a.queryByRole("button", { name: "Undo merge" })).toBeNull();
+  });
 });
 
 // N8: undo used to put the record back with its old stamps, so the other tab,
