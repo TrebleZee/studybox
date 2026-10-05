@@ -47,7 +47,7 @@ export const KEY_SCOPES = {
   [SECRET_KEYS.asanaToken]: "secret",
 };
 
-export const scopeOf = (key) => KEY_SCOPES[key] ?? "device";
+export const scopeOf = (key) => (Object.hasOwn(KEY_SCOPES, key) ? KEY_SCOPES[key] : "device");
 export const keysInScope = (scope) =>
   Object.keys(KEY_SCOPES).filter((key) => KEY_SCOPES[key] === scope);
 

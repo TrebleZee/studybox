@@ -2,6 +2,10 @@ import { useState, useMemo } from "react";
 import { inTierTopics } from "../utils/subjects.js";
 import ExamPacingCard from "./ExamPacingCard.jsx";
 
+// Tallies keyed by subject id. Ids come from stored data and can be any
+// string, so the maps have no prototype: "__proto__" or "toString" is just a key.
+const tally = () => Object.create(null);
+
 // Helper duration formatters
 const fmtDur = (s) => {
   if (!s || s <= 0) return "0m";
@@ -92,8 +96,8 @@ export default function AnalysisPanel({
 
   // Per Subject Totals & Percentages
   const subjectStats = useMemo(() => {
-    const totals = {};
-    const sessionCounts = {};
+    const totals = tally();
+    const sessionCounts = tally();
 
     allSubjects.forEach((sub) => {
       totals[sub.id] = 0;
@@ -169,19 +173,19 @@ export default function AnalysisPanel({
     const currentMonth = todayObj.getMonth();
 
     let todaySecs = 0, todaySessions = 0;
-    const todaySubjects = {};
+    const todaySubjects = tally();
 
     let weekSecs = 0, weekSessions = 0;
-    const weekSubjects = {};
+    const weekSubjects = tally();
 
     let monthSecs = 0, monthSessions = 0;
-    const monthSubjects = {};
+    const monthSubjects = tally();
 
     let yearSecs = 0, yearSessions = 0;
-    const yearSubjects = {};
+    const yearSubjects = tally();
 
     let allSecs = 0, allSessions = 0;
-    const allSubjectsMap = {};
+    const allSubjectsMap = tally();
 
     allSubjects.forEach((sub) => {
       todaySubjects[sub.id] = 0;
@@ -458,7 +462,7 @@ export default function AnalysisPanel({
 
   // 7. Timeframe Breakdown Table Rows
   const breakdownTables = useMemo(() => {
-    const grouped = {};
+    const grouped = tally();
 
     sessions.forEach((s) => {
       if (selectedSubjectFilter !== "all" && s.subjectId !== selectedSubjectFilter) return;
@@ -490,7 +494,7 @@ export default function AnalysisPanel({
       }
 
       if (!grouped[key]) {
-        grouped[key] = { key, label, totalSecs: 0, subjects: {} };
+        grouped[key] = { key, label, totalSecs: 0, subjects: tally() };
         allSubjects.forEach((sub) => (grouped[key].subjects[sub.id] = 0));
       }
 
