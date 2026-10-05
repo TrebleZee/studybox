@@ -10,7 +10,6 @@ Last pass: 2026-10-05, `master` @ `84abc1d`, `v1.15.1`. Report: `docs/readiness/
 
 | ID | Severity | Area | Finding | Evidence | Planned branch |
 | --- | --- | --- | --- | --- | --- |
-| N1 | high | persistence | Two open tabs overwrite each other: nothing listens for storage changes and each tab writes its whole in-memory array | Reasoned from `src/store/usePersistedState.js`; not yet reproduced in a browser | `fix/multi-tab-overwrite` |
 | N2 | high | destructive actions | Deleting a subject or session is one click with no confirmation or undo; it also removes that XP and writes a tombstone | `EditSubjectsCard.jsx`, `LogView.jsx` delete handlers | `feat/undo-delete` |
 | N3 | medium | failure paths | No error boundary, and a storage write that throws (quota) blanks the app | No `componentDidCatch` in `src/`; `saveJson` does not catch | `feat/error-boundary` |
 | N4 | medium | hosting | No security headers: no `vercel.json`, so no Content-Security-Policy | File absent | `chore/security-headers` |
@@ -32,6 +31,7 @@ Last pass: 2026-10-05, `master` @ `84abc1d`, `v1.15.1`. Report: `docs/readiness/
 
 | ID | Finding | Closed by | Verified |
 | --- | --- | --- | --- |
+| N1 | Two open tabs overwrote each other: nothing listened for storage changes and each tab wrote its whole in-memory array | #31 | 2026-10-05: reproduced and fixed in `src/App.multiTab.test.jsx` (two apps over one storage: concurrent sessions, stale-tab delete, at most one write per external change); checked in real Chrome with two pages; installed-PWA window not checked |
 | B2 | Persistence scattered across `App.jsx`, hooks and the Asana client | #27 | 2026-10-05: lint rule blocks direct `localStorage` outside `src/store/` |
 | B3 | Records not sync-safe (timestamp ids, no stamps, hard deletes, no schema version) | #28 | 2026-10-05: two-profile convergence test in `merge.test.js` |
 | B4 | XP incremented and farmable by toggling a topic | #29 | 2026-10-05: `deriveXP` tests and the App toggle test |

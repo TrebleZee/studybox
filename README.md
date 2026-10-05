@@ -49,7 +49,7 @@ The timer is based on timestamps rather than a simple interval counter, so it st
 
 The version shown next to the StudyBox name in the top bar is read from `package.json` at build time, so it always matches the release you're running.
 
-All data is stored locally in `localStorage`. Nothing is synced to a server. Use **Settings > Backup & Restore** to download a JSON backup, since browsers can clear site data. **Restore from file** replaces what's in the browser with the backup; **Merge from file** combines the two, keeping the most recent version of anything changed in both, which is how to bring two devices together.
+All data is stored locally in `localStorage`. Nothing is synced to a server. Use **Settings > Backup & Restore** to download a JSON backup, since browsers can clear site data. **Restore from file** replaces what's in the browser with the backup; **Merge from file** combines the two, keeping the most recent version of anything changed in both, which is how to bring two devices together. Tabs on the same device need nothing: open StudyBox in two tabs, or the installed app beside a tab, and each picks up the other's changes as they happen without losing any (a running timer stays in the tab that started it).
 
 Asana is an optional integration, off until you choose **Connect Asana** in Settings.
 
@@ -127,7 +127,7 @@ An open app checks for a new version every 15 minutes and whenever it comes back
 - `src/components/` - `PlannerView`, `LogView`, `SettingsView` (with `settings/` cards), `Onboarding`, `TopBar`, `AnalysisPanel`, `AsanaTasksPanel` and smaller pieces
 - `src/hooks/useTimer.js` - timestamp-anchored study timer, saved across reloads
 - `src/hooks/useAppUpdate.js` and `src/pwa/updateStore.js` - checks for new versions and applies them only when it's safe
-- `src/store/` - the only code that touches `localStorage`: keys, scopes (account / device / secret) and a change subscription
+- `src/store/` - the only code that touches `localStorage`: keys, scopes (account / device / secret), a change subscription, and how each key loads and merges changes from other tabs
 - `src/utils/` - formatting, subject normalisation, spec catalogue, streak/XP logic, backup and themes
 - `src/utils/specImport.js`, `pdfLines.js`, `topicExtraction.js`, `specInference.js` - spec PDF import: text lines from pdf.js, the topic checklist, and board/spec code/qualification detection
 - `src/data/specs/` - the spec catalogue (one JSON file per specification plus a generated search index)

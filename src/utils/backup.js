@@ -9,6 +9,14 @@ import { emptyTombstones, normalizeTombstones } from "./tombstones.js";
 // Older files load with no tombstones and unstamped records.
 export const BACKUP_VERSION = 3;
 
+export const readFileText = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = () => reject(new Error("Unable to read backup file."));
+    reader.readAsText(file);
+  });
+
 export const buildBackup = ({ subjects, sessions, themeId, game, tombstones }) => ({
   subjects,
   sessions,

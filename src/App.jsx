@@ -11,25 +11,16 @@ import useAppUpdate from "./hooks/useAppUpdate.js";
 import useMilestoneReminder from "./hooks/useMilestoneReminder.js";
 import useStreakReminder from "./hooks/useStreakReminder.js";
 import useTimer from "./hooks/useTimer.js";
-import { normalizeAsanaConfig } from "./services/asanaClient.js";
 import { buildCss } from "./utils/appCss.js";
-import { backupFileName, buildBackup, parseBackup } from "./utils/backup.js";
+import { backupFileName, buildBackup, parseBackup, readFileText } from "./utils/backup.js";
 import { fmt } from "./utils/format.js";
-import {
-  applyLoggedSession,
-  buildInitialGame,
-  deriveXP,
-  settleLegacyXP,
-  streakExpiry,
-  validateStreak,
-} from "./utils/gameLogic.js";
+import { applyLoggedSession, deriveXP, settleLegacyXP, streakExpiry, validateStreak } from "./utils/gameLogic.js";
+import { loaders, tabMerges } from "./store/appState.js";
 import { loadJson, removeKey, saveJson, STORAGE_KEYS, usePersistedState } from "./store/index.js";
 import {
   addUniqueTag,
   isUntouchedDefaultSubjects,
-  normalizeSessions,
   normalizeSubject,
-  normalizeSubjects,
   topicTimerLabel,
   updateSubjectFields,
 } from "./utils/subjects.js";
@@ -37,16 +28,8 @@ import { subjectsForTemplate } from "./utils/catalogue.js";
 import { mergeData } from "./utils/merge.js";
 import { convertTopicToMilestone } from "./utils/milestones.js";
 import { newId, nowIso, stampNew, touch } from "./utils/records.js";
-import { addTombstone, childKey, emptyTombstones, normalizeTombstones } from "./utils/tombstones.js";
+import { addTombstone, childKey, emptyTombstones, mergeTombstones } from "./utils/tombstones.js";
 import { THEMES } from "./utils/themes.js";
-
-const readFileText = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target.result);
-    reader.onerror = () => reject(new Error("Unable to read backup file."));
-    reader.readAsText(file);
-  });
 
 const mapSubject = (subjects, id, fn) =>
   subjects.map((subject) => (subject.id === id ? fn(subject) : subject));
@@ -58,31 +41,18 @@ const mapTopic = (subject, topicId, fn) => ({
 });
 
 export default function StudyBox() {
-  const [themeId, setThemeId] = usePersistedState(STORAGE_KEYS.theme, () => loadJson(STORAGE_KEYS.theme, "midnight"));
-  const [subjects, setSubjects] = usePersistedState(STORAGE_KEYS.subjects, () =>
-    normalizeSubjects(loadJson(STORAGE_KEYS.subjects, null))
-  );
-  const [sessions, setSessions] = usePersistedState(STORAGE_KEYS.sessions, () =>
-    normalizeSessions(loadJson(STORAGE_KEYS.sessions, []))
-  );
-  const [asanaCfg, setAsanaCfg] = usePersistedState(STORAGE_KEYS.asana, () =>
-    normalizeAsanaConfig(loadJson(STORAGE_KEYS.asana, null))
-  );
-  const [asanaStats, setAsanaStats] = usePersistedState(STORAGE_KEYS.asanaStats, () => loadJson(STORAGE_KEYS.asanaStats, null));
-  const [game, setGame] = usePersistedState(STORAGE_KEYS.game, () =>
-    buildInitialGame(
-      loadJson(STORAGE_KEYS.game, null),
-      normalizeSessions(loadJson(STORAGE_KEYS.sessions, [])),
-      normalizeSubjects(loadJson(STORAGE_KEYS.subjects, null))
-    )
-  );
-  // Soft deletes: what was removed and when, so a merge can tell "deleted
-  // here" from "never existed here".
-  const [tombstones, setTombstones] = usePersistedState(STORAGE_KEYS.tombstones, () =>
-    normalizeTombstones(loadJson(STORAGE_KEYS.tombstones, null))
-  );
+  // Another tab's changes are merged in (see store/appState.js), against
+  // this tab's tombstones as well as the stored ones.
+  const [tombstones, setTombstones] = usePersistedState(STORAGE_KEYS.tombstones, loaders.tombstones, mergeTombstones);
+  const merge = tabMerges(tombstones);
+  const [themeId, setThemeId] = usePersistedState(STORAGE_KEYS.theme, loaders.theme);
+  const [subjects, setSubjects] = usePersistedState(STORAGE_KEYS.subjects, loaders.subjects, merge.subjects);
+  const [sessions, setSessions] = usePersistedState(STORAGE_KEYS.sessions, loaders.sessions, merge.sessions);
+  const [asanaCfg, setAsanaCfg] = usePersistedState(STORAGE_KEYS.asana, loaders.asana);
+  const [asanaStats, setAsanaStats] = usePersistedState(STORAGE_KEYS.asanaStats, loaders.asanaStats);
+  const [game, setGame] = usePersistedState(STORAGE_KEYS.game, loaders.game, merge.game);
   const entomb = (kind, id) => setTombstones((prev) => addTombstone(prev, kind, id));
-  const [onboarded, setOnboarded] = usePersistedState(STORAGE_KEYS.onboarded, () => loadJson(STORAGE_KEYS.onboarded, false));
+  const [onboarded, setOnboarded] = usePersistedState(STORAGE_KEYS.onboarded, loaders.onboarded);
   const templateRequest = useRef(0);
   // The unlogged session's note, tags and timed topic are saved alongside the
   // timer so a reload doesn't lose them.
