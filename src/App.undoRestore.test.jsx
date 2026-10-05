@@ -125,6 +125,34 @@ describe("undo restore", () => {
     await waitFor(() => expect(snapshot()).toEqual(before));
   });
 
+  // N9 (#50): normalizers now keep fields a newer build added, on both sides.
+  it("keeps fields a newer build added, on this device and in the file", async () => {
+    seed();
+    const stored = JSON.parse(localStorage.getItem("sb-subjects"));
+    stored[0] = { ...stored[0], order: 3, topics: [{ ...stored[0].topics[0], notes: "mine" }, ...stored[0].topics.slice(1)] };
+    localStorage.setItem("sb-subjects", JSON.stringify(stored));
+    const sessions = JSON.parse(localStorage.getItem("sb-sessions")).map((s) => ({ ...s, topicId: "t-here" }));
+    localStorage.setItem("sb-sessions", JSON.stringify(sessions));
+    const user = userEvent.setup();
+    renderApp();
+    await waitFor(() => expect(localStorage.getItem("sb-game")).not.toBeNull());
+    const before = snapshot();
+    expect(JSON.parse(before["sb-subjects"])[0].order).toBe(3);
+
+    await goTo(user, "Settings");
+    await restore(
+      user,
+      backupFile({
+        subjects: [{ id: "other", name: "Other", color: "#123456", topics: [], order: 1, sharedWith: ["x"] }],
+        sessions: [{ ...session("s-file", "Physics", "from the file"), topicId: "t-file" }],
+      })
+    );
+    await waitFor(() => expect(JSON.parse(localStorage.getItem("sb-subjects"))[0].sharedWith).toEqual(["x"]));
+
+    await user.click(screen.getByRole("button", { name: "Undo restore" }));
+    await waitFor(() => expect(snapshot()).toEqual(before));
+  });
+
   it("is withdrawn once anything changes after the restore, so later work survives", async () => {
     const { user, subjects } = await start();
     await goTo(user, "Settings");

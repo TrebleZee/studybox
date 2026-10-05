@@ -9,7 +9,15 @@ import { childKey, deletedAt, mergeTombstones } from "./tombstones.js";
 // Rules:
 // - Same id on both sides: the copy with the later updatedAt wins whole
 //   (last write wins per record). A missing updatedAt is a pre-v3 record and
-//   loses to any stamped edit. Exact ties break on content, never on side.
+//   loses to any stamped edit. Exact ties go to the copy with more own keys
+//   (an older build that stripped fields it didn't know, N9, didn't restamp,
+//   so the full copy must win the tie it created), then break on content,
+//   never on side. Together that is a total order on records, which is what
+//   keeps a three-copy merge independent of the order it is done in: a
+//   "superset of keys wins" rule would not be one, since two copies with
+//   incomparable key sets would fall to the content compare and could form a
+//   cycle with a third. For subjects the order is taken over the subject's
+//   own fields (see ownFields), which a merge leaves exactly as the winner's.
 // - A tombstone removes a record unless the record was edited after the
 //   deletion.
 // - A subject's own fields, its topics and its milestones merge separately,
@@ -29,8 +37,11 @@ import { childKey, deletedAt, mergeTombstones } from "./tombstones.js";
 
 const stamp = (record) => record?.updatedAt || "";
 
+const keyCount = (record) => Object.keys(record).length;
+
 const pick = (a, b) => {
   if (stamp(a) !== stamp(b)) return stamp(a) > stamp(b) ? a : b;
+  if (keyCount(a) !== keyCount(b)) return keyCount(a) > keyCount(b) ? a : b;
   return JSON.stringify(a) >= JSON.stringify(b) ? a : b;
 };
 
@@ -75,8 +86,30 @@ const mergeById = (winnerRaw, otherRaw, combine) => {
   return merged;
 };
 
+// A subject's own fields, without the two lists that merge separately.
+const ownFields = (subject) => {
+  const fields = { ...subject };
+  delete fields.topics;
+  delete fields.milestones;
+  return fields;
+};
+
+// The winner between two copies of a subject is picked on its own fields, a
+// projection a merge leaves exactly as the winner's: picking on the whole
+// record would let the `milestones` key a merged winner gains from the other
+// side change its key count, and a stamp-tied three-copy merge would then
+// depend on its order. Copies whose own fields are identical fall back to the
+// whole record, so the side never decides: the winner's topic order comes
+// first, and two tabs that each preferred their own copy would write back to
+// each other forever.
+const pickSubject = (a, b) => {
+  const [ownA, ownB] = [ownFields(a), ownFields(b)];
+  if (JSON.stringify(ownA) !== JSON.stringify(ownB)) return pick(ownA, ownB) === ownA ? a : b;
+  return JSON.stringify(a) >= JSON.stringify(b) ? a : b;
+};
+
 const mergeSubject = (a, b, tombstones) => {
-  const winner = pick(a, b);
+  const winner = pickSubject(a, b);
   const other = winner === a ? b : a;
   const topics = mergeById(winner.topics || [], other.topics || [], pick).filter((topic) =>
     survives(topic, tombstones, "topics", childKey(winner.id, topic.id))

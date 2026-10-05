@@ -30,9 +30,11 @@ describe("tombstones", () => {
       normalizeTombstones({
         sessions: { good: T1, bad: "yesterday", worse: 5 },
         topics: ["not", "an", "object"],
-        unknown: { x: T1 },
+        // A kind this build doesn't know is a newer build's deletes: kept (N9).
+        unknown: { x: T1, bad: "yesterday" },
+        notAMap: [T1],
       })
-    ).toEqual({ ...emptyTombstones(), sessions: { good: T1 } });
+    ).toEqual({ ...emptyTombstones(), sessions: { good: T1 }, unknown: { x: T1 } });
   });
 
   it("cannot be used to pollute Object.prototype", () => {

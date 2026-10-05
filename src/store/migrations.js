@@ -37,12 +37,26 @@ const saveOrThrow = (key, value) => {
   return true;
 };
 
+// The last run's result, for storedSchemaIsNewer below.
+let lastRun = null;
+
+// True when the stored data was written by a newer build than this one (its
+// sb-schema is above SCHEMA_VERSION). usePersistedState then skips its mount
+// write-back, so a key this build has not changed is never rewritten in this
+// build's shape. The normalizers keep the fields they don't know (N9), so a
+// key this build does change still carries the newer build's fields through.
+export const storedSchemaIsNewer = () => Boolean(lastRun?.newer);
+
 // Runs any steps newer than the stored version, in order, then records the
-// new version. Data written by a newer build is left alone and reported, so
-// an old cached build can't stamp it back down.
+// new version. Data written by a newer build is left alone and reported: its
+// version stamp is not lowered, nothing is rewritten on mount
+// (storedSchemaIsNewer) and what this build does write keeps every field it
+// doesn't know, so an old cached build can neither stamp the data back down
+// nor strip it.
 export const runMigrations = (migrations = MIGRATIONS, target = SCHEMA_VERSION) => {
   const from = storedVersion() ?? 2;
-  if (from > target) return { from, to: from, newer: true, ran: [] };
+  lastRun = { from, to: from, newer: from > target, ran: [] };
+  if (lastRun.newer) return lastRun;
 
   const ran = [];
   migrations
@@ -56,5 +70,6 @@ export const runMigrations = (migrations = MIGRATIONS, target = SCHEMA_VERSION) 
     });
 
   if (storedVersion() !== target) saveOrThrow(STORAGE_KEYS.schema, target);
-  return { from, to: target, newer: false, ran };
+  lastRun = { from, to: target, newer: false, ran };
+  return lastRun;
 };
