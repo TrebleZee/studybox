@@ -25,6 +25,18 @@ If a task turns out to be a mix (say, a feature that also fixes an unrelated bug
 
 Commit normally on the branch, as many commits as make sense. Keep `npm run lint`, `npm test`, and `npm run build` passing before opening the PR - don't hand over a red branch.
 
+## 2b. Update the status page
+
+Every PR updates `docs/STATUS.md` in the same branch, before it is opened. It is the maintainer's one-page summary, so keep it short and current:
+
+- **Recent changes:** add one row at the top for this PR: what changed for the user (or "no user-facing change"), the ledger ids it closes, and the version it will be tagged (or "none" for `chore/`). Use the PR number once the PR exists (a fast-follow commit on the branch is fine). Keep the table to roughly the last dozen rows.
+- **Current state:** the version (must equal `package.json`; `src/statusDoc.test.js` checks it), the current goal, open PRs, and `Last updated`.
+- **Progress against the plan:** move the phase's state on when this PR finishes or starts one.
+- **Needs actioning:** delete what this PR made unnecessary; add anything only the maintainer can now do (a tag the session couldn't push, a decision, a check on a real device), with why and by when. Next agent steps go under **Agent**.
+- **Known risks:** delete a risk this PR removes; add one a user should know about before it's fixed.
+
+After merging and tagging (step 4), if something didn't happen as planned (a tag that couldn't be pushed, a release not published), add it to Needs actioning in the next PR or a `chore/` follow-up. Never leave the page claiming something that isn't true.
+
 ## 3. Classify the change and open the PR
 
 | Change type | What qualifies | Branch prefix | Version bump |

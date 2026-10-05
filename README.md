@@ -102,6 +102,10 @@ Spec files live in `src/data/specs/` (one `<board>-<spec>.json` per specificatio
 
 To start a new spec file, run `npm run draft-spec -- <spec PDF path or URL> --board AQA --spec 8461 --qualification gcse --subject Biology`. It writes a draft to `drafts/` (not committed) that you then check against the PDF and finish by hand. See "Authoring specs" in `instruction.md`.
 
+### Project status
+
+`docs/STATUS.md` summarises recent changes, progress against the plan and anything waiting on the maintainer. It is updated with every PR.
+
 ### Lint and test
 
 ```bash
