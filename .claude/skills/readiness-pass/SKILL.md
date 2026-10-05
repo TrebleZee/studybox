@@ -11,14 +11,14 @@ It changes nothing in `src/`. Its only outputs are files under `docs/readiness/`
 
 ## 1. Start from master
 
+Work in your own worktree (see the `git-workflow` skill, step 1), never in a checkout another session is using. From inside it:
+
 ```bash
-git checkout master
-git pull
-git fetch --tags
-git checkout -b chore/readiness-<YYYY-MM-DD>
+git fetch origin --tags
+git switch -c chore/readiness-<YYYY-MM-DD> origin/master
 ```
 
-If the working tree has uncommitted changes, stash them with a clear message and say so in the final report. Do not run a pass on a feature branch: the question is about what is live.
+Do not run a pass on a feature branch: the question is about what is live. Note which PRs are open (`gh pr list`); the plan's parallel lanes must account for work already in flight.
 
 ## 2. Audit, twice
 

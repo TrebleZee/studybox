@@ -16,7 +16,7 @@ You fix a StudyBox branch after an independent review, then write the report. Th
 
 ## How
 
-1. `git checkout <branch>` and `git pull`.
+1. Work in the worktree the caller named, where `<branch>` is already checked out, and `git pull` there. Never `git checkout` the branch in another checkout: other sessions work in parallel, and git refuses a branch that is checked out elsewhere. If no worktree was named, make one: `git worktree add .claude/worktrees/review-<short-name> <branch>`.
 2. For each finding: write a failing test that reproduces the scenario first (pure logic in `src/utils/*.test.js`, components in `*.test.jsx`), then fix, then confirm the test passes.
 3. Run `npm run lint`, `npm test` and `npm run build`. All must pass.
 4. Commit on the branch, with messages like `Review fix R2: guard against empty topics in subjectProgress`, and the attribution lines your environment specifies. Push.

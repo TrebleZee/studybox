@@ -8,7 +8,7 @@ Previous goal (Phase A shipped, Phase C re-planned): `docs/goals/2026-10-phase-a
 
 ## Before anything (maintainer, Phase M)
 
-Work may start on A2.1 (`fix/normalize-field-types`) and A2.2 (`chore/ci-master-runs`) at once. Everything from A2.3 on waits until the maintainer has:
+Work may start on every lane in **Parallel lanes** below except where it says it waits. The maintainer has:
 
 - [x] pushed tags `v1.17.0` (`42f6159`) and `v1.17.1` (`251deed`) and published their releases (C9). Until then, do not merge any `fix/` or `feat/` branch: its version would be computed from `v1.16.0`.
 - [x] answered the N8 decision below and recorded it under "Decisions already made".
@@ -16,8 +16,8 @@ Work may start on A2.1 (`fix/normalize-field-types`) and A2.2 (`chore/ci-master-
 
 ## Ground rules (apply to every branch)
 
-1. **Use the `/git-workflow` skill for every branch.** Never commit to `master`. Branch off an up-to-date `master` with the name given below; never reuse a branch name that already exists on `origin`. `fix/` is a patch bump, `feat/` a minor bump, `chore/` no bump and no tag. `feat/` branches go through the review gate before merging.
-2. **Order and expected versions** (from `v1.17.1`; tags are the source of truth, so bump from whatever the latest tag actually is): A2.1 `v1.17.2` → A2.2 (no bump) → A2.3 `v1.17.3` → A2.4 `v1.18.0` → A2.5 `v1.19.0` → A2.6 `v1.19.1` → A2.7 `v1.19.2` → A2.8 `v1.19.3` → A2.9 `v1.19.4` → A2.10 `v1.19.5` → A2.11 `v1.19.6` → A2.12 `v1.19.7` (or skipped) → A3.1 `v1.19.8` → A3.2 `v1.19.9` → A3.3 `v1.19.10` → **exit check**. `chore/ignore-drafts` can land any time.
+1. **Use the `/git-workflow` skill for every branch.** Never commit to `master`. Work in your own worktree, check the item isn't claimed, branch off `origin/master` with the name given below and claim it with a draft PR at once; never reuse a branch name that already exists on `origin`. `fix/` is a patch bump, `feat/` a minor bump, `chore/` no bump and no tag. `feat/` branches go through the review gate before merging. Branches merge one at a time and set their version at merge time (skill step 4).
+2. **Expected versions, if merged in plan order** (a forecast only: lanes run in parallel and merge in whatever order they finish, and the latest tag at merge time decides each version): A2.1 `v1.17.2` → A2.2 (no bump) → A2.3 `v1.17.3` → A2.4 `v1.18.0` → A2.5 `v1.19.0` → A2.6 `v1.19.1` → A2.7 `v1.19.2` → A2.8 `v1.19.3` → A2.9 `v1.19.4` → A2.10 `v1.19.5` → A2.11 `v1.19.6` → A2.12 `v1.19.7` (or skipped) → A3.1 `v1.19.8` → A3.2 `v1.19.9` → A3.3 `v1.19.10` → **exit check**. `chore/ignore-drafts` can land any time.
 3. **Green before PR:** `npm run lint`, `npm test`, `npm run build` all pass locally and in CI. Never hand over a red branch. If a tag can't be pushed from the session, say so and give the maintainer the exact command; never route around a policy denial.
 4. **Reproduce before fixing.** Every finding gets a failing test that shows the auditor's scenario first, then the fix. The audit's scratch tests may be gone; write the test in the repo. A finding marked "reasoned" in the ledger must be reproduced or disproved before any code changes; if disproved, close it as rejected and skip the branch.
 5. **Conventions:** pure logic in `src/utils/*.js` or `src/store/*.js` with a sibling `*.test.js`; JSX in `src/components/*.jsx` with a sibling `*.test.jsx`. `App.jsx` gets smaller or stays the same size, never larger.
@@ -26,8 +26,25 @@ Work may start on A2.1 (`fix/normalize-field-types`) and A2.2 (`chore/ci-master-
 8. **Onboarding guard:** `defaultSubjects()` returns the frozen A-level set and `isUntouchedDefaultSubjects` keeps detecting an untouched install. Keep or add a test in every branch that touches `subjects.js` or a normalizer.
 9. **Containment is not closure.** A known limit written into `instruction.md` does not close a finding. Every README or `instruction.md` claim a branch makes true or false is corrected in that branch (the plan names the lines).
 10. **Keep the ledger and docs current:** in the same PR, move the finding to Closed in `docs/readiness/findings.md` with the PR number and the test that proves it, and update `instruction.md` and `README.md` where behaviour changed.
-11. **Do not touch** uncommitted changes that were in the working tree before this goal started. If they block `git checkout master`, stash them with a clear message and say so in the final report.
+11. **Do not touch** uncommitted changes in any checkout but your own worktree: they belong to the maintainer or another session.
 12. Commits and PRs end with the attribution lines your environment specifies.
+
+## Parallel lanes
+
+Each lane is one session's queue: its branches run in order, because they share files. Different lanes don't share files, so they can run at the same time; each needs its own worktree. The files every PR edits (`docs/STATUS.md`, `docs/readiness/findings.md`, `instruction.md`, `README.md`) are handled by the git-workflow skill's merge step, not by lanes.
+
+| Lane | Branches, in order | Main files | Waits for |
+| --- | --- | --- | --- |
+| 1. Normalizers and storage | A2.1 → A2.9 → A3.2 → A3.3 | normalizers in `src/utils/`, `src/store/appState.js`, `localStore.js`, `usePersistedState.js`, `migrations.js` | nothing (A2.1 is in flight) |
+| 2. Undo and replacing data | A2.3 → A2.4 → A3.1 | `src/utils/undo.js`, `src/hooks/useUndoDelete.js`, Settings Backup & Restore, `Onboarding.jsx`, `App.jsx` | the N8 decision; A3.1 also waits for A3.2's normalizer changes if they overlap |
+| 3. Timer | A2.5 → A2.7 → A2.8 | `src/hooks/useTimer.js`, `TimerPanel.jsx`, `UndoBar.jsx`, Log Session in `App.jsx` | nothing. A2.5 adds to the undo bar: if lane 2 is open, touch `useUndoDelete.js` only to add the timer case |
+| 4. Session edit | A2.6 | `EditSessionModal.jsx` | nothing |
+| 5. Reminders | A2.11 | `useStreakReminder.js`, `useMilestoneReminder.js` | nothing |
+| 6. App update | A2.10 | `useAppUpdate.js`, `UpdateBanner.jsx`, `main.jsx` | nothing. It reads whether a timer, edit or undo is active; it doesn't change those |
+| 7. Chores | A2.2, `chore/ignore-drafts` | `.github/workflows/ci.yml`, `.gitignore` | nothing |
+| 8. Safari backup | A2.12 | `src/utils/backup.js` (download only) | a reproduction on Safari or an iPhone (maintainer) |
+
+Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every lane is empty.
 
 ## Decisions already made (do not re-ask)
 
