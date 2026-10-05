@@ -438,7 +438,9 @@ export default function StudyBox() {
     setTombstones(before.tombstones);
     setGame(before.game);
     setSel(before.sel);
-    if (before.timedSubjectId) timer.setTimedSubjectId(before.timedSubjectId);
+    // Selecting or timing a subject doesn't withdraw the offer, so a timer on a subject only the merge added is cleared.
+    const timedGone = timedSubjectId && !before.subjects.some((subject) => subject.id === timedSubjectId);
+    if (before.timedSubjectId || timedGone) timer.setTimedSubjectId(before.timedSubjectId ?? null);
     setBackupMessage({ type: "success", text: "Merge undone." });
   };
 

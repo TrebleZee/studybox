@@ -13,6 +13,12 @@ Reviewed at `7000159`.
 | R2 | medium | correctness | src/utils/undo.js (`restoreDeletion`), instruction.md | With any other tab or the installed app open, even idle, an undone delete (and an undone merge) is deleted again in the tab that pressed Undo too; the documented limit understated this | Deferred: maintainer decision (re-stamp on undo versus the goal's requirement that undo restores the record "with its stamps unchanged" and leaves storage byte-identical). Stamps not changed. The "Known limit" in `instruction.md`, the N8 row in `docs/readiness/findings.md` and the PR description now state the real scope (0477ad7): undo is reliable only with a single tab open |
 | R3 | low | tests | src/utils/subjects.js | `buildNewSubjects` became an exported pure function with no unit test | Fixed in 4841a31, test `src/utils/subjects.test.js` (fresh `custom-` ids, `${id}-topic-${i}` topic ids, string and object topics with catalogue fields, stamps equal to `now`) |
 
+## Second round (fix commits 7000159..008051d)
+
+| ID | Severity | Category | File | Finding | Resolution |
+| --- | --- | --- | --- | --- | --- |
+| R4 | medium | correctness | src/App.jsx (`undoMerge`) | Starting the timer on a subject only the merge added doesn't withdraw Undo merge; undoing then left the timer on a subject that no longer exists, so the time would log under another subject | Fixed: `undoMerge` clears a timed subject that isn't in the pre-merge subjects, as a subject delete and the merge itself do. Test `src/App.undo.test.jsx` "stops timing a subject that only the merge added" (fails without the fix) |
+
 Notes:
 
 - The R1 fix narrows the goal's "until the next import or a reload" to "and only while nothing has changed since the merge", as the maintainer directed. `instruction.md` says so; `.claude/commands/goal.md` was left as written.
@@ -24,4 +30,4 @@ Notes:
 
 ## Checks
 
-lint pass · test pass (642 tests) · build pass (main bundle 883.07 kB, 261.25 kB gzip)
+lint pass · test pass (643 tests) · build pass (main bundle 883.07 kB, 261.25 kB gzip)

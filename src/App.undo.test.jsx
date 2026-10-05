@@ -166,12 +166,12 @@ describe("undo for deletes", () => {
   });
 });
 
-const mergeFile = () =>
+const mergeFile = (subjects = []) =>
   new File(
     [
       JSON.stringify({
         version: 3,
-        subjects: [],
+        subjects,
         sessions: [session("s-there", "Physics", "2026-09-14T09:00:00.000Z")],
         tombstones: { sessions: { "s-old": "2026-09-14T10:00:00.000Z" } },
         game: { currentStreak: 5, longestStreak: 9, lastStudyDate: "2026-09-14", totalXP: 999, legacyXP: 900 },
@@ -209,5 +209,23 @@ describe("undo merge", () => {
     await goTo(user, "Settings");
     expect(screen.queryByRole("button", { name: "Undo merge" })).toBeNull();
     expect(snapshot()).toEqual(afterTick);
+  });
+
+  it("stops timing a subject that only the merge added", async () => {
+    const { user } = start();
+    await goTo(user, "Settings");
+    const added = { id: "merged-only", name: "Merged Only", color: "#123456", topics: [] };
+    await user.upload(screen.getByLabelText("Merge backup file"), mergeFile([added]));
+    expect(await screen.findByRole("button", { name: "Undo merge" })).toBeTruthy();
+
+    await goTo(user, "Planner");
+    await user.click(screen.getByRole("button", { name: "Merged Only" }));
+    await user.click(screen.getByRole("button", { name: "Start" }));
+    expect(JSON.parse(localStorage.getItem("sb-timer")).timedSubjectId).toBe("merged-only");
+
+    await goTo(user, "Settings");
+    await user.click(screen.getByRole("button", { name: "Undo merge" }));
+    expect(JSON.parse(localStorage.getItem("sb-subjects")).some((s) => s.id === "merged-only")).toBe(false);
+    expect(JSON.parse(localStorage.getItem("sb-timer")).timedSubjectId).toBeNull();
   });
 });
