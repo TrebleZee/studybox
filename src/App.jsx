@@ -35,7 +35,7 @@ import { mergeData } from "./utils/merge.js";
 import { convertTopicToMilestone } from "./utils/milestones.js";
 import { newId, nowIso, stampNew, touch } from "./utils/records.js";
 import { addTombstone, childKey, emptyTombstones, mergeTombstones } from "./utils/tombstones.js";
-import { unchangedSinceMerge } from "./utils/undo.js";
+import { restoreBeforeMerge, unchangedSinceMerge } from "./utils/undo.js";
 import { THEMES } from "./utils/themes.js";
 
 const mapSubject = (subjects, id, fn) =>
@@ -416,7 +416,7 @@ export default function StudyBox() {
   const canUndoMerge = unchangedSinceMerge(backupMessage?.undo?.after, { subjects, sessions, tombstones, game });
   const undoMerge = () => {
     if (!canUndoMerge) return;
-    const { before } = backupMessage.undo;
+    const before = restoreBeforeMerge(backupMessage.undo);
     setSubjects(before.subjects);
     setSessions(before.sessions);
     setTombstones(before.tombstones);

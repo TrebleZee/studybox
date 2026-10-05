@@ -55,6 +55,7 @@ Lane 1's A2.9 starts once A2.1 has merged. The exit check (A3.4) runs once every
 - The Asana token stays in `localStorage` under its current key, behind the CSP in `vercel.json`.
 - The running timer and the session draft are per-tab state, not reconciled across tabs (N12 makes that true rather than changing it).
 - **Undo re-stamps the record it restores** (maintainer, 2026-10-05). This amends the previous goal's "undo puts the record back with its stamps unchanged": A2.3 and A2.4 go ahead as written.
+- **Undo merge does not tombstone records only the file had** (maintainer, 2026-10-05). With another tab open they come back; a tombstone would delete them on the device they came from at the next merge or sync.
 
 ---
 
