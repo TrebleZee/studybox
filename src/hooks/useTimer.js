@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { loadJson, removeKey, saveJson, STORAGE_KEYS } from "../store/index.js";
+import { fmt } from "../utils/format.js";
 
 const nonNegative = (value) => (Number.isFinite(value) && value >= 0 ? value : null);
 
@@ -72,6 +73,10 @@ export default function useTimer({ canTime, defaultSubjectId }) {
 
   const displaySecs = running ? Math.max(0, Math.floor((now - startedAt) / 1000)) : elapsed;
 
+  useEffect(() => {
+    document.title = running ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
+  }, [running, displaySecs]);
+
   const start = () => {
     if (!canTime) return;
     if (!timedSubjectId) setTimedSubjectId(defaultSubjectId);
@@ -85,11 +90,23 @@ export default function useTimer({ canTime, defaultSubjectId }) {
     setStartedAt(null);
   };
 
+  // Returns what it discarded, so Reset can be undone with restore().
   const reset = () => {
     setElapsed(0);
     setStartedAt(null);
     setTimedSubjectId(null);
+    return { elapsed: displaySecs, running, timedSubjectId };
   };
 
-  return { running, displaySecs, timedSubjectId, setTimedSubjectId, start, pause, reset };
+  // Puts a reset timer back at the time it had. A timer that was running
+  // carries on from there, so the gap before Undo isn't counted as study.
+  const restore = (state) => {
+    const restartAt = Date.now();
+    setElapsed(state.elapsed);
+    setTimedSubjectId(state.timedSubjectId);
+    setNow(restartAt);
+    setStartedAt(state.running ? restartAt - state.elapsed * 1000 : null);
+  };
+
+  return { running, displaySecs, timedSubjectId, setTimedSubjectId, start, pause, reset, restore };
 }

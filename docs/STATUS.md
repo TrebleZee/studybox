@@ -8,12 +8,12 @@ Last updated: 2026-10-05
 
 | | |
 | --- | --- |
-| Current version | 1.17.4 |
-| Latest tag on GitHub | v1.17.4 |
+| Current version | 1.18.0 |
+| Latest tag on GitHub | v1.18.0 |
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `661e26a` (1.17.2) at the time of the 5 Oct scope review |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
-| Open PRs | [#46](https://github.com/TrebleZee/studybox/pull/46) undo for timer Reset (N22), [#47](https://github.com/TrebleZee/studybox/pull/47) undo merge offer with a second tab (C14, draft) |
+| Open PRs | [#47](https://github.com/TrebleZee/studybox/pull/47) undo merge offer with a second tab (C14, draft) |
 | Checks on `master` | Lint, test (711 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
 
 ## Recent changes
@@ -22,6 +22,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#46](https://github.com/TrebleZee/studybox/pull/46) | Resetting the timer with time on it shows "Reset timer. Undo", which brings back the elapsed time, subject and timed topic | N22 | v1.18.0 |
 | [#45](https://github.com/TrebleZee/studybox/pull/45) | Stored data that can't be read is left as it was, with a banner and a backup that carries it, instead of being silently replaced; a browser that blocks storage no longer stops the app starting | N16, N17 | v1.17.4 |
 | [#44](https://github.com/TrebleZee/studybox/pull/44) | A coordinator can run the goal's lanes as separate full sessions (`orchestrate` skill), each on a model chosen by risk: Fable for the stored data model and merge, Opus for anything that can lose data and for every review, Sonnet for single-component fixes, Haiku for config. No user-facing change | none | none |
 | [#43](https://github.com/TrebleZee/studybox/pull/43) | Scope review: closes C9, N13 and C7 in the ledger, adds N26, N27, N28 and C13, folds them into the A2/A3 lanes and sets a process budget. No user-facing change | none | none |
@@ -55,7 +56,7 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed, re-planned as A2 and A3 |
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
-| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41) and A2.3 (#42, v1.17.3) merged; A2.9 ready in #45; every lane open except 9 |
+| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4) and A2.5 (#46, v1.18.0) merged; every lane open except 9 |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | Not started |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
@@ -81,6 +82,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 | 6 | Five-user feedback round, including devices used and whether anyone wants friends features | Gates 2.0 and 2.x and sets N20's urgency (V1) | 25 Oct |
 | 7 | Make the design gate doc (`claude/v2-design-gate.md`) available to the exit check | Missing for three passes, so B1's wording has never been checked against it | 6 Nov |
 | 8 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
+| 9 | Decide whether the timer Reset undo (#46) should survive an accidental restart: today pressing Start or Space after Reset withdraws the offer at once, so Undo can never overwrite a new session. Options: fold the new seconds into the restored session, or let Undo replace a session under a few seconds | Review finding R1 on #46 (`docs/reviews/feat-undo-timer-reset.md`); not in the goal, so not decided by an agent | any time |
 
 ### Agent (next steps)
 
@@ -88,8 +90,8 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 
 1. Lane 2: `fix/undo-merge-offer-two-tabs` (C14). The #42 two-tab Undo merge test fails at random, and CI is required, so it blocks other PRs. Then A2.4 `feat/undo-restore` (N11) and A3.1.
 2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
-3. Lane 1: merge A2.9 (#45, N16, N17), then A3.2.
-4. Open now: A2.5 (lane 3), A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
+3. Lane 1: A3.2 (A2.9 merged in #45).
+4. Open now: A2.7 (lane 3), A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
 
 ## Known risks
 
