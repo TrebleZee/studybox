@@ -154,6 +154,9 @@ describe("mergeData", () => {
       subjects: [subject("c", [topic("t1"), topic("t2", { updatedAt: at(3) })], { name: "C2", updatedAt: at(5), order: 1 })],
       sessions: [session("s", 6, { topicId: "t1" })],
     });
+    // Stamp ties around an unknown field: t1 is unstamped on a (with notes) and
+    // c (without); session s is stamped at(6) on both, with topicId only on c.
+    a.sessions = normalizeSessions([session("s", 6)]);
     const flat = (data) => ({
       sessions: data.sessions,
       tombstones: data.tombstones,
@@ -164,6 +167,7 @@ describe("mergeData", () => {
     expect(flat(merge(merge(c, a), b))).toEqual(flat(leftFirst));
     expect(leftFirst.subjects[0].topics.find((t) => t.id === "t2").done).toBe(true);
     expect(leftFirst.subjects[0].order).toBe(1);
+    expect(leftFirst.subjects[0].topics.find((t) => t.id === "t1").notes).toBe("from a");
     expect(leftFirst.sessions[0].topicId).toBe("t1");
   });
 
@@ -256,6 +260,44 @@ describe("mergeData", () => {
     expect(withNewer.subjects[0].topics.find((t) => t.id === "only-a").order).toBe(4);
     expect(withNewer.sessions[0]).not.toHaveProperty("topicId");
     expect(merge(newer, a)).toEqual(withNewer);
+  });
+
+  // N9, the other half: an older build that restored this copy strips the
+  // fields it doesn't know without restamping, so the two copies tie on
+  // updatedAt. The tie must go to the copy with more fields, whichever side
+  // it is on, or merging with the stripped copy spreads the stripping back.
+  describe("on a stamp tie keeps the copy with more fields, so a stripped copy never wins", () => {
+    const unstamped = (record) => {
+      const bare = { ...record };
+      delete bare.createdAt;
+      delete bare.updatedAt;
+      return bare;
+    };
+    const cases = {
+      "stamped equal": { subjectExtra: { updatedAt: at(2) }, topicExtra: { updatedAt: at(3) }, sessionExtra: {} },
+      "both unstamped": { subjectExtra: {}, topicExtra: {}, sessionExtra: null },
+    };
+    Object.entries(cases).forEach(([label, { subjectExtra, topicExtra, sessionExtra }]) => {
+      it(label, () => {
+        const sess = (extra) => (sessionExtra ? session("s1", 18, { ...sessionExtra, ...extra }) : unstamped(session("s1", 18, extra)));
+        const full = copy({
+          subjects: [subject("physics", [topic("t1", { notes: "n", ...topicExtra })], { order: 2, ...subjectExtra })],
+          sessions: [sess({ topicId: "t1" })],
+        });
+        const stripped = copy({
+          subjects: [subject("physics", [topic("t1", topicExtra)], subjectExtra)],
+          sessions: [sess({})],
+        });
+        [merge(full, stripped), merge(stripped, full)].forEach((merged) => {
+          expect(merged.subjects[0].order).toBe(2);
+          expect(merged.subjects[0].topics[0].notes).toBe("n");
+          expect(merged.sessions[0].topicId).toBe("t1");
+        });
+        expect(merge(full, stripped)).toEqual(merge(stripped, full));
+        // The full copy is exactly what comes out, so the merge is idempotent on it.
+        expect(merge(full, stripped).subjects).toEqual(full.subjects);
+      });
+    });
   });
 });
 

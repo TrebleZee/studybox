@@ -9,7 +9,14 @@ import { childKey, deletedAt, mergeTombstones } from "./tombstones.js";
 // Rules:
 // - Same id on both sides: the copy with the later updatedAt wins whole
 //   (last write wins per record). A missing updatedAt is a pre-v3 record and
-//   loses to any stamped edit. Exact ties break on content, never on side.
+//   loses to any stamped edit. Exact ties go to the copy with more own keys
+//   (an older build that stripped fields it didn't know, N9, didn't restamp,
+//   so the full copy must win the tie it created), then break on content,
+//   never on side. Together that is a total order on records, which is what
+//   keeps a three-copy merge independent of the order it is done in: a
+//   "superset of keys wins" rule would not be one, since two copies with
+//   incomparable key sets would fall to the content compare and could form a
+//   cycle with a third.
 // - A tombstone removes a record unless the record was edited after the
 //   deletion.
 // - A subject's own fields, its topics and its milestones merge separately,
@@ -29,8 +36,11 @@ import { childKey, deletedAt, mergeTombstones } from "./tombstones.js";
 
 const stamp = (record) => record?.updatedAt || "";
 
+const keyCount = (record) => Object.keys(record).length;
+
 const pick = (a, b) => {
   if (stamp(a) !== stamp(b)) return stamp(a) > stamp(b) ? a : b;
+  if (keyCount(a) !== keyCount(b)) return keyCount(a) > keyCount(b) ? a : b;
   return JSON.stringify(a) >= JSON.stringify(b) ? a : b;
 };
 

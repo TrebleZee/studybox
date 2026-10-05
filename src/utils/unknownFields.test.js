@@ -226,4 +226,34 @@ describe("unknownFields and isJsonValue", () => {
       (value) => expect(isJsonValue(value)).toBe(false)
     );
   });
+
+  // A field nested deeper than 64 levels is not something this build carries:
+  // the field is dropped (what every unknown field got before N9) rather than
+  // the whole file being refused with a stack overflow.
+  it("stop at 64 levels of nesting and never overflow the stack", () => {
+    const nestedArrays = (depth) => {
+      let value = 1;
+      for (let i = 0; i < depth; i += 1) value = [value];
+      return value;
+    };
+    const nestedObjects = (depth) => {
+      let value = "leaf";
+      for (let i = 0; i < depth; i += 1) value = { a: value };
+      return value;
+    };
+    expect(isJsonValue(nestedArrays(64))).toBe(true);
+    expect(isJsonValue(nestedObjects(64))).toBe(true);
+    expect(isJsonValue(nestedArrays(65))).toBe(false);
+    expect(isJsonValue(nestedObjects(65))).toBe(false);
+    expect(() => isJsonValue(nestedArrays(10_000))).not.toThrow();
+    expect(isJsonValue(nestedArrays(10_000))).toBe(false);
+
+    const [subject] = normalizeSubjects([
+      { ...newerSubject(), shallow: nestedArrays(64), deep: nestedArrays(65), bottomless: nestedObjects(10_000) },
+    ]);
+    expect(subject.shallow).toEqual(nestedArrays(64));
+    expect(subject).not.toHaveProperty("deep");
+    expect(subject).not.toHaveProperty("bottomless");
+    expect(subject.order).toBe(2);
+  });
 });

@@ -47,8 +47,13 @@ export const keepStamps = (record) => ({
 // unchanged. Unknown fields are opaque: nothing in the app reads them, and a
 // merge moves them whole with the record that wins. A key named __proto__ is
 // never kept: it is not a field any build writes, and Object.assign-style
-// copies would read it as the prototype.
-export const isJsonValue = (value, seen = new Set()) => {
+// copies would read it as the prototype. Nesting stops at MAX_JSON_DEPTH
+// levels: a deeper value is not one this build carries (the field is dropped,
+// as every unknown field was before N9), and the check never recurses far
+// enough to overflow the stack on a hostile or absurd file.
+export const MAX_JSON_DEPTH = 64;
+
+export const isJsonValue = (value, depth = 0, seen = new Set()) => {
   if (value === null) return true;
   switch (typeof value) {
     case "string":
@@ -61,13 +66,14 @@ export const isJsonValue = (value, seen = new Set()) => {
     default:
       return false;
   }
+  if (depth >= MAX_JSON_DEPTH) return false;
   // `seen` is the path from the root: a cycle can never be serialized.
   if (seen.has(value)) return false;
   const proto = Object.getPrototypeOf(value);
   if (!Array.isArray(value) && proto !== Object.prototype && proto !== null) return false;
   seen.add(value);
   const items = Array.isArray(value) ? value : Object.keys(value).map((key) => value[key]);
-  const ok = items.every((item) => isJsonValue(item, seen));
+  const ok = items.every((item) => isJsonValue(item, depth + 1, seen));
   seen.delete(value);
   return ok;
 };
