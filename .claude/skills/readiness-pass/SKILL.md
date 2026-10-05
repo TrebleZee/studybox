@@ -38,9 +38,13 @@ Read the report yourself before continuing. Check that every verdict cites ledge
 
 Rewrite `.claude/commands/goal.md` so it describes the phase the plan says is next, in the existing format: a one-paragraph goal, ground rules, decisions already made, then one section per branch with **Branch**, **Closes**, **Build** and **Done when** checkboxes, then "Stop and ask" and "Final report". Before overwriting, copy the outgoing goal to `docs/goals/<YYYY-MM>-<slug>.md` if its work has shipped. Only work an agent can do goes in the goal; decisions and user research stay in the report as the maintainer's.
 
+## 4b. Refresh the status page
+
+Update `docs/STATUS.md` from the report: the readiness line in **Current state**, the whole **Progress against the plan** table (phases, dates and state from the new plan), **Needs actioning** (the report's maintainer items with their dates, and the agent's next branches), and **Known risks** (open findings a user would notice today). It goes in the same PR.
+
 ## 5. Open the PR and stop
 
-Commit the ledger, the report, the goal file and any archived goal. Push and open a `chore/` PR (no version bump, no tag) following the `git-workflow` skill. The PR body is the verdict, the ids opened and closed, and the list of things only the maintainer can do.
+Commit the ledger, the report, the goal file, any archived goal and `docs/STATUS.md`. Push and open a `chore/` PR (no version bump, no tag) following the `git-workflow` skill. The PR body is the verdict, the ids opened and closed, and the list of things only the maintainer can do.
 
 Then stop. Do not start the plan's first branch in the same run: the maintainer reads the report, makes the decisions it asks for, and starts the work with `/goal`.
 
