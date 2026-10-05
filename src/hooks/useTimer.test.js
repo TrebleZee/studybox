@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fmt } from "../utils/format.js";
 import useTimer from "./useTimer.js";
 
 describe("useTimer", () => {
@@ -170,5 +171,42 @@ describe("useTimer persistence", () => {
     const { result } = setup();
     expect(result.current.running).toBe(false);
     expect(result.current.displaySecs).toBe(42);
+  });
+
+  it("reset returns what it discarded and restore puts a running timer back without the gap", () => {
+    const { result } = setup();
+    act(() => result.current.start());
+    act(() => vi.advanceTimersByTime(90_000));
+    let discarded;
+    act(() => {
+      discarded = result.current.reset();
+    });
+    expect(discarded).toEqual({ elapsed: 90, running: true, timedSubjectId: "physics" });
+    expect(result.current.displaySecs).toBe(0);
+    expect(document.title).toBe("StudyBox");
+
+    act(() => vi.advanceTimersByTime(60_000));
+    act(() => result.current.restore(discarded));
+    expect(result.current.displaySecs).toBe(90);
+    expect(result.current.running).toBe(true);
+    expect(result.current.timedSubjectId).toBe("physics");
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(result.current.displaySecs).toBe(100);
+    expect(document.title).toBe(`${fmt(100)} · StudyBox`);
+  });
+
+  it("restore puts a paused timer back paused", () => {
+    const { result } = setup();
+    act(() => result.current.start());
+    act(() => vi.advanceTimersByTime(30_000));
+    act(() => result.current.pause());
+    let discarded;
+    act(() => {
+      discarded = result.current.reset();
+    });
+    act(() => result.current.restore(discarded));
+    act(() => vi.advanceTimersByTime(30_000));
+    expect(result.current.running).toBe(false);
+    expect(result.current.displaySecs).toBe(30);
   });
 });

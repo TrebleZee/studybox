@@ -1,6 +1,7 @@
 export {
   KEY_SCOPES,
   SECRET_KEYS,
+  isUnreadable,
   STORAGE_KEYS,
   keysInScope,
   loadJson,
@@ -9,7 +10,9 @@ export {
   saveJson,
   saveText,
   scopeOf,
+  storageProblem,
   subscribe,
+  unreadableText,
 } from "./localStore.js";
 export { default as usePersistedState } from "./usePersistedState.js";
 export { MIGRATIONS, SCHEMA_VERSION, runMigrations } from "./migrations.js";

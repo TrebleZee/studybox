@@ -1,27 +1,10 @@
-import { useEffect, useState } from "react";
-import { subscribe } from "../store/index.js";
+import { useSyncExternalStore } from "react";
+import { storageProblem, subscribe } from "../store/index.js";
 
-// True while any key's last write failed (storage full or blocked). A key
-// clears on its next successful write.
+// What, if anything, is stopping the app saving: "blocked" (the browser
+// denies storage), "full" (a write failed; clears on that key's next
+// successful write), "unreadable" (stored data didn't parse and was left as
+// it was; clears once that data is next saved) or null.
 export default function useSaveFailure() {
-  const [failed, setFailed] = useState(() => new Set());
-
-  useEffect(
-    () =>
-      subscribe(({ key, type }) => {
-        if (type === "error") {
-          setFailed((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
-        } else if (type === "write" || type === "remove") {
-          setFailed((prev) => {
-            if (!prev.has(key)) return prev;
-            const next = new Set(prev);
-            next.delete(key);
-            return next;
-          });
-        }
-      }),
-    []
-  );
-
-  return failed.size > 0;
+  return useSyncExternalStore(subscribe, storageProblem);
 }

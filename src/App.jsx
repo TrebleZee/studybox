@@ -18,7 +18,7 @@ import useSpaceToggle from "./hooks/useSpaceToggle.js";
 import useUndoDelete from "./hooks/useUndoDelete.js";
 import { buildCss } from "./utils/appCss.js";
 import { buildBackup, downloadBackup, parseBackup, readFileText } from "./utils/backup.js";
-import { fmt } from "./utils/format.js";
+import { timedTopic } from "./utils/sessionDraft.js";
 import { applyLoggedSession, deriveXP, settleLegacyXP, streakExpiry, validateStreak } from "./utils/gameLogic.js";
 import { loaders, tabMerges } from "./store/appState.js";
 import { loadJson, removeKey, saveJson, STORAGE_KEYS, usePersistedState } from "./store/index.js";
@@ -69,12 +69,9 @@ export default function StudyBox() {
   const [savedDraft] = useState(() => loadJson(STORAGE_KEYS.sessionDraft, null));
   // The timed topic comes back (with its subject selected, so the topic list
   // keeps it expanded) only if it still exists on the timed subject.
-  const [restoredTopic] = useState(() => {
-    const timedSubjectId = loadJson(STORAGE_KEYS.timer, null)?.timedSubjectId;
-    const subject = subjects.find((item) => item.id === timedSubjectId);
-    const topicId = savedDraft?.topicId;
-    return subject?.topics.some((topic) => topic.id === topicId) ? { subjectId: subject.id, topicId } : null;
-  });
+  const [restoredTopic] = useState(() =>
+    timedTopic(subjects, loadJson(STORAGE_KEYS.timer, null)?.timedSubjectId, savedDraft?.topicId)
+  );
   const [sel, setSel] = useState(() => restoredTopic?.subjectId ?? subjects[0]?.id ?? null);
   const [view, setView] = useState("planner");
   const [asanaTask, setAsanaTask] = useState(null);
@@ -87,17 +84,6 @@ export default function StudyBox() {
   );
   const [editingSession, setEditingSession] = useState(null);
   const [backupMessage, setBackupMessage] = useState(null);
-  const { undo, noteDeletion, undoDelete, clearUndo } = useUndoDelete({
-    ...{ subjects, sessions, tombstones, setSubjects, setSessions, setTombstones },
-    onRestore: ({ id, selected, timed }) => {
-      if (selected) setSel(id);
-      if (timed) timer.setTimedSubjectId(id);
-    },
-  });
-  const changeView = (next) => {
-    setView(next);
-    clearUndo();
-  };
 
   const theme = THEMES.find((item) => item.id === themeId) || THEMES[0];
   const C = theme.colors;
@@ -147,6 +133,24 @@ export default function StudyBox() {
   const sessionInProgress = running || displaySecs > 0;
   const needsOnboarding =
     !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
+  const { undo, noteDeletion, noteTimerReset, undoDelete, clearUndo } = useUndoDelete({
+    ...{ subjects, sessions, tombstones, setSubjects, setSessions, setTombstones, timerBusy: sessionInProgress },
+    onRestore: ({ id, selected, timed, timer: reset, topicId }) => {
+      if (reset) timer.restore(reset);
+      // Undoing a Reset brings its timed topic back the way a reload does.
+      const topic = reset && timedTopic(subjects, reset.timedSubjectId, topicId);
+      if (topic) {
+        setSel(topic.subjectId);
+        setExpandedTopic(topic.topicId);
+      }
+      if (selected) setSel(id);
+      if (timed) timer.setTimedSubjectId(id);
+    },
+  });
+  const changeView = (next) => {
+    setView(next);
+    clearUndo();
+  };
   const saveFailed = useSaveFailure();
   const appUpdate = useAppUpdate({
     sessionInProgress,
@@ -163,10 +167,6 @@ export default function StudyBox() {
       saveJson(STORAGE_KEYS.sessionDraft, { note, tags: sessionTags, topicId: draftTopicId });
     }
   }, [note, sessionTags, draftTopicId]);
-
-  useEffect(() => {
-    document.title = running ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
-  }, [running, displaySecs]);
 
   useSpaceToggle(() => (running ? timer.pause() : timer.start()));
 
@@ -478,7 +478,7 @@ export default function StudyBox() {
       }}
     >
       <style>{buildCss(C)}</style>
-      {saveFailed && <SaveFailedBanner C={C} onDownload={exportData} />}
+      {saveFailed && <SaveFailedBanner C={C} reason={saveFailed} onDownload={exportData} />}
 
       {needsOnboarding ? (
         <Onboarding
@@ -519,7 +519,7 @@ export default function StudyBox() {
                 highlightedSubjectId: asanaSelected ? null : sub?.id ?? null,
                 start: timer.start,
                 pause: timer.pause,
-                reset: timer.reset,
+                reset: () => noteTimerReset(timer.reset(), { topicId: draftTopicId }),
               }}
               session={{
                 note,
@@ -592,7 +592,7 @@ export default function StudyBox() {
         </>
       )}
 
-      {undo && <UndoBar C={C} name={undo.name} onUndo={undoDelete} onDismiss={clearUndo} raised={appUpdate.updateReady} />}
+      {undo && <UndoBar C={C} name={undo.name} message={undo.message} onUndo={undoDelete} onDismiss={clearUndo} raised={appUpdate.updateReady} />}
       {appUpdate.updateReady && <UpdateBanner C={C} onUpdate={appUpdate.applyNow} />}
     </div>
   );

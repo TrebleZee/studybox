@@ -4,7 +4,7 @@ import { buildInitialGame, normalizeGame } from "../utils/gameLogic.js";
 import { mergeGameStates, mergeSessionLists, mergeSubjectLists } from "../utils/merge.js";
 import { normalizeSessions, normalizeSubjects } from "../utils/subjects.js";
 import { mergeTombstones, normalizeTombstones } from "../utils/tombstones.js";
-import { loadJson, STORAGE_KEYS } from "./localStore.js";
+import { loadJson, STORAGE_KEYS, unreadableText } from "./localStore.js";
 
 const K = STORAGE_KEYS;
 
@@ -30,7 +30,16 @@ export const loaders = {
 // If loading or normalizing the stored data throws (bad stored data can be
 // exactly what crashed the app), the backup falls back to the raw parsed
 // values, so the download still holds what is on disk.
-export const storedBackup = () => {
+//
+// Account data whose stored text doesn't parse goes in as that text, under
+// `unreadable` (key -> text), so nothing on disk is left out. Restoring the
+// file ignores it; it is there to be repaired by hand.
+const withUnreadable = (backup) => {
+  const unreadable = unreadableText();
+  return Object.keys(unreadable).length ? { ...backup, unreadable } : backup;
+};
+
+const rawOrBuiltBackup = () => {
   try {
     return buildBackup({
       subjects: loaders.subjects(),
@@ -50,6 +59,8 @@ export const storedBackup = () => {
     };
   }
 };
+
+export const storedBackup = () => withUnreadable(rawOrBuiltBackup());
 
 // How a tab folds another tab's change into its own state (see
 // usePersistedState). Records merge exactly as a backup merge does, against
