@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { saveJson, subscribe } from "./localStore.js";
+import { isUnreadable, saveJson, subscribe } from "./localStore.js";
 
 // Key order doesn't matter when asking "did the merge add anything?".
 const canonical = (value) =>
@@ -11,6 +11,10 @@ const canonical = (value) =>
 
 // useState that writes itself back to the store whenever it changes (and once
 // on mount, so a normalised or migrated value replaces what was loaded).
+// Stored data that didn't parse is the exception: the mount write would
+// replace it with a default, so it is skipped and the text stays in storage
+// until the user changes that data (the app tells them first; see
+// storageProblem in localStore.js).
 //
 // `load` reads and normalizes the stored value. When another tab changes the
 // key, it is loaded again and, if `merge(local, theirs)` is given, merged with
@@ -19,6 +23,7 @@ const canonical = (value) =>
 // writes: an external change costs at most one write here.
 export default function usePersistedState(key, load, merge) {
   const [value, setValue] = useState(load);
+  const loaded = useRef(value);
   const fromOutside = useRef(undefined);
   const latest = useRef({ load, merge });
 
@@ -28,6 +33,7 @@ export default function usePersistedState(key, load, merge) {
 
   useEffect(() => {
     if (value === fromOutside.current) return;
+    if (value === loaded.current && isUnreadable(key)) return;
     saveJson(key, value);
   }, [key, value]);
 

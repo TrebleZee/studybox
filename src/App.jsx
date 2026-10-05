@@ -478,7 +478,7 @@ export default function StudyBox() {
       }}
     >
       <style>{buildCss(C)}</style>
-      {saveFailed && <SaveFailedBanner C={C} onDownload={exportData} />}
+      {saveFailed && <SaveFailedBanner C={C} reason={saveFailed} onDownload={exportData} />}
 
       {needsOnboarding ? (
         <Onboarding

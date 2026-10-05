@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   KEY_SCOPES,
   SECRET_KEYS,
+  isUnreadable,
   STORAGE_KEYS,
   keysInScope,
   loadJson,
@@ -10,7 +11,9 @@ import {
   saveJson,
   saveText,
   scopeOf,
+  storageProblem,
   subscribe,
+  unreadableText,
 } from "./localStore.js";
 import { buildBackup } from "../utils/backup.js";
 import { normalizeSessions, normalizeSubjects, defaultSubjects } from "../utils/subjects.js";
@@ -173,5 +176,64 @@ describe("backups", () => {
     saveText(SECRET_KEYS.asanaToken, "1/secret-token");
     const backup = buildBackup({ subjects: [], sessions: [], themeId: "midnight", game: {} });
     expect(JSON.stringify(backup)).not.toContain("secret-token");
+  });
+});
+
+describe("stored data that doesn't parse (N16)", () => {
+  it("is remembered with its text, for account keys only, until it is written", () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, "[{\"id\":");
+    localStorage.setItem(STORAGE_KEYS.timer, "{{");
+    expect(loadJson(STORAGE_KEYS.sessions, [])).toEqual([]);
+    expect(loadJson(STORAGE_KEYS.timer, null)).toBeNull();
+
+    expect(isUnreadable(STORAGE_KEYS.sessions)).toBe(true);
+    expect(isUnreadable(STORAGE_KEYS.timer)).toBe(false);
+    expect(unreadableText()).toEqual({ [STORAGE_KEYS.sessions]: "[{\"id\":" });
+    expect(storageProblem()).toBe("unreadable");
+    expect(localStorage.getItem(STORAGE_KEYS.sessions)).toBe("[{\"id\":");
+
+    saveJson(STORAGE_KEYS.sessions, []);
+    expect(isUnreadable(STORAGE_KEYS.sessions)).toBe(false);
+    expect(storageProblem()).toBeNull();
+  });
+
+  it("is forgotten once a load finds it readable again", () => {
+    localStorage.setItem(STORAGE_KEYS.subjects, "[");
+    loadJson(STORAGE_KEYS.subjects, null);
+    localStorage.setItem(STORAGE_KEYS.subjects, "[]");
+    loadJson(STORAGE_KEYS.subjects, null);
+    expect(isUnreadable(STORAGE_KEYS.subjects)).toBe(false);
+  });
+});
+
+describe("blocked storage (N17)", () => {
+  const block = () =>
+    ["getItem", "setItem", "removeItem"].forEach((method) =>
+      vi.spyOn(Storage.prototype, method).mockImplementation(() => {
+        throw new DOMException("The operation is insecure.", "SecurityError");
+      })
+    );
+
+  it("never throws from a read, write or removal, and reports itself", () => {
+    const changes = [];
+    const stop = subscribe((change) => changes.push(change));
+    block();
+
+    expect(loadJson(STORAGE_KEYS.subjects, "fallback")).toBe("fallback");
+    expect(loadText(SECRET_KEYS.asanaToken)).toBe("");
+    expect(saveJson(STORAGE_KEYS.theme, "midnight")).toBe(false);
+    expect(removeKey(STORAGE_KEYS.sessionDraft)).toBe(false);
+    expect(storageProblem()).toBe("blocked");
+    expect(changes.map(({ key, type }) => [key, type])).toEqual([
+      [STORAGE_KEYS.theme, "error"],
+      [STORAGE_KEYS.sessionDraft, "error"],
+    ]);
+
+    vi.restoreAllMocks();
+    expect(saveJson(STORAGE_KEYS.theme, "midnight")).toBe(true);
+    expect(removeKey(STORAGE_KEYS.sessionDraft)).toBe(true);
+    loadJson(STORAGE_KEYS.theme, null);
+    expect(storageProblem()).toBeNull();
+    stop();
   });
 });
