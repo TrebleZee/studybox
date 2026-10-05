@@ -1,4 +1,5 @@
 import { normalizeAsanaConfig } from "../services/asanaClient.js";
+import { buildBackup } from "../utils/backup.js";
 import { buildInitialGame, normalizeGame } from "../utils/gameLogic.js";
 import { mergeGameStates, mergeSessionLists, mergeSubjectLists } from "../utils/merge.js";
 import { normalizeSessions, normalizeSubjects } from "../utils/subjects.js";
@@ -21,6 +22,18 @@ export const loaders = {
   tombstones: () => normalizeTombstones(loadJson(K.tombstones, null)),
   onboarded: () => loadJson(K.onboarded, false),
 };
+
+// A backup built straight from storage, not from React state, for when
+// rendering is what broke. The Asana token is never in it (buildBackup only
+// takes study data).
+export const storedBackup = () =>
+  buildBackup({
+    subjects: loaders.subjects(),
+    sessions: loaders.sessions(),
+    themeId: loaders.theme(),
+    game: loaders.game(),
+    tombstones: loaders.tombstones(),
+  });
 
 // How a tab folds another tab's change into its own state (see
 // usePersistedState). Records merge exactly as a backup merge does, against
