@@ -123,27 +123,35 @@ const mergeGame = (local, incoming, sessions, subjects, nowMs) => {
   return { ...merged, frozenDates: [...new Set(merged.frozenDates || [])].sort() };
 };
 
-// Both inputs: { subjects, sessions, tombstones, game }, already normalized.
-export const mergeData = (local, incoming, nowMs = Date.now()) => {
-  const tombstones = mergeTombstones(local.tombstones, incoming.tombstones);
-
-  // Subject order follows whichever list sorts first, so it doesn't depend
-  // on which copy is local.
+// Subject order follows whichever list sorts first, so it doesn't depend on
+// which copy is local.
+export const mergeSubjectLists = (left, right, tombstones) => {
   const [first, second] =
-    JSON.stringify(local.subjects.map((s) => s.id)) <= JSON.stringify(incoming.subjects.map((s) => s.id))
-      ? [local.subjects, incoming.subjects]
-      : [incoming.subjects, local.subjects];
-  const subjects = mergeById(first, second, (a, b) => mergeSubject(a, b, tombstones))
+    JSON.stringify(left.map((s) => s.id)) <= JSON.stringify(right.map((s) => s.id))
+      ? [left, right]
+      : [right, left];
+  return mergeById(first, second, (a, b) => mergeSubject(a, b, tombstones))
     .map((subject) => mergeSubject(subject, subject, tombstones))
     .filter((subject) => {
       const removed = deletedAt(tombstones, "subjects", subject.id);
       return !removed || lastActivity(subject) > removed;
     });
+};
 
-  const sessions = mergeById(local.sessions, incoming.sessions, pick)
+export const mergeSessionLists = (left, right, tombstones) =>
+  mergeById(left, right, pick)
     .filter((session) => survives(session, tombstones, "sessions", session.id))
     .sort(bySessionOrder);
 
+// Two game states over the same records (two tabs on one device).
+export const mergeGameStates = (left, right, sessions, subjects, nowMs = Date.now()) =>
+  mergeGame({ game: left, sessions, subjects }, { game: right, sessions, subjects }, sessions, subjects, nowMs);
+
+// Both inputs: { subjects, sessions, tombstones, game }, already normalized.
+export const mergeData = (local, incoming, nowMs = Date.now()) => {
+  const tombstones = mergeTombstones(local.tombstones, incoming.tombstones);
+  const subjects = mergeSubjectLists(local.subjects, incoming.subjects, tombstones);
+  const sessions = mergeSessionLists(local.sessions, incoming.sessions, tombstones);
   return {
     subjects,
     sessions,

@@ -53,8 +53,9 @@ export const keysInScope = (scope) =>
 
 const listeners = new Set();
 
-// Listeners get { key, scope, type: "write" | "remove", value }. Secret values
-// are never handed to listeners: they only learn that the key changed.
+// Listeners get { key, scope, type: "write" | "remove" | "external", value }.
+// Secret values are never handed to listeners: they only learn that the key
+// changed.
 const notify = (key, type, value) => {
   if (!listeners.size) return;
   const scope = scopeOf(key);
@@ -99,3 +100,24 @@ export const removeKey = (key) => {
   localStorage.removeItem(key);
   notify(key, "remove", undefined);
 };
+
+// Another tab, or the installed app beside a tab, changed a key this store
+// owns. Browsers fire `storage` only in the other tabs, never in the writer.
+// Keys the store doesn't own are ignored; `value` is the new stored value
+// (undefined once removed), so a listener can reload it.
+const parseStored = (raw) => {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
+};
+
+const onStorage = (event) => {
+  if (event.storageArea && event.storageArea !== localStorage) return;
+  const { key } = event;
+  if (!key || !Object.hasOwn(KEY_SCOPES, key)) return;
+  notify(key, "external", event.newValue === null ? undefined : parseStored(event.newValue));
+};
+
+if (typeof window !== "undefined") window.addEventListener("storage", onStorage);

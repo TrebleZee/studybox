@@ -6,6 +6,7 @@ This file documents the app structure so future changes stay consistent.
 
 - StudyBox is a single-page React app with four views: `Planner`, `Log`, `Analysis`, and `Settings`, plus a first-run `Onboarding` screen.
 - The app stores everything in `localStorage`; there is no backend sync.
+- Several tabs (or the installed app beside a tab) can be open at once: each merges the others' changes as they happen, so no tab's write loses another's records (see Store layer). The running timer and the unlogged session draft are per tab: a timer running in two tabs is two timers.
 - The study timer must remain accurate in background tabs and standalone PWA mode.
 
 ## Storage keys
@@ -26,9 +27,10 @@ This file documents the app structure so future changes stay consistent.
 
 ### Store layer (`src/store/`)
 
-- `src/store/localStore.js` is the only module that touches `localStorage`. ESLint (`no-restricted-globals`) fails any direct use elsewhere in `src/`, tests excepted. Read with `loadJson` / `loadText`, write with `saveJson` / `saveText` / `removeKey`, and use `usePersistedState(key, init)` for React state that persists itself.
+- `src/store/localStore.js` is the only module that touches `localStorage`. ESLint (`no-restricted-globals`) fails any direct use elsewhere in `src/`, tests excepted. Read with `loadJson` / `loadText`, write with `saveJson` / `saveText` / `removeKey`, and use `usePersistedState(key, load, merge?)` for React state that persists itself. `load` reads and normalizes the key (the per-key loaders live in `src/store/appState.js`).
 - Every key has a scope in `KEY_SCOPES`: `account` (subjects, sessions, game, theme, tombstones: what backups carry and what sync will carry), `device` (timer, draft, reminder bookkeeping, Asana config and stats, onboarded, schema version) or `secret` (the Asana token: never backed up, never synced, and its value is never passed to store subscribers). A new key must be given a scope; a test fails otherwise.
-- `subscribe(listener)` reports every write and removal as `{ key, scope, type, value }`. This is the seam the V2 sync engine attaches to; nothing uses it yet.
+- `subscribe(listener)` reports every write and removal as `{ key, scope, type, value }`, and a change made by another tab (the window `storage` event) as `type: "external"`. Keys the store doesn't own are ignored and a secret's value is never passed on. This is the seam the V2 sync engine attaches to.
+- Other tabs: on an external change `usePersistedState` reloads the key through `load` and, where `tabMerges` (in `appState.js`) gives a merge, merges it with this tab's value using the same record merge as Merge from file, against this tab's tombstones as well as the stored ones. Subjects, sessions, tombstones and game merge; theme, Asana settings and `sb-onboarded` take the other tab's value; `sb-timer` and `sb-session-draft` are not reconciled. A merged value is written back only when it adds something the other tab lacked, so an external change costs at most one write and tabs never echo each other.
 
 ## Data model
 

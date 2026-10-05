@@ -117,6 +117,35 @@ describe("store seam", () => {
   });
 });
 
+describe("changes from another tab", () => {
+  const fromOtherTab = (key, newValue) =>
+    window.dispatchEvent(new StorageEvent("storage", { key, newValue, storageArea: localStorage }));
+
+  it("are reported as external, with the new value", () => {
+    const seen = [];
+    const unsubscribe = subscribe((change) => seen.push(change));
+    fromOtherTab(STORAGE_KEYS.theme, JSON.stringify("paper"));
+    fromOtherTab(STORAGE_KEYS.timer, null);
+    unsubscribe();
+
+    expect(seen).toEqual([
+      { key: STORAGE_KEYS.theme, scope: "account", type: "external", value: "paper" },
+      { key: STORAGE_KEYS.timer, scope: "device", type: "external", value: undefined },
+    ]);
+  });
+
+  it("ignore keys the store does not own, and never carry a secret", () => {
+    const seen = [];
+    const unsubscribe = subscribe((change) => seen.push(change));
+    fromOtherTab("someone-elses-key", "1");
+    fromOtherTab(null, null);
+    fromOtherTab(SECRET_KEYS.asanaToken, "1/secret-token");
+    unsubscribe();
+
+    expect(seen).toEqual([{ key: SECRET_KEYS.asanaToken, scope: "secret", type: "external", value: undefined }]);
+  });
+});
+
 describe("backups", () => {
   it("never contain the Asana token", () => {
     saveText(SECRET_KEYS.asanaToken, "1/secret-token");
