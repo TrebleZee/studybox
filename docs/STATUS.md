@@ -9,12 +9,12 @@ Last updated: 2026-10-05
 | | |
 | --- | --- |
 | Current version | 1.17.3 |
-| Latest tag on GitHub | v1.17.2 (v1.17.3 is tagged when #42 merges) |
-| Production | studybox-sigma.vercel.app, deployed from `master` @ `a9280f5` (1.17.1) |
-| Current goal | `.claude/commands/goal.md`: Phases A2 and A3 |
-| Readiness | Phase A exit check failed on 2026-10-05: four new `high` findings (N9, N10, N11, N13); N13 closed by #39, N8 by #42. Report: `docs/readiness/2026-10-05-phase-a-exit.md` |
-| Open PRs | [#42](https://github.com/TrebleZee/studybox/pull/42) undo survives a second open tab (N8); [#43](https://github.com/TrebleZee/studybox/pull/43) readiness pass: scope and on-track review (draft) |
-| Checks on `master` | Lint, test (705 tests with #42), build: green. Every `master` run now completes (#41); CI is not a required check yet (C7) |
+| Latest tag on GitHub | v1.17.3 |
+| Production | studybox-sigma.vercel.app, deployed from `master` @ `661e26a` (1.17.2) at the time of the 5 Oct scope review |
+| Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
+| Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
+| Open PRs | [#44](https://github.com/TrebleZee/studybox/pull/44) orchestrated parallel sessions with models chosen by risk |
+| Checks on `master` | Lint, test (711 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
 
 ## Recent changes
 
@@ -22,6 +22,8 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#44](https://github.com/TrebleZee/studybox/pull/44) | A coordinator can run the goal's lanes as separate full sessions (`orchestrate` skill), each on a model chosen by risk: Fable for the stored data model and merge, Opus for anything that can lose data and for every review, Sonnet for single-component fixes, Haiku for config. No user-facing change | none | none |
+| [#43](https://github.com/TrebleZee/studybox/pull/43) | Scope review: closes C9, N13 and C7 in the ledger, adds N26, N27, N28 and C13, folds them into the A2/A3 lanes and sets a process budget. No user-facing change | none | none |
 | [#42](https://github.com/TrebleZee/studybox/pull/42) | Undo of a delete or a merge now holds with a second tab or the installed app open, instead of being reverted in every tab | N8 | v1.17.3 |
 | [#40](https://github.com/TrebleZee/studybox/pull/40) | Workflow for parallel sessions: one worktree per session, claims as draft PRs, the goal split into parallel lanes, versions set at merge time and merges one at a time. No user-facing change | none | none |
 | [#41](https://github.com/TrebleZee/studybox/pull/41) | CI runs for commits on `master` are never cancelled by a newer push, so every merged commit is verified. No user-facing change | C7 (agent half) | none |
@@ -45,18 +47,19 @@ Older history: the GitHub releases and `git log`.
 
 ## Progress against the plan
 
-From `docs/readiness/2026-10-05-phase-a-exit.md`. Dates are the plan's.
+From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit check's plan; no dates moved).
 
 | Phase | What | Dates | State |
 | --- | --- | --- | --- |
-| A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed |
-| M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Tags, releases, plan approval and the N8 decision (undo may re-stamp) done 5 Oct; required CI open |
-| A2 | Fix today's data loss (N13, N8, N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C7) | 6 to 23 Oct | A2.1 (v1.17.2) and A2.2 (#41) done; A2.3 (N8) in #42; lanes 3 to 7 open (the goal's Parallel lanes) |
+| A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed, re-planned as A2 and A3 |
+| M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
+| M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
+| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41) and A2.3 (#42, v1.17.3) merged; every lane open except 9 |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | Not started |
-| B | Design-gate decisions (B1) and five-user feedback (V1) | by 25 Oct | Maintainer's; no progress recorded |
-| C | Shape the client for sync (record actions, record order, import bounds) | 9 to 27 Nov | Blocked on the A3 exit check |
-| G | Keyboard, offline PDF import, bundle size | 30 Nov to 11 Dec | Not started |
-| D | Backend spike on test data | 30 Nov to 11 Dec | Blocked on B1 |
+| B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
+| C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
+| G | Keyboard (C3 now includes the Asana row), offline PDF import, bundle size | 30 Nov to 11 Dec | Not started |
+| D | Backend spike on test data | 30 Nov to 11 Dec | Ready by its gate; not before the B1 decision |
 | E | v2.0.0 accounts and sync | 4 Jan to 30 Apr 2027 | Blocked on B1, V1 |
 
 Open findings: 3 `high` (N9, N10, N11), 2 `blocker` (B1, V1). The full list is `docs/readiness/findings.md`.
@@ -69,23 +72,29 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 
 | # | Action | Why | By |
 | --- | --- | --- | --- |
-| 1 | Make "Lint, test, build" a required status check on `master`, and turn on "Require branches to be up to date before merging" (Settings → Branches → master) | CI is not required today; every `master` run now completes (#41), so this is the last half of C7. The up-to-date rule stops two parallel PRs merging on the same base and claiming the same version | 9 Oct |
-| 2 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up); it now also describes the parallel workflow | 9 Oct |
-| 3 | On real devices: the installed PWA beside a browser tab; reminders on an Android phone; a backup download on an iPhone | Not testable from a session (N1 check, N20, N25) | 23 Oct |
-| 4 | The four design-gate decisions: data controller and account holder, minimum age and assurance, Online Safety Act scope, reminders for signed-in users | Gates the backend spike and 2.0 (B1) | 25 Oct |
-| 5 | Five-user feedback round, including how many use Android | Gates 2.x and sets N20's urgency (V1) | 25 Oct |
-| 6 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
+| 1 | Confirm the scope answer: A2 and A3 continue; Phase C's V2-only branches (`feat/record-order`, `feat/session-local-day`) wait for the 25 Oct decision; no new process PRs until the 6 Nov exit check apart from C13 and C10 | 5 of the last 7 merged PRs were process or docs, while the V2 blockers haven't moved | 9 Oct |
+| 2 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up); not confirmed done | 9 Oct |
+| 3 | B1/V1 check-in: write down which of the four decisions have an answer and how many users have been asked | If none has an answer by then, 25 Oct isn't credible and the plan should say so early | 15 Oct |
+| 4 | On real devices: the installed PWA beside a browser tab; reminders on an Android phone; a backup download on Safari or an iPhone | Not testable from a session (N1 check, N20, N25; N25 decides A2.12) | 23 Oct |
+| 5 | The four design-gate decisions (data controller and account holder, minimum age and assurance, Online Safety Act scope, reminders for signed-in users), plus whether Asana task names may sit in account-scope session tags (keep, device-only or drop) | Gates the backend spike and 2.0 (B1); decides `fix/asana-session-tags` (N27) | 25 Oct |
+| 6 | Five-user feedback round, including devices used and whether anyone wants friends features | Gates 2.0 and 2.x and sets N20's urgency (V1) | 25 Oct |
+| 7 | Make the design gate doc (`claude/v2-design-gate.md`) available to the exit check | Missing for three passes, so B1's wording has never been checked against it | 6 Nov |
+| 8 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
 
 ### Agent (next steps)
 
 Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1). To run them as separate full sessions, a coordinator uses the `orchestrate` skill (at most 3 workers; the lanes table gives each one's model by risk; only the coordinator merges).
 
-1. Lane 1: A2.9 `fix/guard-storage-reads` (N16, N17); A2.1 shipped in v1.17.2.
-2. Lane 2: A2.3 (N8) in #42, then A2.4 `feat/undo-restore` (N11) and A3.1.
-3. Open now: A2.5 timer-reset undo (lane 3), A2.6 session seconds (lane 4), A2.11 Android reminders (lane 5), A2.10 update reload guard (lane 6), `chore/ignore-drafts` (lane 7); lane 8 (A2.12) once Safari is checked.
+1. Lane 2: `fix/undo-merge-offer-two-tabs` (C14). The #42 two-tab Undo merge test fails at random, and CI is required, so it blocks other PRs. Then A2.4 `feat/undo-restore` (N11) and A3.1.
+2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
+3. Open now: A2.9 (lane 1), A2.5 (lane 3), A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
 
 ## Known risks
 
 - **Undo merge with two tabs open keeps the file's new records** (by decision). Records the merged file added come back from the other tab after Undo merge; everything that was here before is restored.
-- **Restore from file has no undo** (N11). Picking the wrong backup replaces everything.
+- **Undo merge may vanish with a second tab open** (C14, reasoned from a flaky test). Its test fails at random on `master`, which can also block PRs until it is fixed.
+- **Restore from file has no undo** (N11). Picking the wrong backup replaces everything; restoring an old (pre-v3) backup also forgets what was deleted (N10).
 - **Reminders may crash the app on Android** (N20, proven with a stub, not on a device).
+- **Streaks can change after a timezone change** (N26). A trip abroad can shorten the shown streak, and occasionally lapse it.
+- **The Asana task name is saved in the session's tags** (N27), and so in every backup.
+- **A session with an invalid date can't be edited** (N28). Only hand-edited or foreign backups carry one.
