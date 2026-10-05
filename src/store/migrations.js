@@ -5,7 +5,8 @@ import { loadJson, saveJson, STORAGE_KEYS } from "./localStore.js";
 export const SCHEMA_VERSION = 3;
 
 // Ordered, one-way steps. Each `up` gets { loadJson, saveJson, STORAGE_KEYS }
-// and must be safe to run on data that is missing or malformed.
+// (its saveJson throws if a write fails) and must be safe to run on data that
+// is missing or malformed.
 //
 // Field defaults do NOT belong here: by project convention those live in the
 // normalizers (normalizeSubjects, normalizeSessions, normalizeGame), which
@@ -26,6 +27,16 @@ const storedVersion = () => {
   return Number.isInteger(value) && value > 0 ? value : null;
 };
 
+// saveJson reports a failed write (storage full) by returning false instead of
+// throwing, so the app keeps running. A migration must not carry on past one:
+// the step would be stamped as finished with its data never written. Steps
+// and version stamps use this instead, so a failed write stops the run before
+// the version is recorded and the step retries on the next launch.
+const saveOrThrow = (key, value) => {
+  if (!saveJson(key, value)) throw new Error(`StudyBox: migration could not write ${key}`);
+  return true;
+};
+
 // Runs any steps newer than the stored version, in order, then records the
 // new version. Data written by a newer build is left alone and reported, so
 // an old cached build can't stamp it back down.
@@ -38,12 +49,12 @@ export const runMigrations = (migrations = MIGRATIONS, target = SCHEMA_VERSION) 
     .filter((step) => step.version > from && step.version <= target)
     .sort((a, b) => a.version - b.version)
     .forEach((step) => {
-      step.up({ loadJson, saveJson, STORAGE_KEYS });
+      step.up({ loadJson, saveJson: saveOrThrow, STORAGE_KEYS });
       // Recorded after each step, so a crash part-way never re-runs a finished one.
-      saveJson(STORAGE_KEYS.schema, step.version);
+      saveOrThrow(STORAGE_KEYS.schema, step.version);
       ran.push(step.version);
     });
 
-  if (storedVersion() !== target) saveJson(STORAGE_KEYS.schema, target);
+  if (storedVersion() !== target) saveOrThrow(STORAGE_KEYS.schema, target);
   return { from, to: target, newer: false, ran };
 };

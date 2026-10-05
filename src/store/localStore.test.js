@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   KEY_SCOPES,
   SECRET_KEYS,
@@ -114,6 +114,28 @@ describe("store seam", () => {
     expect(() => saveJson(STORAGE_KEYS.onboarded, true)).not.toThrow();
     unsubscribe();
     expect(loadJson(STORAGE_KEYS.onboarded, false)).toBe(true);
+  });
+});
+
+describe("a write that fails", () => {
+  it("is reported to subscribers instead of throwing", () => {
+    const seen = [];
+    const unsubscribe = subscribe((change) => seen.push(change));
+    const full = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("The quota has been exceeded.", "QuotaExceededError");
+    });
+
+    expect(saveJson(STORAGE_KEYS.sessions, [1])).toBe(false);
+    expect(saveText(SECRET_KEYS.asanaToken, "1/secret-token")).toBe(false);
+    full.mockRestore();
+    expect(saveJson(STORAGE_KEYS.sessions, [2])).toBe(true);
+    unsubscribe();
+
+    expect(seen).toEqual([
+      { key: STORAGE_KEYS.sessions, scope: "account", type: "error", value: undefined },
+      { key: SECRET_KEYS.asanaToken, scope: "secret", type: "error", value: undefined },
+      { key: STORAGE_KEYS.sessions, scope: "account", type: "write", value: [2] },
+    ]);
   });
 });
 
