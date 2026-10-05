@@ -100,7 +100,7 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 - **Restore from file has no undo** (N11). Picking the wrong backup replaces everything; restoring an old (pre-v3) backup also forgets what was deleted (N10).
 - **Reminders may crash the app on Android** (N20, proven with a stub, not on a device).
 - **A session in a killed app waits up to 3 minutes before another window picks it up** (by design, #49). If the installed app is swiped away mid-session and StudyBox is reopened within 3 minutes, the session shows as being timed in another window until then; **Continue here** takes it at once.
-- **The session note and tags aren't owned like the timer** (#49). A window that continues a session keeps the note and tags it loaded when it opened, and typing a note in a window that isn't timing changes the saved note for the next reload.
+- **Continue here doesn't bring the timed topic** (#49). The note and tags move with the session; the topic logged with it is whichever one the continuing window has open.
 - **Streaks can change after a timezone change** (N26). A trip abroad can shorten the shown streak, and occasionally lapse it.
 - **The Asana task name is saved in the session's tags** (N27), and so in every backup.
 - **A session with an invalid date can't be edited** (N28). Only hand-edited or foreign backups carry one.

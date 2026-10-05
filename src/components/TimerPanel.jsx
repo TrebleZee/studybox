@@ -178,154 +178,161 @@ export default function TimerPanel({
           </button>
         </div>
       )}
-      <textarea
-        rows={2}
-        placeholder="Session note (optional)"
-        data-autosaved=""
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        style={{
-          margin: "0 13px 8px",
-          background: C.s2,
-          border: `1px solid ${C.bdr2}`,
-          borderRadius: "6px",
-          padding: "7px 9px",
-          color: C.txt,
-          outline: "none",
-          resize: "none",
-          fontFamily: "inherit",
-          fontSize: "12px",
-          lineHeight: 1.5,
-        }}
-      />
-
-      <div style={{ padding: "0 13px 8px" }}>
-        <div
+      {/* The note and tags belong to the session, so they're read-only while
+          another window is timing it. */}
+      <fieldset
+        disabled={elsewhere}
+        style={{ border: "none", margin: 0, padding: 0, minWidth: 0, display: "flex", flexDirection: "column" }}
+      >
+        <textarea
+          rows={2}
+          placeholder="Session note (optional)"
+          data-autosaved=""
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "6px",
-            gap: "8px",
+            margin: "0 13px 8px",
+            background: C.s2,
+            border: `1px solid ${C.bdr2}`,
+            borderRadius: "6px",
+            padding: "7px 9px",
+            color: C.txt,
+            outline: "none",
+            resize: "none",
+            fontFamily: "inherit",
+            fontSize: "12px",
+            lineHeight: 1.5,
           }}
-        >
-          <span
-            style={{
-              fontSize: "10px",
-              fontWeight: 600,
-              color: C.muted,
-              textTransform: "uppercase",
-              letterSpacing: "1px",
-            }}
-          >
-            Session Tags
-          </span>
-          <button
-            className="nb"
-            onClick={clearTags}
-            disabled={!sessionTags.length}
-            style={{
-              border: "none",
-              background: "transparent",
-              color: sessionTags.length ? C.txt : C.muted,
-              cursor: sessionTags.length ? "pointer" : "not-allowed",
-              fontSize: "11px",
-              padding: 0,
-            }}
-          >
-            Clear
-          </button>
-        </div>
+        />
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
-          {sessionTags.length === 0 ? (
-            <span style={{ color: C.muted, fontSize: "11px", lineHeight: 1.5 }}>
-              Add tags like past papers, blurting, or recap.
+        <div style={{ padding: "0 13px 8px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "6px",
+              gap: "8px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "10px",
+                fontWeight: 600,
+                color: C.muted,
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+              }}
+            >
+              Session Tags
             </span>
-          ) : (
-            sessionTags.map((tag) => (
+            <button
+              className="nb"
+              onClick={clearTags}
+              disabled={!sessionTags.length}
+              style={{
+                border: "none",
+                background: "transparent",
+                color: sessionTags.length ? C.txt : C.muted,
+                cursor: sessionTags.length ? "pointer" : "not-allowed",
+                fontSize: "11px",
+                padding: 0,
+              }}
+            >
+              Clear
+            </button>
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+            {sessionTags.length === 0 ? (
+              <span style={{ color: C.muted, fontSize: "11px", lineHeight: 1.5 }}>
+                Add tags like past papers, blurting, or recap.
+              </span>
+            ) : (
+              sessionTags.map((tag) => (
+                <button
+                  key={tag}
+                  className="nb"
+                  onClick={() => removeTag(tag)}
+                  aria-label={`Remove tag ${tag}`}
+                  style={{
+                    border: `1px solid ${C.bdr2}`,
+                    background: C.s2,
+                    color: C.txt,
+                    borderRadius: "999px",
+                    padding: "4px 8px",
+                    cursor: "pointer",
+                    fontSize: "11px",
+                  }}
+                >
+                  {tag} x
+                </button>
+              ))
+            )}
+          </div>
+
+          <div style={{ display: "flex", gap: "5px", marginTop: "8px" }}>
+            <input
+              value={tagDraft}
+              onChange={(e) => setTagDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === ",") {
+                  e.preventDefault();
+                  addTag(tagDraft);
+                }
+              }}
+              placeholder="Add tag"
+              style={{
+                flex: 1,
+                background: C.s2,
+                border: `1px solid ${C.bdr2}`,
+                borderRadius: "6px",
+                padding: "7px 9px",
+                color: C.txt,
+                outline: "none",
+              }}
+            />
+            <button
+              className="nb"
+              onClick={() => addTag(tagDraft)}
+              aria-label="Add session tag"
+              style={{
+                padding: "7px 11px",
+                borderRadius: "6px",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "12px",
+                background: C.s3,
+                color: C.txt,
+              }}
+            >
+              Add
+            </button>
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginTop: "8px" }}>
+            {SESSION_TAG_SUGGESTIONS.map((tag) => (
               <button
                 key={tag}
                 className="nb"
-                onClick={() => removeTag(tag)}
-                aria-label={`Remove tag ${tag}`}
+                onClick={() => setSessionTags((prev) => addUniqueTag(prev, tag))}
                 style={{
+                  padding: "4px 8px",
+                  borderRadius: "999px",
                   border: `1px solid ${C.bdr2}`,
                   background: C.s2,
-                  color: C.txt,
-                  borderRadius: "999px",
-                  padding: "4px 8px",
+                  color: C.muted,
                   cursor: "pointer",
                   fontSize: "11px",
                 }}
               >
-                {tag} x
+                {tag}
               </button>
-            ))
-          )}
+            ))}
+          </div>
         </div>
-
-        <div style={{ display: "flex", gap: "5px", marginTop: "8px" }}>
-          <input
-            value={tagDraft}
-            onChange={(e) => setTagDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === ",") {
-                e.preventDefault();
-                addTag(tagDraft);
-              }
-            }}
-            placeholder="Add tag"
-            style={{
-              flex: 1,
-              background: C.s2,
-              border: `1px solid ${C.bdr2}`,
-              borderRadius: "6px",
-              padding: "7px 9px",
-              color: C.txt,
-              outline: "none",
-            }}
-          />
-          <button
-            className="nb"
-            onClick={() => addTag(tagDraft)}
-            aria-label="Add session tag"
-            style={{
-              padding: "7px 11px",
-              borderRadius: "6px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: 700,
-              fontSize: "12px",
-              background: C.s3,
-              color: C.txt,
-            }}
-          >
-            Add
-          </button>
-        </div>
-
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginTop: "8px" }}>
-          {SESSION_TAG_SUGGESTIONS.map((tag) => (
-            <button
-              key={tag}
-              className="nb"
-              onClick={() => setSessionTags((prev) => addUniqueTag(prev, tag))}
-              style={{
-                padding: "4px 8px",
-                borderRadius: "999px",
-                border: `1px solid ${C.bdr2}`,
-                background: C.s2,
-                color: C.muted,
-                cursor: "pointer",
-                fontSize: "11px",
-              }}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-      </div>
+      </fieldset>
 
       <button
         className="nb"

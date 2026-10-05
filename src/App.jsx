@@ -18,7 +18,7 @@ import useSpaceToggle from "./hooks/useSpaceToggle.js";
 import useUndoDelete from "./hooks/useUndoDelete.js";
 import { buildCss } from "./utils/appCss.js";
 import { buildBackup, downloadBackup, parseBackup, readFileText } from "./utils/backup.js";
-import { timedTopic } from "./utils/sessionDraft.js";
+import { draftFields, timedTopic } from "./utils/sessionDraft.js";
 import { applyLoggedSession, deriveXP, settleLegacyXP, streakExpiry, validateStreak } from "./utils/gameLogic.js";
 import { loaders, tabMerges } from "./store/appState.js";
 import { loadJson, removeKey, saveJson, STORAGE_KEYS, usePersistedState } from "./store/index.js";
@@ -76,12 +76,8 @@ export default function StudyBox() {
   const [view, setView] = useState("planner");
   const [asanaTask, setAsanaTask] = useState(null);
   const [expandedTopic, setExpandedTopic] = useState(() => restoredTopic?.topicId ?? null);
-  const [note, setNote] = useState(() =>
-    typeof savedDraft?.note === "string" ? savedDraft.note : ""
-  );
-  const [sessionTags, setSessionTags] = useState(() =>
-    Array.isArray(savedDraft?.tags) ? savedDraft.tags.filter((tag) => typeof tag === "string") : []
-  );
+  const [note, setNote] = useState(() => draftFields(savedDraft).note);
+  const [sessionTags, setSessionTags] = useState(() => draftFields(savedDraft).tags);
   const [editingSession, setEditingSession] = useState(null);
   const [backupMessage, setBackupMessage] = useState(null);
 
@@ -122,8 +118,12 @@ export default function StudyBox() {
   const canTime = asanaSelected || Boolean(sub);
 
   const timer = useTimer({
-    canTime,
-    defaultSubjectId: asanaSelected ? asanaCfg.id : sub?.id ?? null,
+    ...{ canTime, defaultSubjectId: asanaSelected ? asanaCfg.id : sub?.id ?? null },
+    onAdopt: () => {
+      const draft = draftFields(loadJson(STORAGE_KEYS.sessionDraft, null));
+      setNote(draft.note);
+      setSessionTags(draft.tags);
+    },
   });
   useStreakReminder(game);
   useMilestoneReminder(subjects);
@@ -161,12 +161,13 @@ export default function StudyBox() {
   // the expanded topic is just navigation.
   const draftTopicId = sessionInProgress && timedSubject ? expandedTopic : null;
   useEffect(() => {
+    if (timer.elsewhere) return;
     if (!note && !sessionTags.length && !draftTopicId) {
       removeKey(STORAGE_KEYS.sessionDraft);
     } else {
       saveJson(STORAGE_KEYS.sessionDraft, { note, tags: sessionTags, topicId: draftTopicId });
     }
-  }, [note, sessionTags, draftTopicId]);
+  }, [note, sessionTags, draftTopicId, timer.elsewhere]);
 
   useSpaceToggle(() => (running ? timer.pause() : timer.start()));
 

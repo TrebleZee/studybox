@@ -62,7 +62,7 @@ const IDLE = { elapsed: 0, startedAt: null, timedSubjectId: null };
 
 // The timer is anchored to a Date.now() start timestamp rather than counting
 // ticks, so a backgrounded tab or a throttled interval can't make it drift.
-export default function useTimer({ canTime, defaultSubjectId }) {
+export default function useTimer({ canTime, defaultSubjectId, onAdopt }) {
   const [tabId] = useState(() => newId("tab"));
   const [initial] = useState(() => {
     const saved = loadJson(STORAGE_KEYS.timer, null);
@@ -90,7 +90,12 @@ export default function useTimer({ canTime, defaultSubjectId }) {
     setNow(Date.now());
     setElsewhere(isElsewhere);
   };
-  const adopt = (saved) => take(savedTimer(saved, Date.now()), false);
+  // Taking the saved timer from another tab (it was freed, or continued here)
+  // tells the app, so the session's note and tags come with it.
+  const adopt = (saved) => {
+    take(savedTimer(saved, Date.now()), false);
+    onAdopt?.();
+  };
   const yieldTimer = () => take(IDLE, true);
 
   useEffect(() => {

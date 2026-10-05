@@ -6,3 +6,10 @@ export const timedTopic = (subjects, subjectId, topicId) => {
   const subject = subjects.find((item) => item.id === subjectId);
   return subject?.topics.some((topic) => topic.id === topicId) ? { subjectId, topicId } : null;
 };
+
+// The note and tags of a saved draft, with anything of the wrong type dropped.
+// Read on load, and again when this tab takes over a session from another.
+export const draftFields = (saved) => ({
+  note: typeof saved?.note === "string" ? saved.note : "",
+  tags: Array.isArray(saved?.tags) ? saved.tags.filter((tag) => typeof tag === "string") : [],
+});

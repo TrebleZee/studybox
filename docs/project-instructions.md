@@ -28,7 +28,7 @@ StudyBox is a local-first study planner and revision timer for GCSE and A-level 
 | `sb-last-streak-reminder` | device | Day the streak reminder last fired |
 | `sb-last-milestone-reminder` | device | Day the milestone reminder last fired |
 | `sb-timer` | device | The running timer, owned by one tab (`owner`, `heldAt`); other tabs never copy or write it |
-| `sb-session-draft` | device | The unlogged session's note, tags and topic (not reconciled across tabs) |
+| `sb-session-draft` | device | The unlogged session's note, tags and topic; written only by the tab that owns the timer |
 | `sb-schema` | device | Stored-data schema version (currently 3) |
 | `studybox_asana_pat` | secret | Asana personal access token, plain text, legacy name |
 

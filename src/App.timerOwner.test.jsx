@@ -247,4 +247,33 @@ describe("one tab owns the running timer (N12)", () => {
     expect(sessions()).toHaveLength(1);
     expect(sessions()[0].duration).toBe(60);
   });
+  it("keeps the owner's note, tags and timed topic, and brings them to a tab that continues the session", () => {
+    const pwa = open();
+    click(pwa, "Computer Science");
+    fireEvent.click(pwa.getByText("Components of a Computer"));
+    fireEvent.change(pwa.getByPlaceholderText("Session note (optional)"), { target: { value: "Chapter 3" } });
+    click(pwa, "Recap");
+    click(pwa, "Start");
+    wait(60_000);
+    const draft = localStorage.getItem(STORAGE_KEYS.sessionDraft);
+    expect(JSON.parse(draft).topicId).toBeTruthy();
+
+    // Opening a tab leaves the draft as it was, and its note is read-only.
+    const tab = open();
+    deliver();
+    expect(localStorage.getItem(STORAGE_KEYS.sessionDraft)).toBe(draft);
+    expect(tab.getByPlaceholderText("Session note (optional)").matches(":disabled")).toBe(true);
+
+    fireEvent.change(pwa.getByPlaceholderText("Session note (optional)"), { target: { value: "Chapter 3 and 4" } });
+    deliver();
+    click(tab, "Continue here");
+    deliver();
+    expect(tab.getByPlaceholderText("Session note (optional)").value).toBe("Chapter 3 and 4");
+    expect(tab.getByPlaceholderText("Session note (optional)").matches(":disabled")).toBe(false);
+    click(tab, "Log Session");
+    const [logged] = sessions();
+    expect(logged.subjectId).toBe("cs");
+    expect(logged.note).toBe("Chapter 3 and 4");
+    expect(logged.tags).toContain("Recap");
+  });
 });
