@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildBackup, parseBackup } from "./backup.js";
-import { DEFAULT_GAME } from "./gameLogic.js";
+import { DEFAULT_GAME, buildInitialGame } from "./gameLogic.js";
 import { mergeData } from "./merge.js";
 import { normalizeSessions, normalizeSubjects } from "./subjects.js";
 import { addTombstone, childKey, emptyTombstones } from "./tombstones.js";
@@ -291,5 +291,18 @@ describe("merging XP", () => {
     const a = copy({ sessions: [session("a", 18)], game: { ...DEFAULT_GAME, totalXP: 30, legacyXP: 0 } });
     const b = copy({ sessions: [session("b", 19)], game: { totalXP: 530 } });
     expect(merge(a, b).game).toMatchObject({ legacyXP: 500, totalXP: 560 });
+  });
+});
+
+describe("merging the streak", () => {
+  it("is idempotent for a lapsed streak with freezes to spend", () => {
+    const sessions = [session("s1", 1, { duration: 60 * 60 * 45 }), session("s2", 2)];
+    const game = buildInitialGame({ currentStreak: 2, lastStudyDate: "2026-10-02", legacyXP: 0, frozenDates: [] }, sessions, [], NOW);
+    expect(game).toMatchObject({ currentStreak: 0, freezesUsed: 3 });
+
+    const a = copy({ sessions, game });
+    const once = merge(a, a);
+    expect(once.game).toEqual(game);
+    expect(merge(once, once).game).toEqual(game);
   });
 });

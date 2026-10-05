@@ -177,6 +177,13 @@ describe("deriveXP", () => {
     expect(deriveXP(sessions.slice(1), [done(2, 3)])).toBe(25);
   });
 
+  it("follows the records, so deleting a subject or a completed topic takes its XP too", () => {
+    const subjects = [done(4), done(1, 2)];
+    expect(deriveXP([], subjects)).toBe(50);
+    expect(deriveXP([], subjects.slice(1))).toBe(10);
+    expect(deriveXP([], [{ topics: [] }])).toBe(0);
+  });
+
   it("cannot be farmed by ticking the same topic repeatedly", () => {
     let subject = done(0, 1);
     for (let i = 0; i < 50; i += 1) subject = { topics: [{ done: !subject.topics[0].done }] };
@@ -233,6 +240,30 @@ describe("buildInitialGame", () => {
     const result = buildInitialGame({ totalXP: 900 }, [], [], now);
     expect(result.totalXP).toBe(900);
     expect(result.legacyXP).toBe(900);
+  });
+
+  it("does not spend freezes again each launch once a streak has lapsed", () => {
+    const sessions = [
+      { date: localDay(2026, 9, 1).toISOString(), duration: 60 * 60 * 45 },
+      { date: localDay(2026, 9, 2).toISOString(), duration: 60 * 60 },
+    ];
+    const first = buildInitialGame({ currentStreak: 2, lastStudyDate: "2026-09-02", legacyXP: 0, frozenDates: [] }, sessions, [], now);
+    expect(first.currentStreak).toBe(0);
+    expect(first.freezesUsed).toBe(3);
+
+    const second = buildInitialGame(first, sessions, [], now);
+    const third = buildInitialGame(second, sessions, [], now + DAY_MS);
+    expect(second).toEqual(first);
+    expect(third.freezesUsed).toBe(3);
+    expect(third.frozenDates).toEqual(first.frozenDates);
+  });
+
+  it("still rebuilds the streak from history when the saved game is missing", () => {
+    const sessions = [
+      { date: localDay(2026, 9, 13).toISOString(), duration: 600 },
+      { date: localDay(2026, 9, 14).toISOString(), duration: 600 },
+    ];
+    expect(buildInitialGame(null, sessions, [], now).currentStreak).toBe(2);
   });
 
   it("ignores a stored total once XP is derived, so editing it can't add XP", () => {

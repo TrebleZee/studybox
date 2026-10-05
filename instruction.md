@@ -66,6 +66,7 @@ These rules exist so two copies of a user's data can be merged using only what i
 
 - `deriveXP(sessions, subjects)` in `gameLogic.js` is the only definition of XP: one per whole minute of each session (at least one for any session) plus `TOPIC_XP` (10) per completed topic. `game.totalXP` is kept in step with it by one effect in `App.jsx`; nothing may add to `totalXP` directly. Unticking a topic or deleting a session takes its XP back, so there is nothing to farm.
 - `game.legacyXP` holds XP an install earned before derivation that its records can't explain. `settleLegacyXP` fixes it once, the first time a pre-1.15.1 save (or backup) is loaded, so nobody's total drops on upgrade; after that it never grows. `totalXP = deriveXP(...) + legacyXP`.
+- This is deliberate in both directions: deleting a subject or a completed topic (including converting one to a milestone) removes that topic XP, the same as unticking it. Freezes already used stay used; freezes available never go below zero.
 - For V2: a leaderboard must be computed from session records on the server and must ignore `legacyXP`, which is unverifiable by construction.
 - Sessions include `id`, `subjectId`, `subjectName`, `subjectColor`, `duration`, `date`, `note`, and `tags`.
 

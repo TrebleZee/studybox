@@ -240,9 +240,16 @@ export const buildInitialGame = (loaded, sessions, subjects, nowMs = Date.now())
     lastStudyDate,
     lastStudyDate === storedGame.lastStudyDate ? storedGame.streakProtectedUntil : null
   );
-  const historicalStreak = dateStrings.length
-    ? getStreakForDates(dateStrings, frozenDates)
-    : storedGame.currentStreak;
+  // A streak the saved game already recorded as lapsed stays lapsed. Without
+  // this, the history would revive it on every launch and validateStreak
+  // would spend the user's freezes on the same missed days again.
+  const alreadyLapsed =
+    storedGame.currentStreak === 0 && Boolean(lastStudyDate) && storedGame.lastStudyDate === lastStudyDate;
+  const historicalStreak = alreadyLapsed
+    ? 0
+    : dateStrings.length
+      ? getStreakForDates(dateStrings, frozenDates)
+      : storedGame.currentStreak;
   const historicalLongest = dateStrings.length
     ? getLongestStreak(dateStrings, frozenDates)
     : storedGame.longestStreak;
