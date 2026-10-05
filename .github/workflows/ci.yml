@@ -5,9 +5,12 @@ on:
   push:
     branches: [master]
 
+# A newer push to a pull request cancels its older run. Every push to master
+# gets its own group (keyed by run id) and is never cancelled, so each merged
+# commit is verified: in a shared group GitHub would still drop a pending run.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'pull_request' && format('ci-pr-{0}', github.ref) || format('ci-push-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
