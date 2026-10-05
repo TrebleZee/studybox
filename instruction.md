@@ -169,7 +169,7 @@ These rules exist so two copies of a user's data can be merged using only what i
 
 ## Workflow
 
-- Every change goes through the `git-workflow` skill (`.claude/skills/git-workflow/SKILL.md`): a `fix/`, `feat/`, `refactor/` or `chore/` branch off an up-to-date `master`, a PR, and a tag for anything that changes the shipped app (`fix/` patch, `feat/` minor, `refactor/` major, `chore/` no tag). `feat/` and `refactor/` PRs pass the review gate (`release-reviewer`, then `release-fixer`) before merging. `v2.0.0` is reserved for accounts and sync.
+- Every change goes through the `git-workflow` skill (`.claude/skills/git-workflow/SKILL.md`): a `fix/`, `feat/`, `refactor/` or `chore/` branch off `origin/master` in the session's own worktree, claimed at once with a draft PR; branches merge one at a time and set their version at merge time, so parallel branches never compute the same one; and a tag for anything that changes the shipped app (`fix/` patch, `feat/` minor, `refactor/` major, `chore/` no tag). `feat/` and `refactor/` PRs pass the review gate (`release-reviewer`, then `release-fixer`) before merging. `v2.0.0` is reserved for accounts and sync.
 - `npm run lint`, `npm test` and `npm run build` must pass before a PR; CI runs the same three.
 - `docs/STATUS.md` is the one-page summary: current state, recent changes, progress against the plan, what needs actioning (maintainer and agent) and known risks. Every PR updates it (git-workflow step 2b) and every readiness pass refreshes it; `src/statusDoc.test.js` checks its sections and that its version matches `package.json`.
 - Before starting a phase of the V2 plan, run the `readiness-pass` skill: it re-audits `master` against `docs/readiness/findings.md` and writes a dated report next to it.
