@@ -10,12 +10,11 @@ Last pass: 2026-10-05, `master` @ `84abc1d`, `v1.15.1`. Report: `docs/readiness/
 
 | ID | Severity | Area | Finding | Evidence | Planned branch |
 | --- | --- | --- | --- | --- | --- |
-| N2 | high | destructive actions | Deleting a subject or session is one click with no confirmation or undo; it also removes that XP and writes a tombstone | `EditSubjectsCard.jsx`, `LogView.jsx` delete handlers | `feat/undo-delete` |
 | N3 | medium | failure paths | No error boundary, and a storage write that throws (quota) blanks the app | No `componentDidCatch` in `src/`; `saveJson` does not catch | `feat/error-boundary` |
 | N4 | medium | hosting | No security headers: no `vercel.json`, so no Content-Security-Policy | File absent | `chore/security-headers` |
 | N5 | medium | sync seam | The store reports whole arrays, not which records changed, and subjects and topics have no order field | `src/store/localStore.js` `notify`; `src/utils/merge.js` known limits | `chore/record-actions`, `feat/record-order` |
 | N6 | low | untrusted input | `normalizeSubject` throws on a subject whose id is `__proto__`, `constructor` or `toString` | Reproduced with `node -e` on `normalizeSubjects` | `fix/preset-lookup-own-keys` |
-| N7 | low | destructive actions | Merge from file cannot be undone and takes no safety copy first | `importData` in `App.jsx` | with `feat/undo-delete` |
+| N8 | low | destructive actions | Undo keeps the record's stamps unchanged, so if another open tab has already merged the deletion, that tab's next merge deletes the record again | Reasoned from `src/store/appState.js` tab merges and `src/utils/undo.js`; documented limit in `instruction.md` | sync design: an "undeleted at" stamp |
 | B1 | blocker | design gate | Four decisions open: data controller and account holder, minimum age and assurance, Online Safety Act scope, streak reminders for signed-in users | Project doc `claude/v2-design-gate.md` section 5 | none: the maintainer's decision |
 | B7 | medium | secrets | Asana token is plaintext in `localStorage`. Fenced from backups and sync, not solved | `SECRET_KEYS` in `src/store/localStore.js` | CSP now (N4); OAuth or removal in 2.0 |
 | C1 | low | structure | `App.jsx` is 651 lines against a 480 target; all record mutations live in it | `wc -l` | `chore/record-actions` |
@@ -31,6 +30,8 @@ Last pass: 2026-10-05, `master` @ `84abc1d`, `v1.15.1`. Report: `docs/readiness/
 
 | ID | Finding | Closed by | Verified |
 | --- | --- | --- | --- |
+| N2 | Deleting a subject or session was one click with no confirmation or undo | #32 | 2026-10-05: `src/App.undo.test.jsx` (delete then undo leaves `sb-subjects`, `sb-sessions`, `sb-tombstones`, `sb-game` byte-identical for subjects, topics, milestones and sessions) |
+| N7 | Merge from file could not be undone | #32 | 2026-10-05: `src/App.undo.test.jsx` "undo merge" restores the exact pre-merge storage |
 | N1 | Two open tabs overwrote each other: nothing listened for storage changes and each tab wrote its whole in-memory array | #31 | 2026-10-05: reproduced and fixed in `src/App.multiTab.test.jsx` (two apps over one storage: concurrent sessions, stale-tab delete, at most one write per external change); checked in real Chrome with two pages; installed-PWA window not checked |
 | B2 | Persistence scattered across `App.jsx`, hooks and the Asana client | #27 | 2026-10-05: lint rule blocks direct `localStorage` outside `src/store/` |
 | B3 | Records not sync-safe (timestamp ids, no stamps, hard deletes, no schema version) | #28 | 2026-10-05: two-profile convergence test in `merge.test.js` |
