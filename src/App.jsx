@@ -6,19 +6,22 @@ import Onboarding from "./components/Onboarding.jsx";
 import PlannerView from "./components/PlannerView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import TopBar from "./components/TopBar.jsx";
+import UndoBar from "./components/UndoBar.jsx";
 import UpdateBanner from "./components/UpdateBanner.jsx";
 import useAppUpdate from "./hooks/useAppUpdate.js";
 import useMilestoneReminder from "./hooks/useMilestoneReminder.js";
 import useStreakReminder from "./hooks/useStreakReminder.js";
 import useTimer from "./hooks/useTimer.js";
+import useUndoDelete from "./hooks/useUndoDelete.js";
 import { buildCss } from "./utils/appCss.js";
-import { backupFileName, buildBackup, parseBackup, readFileText } from "./utils/backup.js";
+import { buildBackup, downloadBackup, parseBackup, readFileText } from "./utils/backup.js";
 import { fmt } from "./utils/format.js";
 import { applyLoggedSession, deriveXP, settleLegacyXP, streakExpiry, validateStreak } from "./utils/gameLogic.js";
 import { loaders, tabMerges } from "./store/appState.js";
 import { loadJson, removeKey, saveJson, STORAGE_KEYS, usePersistedState } from "./store/index.js";
 import {
   addUniqueTag,
+  buildNewSubjects,
   isUntouchedDefaultSubjects,
   normalizeSubject,
   topicTimerLabel,
@@ -33,6 +36,9 @@ import { THEMES } from "./utils/themes.js";
 
 const mapSubject = (subjects, id, fn) =>
   subjects.map((subject) => (subject.id === id ? fn(subject) : subject));
+
+const mapMilestones = (subjects, subjectId, fn) =>
+  mapSubject(subjects, subjectId, (subject) => normalizeSubject({ ...subject, milestones: fn(subject.milestones || []) }));
 
 // Edits stamp the record they change (updatedAt), which is what sync merges on.
 const mapTopic = (subject, topicId, fn) => ({
@@ -77,6 +83,17 @@ export default function StudyBox() {
   );
   const [editingSession, setEditingSession] = useState(null);
   const [backupMessage, setBackupMessage] = useState(null);
+  const { undo, noteDeletion, undoDelete, clearUndo } = useUndoDelete({
+    ...{ subjects, sessions, tombstones, setSubjects, setSessions, setTombstones },
+    onRestore: ({ id, selected, timed }) => {
+      if (selected) setSel(id);
+      if (timed) timer.setTimedSubjectId(id);
+    },
+  });
+  const changeView = (next) => {
+    setView(next);
+    clearUndo();
+  };
 
   const theme = THEMES.find((item) => item.id === themeId) || THEMES[0];
   const C = theme.colors;
@@ -151,6 +168,7 @@ export default function StudyBox() {
     const handleKeyDown = (e) => {
       if (e.code !== "Space") return;
       if (document.querySelector('[role="dialog"]')) return;
+      if (e.target?.closest?.("[data-own-keys]")) return;
 
       const target = e.target;
       const tag = target?.tagName;
@@ -198,8 +216,8 @@ export default function StudyBox() {
       setExpandedTopic(null);
     },
     selectAsana: () => setSel(asanaCfg.id),
-    openAnalysis: () => setView("analysis"),
-    openSettings: () => setView("settings"),
+    openAnalysis: () => changeView("analysis"),
+    openSettings: () => changeView("settings"),
 
     toggleTopic: (subjectId, topicId) => {
       setSubjects((prev) =>
@@ -222,37 +240,23 @@ export default function StudyBox() {
       const cleanName = name.trim();
       if (!cleanName) return;
       setSubjects((prev) =>
-        mapSubject(prev, subjectId, (subject) =>
-          normalizeSubject({
-            ...subject,
-            milestones: [
-              ...(subject.milestones || []),
-              stampNew({ id: newId("ms"), name: cleanName, kind, due: due || null, done: false }),
-            ],
-          })
-        )
+        mapMilestones(prev, subjectId, (milestones) => [
+          ...milestones,
+          stampNew({ id: newId("ms"), name: cleanName, kind, due: due || null, done: false }),
+        ])
       );
     },
     updateMilestone: (subjectId, milestoneId, patch) =>
       setSubjects((prev) =>
-        mapSubject(prev, subjectId, (subject) =>
-          normalizeSubject({
-            ...subject,
-            milestones: (subject.milestones || []).map((milestone) =>
-              milestone.id === milestoneId ? touch({ ...milestone, ...patch }) : milestone
-            ),
-          })
+        mapMilestones(prev, subjectId, (milestones) =>
+          milestones.map((milestone) => (milestone.id === milestoneId ? touch({ ...milestone, ...patch }) : milestone))
         )
       ),
     deleteMilestone: (subjectId, milestoneId) => {
+      noteDeletion("milestones", milestoneId, subjectId);
       entomb("milestones", childKey(subjectId, milestoneId));
       setSubjects((prev) =>
-        mapSubject(prev, subjectId, (subject) =>
-          normalizeSubject({
-            ...subject,
-            milestones: (subject.milestones || []).filter((milestone) => milestone.id !== milestoneId),
-          })
-        )
+        mapMilestones(prev, subjectId, (milestones) => milestones.filter((milestone) => milestone.id !== milestoneId))
       );
     },
     // "Keep as topic" on the NEA offer: remembered on the topic itself, so the
@@ -277,7 +281,9 @@ export default function StudyBox() {
     updateTopic: (topicId, patch) =>
       updateCurrentSubject((subject) => mapTopic(subject, topicId, (topic) => ({ ...topic, ...patch }))),
     deleteTopic: (topicId) => {
-      if (sub) entomb("topics", childKey(sub.id, topicId));
+      if (!sub) return;
+      noteDeletion("topics", topicId, sub.id);
+      entomb("topics", childKey(sub.id, topicId));
       updateCurrentSubject((subject) => ({
         ...subject,
         topics: subject.topics.filter((topic) => topic.id !== topicId),
@@ -333,30 +339,6 @@ export default function StudyBox() {
     },
   };
 
-  // New subjects from the add form, a PDF import or the catalogue picker.
-  // Each gets a fresh globally unique id and fresh topic ids.
-  const buildNewSubjects = (list) => {
-    const now = nowIso();
-    return list.map(({ topics, ...fields }) => {
-      const id = newId("custom");
-      return normalizeSubject({
-        ...fields,
-        id,
-        createdAt: now,
-        updatedAt: now,
-        // Topics are names, or objects (catalogueTopicId, paper, higherOnly) when seeded from the catalogue.
-        topics: topics.map((topic, i) => ({
-          ...(typeof topic === "string" ? { name: topic } : topic),
-          id: `${id}-topic-${i}`,
-          done: false,
-          subtasks: [],
-          createdAt: now,
-          updatedAt: now,
-        })),
-      });
-    });
-  };
-
   // Accepts one subject or a list (the catalogue picker can add several).
   const addSubject = (input) => {
     const added = buildNewSubjects(Array.isArray(input) ? input : [input]);
@@ -366,6 +348,7 @@ export default function StudyBox() {
   };
 
   const removeSubject = (id) => {
+    noteDeletion("subjects", id, null, { selected: sel === id, timed: timedSubjectId === id });
     const next = subjects.filter((subject) => subject.id !== id);
     entomb("subjects", id);
     setSubjects(next);
@@ -388,19 +371,14 @@ export default function StudyBox() {
   };
 
   const deleteSession = (id) => {
+    noteDeletion("sessions", id);
     entomb("sessions", id);
     setSessions((prev) => prev.filter((s) => s.id !== id));
   };
 
   const exportData = () => {
     const backup = buildBackup({ subjects, sessions, themeId, game, tombstones });
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = backupFileName();
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadBackup(backup);
     setBackupMessage({ type: "success", text: "Backup downloaded." });
   };
 
@@ -430,7 +408,9 @@ export default function StudyBox() {
           timer.setTimedSubjectId(null);
         }
         setOnboarded(true);
-        setBackupMessage({ type: "success", text: "Backup merged with the data on this device." });
+        // Kept in memory only, until the next import or a reload.
+        const before = { subjects, sessions, tombstones, game, sel, timedSubjectId };
+        setBackupMessage({ type: "success", text: "Backup merged with the data on this device.", undo: before });
         return { ok: true };
       }
       setTombstones(restored.tombstones ?? emptyTombstones());
@@ -451,6 +431,17 @@ export default function StudyBox() {
       setBackupMessage({ type: "error", text: message });
       return { ok: false, error: message };
     }
+  };
+
+  const undoMerge = () => {
+    const before = backupMessage.undo;
+    setSubjects(before.subjects);
+    setSessions(before.sessions);
+    setTombstones(before.tombstones);
+    setGame(before.game);
+    setSel(before.sel);
+    if (before.timedSubjectId) timer.setTimedSubjectId(before.timedSubjectId);
+    setBackupMessage({ type: "success", text: "Merge undone." });
   };
 
   // Onboarding's "Choose my subjects": the picked subjects replace the
@@ -514,7 +505,7 @@ export default function StudyBox() {
         />
       ) : (
         <>
-          <TopBar C={C} view={view} onChangeView={setView} game={game} grandTotal={grandTotal} subjects={subjects} />
+          <TopBar C={C} view={view} onChangeView={changeView} game={game} grandTotal={grandTotal} subjects={subjects} />
 
           {view === "planner" && (
             <PlannerView
@@ -598,6 +589,7 @@ export default function StudyBox() {
               onExport={exportData}
               onImport={importData}
               onMerge={(file) => importData(file, { merge: true })}
+              onUndoMerge={undoMerge}
             />
           )}
 
@@ -615,6 +607,7 @@ export default function StudyBox() {
         </>
       )}
 
+      {undo && <UndoBar C={C} name={undo.name} onUndo={undoDelete} onDismiss={clearUndo} raised={appUpdate.updateReady} />}
       {appUpdate.updateReady && <UpdateBanner C={C} onUpdate={appUpdate.applyNow} />}
     </div>
   );

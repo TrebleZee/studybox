@@ -1,4 +1,4 @@
-import { keepStamps } from "./records.js";
+import { keepStamps, newId, nowIso } from "./records.js";
 
 const TOPIC_SEED = {
   physics: [
@@ -416,6 +416,29 @@ export const normalizeSubject = (subject, index = 0) => {
     ...keepStamps(subject),
   };
 };
+
+// New subjects from the add form, a PDF import, the catalogue picker or
+// onboarding. Each gets a fresh globally unique id and fresh topic ids.
+// Topics are names, or objects (catalogueTopicId, paper, higherOnly) when
+// seeded from the catalogue.
+export const buildNewSubjects = (list, now = nowIso()) =>
+  list.map(({ topics, ...fields }) => {
+    const id = newId("custom");
+    return normalizeSubject({
+      ...fields,
+      id,
+      createdAt: now,
+      updatedAt: now,
+      topics: topics.map((topic, i) => ({
+        ...(typeof topic === "string" ? { name: topic } : topic),
+        id: `${id}-topic-${i}`,
+        done: false,
+        subtasks: [],
+        createdAt: now,
+        updatedAt: now,
+      })),
+    });
+  });
 
 export const normalizeSessions = (input) => {
   if (!Array.isArray(input)) return [];
