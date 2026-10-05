@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isUntouchedDefaultSubjects } from "../utils/subjects.js";
 import { addTombstone, emptyTombstones } from "../utils/tombstones.js";
-import { loaders, tabMerges } from "./appState.js";
+import { loaders, storedBackup, tabMerges } from "./appState.js";
 import { STORAGE_KEYS } from "./localStore.js";
 
 const session = (id, updatedAt = "2026-09-13T10:00:00.000Z") => ({
@@ -59,5 +59,18 @@ describe("tab merges", () => {
 describe("loaders", () => {
   it("start an untouched install on the default subjects", () => {
     expect(isUntouchedDefaultSubjects(loaders.subjects())).toBe(true);
+  });
+});
+
+describe("storedBackup", () => {
+  it("carries account data that doesn't parse as the text it is stored as (N16)", () => {
+    localStorage.setItem(STORAGE_KEYS.subjects, '[{"id":"maths","na');
+    const backup = storedBackup();
+    expect(backup.unreadable).toEqual({ [STORAGE_KEYS.subjects]: '[{"id":"maths","na' });
+    expect(Array.isArray(backup.subjects)).toBe(true);
+  });
+
+  it("has no unreadable field when everything parses", () => {
+    expect(storedBackup()).not.toHaveProperty("unreadable");
   });
 });

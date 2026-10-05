@@ -54,7 +54,7 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed, re-planned as A2 and A3 |
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
-| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41) and A2.3 (#42, v1.17.3) merged; every lane open except 9 |
+| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41) and A2.3 (#42, v1.17.3) merged; A2.9 ready in #45; every lane open except 9 |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | Not started |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
@@ -87,7 +87,8 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 
 1. Lane 2: `fix/undo-merge-offer-two-tabs` (C14). The #42 two-tab Undo merge test fails at random, and CI is required, so it blocks other PRs. Then A2.4 `feat/undo-restore` (N11) and A3.1.
 2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
-3. Open now: A2.9 (lane 1), A2.5 (lane 3), A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
+3. Lane 1: merge A2.9 (#45, N16, N17), then A3.2.
+4. Open now: A2.5 (lane 3), A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
 
 ## Known risks
 
@@ -98,3 +99,4 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 - **Streaks can change after a timezone change** (N26). A trip abroad can shorten the shown streak, and occasionally lapse it.
 - **The Asana task name is saved in the session's tags** (N27), and so in every backup.
 - **A session with an invalid date can't be edited** (N28). Only hand-edited or foreign backups carry one.
+- **Stored data that can't be read is kept only until the next change to it** (N16, by design). The app leaves it in storage and says so, with a backup that carries it as stored; the user's next change to that data replaces it.
