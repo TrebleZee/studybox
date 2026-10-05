@@ -213,3 +213,93 @@ describe("a change from another tab", () => {
     expect(stored(STORAGE_KEYS.theme)).toBe("paper");
   });
 });
+
+// N8: undo used to put the record back with its old stamps, so the other tab,
+// which had already merged the tombstone, deleted it again everywhere.
+describe("undo with a second tab open", () => {
+  const oldSession = {
+    id: "sess-old",
+    subjectId: "maths",
+    subjectName: "Maths",
+    subjectColor: "#4f8cff",
+    duration: 600,
+    date: "2026-09-13T10:00:00.000Z",
+    note: "",
+    tags: [],
+    createdAt: "2026-09-13T10:00:00.000Z",
+    updatedAt: "2026-09-13T10:00:00.000Z",
+  };
+  const undoIn = (tab) => fireEvent.click(tab.getByRole("button", { name: "Undo" }));
+  const later = () => act(() => vi.advanceTimersByTime(2000));
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-14T10:00:00.000Z"));
+  });
+
+  it.each([
+    ["after the other tab has merged the delete", true],
+    ["before the other tab has heard of it", false],
+  ])("keeps an undone session delete in both tabs, %s", (_, deliverFirst) => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify([oldSession]));
+    const [a, b] = openTabs();
+    fireEvent.click(a.getByRole("button", { name: "Log" }));
+    fireEvent.click(a.getByRole("button", { name: "Delete session Maths" }));
+    if (deliverFirst) deliver();
+    later();
+    undoIn(a);
+    deliver();
+
+    expect(stored(STORAGE_KEYS.sessions).map((s) => s.id)).toEqual(["sess-old"]);
+    fireEvent.click(a.getByRole("button", { name: "Planner" }));
+    expect(loggedIn(a)).toBe(1);
+    expect(loggedIn(b)).toBe(1);
+  });
+
+  it("keeps an undone session delete when Undo comes in the same millisecond", () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify([oldSession]));
+    const [a, b] = openTabs();
+    fireEvent.click(a.getByRole("button", { name: "Log" }));
+    fireEvent.click(a.getByRole("button", { name: "Delete session Maths" }));
+    deliver();
+    undoIn(a);
+    deliver();
+
+    expect(stored(STORAGE_KEYS.sessions)).toHaveLength(1);
+    fireEvent.click(a.getByRole("button", { name: "Planner" }));
+    expect(loggedIn(b)).toBe(1);
+  });
+
+  it("keeps an undone topic delete in both tabs", () => {
+    const [a, b] = openTabs();
+    const topic = stored(STORAGE_KEYS.subjects)[0].topics[0];
+    fireEvent.click(a.getByRole("button", { name: `Delete topic ${topic.name}` }));
+    deliver();
+    later();
+    undoIn(a);
+    deliver();
+
+    // Back in both tabs; a merge may put it at the end (order is not synced yet).
+    expect(stored(STORAGE_KEYS.subjects)[0].topics.map((t) => t.id)).toContain(topic.id);
+    [a, b].forEach((tab) =>
+      expect(tab.getByRole("button", { name: `Delete topic ${topic.name}` })).toBeTruthy()
+    );
+  });
+
+  it("keeps an undone subject delete in both tabs", () => {
+    const [a, b] = openTabs();
+    const subject = stored(STORAGE_KEYS.subjects)[0];
+    fireEvent.click(a.getByRole("button", { name: "Settings" }));
+    fireEvent.click(b.getByRole("button", { name: "Settings" }));
+    fireEvent.click(a.getByRole("button", { name: `Delete subject ${subject.id}` }));
+    deliver();
+    later();
+    undoIn(a);
+    deliver();
+
+    expect(stored(STORAGE_KEYS.subjects).map((s) => s.id)).toContain(subject.id);
+    [a, b].forEach((tab) =>
+      expect(tab.getByRole("button", { name: `Delete subject ${subject.id}` })).toBeTruthy()
+    );
+  });
+});

@@ -1,9 +1,11 @@
+import { nowIso, touch } from "./records.js";
 import { addTombstone, childKey, deletedAt, removeTombstone } from "./tombstones.js";
 
 // Undo for deletes. Before a record is deleted, describeDeletion notes where
 // it was and any tombstone it already had; restoreDeletion puts it back at
-// that position exactly as it was (stamps unchanged) and takes the new
-// tombstone away again. XP comes back by itself because it is derived.
+// that position as it was, stamped as edited now so it wins against the
+// delete in every tab, and takes the new tombstone away again. XP comes back
+// by itself because it is derived.
 //
 // kind: "subjects" | "sessions" | "topics" | "milestones" (the last two
 // within `subjectId`). State: { subjects, sessions, tombstones }.
@@ -42,20 +44,30 @@ const inKeyOrder = (object, keys = []) => {
   return Object.fromEntries([...first, ...rest].map((key) => [key, object[key]]));
 };
 
-export const restoreDeletion = ({ subjects, sessions, tombstones }, entry) => {
+// The restored record is stamped as edited now (N8): another tab may already
+// have merged the delete's tombstone, and only a record edited after its
+// tombstone survives a merge. If Undo lands in the same millisecond as the
+// delete, the stamp goes one millisecond past the tombstone.
+const restoreStamp = (tombstone, now) => {
+  if (!tombstone || now > tombstone) return now;
+  return new Date(Date.parse(tombstone) + 1).toISOString();
+};
+
+export const restoreDeletion = ({ subjects, sessions, tombstones }, entry, now = nowIso()) => {
   const key = tombstoneId(entry);
+  const record = touch(entry.record, restoreStamp(deletedAt(tombstones, entry.kind, key), now));
   const restoredTombstones = entry.previousTombstone
     ? addTombstone(tombstones, entry.kind, key, entry.previousTombstone)
     : removeTombstone(tombstones, entry.kind, key);
   const state = { subjects, sessions, tombstones: restoredTombstones };
-  if (entry.kind === "subjects") return { ...state, subjects: insertAt(subjects, entry.index, entry.record) };
-  if (entry.kind === "sessions") return { ...state, sessions: insertAt(sessions, entry.index, entry.record) };
+  if (entry.kind === "subjects") return { ...state, subjects: insertAt(subjects, entry.index, record) };
+  if (entry.kind === "sessions") return { ...state, sessions: insertAt(sessions, entry.index, record) };
   return {
     ...state,
     subjects: subjects.map((subject) =>
       subject.id === entry.subjectId
         ? inKeyOrder(
-            { ...subject, [entry.kind]: insertAt(subject[entry.kind] || [], entry.index, entry.record) },
+            { ...subject, [entry.kind]: insertAt(subject[entry.kind] || [], entry.index, record) },
             entry.parentKeys
           )
         : subject

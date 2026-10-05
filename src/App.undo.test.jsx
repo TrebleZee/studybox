@@ -50,6 +50,43 @@ const start = () => {
 
 const undoBar = () => screen.getByRole("status", { name: /Deleted/ });
 
+// Every stored record with this id, wherever it is.
+const recordsWithId = (snap, id) => {
+  const found = [];
+  Object.values(snap).forEach((text) =>
+    text && JSON.parse(text, (key, value) => {
+      if (value && typeof value === "object" && !Array.isArray(value) && value.id === id) found.push(value);
+      return value;
+    })
+  );
+  return found;
+};
+
+// Undo puts the record back as it was, stamped as edited now so another tab
+// can't delete it again (N8): storage matches what it was before the delete
+// except for that one record's updatedAt, which has moved forward.
+const expectRestored = (before, id) => {
+  const unstamped = (snap) =>
+    Object.fromEntries(
+      Object.entries(snap).map(([key, text]) => [
+        key,
+        text &&
+          JSON.stringify(
+            JSON.parse(text, (k, value) => {
+              if (!value || typeof value !== "object" || Array.isArray(value) || value.id !== id) return value;
+              const { updatedAt: _updatedAt, ...rest } = value;
+              return rest;
+            })
+          ),
+      ])
+    );
+  const now = snapshot();
+  expect(unstamped(now)).toEqual(unstamped(before));
+  const [restored] = recordsWithId(now, id);
+  const [original] = recordsWithId(before, id);
+  expect(restored.updatedAt > (original.updatedAt || "")).toBe(true);
+};
+
 describe("undo for deletes", () => {
   it("undoes a session delete, leaving storage exactly as before", async () => {
     const { user, before } = start();
@@ -60,7 +97,7 @@ describe("undo for deletes", () => {
     expect(undoBar().textContent).toContain("Deleted Maths.");
     await user.click(within(undoBar()).getByRole("button", { name: "Undo" }));
 
-    expect(snapshot()).toEqual(before);
+    expectRestored(before, "s-old");
     expect(screen.queryByRole("status", { name: /Deleted/ })).toBeNull();
     expect(screen.getByRole("button", { name: "Delete session Maths" })).toBeTruthy();
   });
@@ -72,7 +109,7 @@ describe("undo for deletes", () => {
     expect(snapshot()).not.toEqual(before);
 
     await user.click(within(undoBar()).getByRole("button", { name: "Undo" }));
-    expect(snapshot()).toEqual(before);
+    expectRestored(before, subjects[0].topics[0].id);
     // The completed topic's XP was never touched, and the order is unchanged.
     expect(JSON.parse(localStorage.getItem("sb-subjects"))[0].topics[1].id).toBe(topic.id);
   });
@@ -86,7 +123,7 @@ describe("undo for deletes", () => {
     expect(JSON.parse(localStorage.getItem("sb-game")).totalXP).toBe(xp - 10);
 
     await user.click(within(undoBar()).getByRole("button", { name: "Undo" }));
-    expect(snapshot()).toEqual(before);
+    expectRestored(before, subjects[0].topics[1].id);
   });
 
   it("undoes a milestone delete", async () => {
@@ -95,7 +132,7 @@ describe("undo for deletes", () => {
     expect(undoBar().textContent).toContain("Deleted NEA draft.");
 
     await user.click(within(undoBar()).getByRole("button", { name: "Undo" }));
-    expect(snapshot()).toEqual(before);
+    expectRestored(before, "ms-1");
   });
 
   it("undoes a subject delete, restoring it, its place and the selection", async () => {
@@ -105,7 +142,7 @@ describe("undo for deletes", () => {
     expect(JSON.parse(localStorage.getItem("sb-subjects")).map((s) => s.id)).not.toContain(subjects[0].id);
 
     await user.click(within(undoBar()).getByRole("button", { name: "Undo" }));
-    expect(snapshot()).toEqual(before);
+    expectRestored(before, subjects[0].id);
     await goTo(user, "Planner");
     expect(screen.getByRole("button", { name: `Delete topic ${subjects[0].topics[0].name}` })).toBeTruthy();
   });
@@ -159,7 +196,7 @@ describe("undo for deletes", () => {
     expect(document.activeElement).toBe(undo);
     await user.keyboard(" ");
 
-    expect(snapshot()).toEqual(before);
+    expectRestored(before, "s-old");
     await goTo(user, "Planner");
     expect(screen.getByRole("button", { name: "Start" })).toBeTruthy();
     expect(localStorage.getItem("sb-timer")).toBeNull();

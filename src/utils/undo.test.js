@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_GAME } from "./gameLogic.js";
+import { mergeData } from "./merge.js";
 import { addTombstone, childKey, emptyTombstones, removeTombstone } from "./tombstones.js";
 import { describeDeletion, restoreDeletion, unchangedSinceMerge } from "./undo.js";
 
@@ -14,6 +16,13 @@ describe("unchangedSinceMerge", () => {
 
 const at = "2026-09-14T10:00:00.000Z";
 const later = "2026-09-14T11:00:00.000Z";
+const undoneAt = "2026-09-14T11:05:00.000Z";
+
+// The state as it was, with the restored record stamped as edited at `now`.
+const stamped = (s, id, now) =>
+  JSON.parse(JSON.stringify(s), (key, value) =>
+    value && typeof value === "object" && !Array.isArray(value) && value.id === id ? { ...value, updatedAt: now } : value
+  );
 
 const state = () => ({
   subjects: [
@@ -70,11 +79,34 @@ describe("undoing a delete", () => {
     ["topics", "t1", "maths"],
     ["topics", "t2", "maths"],
     ["milestones", "m1", "maths"],
-  ])("puts a deleted %s record (%s) back exactly, in place, with no tombstone", (kind, id, subjectId) => {
+  ])("puts a deleted %s record (%s) back in place, stamped now, with no tombstone", (kind, id, subjectId) => {
     const before = state();
     const entry = describeDeletion(before, kind, id, subjectId);
-    const after = restoreDeletion(remove(before, kind, id, subjectId), entry);
-    expect(JSON.stringify(after)).toBe(JSON.stringify(before));
+    const after = restoreDeletion(remove(before, kind, id, subjectId), entry, undoneAt);
+    expect(JSON.stringify(after)).toBe(JSON.stringify(stamped(before, id, undoneAt)));
+  });
+
+  it.each([
+    ["subjects", "maths", null],
+    ["sessions", "s1", null],
+    ["topics", "t1", "maths"],
+    ["milestones", "m1", "maths"],
+  ])("restores a %s record so it survives a merge with a copy that has the tombstone (N8)", (kind, id, subjectId) => {
+    const before = state();
+    const entry = describeDeletion(before, kind, id, subjectId);
+    const deleted = remove(before, kind, id, subjectId);
+    const undone = restoreDeletion(deleted, entry, undoneAt);
+    const other = { ...deleted, game: DEFAULT_GAME };
+    const merged = mergeData({ ...undone, game: DEFAULT_GAME }, other);
+    const ids = JSON.stringify([merged.subjects, merged.sessions]);
+    expect(ids).toContain(`"id":"${id}"`);
+  });
+
+  it("stamps past the tombstone when Undo lands in the same millisecond as the delete", () => {
+    const before = state();
+    const entry = describeDeletion(before, "sessions", "s1");
+    const undone = restoreDeletion(remove(before, "sessions", "s1"), entry, later);
+    expect(undone.sessions[0].updatedAt).toBe("2026-09-14T11:00:00.001Z");
   });
 
   it("puts a subject's milestones key back in its place when the last milestone was deleted", () => {
@@ -83,8 +115,8 @@ describe("undoing a delete", () => {
     // As the normalizer does: no milestones left, no key.
     const deleted = remove(before, "milestones", "m1", "maths");
     const withoutKey = Object.fromEntries(Object.entries(deleted.subjects[0]).filter(([key]) => key !== "milestones"));
-    const after = restoreDeletion({ ...deleted, subjects: [withoutKey, deleted.subjects[1]] }, entry);
-    expect(JSON.stringify(after)).toBe(JSON.stringify(before));
+    const after = restoreDeletion({ ...deleted, subjects: [withoutKey, deleted.subjects[1]] }, entry, undoneAt);
+    expect(JSON.stringify(after)).toBe(JSON.stringify(stamped(before, "m1", undoneAt)));
   });
 
   it("names what was deleted", () => {
