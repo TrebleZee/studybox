@@ -46,6 +46,7 @@ Phases in dependency order, each with dates, an exit test that can be checked, a
 - Work that only the maintainer can do (decisions, user feedback, reading regulator guidance, repo settings) goes in its own phase, marked as theirs, with a date.
 - Nothing lands in the May to June exam freeze.
 - Keep running work (catalogue waves, the yearly exam-dates file) listed alongside.
+- Group the branches into **parallel lanes** so several sessions can work at once. Branches that change the same files or code path (the same component, hook, store module or loader, or that each grow `App.jsx` in the same place) share a lane and run in order. Branches in different lanes must not overlap. For every lane, name its branches in order, the main files they touch, and what it waits for (a maintainer decision, another branch merging). In `goal.md` put this as a **Parallel lanes** table right after the ground rules. The version list stays a forecast; tags decide the real versions at merge time.
 
 ## 5. Write the report
 
