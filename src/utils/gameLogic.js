@@ -3,7 +3,13 @@ export const DEFAULT_GAME = {
   longestStreak: 0,
   lastStudyDate: null,
   streakProtectedUntil: null,
+  // Always derived: deriveXP(sessions, subjects) + legacyXP. Kept on the game
+  // object so views and freeze maths can read it, never incremented.
   totalXP: 0,
+  // XP earned before XP was derived that the records can't account for (a
+  // deleted session, a topic ticked more than once). Fixed when a pre-1.15.1
+  // save is first loaded and never grows afterwards.
+  legacyXP: 0,
   freezesUsed: 0,
   // Calendar days a streak freeze covered. Needed so rebuilding the streak
   // from session history bridges those days instead of treating them as breaks.
@@ -125,13 +131,44 @@ export const normalizeGame = (loaded) => {
     longestStreak: Number(loaded.longestStreak) || 0,
     lastStudyDate: normalizeDateKey(loaded.lastStudyDate),
     streakProtectedUntil: Number(loaded.streakProtectedUntil) || null,
-    totalXP: Number(loaded.totalXP) || 0,
+    totalXP: Math.max(0, Number(loaded.totalXP) || 0),
+    // null marks a save from before XP was derived (see settleLegacyXP).
+    legacyXP:
+      loaded.legacyXP === undefined || loaded.legacyXP === null
+        ? null
+        : Math.max(0, Math.floor(Number(loaded.legacyXP)) || 0),
     freezesUsed: Number(loaded.freezesUsed) || 0,
     // null marks a save from before frozenDates was tracked (see buildInitialGame).
     frozenDates: Array.isArray(loaded.frozenDates)
       ? loaded.frozenDates.map(normalizeDateKey).filter(Boolean)
       : null,
   };
+};
+
+export const TOPIC_XP = 10;
+
+// XP is a pure function of the records: one per whole minute of each session
+// (at least one for any session) and TOPIC_XP per completed topic. Nothing increments it, so unticking a topic
+// or deleting a session takes its XP back and there is nothing to farm.
+const sessionXP = (session) => {
+  const seconds = Number(session.duration) || 0;
+  return seconds > 0 ? Math.max(1, Math.floor(seconds / 60)) : 0;
+};
+
+export const deriveXP = (sessions, subjects) =>
+  sessions.reduce((sum, session) => sum + sessionXP(session), 0) +
+  subjects.reduce((sum, subject) => sum + subject.topics.filter((topic) => topic.done).length * TOPIC_XP, 0);
+
+// A save from before XP was derived keeps its total: whatever the records
+// don't explain becomes legacyXP, once. After that totalXP only follows the
+// records.
+export const settleLegacyXP = (game, sessions, subjects) => {
+  const derived = deriveXP(sessions, subjects);
+  const legacyXP =
+    game.legacyXP === null || game.legacyXP === undefined
+      ? Math.max(0, (Number(game.totalXP) || 0) - derived)
+      : game.legacyXP;
+  return { ...game, legacyXP, totalXP: derived + legacyXP };
 };
 
 export const validateStreak = (game, nowMs = Date.now()) => {
@@ -197,27 +234,31 @@ export const buildInitialGame = (loaded, sessions, subjects, nowMs = Date.now())
     )
   ).sort();
   const lastStudyDate = dateStrings[dateStrings.length - 1] || storedGame.lastStudyDate;
-  const minutesStudied = sessions.reduce(
-    (sum, session) => sum + Math.floor(session.duration / 60),
-    0
-  );
-  const topicXP = subjects.reduce(
-    (sum, subject) => sum + subject.topics.filter((topic) => topic.done).length * 10,
-    0
-  );
   const frozenDates = storedGame.frozenDates ?? inferFrozenDates(
     dateStrings,
     storedGame.freezesUsed,
     lastStudyDate,
     lastStudyDate === storedGame.lastStudyDate ? storedGame.streakProtectedUntil : null
   );
-  const historicalStreak = dateStrings.length
-    ? getStreakForDates(dateStrings, frozenDates)
-    : storedGame.currentStreak;
+  // A streak the saved game already recorded as lapsed stays lapsed. Without
+  // this, the history would revive it on every launch and validateStreak
+  // would spend the user's freezes on the same missed days again.
+  // (Also when the newest session was since deleted: nothing newer than the
+  // lapse has been studied.)
+  const alreadyLapsed =
+    storedGame.currentStreak === 0 &&
+    Boolean(lastStudyDate) &&
+    Boolean(storedGame.lastStudyDate) &&
+    lastStudyDate <= storedGame.lastStudyDate;
+  const historicalStreak = alreadyLapsed
+    ? 0
+    : dateStrings.length
+      ? getStreakForDates(dateStrings, frozenDates)
+      : storedGame.currentStreak;
   const historicalLongest = dateStrings.length
     ? getLongestStreak(dateStrings, frozenDates)
     : storedGame.longestStreak;
-  const calculatedTotalXP = minutesStudied + topicXP;
+  const { legacyXP, totalXP } = settleLegacyXP(storedGame, sessions, subjects);
 
   return validateStreak(
     {
@@ -225,9 +266,8 @@ export const buildInitialGame = (loaded, sessions, subjects, nowMs = Date.now())
       currentStreak: historicalStreak,
       longestStreak: Math.max(storedGame.longestStreak, historicalLongest),
       lastStudyDate,
-      // XP is earned progress, so keep persisted XP even if a session was
-      // later deleted from the history.
-      totalXP: Math.max(storedGame.totalXP, calculatedTotalXP),
+      legacyXP,
+      totalXP,
       streakProtectedUntil: storedGame.streakProtectedUntil,
       frozenDates,
     },
@@ -246,7 +286,8 @@ export const freezeStats = (game) => {
   };
 };
 
-export const applyLoggedSession = (game, durationSecs, loggedAt = new Date()) => {
+// Streak only: XP follows from the session record itself (see deriveXP).
+export const applyLoggedSession = (game, loggedAt = new Date()) => {
   const today = dateKey(loggedAt);
   const validated = validateStreak(game, loggedAt.getTime());
   let streak = validated.currentStreak;
@@ -265,6 +306,5 @@ export const applyLoggedSession = (game, durationSecs, loggedAt = new Date()) =>
     longestStreak: Math.max(validated.longestStreak, streak),
     lastStudyDate: today,
     streakProtectedUntil: null,
-    totalXP: validated.totalXP + Math.max(1, Math.floor(durationSecs / 60)),
   };
 };

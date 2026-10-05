@@ -15,6 +15,9 @@ import {
   normalizeGame,
   streakExpiry,
   validateStreak,
+  deriveXP,
+  settleLegacyXP,
+  TOPIC_XP,
 } from "./gameLogic.js";
 
 const localDay = (y, m, d, h = 12) => new Date(y, m - 1, d, h, 0, 0, 0);
@@ -53,7 +56,8 @@ describe("normalizeGame", () => {
     expect(normalizeGame("nope")).toEqual(DEFAULT_GAME);
     // An object without frozenDates is a pre-freeze-tracking save, flagged
     // with null so buildInitialGame can infer the frozen days.
-    expect(normalizeGame({})).toEqual({ ...DEFAULT_GAME, frozenDates: null });
+    // Likewise legacyXP: null marks a save from before XP was derived.
+    expect(normalizeGame({})).toEqual({ ...DEFAULT_GAME, frozenDates: null, legacyXP: null });
   });
 
   it("keeps valid frozenDates and drops junk entries", () => {
@@ -122,36 +126,91 @@ describe("validateStreak", () => {
 describe("applyLoggedSession", () => {
   it("bootstraps the very first session to a 1-day streak", () => {
     const at = localDay(2026, 9, 14);
-    const result = applyLoggedSession(DEFAULT_GAME, 120, at);
+    const result = applyLoggedSession(DEFAULT_GAME, at);
     expect(result.currentStreak).toBe(1);
     expect(result.longestStreak).toBe(1);
     expect(result.lastStudyDate).toBe("2026-09-14");
-    expect(result.totalXP).toBe(2);
   });
 
-  it("only adds XP when already studied today", () => {
-    const first = applyLoggedSession(DEFAULT_GAME, 600, localDay(2026, 9, 14, 9));
-    const second = applyLoggedSession(first, 300, localDay(2026, 9, 14, 20));
+  it("leaves the streak alone when already studied today", () => {
+    const first = applyLoggedSession(DEFAULT_GAME, localDay(2026, 9, 14, 9));
+    const second = applyLoggedSession(first, localDay(2026, 9, 14, 20));
     expect(second.currentStreak).toBe(1);
-    expect(second.totalXP).toBe(15);
+  });
+
+  it("never touches XP: that comes from the session record", () => {
+    const start = { ...DEFAULT_GAME, totalXP: 40, legacyXP: 7 };
+    expect(applyLoggedSession(start, localDay(2026, 9, 14))).toMatchObject({ totalXP: 40, legacyXP: 7 });
   });
 
   it("extends the streak on the next day", () => {
-    const first = applyLoggedSession(DEFAULT_GAME, 60, localDay(2026, 9, 14));
-    const next = applyLoggedSession(first, 60, localDay(2026, 9, 15));
+    const first = applyLoggedSession(DEFAULT_GAME, localDay(2026, 9, 14));
+    const next = applyLoggedSession(first, localDay(2026, 9, 15));
     expect(next.currentStreak).toBe(2);
     expect(next.longestStreak).toBe(2);
   });
 
   it("restarts at 1 after the streak lapsed", () => {
-    const first = applyLoggedSession(DEFAULT_GAME, 60, localDay(2026, 9, 14));
-    const later = applyLoggedSession(first, 60, localDay(2026, 9, 20));
+    const first = applyLoggedSession(DEFAULT_GAME, localDay(2026, 9, 14));
+    const later = applyLoggedSession(first, localDay(2026, 9, 20));
     expect(later.currentStreak).toBe(1);
     expect(later.longestStreak).toBe(1);
   });
 
-  it("awards at least 1 XP for very short sessions", () => {
-    expect(applyLoggedSession(DEFAULT_GAME, 5, localDay(2026, 9, 14)).totalXP).toBe(1);
+});
+
+describe("deriveXP", () => {
+  const done = (n, total = n) => ({ topics: Array.from({ length: total }, (_, i) => ({ done: i < n })) });
+
+  it("is one XP per whole minute of each session plus 10 per completed topic", () => {
+    expect(deriveXP([{ duration: 600 }, { duration: 125 }], [done(2, 5), done(1)])).toBe(10 + 2 + 30);
+  });
+
+  it("awards at least 1 XP for very short sessions, and none for empty or junk ones", () => {
+    expect(deriveXP([{ duration: 5 }], [])).toBe(1);
+    expect(deriveXP([{ duration: 0 }, { duration: -30 }, { duration: "abc" }, {}], [])).toBe(0);
+  });
+
+  it("gives XP back when a topic is unticked or a session deleted", () => {
+    const sessions = [{ duration: 600 }, { duration: 300 }];
+    expect(deriveXP(sessions, [done(3)])).toBe(45);
+    expect(deriveXP(sessions.slice(1), [done(2, 3)])).toBe(25);
+  });
+
+  it("follows the records, so deleting a subject or a completed topic takes its XP too", () => {
+    const subjects = [done(4), done(1, 2)];
+    expect(deriveXP([], subjects)).toBe(50);
+    expect(deriveXP([], subjects.slice(1))).toBe(10);
+    expect(deriveXP([], [{ topics: [] }])).toBe(0);
+  });
+
+  it("cannot be farmed by ticking the same topic repeatedly", () => {
+    let subject = done(0, 1);
+    for (let i = 0; i < 50; i += 1) subject = { topics: [{ done: !subject.topics[0].done }] };
+    expect(deriveXP([], [subject])).toBe(0);
+    expect(deriveXP([], [{ topics: [{ done: true }] }])).toBe(TOPIC_XP);
+  });
+});
+
+describe("settleLegacyXP", () => {
+  const sessions = [{ duration: 600 }];
+  const subjects = [{ topics: [{ done: true }] }];
+
+  it("keeps a pre-derivation total by carrying the unexplained part as legacyXP", () => {
+    const settled = settleLegacyXP({ totalXP: 500, legacyXP: null }, sessions, subjects);
+    expect(settled).toMatchObject({ legacyXP: 480, totalXP: 500 });
+  });
+
+  it("carries nothing when the records explain the whole total", () => {
+    expect(settleLegacyXP({ totalXP: 20, legacyXP: null }, sessions, subjects)).toMatchObject({ legacyXP: 0, totalXP: 20 });
+    expect(settleLegacyXP({ totalXP: 3, legacyXP: null }, sessions, subjects)).toMatchObject({ legacyXP: 0, totalXP: 20 });
+  });
+
+  it("settles once: afterwards the total only follows the records", () => {
+    const settled = settleLegacyXP({ totalXP: 500, legacyXP: null }, sessions, subjects);
+    const inflated = { ...settled, totalXP: 99999 };
+    expect(settleLegacyXP(inflated, sessions, subjects).totalXP).toBe(500);
+    expect(settleLegacyXP(settled, [], []).totalXP).toBe(480);
   });
 });
 
@@ -177,9 +236,56 @@ describe("buildInitialGame", () => {
     expect(result.totalXP).toBe(10 + 20 + 10);
   });
 
-  it("keeps persisted XP when it exceeds what history implies", () => {
+  it("keeps a pre-derivation save's XP when it exceeds what history implies", () => {
     const result = buildInitialGame({ totalXP: 900 }, [], [], now);
     expect(result.totalXP).toBe(900);
+    expect(result.legacyXP).toBe(900);
+  });
+
+  it("does not spend freezes again each launch once a streak has lapsed", () => {
+    const sessions = [
+      { date: localDay(2026, 9, 1).toISOString(), duration: 60 * 60 * 45 },
+      { date: localDay(2026, 9, 2).toISOString(), duration: 60 * 60 },
+    ];
+    const first = buildInitialGame({ currentStreak: 2, lastStudyDate: "2026-09-02", legacyXP: 0, frozenDates: [] }, sessions, [], now);
+    expect(first.currentStreak).toBe(0);
+    expect(first.freezesUsed).toBe(3);
+
+    const second = buildInitialGame(first, sessions, [], now);
+    const third = buildInitialGame(second, sessions, [], now + DAY_MS);
+    expect(second).toEqual(first);
+    expect(third.freezesUsed).toBe(3);
+    expect(third.frozenDates).toEqual(first.frozenDates);
+  });
+
+  it("does not spend another freeze when a lapsed streak's newest session is deleted", () => {
+    const sessions = [
+      { date: localDay(2026, 9, 1).toISOString(), duration: 60 * 60 * 45 },
+      { date: localDay(2026, 9, 2).toISOString(), duration: 60 * 60 },
+    ];
+    const lapsed = buildInitialGame({ currentStreak: 2, lastStudyDate: "2026-09-02", legacyXP: 0, frozenDates: [] }, sessions, [], now);
+    const after = buildInitialGame(lapsed, sessions.slice(0, 1), [], now);
+    expect(after.currentStreak).toBe(0);
+    expect(after.freezesUsed).toBe(lapsed.freezesUsed);
+  });
+
+  it("rebuilds a lapsed streak once something newer is studied", () => {
+    const lapsed = { currentStreak: 0, lastStudyDate: "2026-09-02", legacyXP: 0, frozenDates: [] };
+    const sessions = [{ date: localDay(2026, 9, 14).toISOString(), duration: 600 }];
+    expect(buildInitialGame(lapsed, sessions, [], now).currentStreak).toBe(1);
+  });
+
+  it("still rebuilds the streak from history when the saved game is missing", () => {
+    const sessions = [
+      { date: localDay(2026, 9, 13).toISOString(), duration: 600 },
+      { date: localDay(2026, 9, 14).toISOString(), duration: 600 },
+    ];
+    expect(buildInitialGame(null, sessions, [], now).currentStreak).toBe(2);
+  });
+
+  it("ignores a stored total once XP is derived, so editing it can't add XP", () => {
+    const result = buildInitialGame({ totalXP: 99999, legacyXP: 0 }, [{ date: localDay(2026, 9, 14).toISOString(), duration: 600 }], [], now);
+    expect(result.totalXP).toBe(10);
   });
 
   it("consumes a freeze on load after a missed day", () => {

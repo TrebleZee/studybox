@@ -18,6 +18,8 @@ import { fmt } from "./utils/format.js";
 import {
   applyLoggedSession,
   buildInitialGame,
+  deriveXP,
+  settleLegacyXP,
   streakExpiry,
   validateStreak,
 } from "./utils/gameLogic.js";
@@ -108,6 +110,14 @@ export default function StudyBox() {
 
   const theme = THEMES.find((item) => item.id === themeId) || THEMES[0];
   const C = theme.colors;
+
+  // XP is derived from the records, never incremented: this keeps the stored
+  // total in step with them (unticking a topic or deleting a session takes
+  // its XP back).
+  const totalXP = deriveXP(sessions, subjects) + (game.legacyXP || 0);
+  useEffect(() => {
+    setGame((current) => (current.totalXP === totalXP ? current : { ...current, totalXP }));
+  }, [totalXP, setGame]);
 
   // Re-validate when the persisted streak window expires while the app is open;
   // buildInitialGame runs the same validator on launch.
@@ -222,8 +232,6 @@ export default function StudyBox() {
     openSettings: () => setView("settings"),
 
     toggleTopic: (subjectId, topicId) => {
-      const topic = subjects.find((s) => s.id === subjectId)?.topics.find((t) => t.id === topicId);
-      if (topic && !topic.done) setGame((g) => ({ ...g, totalXP: g.totalXP + 10 }));
       setSubjects((prev) =>
         mapSubject(prev, subjectId, (subject) => mapTopic(subject, topicId, (t) => ({ ...t, done: !t.done })))
       );
@@ -323,7 +331,7 @@ export default function StudyBox() {
     logSession: () => {
       if (!displaySecs || !canTime) return;
 
-      setGame((g) => applyLoggedSession(g, displaySecs, new Date()));
+      setGame((g) => applyLoggedSession(g, new Date()));
 
       const isAsana = timingAsana || (!timedSubject && asanaSelected);
       const subjectToLog = isAsana
@@ -462,7 +470,9 @@ export default function StudyBox() {
       }
       if (restored.sessions) setSessions(restored.sessions);
       if (restored.themeId) setThemeId(restored.themeId);
-      if (restored.game) setGame(restored.game);
+      if (restored.game) {
+        setGame(settleLegacyXP(restored.game, restored.sessions ?? sessions, restored.subjects ?? subjects));
+      }
       setOnboarded(true);
       setBackupMessage({ type: "success", text: "Backup restored." });
       return { ok: true };

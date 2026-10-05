@@ -62,6 +62,13 @@ These rules exist so two copies of a user's data can be merged using only what i
   - Records from before v3 have no edit time. Where two copies differ on such a record the winner is arbitrary, though the same on every device.
   - Two copies always converge on the same records, but the *order* of subjects and topics may differ between them. Sync needs an explicit order field.
   - With three or more copies and a deleted subject, the result can depend on merge order: a pairwise merge that drops the subject forgets that copy's rename and its own topics, and a third copy can bring the subject back without them (pinned in `merge.test.js`). File merges between two devices are unaffected. Sync should keep deleted rows server-side so nothing is forgotten.
+
+### XP is derived, never incremented (from 1.15.1)
+
+- `deriveXP(sessions, subjects)` in `gameLogic.js` is the only definition of XP: one per whole minute of each session (at least one for any session) plus `TOPIC_XP` (10) per completed topic. `game.totalXP` is kept in step with it by one effect in `App.jsx`; nothing may add to `totalXP` directly. Unticking a topic or deleting a session takes its XP back, so there is nothing to farm.
+- `game.legacyXP` holds XP an install earned before derivation that its records can't explain. `settleLegacyXP` fixes it once, the first time a pre-1.15.1 save (or backup) is loaded, so nobody's total drops on upgrade; after that it never grows. `totalXP = deriveXP(...) + legacyXP`.
+- This is deliberate in both directions: deleting a subject or a completed topic (including converting one to a milestone) removes that topic XP, the same as unticking it. Freezes already used stay used; freezes available never go below zero.
+- For V2: a leaderboard must be computed from session records on the server and must ignore `legacyXP`, which is unverifiable by construction.
 - Sessions include `id`, `subjectId`, `subjectName`, `subjectColor`, `duration`, `date`, `note`, and `tags`.
 
 ## Spec catalogue
