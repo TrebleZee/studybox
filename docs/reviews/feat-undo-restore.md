@@ -1,4 +1,4 @@
-# Review: feat/undo-restore (PR #48, target v1.19.0)
+# Review: feat/undo-restore (PR #48)
 
 Date: 2026-10-05 · Reviewer: release-reviewer · Fixer: release-fixer
 Verdict: fixed. Three in-diff findings (two medium, one low) fixed with a regression test each; nothing left open.
