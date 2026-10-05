@@ -13,7 +13,7 @@ Last updated: 2026-10-05
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `b8d07fb` (1.17.1) |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, worked in the parallel lanes it lists |
 | Readiness | Phase A exit check failed on 2026-10-05: four new `high` findings (N9, N10, N11, N13). Report: `docs/readiness/2026-10-05-phase-a-exit.md` |
-| Open PRs | `chore/parallel-workflow` (this change). A2.1 `fix/normalize-field-types` is in progress in a local worktree, not yet pushed |
+| Open PRs | [#40](https://github.com/TrebleZee/studybox/pull/40) parallel workflow (this change). A2.1 `fix/normalize-field-types` is in progress in a local worktree, not yet pushed |
 | Checks on `master` | Lint, test (674 tests), build: green. CI is not a required check yet (C7) |
 
 ## Recent changes
@@ -22,7 +22,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
-| PR_THIS | Workflow for parallel sessions: one worktree per session, claims as draft PRs, the goal split into parallel lanes, versions set at merge time and merges one at a time. No user-facing change | none | none |
+| [#40](https://github.com/TrebleZee/studybox/pull/40) | Workflow for parallel sessions: one worktree per session, claims as draft PRs, the goal split into parallel lanes, versions set at merge time and merges one at a time. No user-facing change | none | none |
 | [#38](https://github.com/TrebleZee/studybox/pull/38) | This status page, updated by every PR and readiness pass. No user-facing change | none | none |
 | [#36](https://github.com/TrebleZee/studybox/pull/36) | Docs synced with the code; root `CLAUDE.md`; replacement Claude project instructions. No user-facing change | C4 | none |
 | [#35](https://github.com/TrebleZee/studybox/pull/35) | Security headers (Content-Security-Policy and others) on every route of the live app | N4 | none |
