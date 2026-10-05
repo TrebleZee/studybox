@@ -14,7 +14,7 @@ GlobalWorkerOptions.workerSrc = workerSrc;
 
 export async function extractPdfText(file) {
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const loadingTask = getDocument({ data: bytes });
+  const loadingTask = getDocument({ data: bytes, isEvalSupported: false });
   const pdf = await loadingTask.promise;
   const parts = [];
 
