@@ -64,7 +64,13 @@ describe("store seam", () => {
       expect(KEY_SCOPES[key], key).toBeDefined()
     );
     expect(keysInScope("account").sort()).toEqual(
-      [STORAGE_KEYS.game, STORAGE_KEYS.sessions, STORAGE_KEYS.subjects, STORAGE_KEYS.theme].sort()
+      [
+        STORAGE_KEYS.game,
+        STORAGE_KEYS.sessions,
+        STORAGE_KEYS.subjects,
+        STORAGE_KEYS.theme,
+        STORAGE_KEYS.tombstones,
+      ].sort()
     );
   });
 

@@ -1,3 +1,5 @@
+import { keepStamps } from "./records.js";
+
 const TOPIC_SEED = {
   physics: [
     "Practical Skills in Physics",
@@ -361,6 +363,7 @@ const normalizeMilestones = (milestones, subjectId) => {
       ...(isNonEmptyString(milestone.catalogueMilestoneId)
         ? { catalogueMilestoneId: milestone.catalogueMilestoneId }
         : {}),
+      ...keepStamps(milestone),
     }));
   return valid.length ? valid : null;
 };
@@ -407,7 +410,10 @@ export const normalizeSubject = (subject, index = 0) => {
         ? { catalogueTopicId: topic.catalogueTopicId }
         : {}),
       ...topicTierFields(topic),
+      ...keepStamps(topic),
     })),
+    // Schema v3 stamps: optional, so pre-v3 subjects normalize exactly as before.
+    ...keepStamps(subject),
   };
 };
 
@@ -423,6 +429,7 @@ export const normalizeSessions = (input) => {
     date: session?.date || new Date().toISOString(),
     note: session?.note || "",
     tags: Array.isArray(session?.tags) ? session.tags.filter(Boolean) : [],
+    ...keepStamps(session),
   }));
 };
 

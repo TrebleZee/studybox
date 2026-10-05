@@ -12,3 +12,4 @@ export {
   subscribe,
 } from "./localStore.js";
 export { default as usePersistedState } from "./usePersistedState.js";
+export { MIGRATIONS, SCHEMA_VERSION, runMigrations } from "./migrations.js";

@@ -1,3 +1,4 @@
+import { newId } from "./records.js";
 // Pure helpers for subject milestones (NEA, practicals, coursework).
 // Due dates are calendar days ("YYYY-MM-DD") in the user's local time zone:
 // a milestone due today is "due today" all day, whatever the hour.
@@ -63,7 +64,8 @@ export const neaTopicCandidates = (subjects) =>
 
 // Replaces the topic with an NEA milestone of the same name. Call only after
 // the user has confirmed; a subject without that topic is returned as is.
-export const convertTopicToMilestone = (subject, topicId, newId = `ms-${Date.now().toString(36)}`) => {
+// Pass `now` (an ISO timestamp) to stamp the new milestone for sync.
+export const convertTopicToMilestone = (subject, topicId, id = newId("ms"), now = null) => {
   const topic = subject.topics.find((item) => item.id === topicId);
   if (!topic) return subject;
   return {
@@ -71,7 +73,14 @@ export const convertTopicToMilestone = (subject, topicId, newId = `ms-${Date.now
     topics: subject.topics.filter((item) => item.id !== topicId),
     milestones: [
       ...(subject.milestones || []),
-      { id: newId, name: topic.name, kind: "nea", due: null, done: topic.done },
+      {
+        id,
+        name: topic.name,
+        kind: "nea",
+        due: null,
+        done: topic.done,
+        ...(now ? { createdAt: now, updatedAt: now } : {}),
+      },
     ],
   };
 };
