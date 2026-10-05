@@ -171,6 +171,25 @@ describe("mergeData", () => {
     expect(leftFirst.sessions[0].topicId).toBe("t1");
   });
 
+  // Review finding R4 on #50: three stamp-tied copies of one subject, one of
+  // them with milestones. The winner is picked on the subject's own fields,
+  // so the `milestones` key a merged copy gains cannot tip a later tie.
+  it("gives the same subject fields whatever order three stamp-tied copies with milestones meet in", () => {
+    const milestone = { id: "m1", name: "NEA", kind: "nea", due: null, done: false };
+    const a = copy({ subjects: [subject("s", [topic("t")], { milestones: [milestone] })] });
+    const b = copy({ subjects: [subject("s", [topic("t")], { examYear: 2027, notes: "y" })] });
+    const c = copy({ subjects: [subject("s", [topic("t")], { order: 0, notes: "x" })] });
+    const own = (data) => {
+      const { topics, milestones, ...fields } = data.subjects[0];
+      return { fields, topicIds: ids(topics), milestoneIds: ids(milestones || []) };
+    };
+    const leftFirst = own(merge(merge(a, b), c));
+    expect(own(merge(a, merge(b, c)))).toEqual(leftFirst);
+    expect(own(merge(merge(c, a), b))).toEqual(leftFirst);
+    expect(own(merge(merge(b, c), a))).toEqual(leftFirst);
+    expect(leftFirst.milestoneIds).toEqual(["m1"]);
+  });
+
   // Known limit, pinned so a change to it is deliberate (see instruction.md).
   it("can forget one copy's rename when three copies meet around a deleted subject", () => {
     const a = copy({
