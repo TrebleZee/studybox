@@ -8,7 +8,7 @@ Last updated: 2026-10-06
 
 | | |
 | --- | --- |
-| Current version | 1.19.6 |
+| Current version | 1.19.7 |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
 
@@ -18,6 +18,9 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#65](https://github.com/TrebleZee/studybox/pull/65) | Version 1.19.7 for #63 and #64, which merged without one. No user-facing change | none | none |
+| [#64](https://github.com/TrebleZee/studybox/pull/64) | On a phone, the undo bar and the update banner stack instead of overlapping, and the timer's tag row no longer gets clipped | N29 (follow-up) | v1.19.7 |
+| [#63](https://github.com/TrebleZee/studybox/pull/63) | Every view is usable on a phone: the planner's columns stack, hover-only controls show on touch, and timer alerts are flagged when switching panes | N29 | v1.19.7 |
 | [#62](https://github.com/TrebleZee/studybox/pull/62) | `instruction.md` documents two known gaps: streaks are rebuilt in the device's current timezone (N26), and the Asana panel copies a task's name into session tags (N27). No user-facing change | none (N26 and N27 stay open) | none |
 | [#61](https://github.com/TrebleZee/studybox/pull/61) | The status page stops going stale on merge: it states only what is true once its PR has merged (no production sha, open PRs, tag or check-state rows), and the post-merge checks moved into the git-workflow skill. No user-facing change | C13 | none |
 | [#55](https://github.com/TrebleZee/studybox/pull/55) | Restore from file, Start blank and templates write tombstones for what they replace, so another open tab (or a later merge) can no longer bring removed subjects, sessions, topics or subtasks back; restoring an old backup keeps this device's deletes | N10 | v1.19.6 |
@@ -94,7 +97,6 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 | 7 | Make the design gate doc (`claude/v2-design-gate.md`) available to the exit check | Missing for three passes, so B1's wording has never been checked against it | 6 Nov |
 | 8 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
 | 9 | Decide whether the timer Reset undo (#46) should survive an accidental restart: today pressing Start or Space after Reset withdraws the offer at once, so Undo can never overwrite a new session. Options: fold the new seconds into the restored session, or let Undo replace a session under a few seconds | Review finding R1 on #46 (`docs/reviews/feat-undo-timer-reset.md`); not in the goal, so not decided by an agent | any time |
-| 10 | Publish the GitHub release for `v1.19.1` (the tag is on `origin`; `gh release create v1.19.1 --latest=false` with the #54 fix as its notes) | The merger session's release command was blocked by the permission system, so v1.19.1 is the only tag with no release | 9 Oct |
 | 11 | On a real phone (iPhone Safari and Android Chrome, in the browser and as the installed PWA): every view fits without sideways scrolling, the top bar isn't clipped, Log Session is reachable with the address bar showing, focusing a field doesn't zoom the page, and the planner's Subjects / Topics / Timer switch works with a timer running | Only checked in desktop Chromium at 375 and 390 px (N29) | any time |
 
 ### Agent (next steps)
