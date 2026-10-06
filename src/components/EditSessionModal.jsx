@@ -41,11 +41,19 @@ export default function EditSessionModal({ C, session, subjects, asanaCfg, onSav
       ).toISOString();
     }
 
+    // The fields hold whole hours and minutes only: untouched, keep the stored seconds.
+    const hoursChanged = editDurationHours !== Math.floor(session.duration / 3600);
+    const minutesChanged = editDurationMinutes !== Math.floor((session.duration % 3600) / 60);
+    const duration =
+      hoursChanged || minutesChanged
+        ? editDurationHours * 3600 + editDurationMinutes * 60
+        : session.duration;
+
     onSave(session.id, {
       subjectId: target.id,
       subjectName: target.name,
       subjectColor: target.color,
-      duration: editDurationHours * 3600 + editDurationMinutes * 60,
+      duration,
       date: finalDate,
       tags: editTags,
       note: editNote.trim(),
