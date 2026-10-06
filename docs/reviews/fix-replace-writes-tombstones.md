@@ -10,6 +10,8 @@ Verdict: fixed. Both runs returned clean with one low in-diff finding each – t
 
 Both runs reported the same R1 from different scenarios (A: another tab restores a v3 backup with tombstones; B: another tab picks Start blank, adds and deletes subjects). The union below lists it once.
 
+- **Round 2 (re-check of the fix commit feb88e3 only):** VERDICT clean, no findings. The guard reads stored `onboarded`, which every way another tab can finish onboarding sets; the same-tab ticket still covers same-tab races; with blocked storage the template applies as before. Confirmed the test fails without the guard (subjects overwritten and the other tab's tombstone dropped) and passes with it.
+
 ## Findings
 
 | ID | Severity | Category | File | Summary | Outcome |
@@ -23,4 +25,4 @@ Both runs reported the same R1 from different scenarios (A: another tab restores
 
 ## Checks
 
-lint pass · test pass (840 tests, 67 files) · build pass (main bundle 896.43 kB, gzip 265.43 kB)
+lint pass · test pass (849 tests, 68 files, after merging #56) · build pass (main bundle 896.43 kB, gzip 265.43 kB)
