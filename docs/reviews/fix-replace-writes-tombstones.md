@@ -29,4 +29,4 @@ Both runs reported the same R1 from different scenarios (A: another tab restores
 
 ## Checks
 
-lint pass · test pass (898 tests, after merging master with #58 and #59) · build pass (main bundle 896.43 kB, gzip 265.43 kB)
+lint pass · test pass (898 tests, after merging master with #58 and #59) · build pass
