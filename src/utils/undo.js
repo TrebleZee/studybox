@@ -1,7 +1,8 @@
 import { settleLegacyXP } from "./gameLogic.js";
 import { mergeData } from "./merge.js";
 import { nowIso, touch } from "./records.js";
-import { addTombstone, childKey, deletedAt, emptyTombstones, removeTombstone, subtaskKey, TOMBSTONE_KINDS } from "./tombstones.js";
+import { replaceData, stampPast } from "./replace.js";
+import { addTombstone, childKey, deletedAt, removeTombstone, subtaskKey, TOMBSTONE_KINDS } from "./tombstones.js";
 
 // Undo for deletes. Before a record is deleted, describeDeletion notes where
 // it was and any tombstone it already had; restoreDeletion puts it back at
@@ -94,13 +95,6 @@ const MERGED_KEYS = ["subjects", "sessions", "tombstones", "game"];
 export const unchangedSinceMerge = (after, state) =>
   !!after && MERGED_KEYS.every((key) => after[key] === state[key] || canonical(after[key]) === canonical(state[key]));
 
-// A stamp later than `now` and than every given time, so the record it marks
-// wins a merge against any of them.
-const stampPast = (times, now) => {
-  const latest = times.filter(Boolean).reduce((max, time) => (time > max ? time : max), "");
-  return now > latest ? now : new Date(Date.parse(latest) + 1).toISOString();
-};
-
 const byId = (list = []) => new Map(list.map((record) => [record.id, record]));
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const ownFields = (subject) => {
@@ -113,9 +107,9 @@ const ownFields = (subject) => {
 // Re-stamps each record of `list` that the merge changed or removed, past the
 // merged copy and any tombstone for it, so the pre-merge copy wins in a tab
 // that already took the merge. Unchanged records keep their stamps, and so
-// does a record that is simply gone with no tombstone (a restore drops it
-// that way): no tab can hold a newer copy of it, and the copy another tab
-// still holds is this one.
+// does a record that is simply gone with no tombstone (an untouched
+// placeholder default a restore replaced): no tab can hold a newer copy of
+// it, and the copy another tab still holds is this one.
 const restampChanged = (list, mergedList, tombstoneOf, now) => {
   const merged = byId(mergedList);
   return list.map((record) => {
@@ -160,10 +154,9 @@ export const restoreBeforeMerge = ({ before, after }, now = nowIso()) => {
   return { ...before, subjects, sessions };
 };
 
-// Undo restore (N11). Restore replaces everything, so another open tab merges
-// what it had back in and writes it here (N10, until replacing writes
-// tombstones): an echo like that holds nothing that wasn't here before the
-// restore or in the file, and leaves the offer in place. Anything else (a
+// Undo restore (N11). Another open tab merges the restore into what it had
+// and writes it here: an echo like that holds nothing that wasn't here before
+// the restore or in the file, and leaves the offer in place. Anything else (a
 // logged session, a tick, a delete, here or in another tab) withdraws it.
 // Records are compared by content, not by a last-write-wins merge (R1): a file
 // stamped ahead of this device's clock would otherwise win against every edit
@@ -239,16 +232,16 @@ export const unchangedSinceRestore = (undo, state, nowMs = Date.now()) => {
   return canonical(withoutTotal(mergeData(known, state, nowMs).game)) === canonical(withoutTotal(known.game));
 };
 
-// What Restore from file leaves: the file's lists, tombstones, game and theme,
-// keeping what's here for any part the file doesn't carry.
-export const stateAfterRestore = (restored, { subjects, sessions, game, themeId }) => {
-  const after = {
-    subjects: restored.subjects ?? subjects,
-    sessions: restored.sessions ?? sessions,
-    tombstones: restored.tombstones ?? emptyTombstones(),
-    themeId: restored.themeId || themeId,
-  };
-  return { ...after, game: restored.game ? settleLegacyXP(restored.game, after.sessions, after.subjects) : game };
+// What Restore from file leaves: the file's lists, game and theme, keeping
+// what's here for any part the file doesn't carry. The lists replace what's
+// here through replaceData (N10): what they remove is tombstoned, the
+// tombstones here are kept beside the file's, and a record another copy could
+// beat is stamped as edited now. `placeholder`: the subjects here are the
+// untouched onboarding defaults, which leave no tombstones.
+export const stateAfterRestore = (restored, state, { placeholder = false, now = nowIso() } = {}) => {
+  const lists = replaceData(state, restored, { placeholder, now });
+  const after = { ...lists, themeId: restored.themeId || state.themeId };
+  return { ...after, game: restored.game ? settleLegacyXP(restored.game, after.sessions, after.subjects) : state.game };
 };
 
 // The offer beside an import's message: { kind: "merge" | "restore", before, after }.

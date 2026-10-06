@@ -470,16 +470,16 @@ describe("undo restore with a second tab open", () => {
     return { before, topic };
   };
 
-  it("stays offered after the other tab merges its records back in", async () => {
+  it("stays offered after the other tab takes the restore", async () => {
     localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(preRestore()));
     const [a, b] = openTabs();
     queued.splice(0);
     await restoreIn(a);
     deliver();
 
-    // Tab B kept its own records (N10) and wrote them back here.
-    expect(stored(STORAGE_KEYS.sessions).some((s) => s.id === "sess-kept")).toBe(true);
-    expect(loggedIn(b)).toBe(3);
+    // Tab B takes the restore and doesn't bring back what it removed (N10).
+    expect(stored(STORAGE_KEYS.sessions).some((s) => s.id === "sess-kept")).toBe(false);
+    expect(loggedIn(b)).toBe(2);
     expect(a.getByRole("button", { name: "Undo restore" })).toBeTruthy();
   });
 
@@ -541,7 +541,9 @@ describe("undo restore with a second tab open", () => {
     await restoreIn(a);
     deliver();
 
-    fireEvent.click(b.getAllByRole("checkbox")[1]);
+    // The file's only topic is done, so the change is a session deleted in tab B.
+    fireEvent.click(b.getByRole("button", { name: "Log" }));
+    fireEvent.click(b.getAllByRole("button", { name: "Delete session Maths" })[0]);
     deliver();
 
     expect(a.queryByRole("button", { name: "Undo restore" })).toBeNull();

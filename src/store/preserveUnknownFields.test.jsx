@@ -1,4 +1,4 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { goTo, renderApp } from "../test/helpers.jsx";
@@ -128,7 +128,8 @@ describe("fields written by a newer build (N9)", () => {
     await goTo(user, "Settings");
     await user.upload(screen.getByLabelText("Restore backup file"), newerFile());
     expect(await screen.findByText(/restored/i)).toBeTruthy();
-    expectUnknownFields(stored(STORAGE_KEYS.subjects), stored(STORAGE_KEYS.sessions));
+    // The message renders before the persist effects write storage.
+    await waitFor(() => expectUnknownFields(stored(STORAGE_KEYS.subjects), stored(STORAGE_KEYS.sessions)));
   });
 
   it("survive Merge from file", async () => {
@@ -137,7 +138,7 @@ describe("fields written by a newer build (N9)", () => {
     await goTo(user, "Settings");
     await user.upload(screen.getByLabelText("Merge backup file"), newerFile());
     expect(await screen.findByText("Backup merged with the data on this device.")).toBeTruthy();
-    expectUnknownFields(stored(STORAGE_KEYS.subjects), stored(STORAGE_KEYS.sessions));
+    await waitFor(() => expectUnknownFields(stored(STORAGE_KEYS.subjects), stored(STORAGE_KEYS.sessions)));
   });
 
   it("are in the backup built straight from storage", () => {

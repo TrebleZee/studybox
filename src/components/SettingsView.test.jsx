@@ -301,7 +301,9 @@ describe("Settings", () => {
       expect(localStorage.getItem("sb-sessions")).toBe(before);
     });
 
-    it("restoring a file replaces this device's tombstones with the file's", async () => {
+    // N10: a pre-v3 file has no tombstones; forgetting this device's would let
+    // a later merge bring back everything deleted here.
+    it("restoring a file keeps this device's tombstones beside the file's", async () => {
       const user = userEvent.setup();
       localStorage.setItem(
         "sb-tombstones",
@@ -314,7 +316,9 @@ describe("Settings", () => {
         backupFile({ subjects: [], sessions: [storedSession("there")], version: 2 })
       );
       expect(await screen.findByText("Backup restored.")).toBeTruthy();
-      await waitFor(() => expect(JSON.parse(localStorage.getItem("sb-tombstones")).sessions).toEqual({}));
+      await waitFor(() =>
+        expect(JSON.parse(localStorage.getItem("sb-tombstones")).sessions.old).toBe("2026-06-01T09:00:00.000Z")
+      );
     });
   });
 
