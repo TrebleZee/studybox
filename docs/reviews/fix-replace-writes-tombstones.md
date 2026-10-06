@@ -1,4 +1,4 @@
-# Review: fix/replace-writes-tombstones (PR #55, target v1.19.3)
+# Review: fix/replace-writes-tombstones (PR #55; version set at merge time)
 
 Date: 2026-10-06 · Reviewer: release-reviewer (two independent runs, Critical tier) · Fixer: release-fixer
 Verdict: fixed. Both runs returned clean with one low in-diff finding each – the same race in Use template – which is fixed with a regression test; the other finding is pre-existing and left as a follow-up.
