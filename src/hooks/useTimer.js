@@ -180,9 +180,11 @@ export default function useTimer({ canTime, defaultSubjectId, onAdopt }) {
     document.title = running ? `${fmt(displaySecs)} · StudyBox` : "StudyBox";
   }, [running, displaySecs]);
 
+  // A new session times the selected subject. One with time on it keeps its
+  // own, and if that's gone (deleted mid-session, N15) the app asks for one.
   const start = () => {
     if (!canTime || elsewhere) return;
-    if (!timedSubjectId) setTimedSubjectId(defaultSubjectId);
+    if (elapsed === 0) setTimedSubjectId(defaultSubjectId);
     const startTime = Date.now();
     setNow(startTime);
     setStartedAt(startTime - elapsed * 1000);

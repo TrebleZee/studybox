@@ -253,6 +253,8 @@ describe("undo restore", () => {
       screen.getByLabelText("Restore backup file"),
       backupFile({ subjects: [{ id: "other", name: "Other", color: "#123456", topics: [] }], sessions: [] })
     );
+    // The file is read asynchronously: wait for the restore to leave onboarding.
+    await waitFor(() => expect(screen.queryByText("Welcome to StudyBox")).toBeNull());
     await goTo(user, "Settings");
     expect(screen.getByText("Backup restored.")).toBeTruthy();
 
