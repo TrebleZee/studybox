@@ -33,6 +33,23 @@ describe("BottomBars", () => {
     }
   });
 
+  it("keeps the update banner (and its focus) when the undo bar comes and goes", () => {
+    const tree = (undo) => (
+      <BottomBars>
+        {undo && <UndoBar C={C} name="Algebra" onUndo={() => {}} onDismiss={() => {}} />}
+        <UpdateBanner C={C} onUpdate={() => {}} />
+      </BottomBars>
+    );
+    const { rerender } = render(tree(false));
+    const button = screen.getByRole("button", { name: "Update now" });
+    button.focus();
+    rerender(tree(true));
+    expect(screen.getByRole("button", { name: "Update now" })).toBe(button);
+    expect(document.activeElement).toBe(button);
+    rerender(tree(false));
+    expect(screen.getByRole("button", { name: "Update now" })).toBe(button);
+  });
+
   it("renders nothing when no bar is showing", () => {
     render(<BottomBars>{false}{null}</BottomBars>);
     expect(document.querySelector("[data-bottom-bars]")).toBeNull();
