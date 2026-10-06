@@ -18,6 +18,8 @@ export default function TimerPanel({
   displaySecs,
   canTime: canTimeHere,
   elsewhere,
+  orphaned,
+  onChooseSubject,
   timerColor,
   timerLabel,
   highlightedSubjectId,
@@ -37,6 +39,7 @@ export default function TimerPanel({
   // While another window owns the session in progress, this one can't start
   // a second timer; it can only continue that session here.
   const canTime = canTimeHere && !elsewhere;
+  const canLog = Boolean(displaySecs) && canTime && !orphaned;
   const [tagDraft, setTagDraft] = useState("");
   const addTag = (raw) => {
     const next = raw.trim();
@@ -97,7 +100,7 @@ export default function TimerPanel({
             whiteSpace: "nowrap",
           }}
         >
-          {timerLabel}
+          {orphaned ? "No subject" : timerLabel}
         </div>
       </div>
       <div style={{ display: "flex", gap: "5px", padding: "0 13px", marginBottom: "8px" }}>
@@ -176,6 +179,37 @@ export default function TimerPanel({
           >
             Continue here
           </button>
+        </div>
+      )}
+      {/* The timed subject was deleted mid-session (N15): the session is never
+          logged under another subject until the user picks one here. */}
+      {orphaned && (
+        <div style={{ margin: "0 13px 8px", fontSize: "11px", color: C.txt, lineHeight: 1.5 }}>
+          <div role="alert">
+            The subject this session was timed on has been deleted. Choose one to log it under, or Reset to discard it.
+          </div>
+          <select
+            aria-label="Log this session under"
+            value=""
+            onChange={(e) => e.target.value && onChooseSubject(e.target.value)}
+            style={{
+              width: "100%",
+              marginTop: "6px",
+              background: C.s2,
+              border: `1px solid ${C.bdr2}`,
+              borderRadius: "6px",
+              padding: "6px 8px",
+              color: C.txt,
+              fontSize: "12px",
+            }}
+          >
+            <option value="">Choose a subject</option>
+            {subjects.map((subject) => (
+              <option key={subject.id} value={subject.id}>
+                {subject.name}
+              </option>
+            ))}
+          </select>
         </div>
       )}
       {/* The note and tags belong to the session, so they're read-only while
@@ -337,17 +371,17 @@ export default function TimerPanel({
       <button
         className="nb"
         onClick={onLog}
-        disabled={!displaySecs || !canTime}
+        disabled={!canLog}
         style={{
           margin: "0 13px 13px",
           padding: "9px 0",
-          background: displaySecs && canTime ? timerColor : C.s3,
+          background: canLog ? timerColor : C.s3,
           border: "none",
           borderRadius: "6px",
-          color: displaySecs && canTime ? "#000" : C.muted,
+          color: canLog ? "#000" : C.muted,
           fontWeight: 700,
           fontSize: "12px",
-          cursor: displaySecs && canTime ? "pointer" : "not-allowed",
+          cursor: canLog ? "pointer" : "not-allowed",
           transition: "all 0.15s",
         }}
       >

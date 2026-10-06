@@ -22,6 +22,17 @@ describe("useTimer", () => {
     expect(result.current.timedSubjectId).toBe("physics");
   });
 
+  it("resuming a session whose subject was cleared never picks the selected one (N15)", () => {
+    const { result } = setup();
+    act(() => result.current.start());
+    act(() => vi.advanceTimersByTime(3000));
+    act(() => result.current.pause());
+    act(() => result.current.setTimedSubjectId(null));
+    act(() => result.current.start());
+    expect(result.current.running).toBe(true);
+    expect(result.current.timedSubjectId).toBeNull();
+  });
+
   it("stays accurate after the clock jumps (tab backgrounded)", () => {
     const { result } = setup();
     act(() => result.current.start());
