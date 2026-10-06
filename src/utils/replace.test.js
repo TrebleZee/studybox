@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { mergeData } from "./merge.js";
 import { replaceData, stampPast } from "./replace.js";
 import { DEFAULT_GAME } from "./gameLogic.js";
-import { addTombstone, childKey, emptyTombstones } from "./tombstones.js";
+import { addTombstone, childKey, emptyTombstones, subtaskKey } from "./tombstones.js";
 
 // N10: replacing data tombstones what it removes, keeps the tombstones here,
 // and stamps what it puts in place only where another copy could beat it.
@@ -93,6 +93,36 @@ describe("replaceData", () => {
     const merged = mergeData({ ...here, tombstones, game: DEFAULT_GAME }, { ...replaced, game: DEFAULT_GAME }, nowMs);
     expect(merged.subjects.map((s) => s.id)).toEqual(["maths"]);
     expect(merged.sessions.map((s) => s.id)).toEqual(["s1"]);
+  });
+
+  // N19 made subtasks records: they merge one by one, apart from their topic.
+  it("tombstones subtasks it drops from a topic it keeps, and stamps one another copy would beat", () => {
+    const st = (id, done, updatedAt) => ({ id, name: id, done, updatedAt });
+    const withSubtasks = (subtasks, topicExtra = {}) => ({
+      ...here,
+      subjects: [subject("maths", [{ ...topic("t1", true, at(10)), ...topicExtra, subtasks }])],
+    });
+    const mine = withSubtasks([st("a", true, at(10)), st("gone", false, at(10)), st("same", false, at(9))]);
+    const file = [subject("maths", [{ ...topic("t1", true, at(10)), subtasks: [st("a", false, at(9)), st("same", false, at(9))] }])];
+    const replaced = replaceData(mine, { subjects: file }, { now });
+    expect(replaced.tombstones.subtasks).toEqual({ [subtaskKey("maths", "t1", "gone")]: now });
+    const [a, same] = replaced.subjects[0].topics[0].subtasks;
+    expect(a).toEqual({ ...file[0].topics[0].subtasks[0], updatedAt: now });
+    expect(same).toBe(file[0].topics[0].subtasks[1]);
+    // The topic's own fields are unchanged, so the topic keeps its stamp.
+    expect(replaced.subjects[0].topics[0].updatedAt).toBe(at(10));
+    const merged = mergeData({ ...mine, game: DEFAULT_GAME }, { ...replaced, game: DEFAULT_GAME }, nowMs);
+    expect(merged.subjects[0].topics[0].subtasks.map((x) => [x.id, x.done])).toEqual([["a", false], ["same", false]]);
+  });
+
+  it("stamps a subtask past its tombstone, and a topic only on its own fields", () => {
+    const st = { id: "a", name: "a", done: false, updatedAt: at(9) };
+    const tombstones = addTombstone(emptyTombstones(), "subtasks", subtaskKey("maths", "t1", "a"), at(13));
+    const mine = { ...here, tombstones, subjects: [subject("maths", [{ ...topic("t1", false, at(10)), subtasks: [] }])] };
+    const file = [subject("maths", [{ ...topic("t1", false, at(10)), subtasks: [st] }])];
+    const [t1] = replaceData(mine, { subjects: file }, { now }).subjects[0].topics;
+    expect(t1.subtasks[0].updatedAt).toBe("2026-09-14T13:00:00.001Z");
+    expect(t1.updatedAt).toBe(at(10));
   });
 
   it("writes no tombstones for the untouched placeholder subjects, and leaves the file's stamps alone", () => {

@@ -131,6 +131,56 @@ describe("restore with a second tab open (N10)", () => {
   });
 });
 
+// N10 for subtasks (N19 made them records): a stamped subtask the restore
+// drops from a topic it keeps must stay gone in both tabs, and Undo restore
+// must bring it back in both.
+describe("restore with a second tab open drops subtasks of kept topics (N10, N19)", () => {
+  const subtask = (id, done = false, updatedAt = at(12)) => ({ id, name: id, done, createdAt: at(12), updatedAt });
+  const seedSubtasks = () => {
+    const subjects = seedInstall();
+    subjects[0].topics[0] = { ...subjects[0].topics[0], subtasks: [subtask("st-keep"), subtask("st-drop")] };
+    localStorage.setItem(STORAGE_KEYS.subjects, JSON.stringify(subjects));
+    return subjects;
+  };
+  const subtasksOf = () => stored(STORAGE_KEYS.subjects)[0].topics[0].subtasks;
+
+  it("ends with only the file's subtasks in both tabs, and Undo restore brings the dropped one back", async () => {
+    const subjects = seedSubtasks();
+    const [a, b] = openTabs();
+    queued.splice(0);
+
+    const kept = { ...subjects[0], topics: [{ ...subjects[0].topics[0], subtasks: [subtask("st-keep")] }] };
+    await upload(a, { version: 3, subjects: [kept], sessions: [] });
+    deliver();
+    // Tab B writes again from its own (pre-restore) state.
+    fireEvent.click(b.getByRole("button", { name: "Settings" }));
+    fireEvent.click(b.getByRole("button", { name: "Planner" }));
+    deliver();
+
+    expect(subtasksOf().map((st) => st.id)).toEqual(["st-keep"]);
+    expect(Object.keys(stored(STORAGE_KEYS.tombstones).subtasks)).toEqual([`${subjects[0].id}::${subjects[0].topics[0].id}::st-drop`]);
+
+    fireEvent.click(a.getByRole("button", { name: "Undo restore" }));
+    deliver();
+    expect(subtasksOf().map((st) => st.id).sort()).toEqual(["st-drop", "st-keep"]);
+  });
+
+  it("keeps the file's older copy of a subtask this device has a newer copy of, in both tabs", async () => {
+    const subjects = seedSubtasks();
+    const [a, b] = openTabs();
+    queued.splice(0);
+
+    const older = { ...subjects[0], topics: [{ ...subjects[0].topics[0], subtasks: [subtask("st-keep", true, at(10)), subtask("st-drop")] }] };
+    await upload(a, { version: 3, subjects: [older], sessions: [] });
+    deliver();
+    fireEvent.click(b.getByRole("button", { name: "Settings" }));
+    fireEvent.click(b.getByRole("button", { name: "Planner" }));
+    deliver();
+
+    expect(subtasksOf().find((st) => st.id === "st-keep").done).toBe(true);
+  });
+});
+
 describe("restoring a backup from before tombstones (pre-v3)", () => {
   it("keeps this device's tombstones, so a later merge does not bring deleted records back", async () => {
     seedInstall();
