@@ -20,8 +20,9 @@ export default function LogView({
   const max = Math.max(...rows.map((item) => subTotal(item.id)), 1);
 
   return (
-    <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+    <div className="split" style={{ display: "flex", flex: 1, overflow: "hidden" }}>
       <div
+        className="split-side"
         style={{
           width: "188px",
           borderRight: `1px solid ${C.bdr}`,

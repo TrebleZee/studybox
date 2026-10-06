@@ -22,11 +22,12 @@ export default function SettingsView({
   onUndoImport,
 }) {
   return (
-    <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+    <div className="split" style={{ display: "flex", flex: 1, overflow: "hidden" }}>
       <ThemePicker C={C} themeId={themeId} onChange={onChangeTheme} />
 
       <div style={{ flex: 1, overflowY: "auto", padding: "14px 18px" }}>
         <div
+          className="settings-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 1.3fr) minmax(180px, 1fr)",

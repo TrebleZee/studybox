@@ -565,7 +565,7 @@ export default function AnalysisPanel({
   };
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px", background: C.bg }}>
+    <div className="analysis-root" style={{ flex: 1, overflowY: "auto", padding: "20px 24px", background: C.bg }}>
       {/* Header & Controls */}
       <div
         style={{
@@ -587,7 +587,7 @@ export default function AnalysisPanel({
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+        <div className="analysis-controls" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           {/* Timeframe Filter Buttons */}
           <div
             style={{

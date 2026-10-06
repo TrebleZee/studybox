@@ -3,6 +3,7 @@ import { THEMES } from "../../utils/themes.js";
 export default function ThemePicker({ C, themeId, onChange }) {
   return (
     <div
+      className="split-side"
       style={{
         width: "228px",
         borderRight: `1px solid ${C.bdr}`,
@@ -25,7 +26,7 @@ export default function ThemePicker({ C, themeId, onChange }) {
       >
         Themes
       </div>
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 8px 8px" }}>
+      <div className="theme-list" style={{ flex: 1, overflowY: "auto", padding: "0 8px 8px" }}>
         {THEMES.map((candidate) => {
           const active = candidate.id === themeId;
           return (
