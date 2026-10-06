@@ -1,5 +1,7 @@
+import { settleLegacyXP } from "./gameLogic.js";
+import { mergeData } from "./merge.js";
 import { nowIso, touch } from "./records.js";
-import { addTombstone, childKey, deletedAt, removeTombstone } from "./tombstones.js";
+import { addTombstone, childKey, deletedAt, emptyTombstones, removeTombstone, TOMBSTONE_KINDS } from "./tombstones.js";
 
 // Undo for deletes. Before a record is deleted, describeDeletion notes where
 // it was and any tombstone it already had; restoreDeletion puts it back at
@@ -110,12 +112,16 @@ const ownFields = (subject) => {
 
 // Re-stamps each record of `list` that the merge changed or removed, past the
 // merged copy and any tombstone for it, so the pre-merge copy wins in a tab
-// that already took the merge. Unchanged records keep their stamps.
+// that already took the merge. Unchanged records keep their stamps, and so
+// does a record that is simply gone with no tombstone (a restore drops it
+// that way): no tab can hold a newer copy of it, and the copy another tab
+// still holds is this one.
 const restampChanged = (list, mergedList, tombstoneOf, now) => {
   const merged = byId(mergedList);
   return list.map((record) => {
     const mergedRecord = merged.get(record.id);
     if (mergedRecord && same(record, mergedRecord)) return record;
+    if (!mergedRecord && !tombstoneOf(record.id)) return record;
     return touch(record, stampPast([mergedRecord?.updatedAt, tombstoneOf(record.id)], now));
   });
 };
@@ -132,12 +138,107 @@ export const restoreBeforeMerge = ({ before, after }, now = nowIso()) => {
     const child = (kind) => (id) => deletedAt(tombstones, kind, childKey(subject.id, id));
     const topics = restampChanged(subject.topics, merged?.topics, child("topics"), now);
     const milestones = subject.milestones && restampChanged(subject.milestones, merged?.milestones, child("milestones"), now);
-    const fieldsChanged = !merged || !same(ownFields(subject), ownFields(merged));
+    const removed = deletedAt(tombstones, "subjects", subject.id);
+    const fieldsChanged = merged ? !same(ownFields(subject), ownFields(merged)) : !!removed;
     const restored = { ...subject, topics, ...(milestones ? { milestones } : {}) };
     return fieldsChanged
-      ? touch(restored, stampPast([merged?.updatedAt, deletedAt(tombstones, "subjects", subject.id)], now))
+      ? touch(restored, stampPast([merged?.updatedAt, removed], now))
       : restored;
   });
   const sessions = restampChanged(before.sessions, after.sessions, (id) => deletedAt(tombstones, "sessions", id), now);
   return { ...before, subjects, sessions };
 };
+
+// Undo restore (N11). Restore replaces everything, so another open tab merges
+// what it had back in and writes it here (N10, until replacing writes
+// tombstones): an echo like that holds nothing that wasn't here before the
+// restore or in the file, and leaves the offer in place. Anything else (a
+// logged session, a tick, a delete, here or in another tab) withdraws it.
+// Records are compared by content, not by a last-write-wins merge (R1): a file
+// stamped ahead of this device's clock would otherwise win against every edit
+// made since, and Undo restore would silently discard them. Every session,
+// subject's own fields, topic, milestone and tombstone here must be exactly a
+// copy from before the restore or from the file. The game has no stamps and
+// tabs merge it by taking the larger values, so it alone is compared by
+// merging; XP is derived, so totalXP is left out.
+const withoutTotal = (game) => ({ ...game, totalXP: null });
+const sameData = (a, b) =>
+  MERGED_KEYS.every((key) =>
+    key === "game" ? canonical(withoutTotal(a.game)) === canonical(withoutTotal(b.game)) : canonical(a[key]) === canonical(b[key])
+  );
+// Order isn't synced yet, so an echo may hold the same records in another order.
+const sortById = (list) => [...list].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+const byIdOrder = (data) => ({
+  ...data,
+  subjects: sortById(data.subjects).map((subject) => ({
+    ...subject,
+    topics: sortById(subject.topics || []),
+    ...(subject.milestones ? { milestones: sortById(subject.milestones) } : {}),
+  })),
+});
+
+// Canonical copies of each record in `lists`, keyed by id (a Map: ids are untrusted).
+const copiesOf = (lists) => {
+  const copies = new Map();
+  lists.flat().forEach((record) => {
+    if (!copies.has(record.id)) copies.set(record.id, new Set());
+    copies.get(record.id).add(canonical(record));
+  });
+  return copies;
+};
+const allKnown = (list = [], copies) => list.every((record) => copies.get(record.id)?.has(canonical(record)));
+const subjectIn = (data, id) => data.subjects.find((subject) => subject.id === id);
+
+const recordsKnown = (state, sources) => {
+  if (!allKnown(state.sessions, copiesOf(sources.map((source) => source.sessions)))) return false;
+  const subjectFields = copiesOf(sources.map((source) => source.subjects.map(ownFields)));
+  const subjectsKnown = state.subjects.every((subject) => {
+    if (!subjectFields.get(subject.id)?.has(canonical(ownFields(subject)))) return false;
+    const known = sources.map((source) => subjectIn(source, subject.id)).filter(Boolean);
+    return (
+      allKnown(subject.topics, copiesOf(known.map((copy) => copy.topics || []))) &&
+      allKnown(subject.milestones, copiesOf(known.map((copy) => copy.milestones || [])))
+    );
+  });
+  if (!subjectsKnown) return false;
+  return TOMBSTONE_KINDS.every((kind) =>
+    Object.entries(state.tombstones?.[kind] || {}).every(([id, time]) =>
+      sources.some((source) => deletedAt(source.tombstones, kind, id) === time)
+    )
+  );
+};
+
+export const unchangedSinceRestore = (undo, state, nowMs = Date.now()) => {
+  if (!undo?.after || state.themeId !== undo.after.themeId) return false;
+  if (sameData(byIdOrder(undo.after), byIdOrder(state))) return true;
+  if (!recordsKnown(state, [undo.after, undo.before])) return false;
+  const known = mergeData(undo.after, undo.before, nowMs);
+  return canonical(withoutTotal(mergeData(known, state, nowMs).game)) === canonical(withoutTotal(known.game));
+};
+
+// What Restore from file leaves: the file's lists, tombstones, game and theme,
+// keeping what's here for any part the file doesn't carry.
+export const stateAfterRestore = (restored, { subjects, sessions, game, themeId }) => {
+  const after = {
+    subjects: restored.subjects ?? subjects,
+    sessions: restored.sessions ?? sessions,
+    tombstones: restored.tombstones ?? emptyTombstones(),
+    themeId: restored.themeId || themeId,
+  };
+  return { ...after, game: restored.game ? settleLegacyXP(restored.game, after.sessions, after.subjects) : game };
+};
+
+// The offer beside an import's message: { kind: "merge" | "restore", before, after }.
+export const canUndoImport = (offer, state) =>
+  offer?.kind === "restore" ? unchangedSinceRestore(offer, state) : unchangedSinceMerge(offer?.after, state);
+
+// The state Undo puts back, theme and onboarding included. Undo restore
+// re-stamps against what is here now, which may already include another
+// tab's echo; records only the file had are left out but not tombstoned, as
+// for Undo merge (maintainer decision, 2026-10-05): with another tab open they
+// come back from it. A merge changes neither theme nor onboarding, so Undo
+// merge leaves the theme as it is now and onboarding done.
+export const stateBeforeImport = (offer, state, now = nowIso()) =>
+  offer.kind === "restore"
+    ? restoreBeforeMerge({ before: offer.before, after: state }, now)
+    : { ...restoreBeforeMerge(offer, now), themeId: state.themeId, onboarded: true };

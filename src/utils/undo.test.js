@@ -2,7 +2,16 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_GAME } from "./gameLogic.js";
 import { mergeData } from "./merge.js";
 import { addTombstone, childKey, emptyTombstones, removeTombstone } from "./tombstones.js";
-import { describeDeletion, restoreBeforeMerge, restoreDeletion, unchangedSinceMerge } from "./undo.js";
+import {
+  canUndoImport,
+  describeDeletion,
+  restoreBeforeMerge,
+  restoreDeletion,
+  stateAfterRestore,
+  stateBeforeImport,
+  unchangedSinceMerge,
+  unchangedSinceRestore,
+} from "./undo.js";
 
 describe("unchangedSinceMerge", () => {
   const after = { subjects: [], sessions: [], tombstones: emptyTombstones(), game: { totalXP: 0 } };
@@ -222,5 +231,129 @@ describe("undoing a merge", () => {
     const { before, after } = setup();
     const restored = restoreBeforeMerge({ before, after }, "2026-09-15T00:00:00.000Z");
     expect(restored.sessions[0].updatedAt).toBe("2026-09-20T10:00:00.001Z");
+  });
+});
+
+// N11: Undo restore.
+describe("undoing a restore", () => {
+  const nowMs = Date.parse("2026-09-20T12:00:00.000Z");
+  const session = (id, note, updatedAt = at) => ({ id, subjectId: "maths", duration: 600, date: at, note, tags: [], updatedAt });
+  const subject = { id: "maths", name: "Maths", color: "#123456", topics: [{ id: "t1", name: "Algebra", done: false }] };
+  const game = { ...DEFAULT_GAME, legacyXP: 0 };
+  const before = {
+    subjects: [subject],
+    sessions: [session("mine", "mine"), session("only-here", "only here")],
+    tombstones: emptyTombstones(),
+    game,
+    themeId: "dark",
+    onboarded: true,
+  };
+  const file = {
+    subjects: [{ ...subject, name: "Renamed", updatedAt: later }],
+    sessions: [session("mine", "theirs", later), session("file-only", "from the file")],
+    tombstones: emptyTombstones(),
+    game: { ...DEFAULT_GAME, totalXP: 500, legacyXP: null },
+    themeId: "light",
+  };
+  const after = stateAfterRestore(file, before);
+  const offer = { kind: "restore", before, after };
+
+  it("takes everything from the file, keeping what's here for parts it doesn't carry", () => {
+    expect(after.subjects).toBe(file.subjects);
+    expect(after.themeId).toBe("light");
+    expect(after.game.legacyXP).toBe(500 - 20);
+    const partial = stateAfterRestore({ sessions: [] }, before);
+    expect(partial.subjects).toBe(before.subjects);
+    expect(partial.game).toBe(before.game);
+    expect(partial.themeId).toBe("dark");
+    expect(partial.tombstones).toEqual(emptyTombstones());
+  });
+
+  it("is offered while nothing has changed, and after another tab merges its own records back in", () => {
+    expect(canUndoImport(offer, after)).toBe(true);
+    const echo = { ...mergeData(after, before, nowMs), themeId: "light" };
+    expect(echo.sessions.map((s) => s.id).sort()).toEqual(["file-only", "mine", "only-here"]);
+    expect(unchangedSinceRestore(offer, echo, nowMs)).toBe(true);
+    // ...in any order.
+    expect(unchangedSinceRestore(offer, { ...echo, sessions: [...echo.sessions].reverse() }, nowMs)).toBe(true);
+  });
+
+  it("is withdrawn by anything new: a session, an edit, a delete or a theme change", () => {
+    const changed = [
+      { ...after, sessions: [...after.sessions, session("new", "logged since", undoneAt)] },
+      { ...after, sessions: [session("mine", "edited since", undoneAt), after.sessions[1]] },
+      { ...after, tombstones: addTombstone(after.tombstones, "sessions", "file-only", undoneAt) },
+      { ...after, themeId: "dark" },
+    ];
+    changed.forEach((state) => expect(unchangedSinceRestore(offer, state, nowMs)).toBe(false));
+    expect(unchangedSinceRestore(undefined, after, nowMs)).toBe(false);
+  });
+
+  it("is withdrawn by edits even when the file's stamps are ahead of this device's clock (R1)", () => {
+    const now = new Date(nowMs).toISOString();
+    const ahead = "2026-09-21T12:00:00.000Z";
+    const skewed = {
+      subjects: [{ ...subject, updatedAt: ahead, topics: [{ id: "t1", name: "Algebra", done: false, updatedAt: ahead }] }],
+      sessions: [session("skewed", "from a fast clock", ahead)],
+      tombstones: emptyTombstones(),
+      game,
+      themeId: "dark",
+    };
+    const restoredState = stateAfterRestore(skewed, before);
+    const skewedOffer = { kind: "restore", before, after: restoredState };
+    const [restoredSubject] = restoredState.subjects;
+    const ticked = {
+      ...restoredState,
+      subjects: [
+        {
+          ...restoredSubject,
+          topics: [{ ...restoredSubject.topics[0], done: true, updatedAt: now }, { id: "t2", name: "New", done: false, createdAt: now, updatedAt: now }],
+        },
+      ],
+    };
+    const editedSession = { ...restoredState, sessions: [session("skewed", "edited here", now)] };
+    const renamed = { ...restoredState, subjects: [{ ...restoredSubject, name: "Maths here", updatedAt: now }] };
+    [ticked, editedSession, renamed].forEach((state) => expect(unchangedSinceRestore(skewedOffer, state, nowMs)).toBe(false));
+    // Another tab's echo of the same restore still leaves the offer in place.
+    const echo = { ...mergeData(restoredState, before, nowMs), themeId: "dark" };
+    expect(unchangedSinceRestore(skewedOffer, echo, nowMs)).toBe(true);
+  });
+
+  it("puts back what was here, re-stamping only what the file had another copy of", () => {
+    const restored = stateBeforeImport(offer, after, undoneAt);
+    expect(restored.themeId).toBe("dark");
+    expect(restored.onboarded).toBe(true);
+    expect(restored.game).toBe(game);
+    expect(restored.sessions).toEqual([{ ...before.sessions[0], updatedAt: undoneAt }, before.sessions[1]]);
+    expect(restored.subjects).toEqual([{ ...subject, updatedAt: undoneAt }]);
+    // The re-stamped copies win against the file's in a tab that took the restore.
+    const otherTab = mergeData(after, before, nowMs);
+    const settled = mergeData(otherTab, restored, nowMs);
+    expect(settled.sessions.find((s) => s.id === "mine").note).toBe("mine");
+    expect(settled.subjects[0].name).toBe("Maths");
+  });
+
+  it("leaves a record the restore simply dropped exactly as it was", () => {
+    const dropped = stateAfterRestore({ subjects: [], sessions: [] }, before);
+    const restored = stateBeforeImport({ kind: "restore", before, after: dropped }, dropped, undoneAt);
+    expect(restored.subjects).toEqual(before.subjects);
+    expect(restored.sessions).toEqual(before.sessions);
+  });
+
+  it("re-stamps a record the file tombstoned, past its tombstone", () => {
+    const tombstoned = stateAfterRestore(
+      { subjects: [subject], sessions: [], tombstones: addTombstone(emptyTombstones(), "sessions", "mine", undoneAt) },
+      before
+    );
+    const restored = stateBeforeImport({ kind: "restore", before, after: tombstoned }, tombstoned, at);
+    expect(restored.sessions[0].updatedAt > undoneAt).toBe(true);
+    expect(restored.sessions[1]).toBe(before.sessions[1]);
+  });
+
+  it("leaves the theme and onboarding alone on Undo merge", () => {
+    const merged = mergeData(before, file, nowMs);
+    const undone = stateBeforeImport({ kind: "merge", before, after: merged }, { ...merged, themeId: "light" }, undoneAt);
+    expect(undone.themeId).toBe("light");
+    expect(undone.onboarded).toBe(true);
   });
 });
