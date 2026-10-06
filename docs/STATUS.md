@@ -18,6 +18,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#62](https://github.com/TrebleZee/studybox/pull/62) | `instruction.md` documents two known gaps: streaks are rebuilt in the device's current timezone (N26), and the Asana panel copies a task's name into session tags (N27). No user-facing change | none (N26 and N27 stay open) | none |
 | [#61](https://github.com/TrebleZee/studybox/pull/61) | The status page stops going stale on merge: it states only what is true once its PR has merged (no production sha, open PRs, tag or check-state rows), and the post-merge checks moved into the git-workflow skill. No user-facing change | C13 | none |
 | [#55](https://github.com/TrebleZee/studybox/pull/55) | Restore from file, Start blank and templates write tombstones for what they replace, so another open tab (or a later merge) can no longer bring removed subjects, sessions, topics or subtasks back; restoring an old backup keeps this device's deletes | N10 | v1.19.6 |
 | [#60](https://github.com/TrebleZee/studybox/pull/60) | `drafts/` is ignored again, so spec PDF text dumped by `draft-spec --dump-text` can't be committed by accident. No user-facing change | C10 | none |
@@ -93,6 +94,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 | 7 | Make the design gate doc (`claude/v2-design-gate.md`) available to the exit check | Missing for three passes, so B1's wording has never been checked against it | 6 Nov |
 | 8 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
 | 9 | Decide whether the timer Reset undo (#46) should survive an accidental restart: today pressing Start or Space after Reset withdraws the offer at once, so Undo can never overwrite a new session. Options: fold the new seconds into the restored session, or let Undo replace a session under a few seconds | Review finding R1 on #46 (`docs/reviews/feat-undo-timer-reset.md`); not in the goal, so not decided by an agent | any time |
+| 10 | Publish the GitHub release for `v1.19.1` (the tag is on `origin`; `gh release create v1.19.1 --latest=false` with the #54 fix as its notes) | The merger session's release command was blocked by the permission system, so v1.19.1 is the only tag with no release | 9 Oct |
 
 ### Agent (next steps)
 
