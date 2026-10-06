@@ -8,12 +8,12 @@ Last updated: 2026-10-06
 
 | | |
 | --- | --- |
-| Current version | 1.19.2 |
-| Latest tag on GitHub | v1.19.2 |
+| Current version | 1.19.3 |
+| Latest tag on GitHub | v1.19.3 |
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `661e26a` (1.17.2) at the time of the 5 Oct scope review |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
-| Open PRs | drafts: [#52](https://github.com/TrebleZee/studybox/pull/52) subtasks merge as records (N19), [#55](https://github.com/TrebleZee/studybox/pull/55) replacing data writes tombstones (N10) |
+| Open PRs | draft: [#55](https://github.com/TrebleZee/studybox/pull/55) replacing data writes tombstones (N10) |
 | Checks on `master` | Lint, test (711 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
 
 ## Recent changes
@@ -22,6 +22,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#52](https://github.com/TrebleZee/studybox/pull/52) | Subtasks merge as records: a subtask added or deleted on one copy (another tab, or a merged file) is no longer lost or brought back when the other copy edits its topic | N19 | v1.19.3 |
 | [#56](https://github.com/TrebleZee/studybox/pull/56) | Applying an update in one window never reloads another that is busy (a session timed there, an undo on offer, an open edit): it shows the update banner and reloads once idle | N18 | v1.19.2 |
 | [#54](https://github.com/TrebleZee/studybox/pull/54) | A session whose subject was deleted (here, in another tab, or before undoing a Reset) is never logged under another subject: the timer says so and asks which subject to log it under | N15 | v1.19.1 |
 | [#53](https://github.com/TrebleZee/studybox/pull/53) | Orchestration stops using Fable: Opus is the top tier and Critical work gets two independent reviews. No user-facing change | none | none |
@@ -65,7 +66,7 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
 | A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0), A2.3b (#47, v1.18.1), A2.7 (#49, v1.19.0), A2.4 (#48, v1.19.0), A2.8 (#54, v1.19.1) and A2.10 (#56, v1.19.2) merged; every lane open except 9 |
-| A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | A3.2 (#50, N9, v1.19.0) merged; A3.3 (N19) open as #52; A3.1 not started |
+| A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | A3.2 (#50, N9, v1.19.0) and A3.3 (#52, N19, v1.19.3) merged; A3.1 not started |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
 | G | Keyboard (C3 now includes the Asana row), offline PDF import, bundle size | 30 Nov to 11 Dec | Not started |
@@ -98,7 +99,7 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 
 1. Lane 2: A3.1 (A2.4 merged in #48, v1.19.0).
 2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
-3. Lane 1: A3.3 `fix/subtask-records` (N19) is #52. It also touches `restoreBeforeMerge` and the Undo restore echo check in `src/utils/undo.js` (lane 2's file, merged with #48 on the branch) so both undos still hold for subtasks. Next in lane 1: Phase C `fix/bound-imported-values`, after the A3.4 exit check.
+3. Lane 1: A3.3 `fix/subtask-records` (N19) merged in #52 (v1.19.3). It also touches `restoreBeforeMerge` and the Undo restore echo check in `src/utils/undo.js` (lane 2's file, merged with #48 on the branch) so both undos still hold for subtasks. Next in lane 1: Phase C `fix/bound-imported-values`, after the A3.4 exit check.
 4. Open now: A2.6 (lane 4), A2.11 (lane 5), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check. Lane 6 is empty (A2.10 merged in #56).
 5. Test flakes seen only under full-suite load (each passes when run alone): `App.multiTab.test.jsx` "restores every pre-merge record in both tabs" (C14's test, failed once in a full run on 6 Oct), `App.undoRestore.test.jsx` "undoes a restore made from onboarding" (clicks Settings before the async restore finishes; about 1 in 10) `AddSubjectCard.test.jsx` "keeps the title chooser visible after a failed load" and `App.appUpdate.test.jsx` "doesn't reload a tab holding Undo merge, even back on the planner" (once in three full runs on 6 Oct, while #56 was merging). CI is required, so each can block a merge: one small `fix/` for the four.
 
