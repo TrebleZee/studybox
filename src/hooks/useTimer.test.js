@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fmt } from "../utils/format.js";
-import useTimer from "./useTimer.js";
+import useTimer, { ownedElsewhere } from "./useTimer.js";
 
 describe("useTimer", () => {
   beforeEach(() => {
@@ -208,5 +208,93 @@ describe("useTimer persistence", () => {
     act(() => vi.advanceTimersByTime(30_000));
     expect(result.current.running).toBe(false);
     expect(result.current.displaySecs).toBe(30);
+  });
+});
+
+describe("one tab owns the timer (N12)", () => {
+  const NOW = Date.parse("2026-06-19T09:00:00.000Z");
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+  afterEach(() => vi.useRealTimers());
+
+  const setup = () => renderHook(() => useTimer({ canTime: true, defaultSubjectId: "physics" }));
+  const stored = () => JSON.parse(localStorage.getItem("sb-timer"));
+  const otherTab = (fields) =>
+    localStorage.setItem(
+      "sb-timer",
+      JSON.stringify({ elapsed: 0, startedAt: NOW - 60_000, timedSubjectId: "maths", owner: "tab-other", heldAt: NOW, ...fields })
+    );
+
+  it.each([
+    ["a live session another tab owns", { owner: "tab-other", heldAt: NOW - 1000 }, 0, true],
+    ["this tab's own session", { owner: "tab-me", heldAt: NOW - 1000 }, 0, false],
+    ["an owner gone quiet for three minutes", { owner: "tab-other", heldAt: NOW - 3 * 60_000 }, 0, false],
+    ["a heartbeat from the future", { owner: "tab-other", heldAt: NOW + 1000 }, 0, false],
+    ["a timer saved before owners existed", { owner: undefined, heldAt: undefined }, 0, false],
+    ["a released timer, to the reloading page", { owner: null, heldAt: NOW - 1000 }, 0, false],
+    ["a released timer, to another tab within the grace", { owner: null, heldAt: NOW - 1000 }, 5000, true],
+    ["a timer with nothing on it", { owner: "tab-other", heldAt: NOW, startedAt: null, elapsed: 0 }, 0, false],
+  ])("treats %s correctly", (_label, fields, grace, expected) => {
+    const saved = { elapsed: 0, startedAt: NOW - 60_000, timedSubjectId: "maths", ...fields };
+    expect(ownedElsewhere(saved, "tab-me", NOW, grace)).toBe(expected);
+  });
+
+  it("leaves another tab's running timer alone: no copy, no write, no start, no restore", () => {
+    otherTab();
+    const before = localStorage.getItem("sb-timer");
+    const { result } = setup();
+    expect(result.current.elsewhere).toBe(true);
+    expect(result.current.displaySecs).toBe(0);
+
+    act(() => result.current.start());
+    act(() => result.current.restore({ elapsed: 120, running: true, timedSubjectId: "physics" }));
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(result.current.running).toBe(false);
+    expect(localStorage.getItem("sb-timer")).toBe(before);
+  });
+
+  it("stamps its own timer with an owner and a heartbeat, paused too", () => {
+    const { result } = setup();
+    act(() => result.current.start());
+    act(() => vi.advanceTimersByTime(30_000));
+    const owner = stored().owner;
+    expect(owner).toMatch(/^tab-/);
+    expect(stored().heldAt).toBe(Date.now());
+
+    act(() => result.current.pause());
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(stored()).toMatchObject({ owner, elapsed: 30, startedAt: null, heldAt: Date.now() });
+  });
+
+  it("releases its timer on pagehide, and its reload takes it back at once", () => {
+    const first = setup();
+    act(() => first.result.current.start());
+    act(() => vi.advanceTimersByTime(30_000));
+    act(() => window.dispatchEvent(new Event("pagehide")));
+    expect(stored().owner).toBeNull();
+
+    const { result } = setup();
+    expect(result.current.elsewhere).toBe(false);
+    expect(result.current.running).toBe(true);
+    expect(result.current.displaySecs).toBe(30);
+    first.unmount();
+  });
+
+  it("lets go of its session when another tab continues it", () => {
+    const { result } = setup();
+    act(() => result.current.start());
+    act(() => vi.advanceTimersByTime(30_000));
+    otherTab({ startedAt: NOW, heldAt: Date.now() });
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent("storage", { key: "sb-timer", newValue: localStorage.getItem("sb-timer"), storageArea: localStorage })
+      );
+    });
+    expect(result.current.elsewhere).toBe(true);
+    expect(result.current.running).toBe(false);
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(stored().owner).toBe("tab-other");
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { timedTopic } from "./sessionDraft.js";
+import { draftFields, timedTopic } from "./sessionDraft.js";
 
 const subjects = [
   { id: "cs", topics: [{ id: "t1" }, { id: "t2" }] },
@@ -22,5 +22,16 @@ describe("timedTopic", () => {
     expect(timedTopic(subjects, "cs", null)).toBeNull();
     expect(timedTopic(subjects, "cs", { id: "t1" })).toBeNull();
     expect(timedTopic(subjects, "__proto__", "constructor")).toBeNull();
+  });
+});
+
+describe("draftFields", () => {
+  it("reads the note and tags, dropping anything of the wrong type", () => {
+    expect(draftFields({ note: "Ch 3", tags: ["Recap", 4, null, "Blurting"], topicId: "t1" })).toEqual({
+      note: "Ch 3",
+      tags: ["Recap", "Blurting"],
+    });
+    expect(draftFields({ note: { text: "x" }, tags: "Recap" })).toEqual({ note: "", tags: [] });
+    expect(draftFields(null)).toEqual({ note: "", tags: [] });
   });
 });

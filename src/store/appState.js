@@ -72,8 +72,8 @@ export const storedBackup = () => withUnreadable(rawOrBuiltBackup());
 //
 // Tombstones merge with mergeTombstones (later deletion wins). Keys with no
 // merge at all (theme, Asana settings, onboarded) take the other
-// tab's value. The running timer and the unlogged session draft are per-tab
-// and never reconciled: a timer running in two tabs is two timers.
+// tab's value. The running timer and the unlogged session draft are never
+// reconciled: one tab owns the timer and no other writes it (useTimer).
 export const tabMerges = (localTombstones) => {
   const tombstones = () => mergeTombstones(localTombstones, loaders.tombstones());
   return {
