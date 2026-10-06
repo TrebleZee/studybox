@@ -59,14 +59,14 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
 | A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0), A2.3b (#47, v1.18.1), A2.7 (#49) and A2.4 (#48, v1.19.0) merged; every lane open except 9 |
-| A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | A3.2 (N9) open as #50, ready for the coordinator; A3.1 and A3.3 not started |
+| A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | A3.2 (#50) merged; A3.1 (N10) open as #55; A3.3 (N19) open as #52 |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
 | G | Keyboard (C3 now includes the Asana row), offline PDF import, bundle size | 30 Nov to 11 Dec | Not started |
 | D | Backend spike on test data | 30 Nov to 11 Dec | Ready by its gate; not before the B1 decision |
 | E | v2.0.0 accounts and sync | 4 Jan to 30 Apr 2027 | Blocked on B1, V1 |
 
-Open findings: 1 `high` (N10) once #48 merges (N9 closed by #50), 2 `blocker` (B1, V1). The full list is `docs/readiness/findings.md`.
+Open findings: no `high` once #55 merges (N10), 2 `blocker` (B1, V1). The full list is `docs/readiness/findings.md`.
 
 ## Needs actioning
 
@@ -90,7 +90,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 
 Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1). To run them as separate full sessions, a coordinator uses the `orchestrate` skill (at most 3 workers; the lanes table gives each one's model by risk; only the coordinator merges).
 
-1. Lane 2: A2.4 `feat/undo-restore` (N11) is #48, ready to merge; then A3.1. C14 is fixed (#47, v1.18.1).
+1. Lane 2: A3.1 `fix/replace-writes-tombstones` (N10) is #55, for the coordinator to merge; that empties lane 2.
 2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
 3. Lane 1: A3.3 `fix/subtask-records` (N19) once A3.2 (#50) is live; A3.2's unknown-field and unknown-tombstone-kind carry-through is what lets an older build keep subtask stamps and `subtasks` tombstones.
 4. Open now: A2.8 (lane 3, after #49 merges), A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
@@ -98,7 +98,7 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 ## Known risks
 
 - **Undo merge with two tabs open keeps the file's new records** (by decision). Records the merged file added come back from the other tab after Undo merge; everything that was here before is restored.
-- **Restore from file can be undone only until something changes** (N11 fixed by #48). Picking the wrong backup replaces everything; "Undo restore" brings it back until the next import, change or reload. Restoring an old (pre-v3) backup also forgets what was deleted (N10), and with another tab open, records only the file had and a bigger streak from the file stay after Undo (both known limits by maintainer decision, 2026-10-05).
+- **Restore from file can be undone only until something changes** (N11 fixed by #48). Picking the wrong backup replaces everything; "Undo restore" brings it back until the next import, change or reload. With another tab open, records only the file had and a bigger streak from the file stay after Undo (both known limits by maintainer decision, 2026-10-05).
 - **Reminders may crash the app on Android** (N20, proven with a stub, not on a device).
 - **A session in a killed app waits up to 3 minutes before another window picks it up** (by design, #49). If the installed app is swiped away mid-session and StudyBox is reopened within 3 minutes, the session shows as being timed in another window until then; **Continue here** takes it at once.
 - **Continue here doesn't bring the timed topic** (#49). The note and tags move with the session; the topic logged with it is whichever one the continuing window has open.
