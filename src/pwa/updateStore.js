@@ -1,32 +1,81 @@
 // Bridges the service worker registration (set up in main.jsx) to React.
 // main.jsx marks an update as ready; useAppUpdate decides when it's safe to
 // apply it, so a reload never lands in the middle of a study session.
+//
+// Applying an update in any tab hands every open tab to the new version at
+// once. The register client would reload each of them (N18); instead a tab
+// only reloads straight away if it asked for the update itself, and any other
+// tab is left to useAppUpdate, which reloads it once it's safe and shows the
+// banner until then.
 
 export const UPDATE_CHECK_INTERVAL_MS = 15 * 60 * 1000;
 
-let ready = false;
+const defaultReload = () => window.location.reload();
+
+// "none", "ready" (downloaded, waiting) or "active" (another tab applied it:
+// the new version already controls this page, so updating is just a reload).
+let state = "none";
 let apply = null;
+let requested = false;
+let reload = defaultReload;
 const listeners = new Set();
+
+const setState = (next) => {
+  state = next;
+  listeners.forEach((listener) => listener());
+};
 
 export const subscribeToUpdates = (listener) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
 };
 
-export const isUpdateReady = () => ready;
+export const updateState = () => state;
+
+export const isUpdateReady = () => state !== "none";
 
 export const markUpdateReady = (applyFn) => {
   apply = applyFn;
-  ready = true;
-  listeners.forEach((listener) => listener());
+  if (state === "none") setState("ready");
 };
 
-export const applyUpdate = () => apply?.();
+// The new version has taken control of this page.
+export const markUpdateActive = () => {
+  if (requested) return reload();
+  if (state !== "active") setState("active");
+  return undefined;
+};
+
+export const applyUpdate = () => {
+  if (state === "active") return reload();
+  requested = true;
+  return apply?.();
+};
+
+// Registers the service worker (main.jsx passes vite-plugin-pwa's registerSW)
+// and feeds its update events into this store.
+export const registerUpdates = (registerSW, { reload: reloadPage = defaultReload } = {}) => {
+  reload = reloadPage;
+  const updateSW = registerSW({
+    immediate: true,
+    onNeedRefresh() {
+      markUpdateReady(() => updateSW(true));
+    },
+    // Without this the register client reloads every tab on `controlling`.
+    onNeedReload: markUpdateActive,
+    onRegisteredSW(_swUrl, registration) {
+      watchForUpdates(registration);
+    },
+  });
+  return updateSW;
+};
 
 // Test-only: forget any pending update between tests.
 export const resetUpdateStore = () => {
-  ready = false;
+  state = "none";
   apply = null;
+  requested = false;
+  reload = defaultReload;
   listeners.clear();
 };
 
