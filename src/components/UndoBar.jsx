@@ -16,7 +16,7 @@ const button = (C, strong) => ({
 // after a timer Reset). One at a time: the app replaces it on the next
 // delete or Reset and clears it when the view changes. Space on its buttons
 // presses them rather than toggling the timer (data-own-keys).
-export default function UndoBar({ C, name, message, onUndo, onDismiss, raised = false }) {
+export default function UndoBar({ C, name, message, onUndo, onDismiss }) {
   const labelId = useId();
   return (
     <div
@@ -24,10 +24,8 @@ export default function UndoBar({ C, name, message, onUndo, onDismiss, raised = 
       aria-labelledby={labelId}
       data-own-keys=""
       style={{
-        position: "fixed",
-        bottom: raised ? "64px" : "16px",
-        left: "50%",
-        transform: "translateX(-50%)",
+        pointerEvents: "auto",
+        boxSizing: "border-box",
         display: "flex",
         alignItems: "center",
         gap: "8px",
@@ -38,8 +36,7 @@ export default function UndoBar({ C, name, message, onUndo, onDismiss, raised = 
         boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
         fontSize: "12px",
         color: C.txt,
-        zIndex: 1000,
-        maxWidth: "calc(100vw - 32px)",
+        maxWidth: "100%",
       }}
     >
       <span id={labelId} style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
