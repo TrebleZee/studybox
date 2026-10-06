@@ -450,13 +450,13 @@ export default function StudyBox() {
 
   // Catalogue-backed templates load their spec chunks on demand, so this is
   // async; Onboarding shows an error if that load fails. Each request takes a
-  // ticket; if another onboarding action (start blank, restore, a newer
-  // template) happened while it was loading, the stale result is dropped.
+  // ticket; if another onboarding action here (start blank, restore, a newer template), or
+  // in another tab (stored `onboarded`), happened while it was loading, the stale result is dropped.
   const useTemplate = async (templateId) => {
     const request = ++templateRequest.current;
     try {
       const template = await subjectsForTemplate(templateId);
-      if (request !== templateRequest.current) return { ok: true };
+      if (request !== templateRequest.current || loaders.onboarded()) return { ok: true };
       if (!template.length) return { ok: false, error: "That template couldn't be loaded." };
       replaceSubjects(template);
       return { ok: true };
