@@ -52,6 +52,7 @@ export default function TimerPanel({
 
   return (
     <div
+      data-pane-id="timer"
       style={{
         width: "250px",
         borderLeft: `1px solid ${C.bdr}`,

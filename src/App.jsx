@@ -463,10 +463,10 @@ export default function StudyBox() {
 
   return (
     <div
+      className="app-root"
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
         background: C.bg,
         color: C.txt,
         fontFamily: '"Inter", system-ui, sans-serif',

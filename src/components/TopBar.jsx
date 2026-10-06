@@ -15,6 +15,7 @@ export default function TopBar({ C, view, onChangeView, game, grandTotal, subjec
 
   return (
     <div
+      className="topbar"
       style={{
         display: "flex",
         alignItems: "center",
@@ -38,6 +39,7 @@ export default function TopBar({ C, view, onChangeView, game, grandTotal, subjec
         StudyBox
         <VersionTag C={C} style={{ marginLeft: "5px" }} />
       </span>
+      <div className="topbar-tabs" style={{ display: "contents" }}>
       {VIEWS.map(([v, label]) => (
         <button
           key={v}
@@ -58,7 +60,9 @@ export default function TopBar({ C, view, onChangeView, game, grandTotal, subjec
           {label}
         </button>
       ))}
+      </div>
       <div
+        className="topbar-stats"
         style={{
           marginLeft: "auto",
           display: "flex",

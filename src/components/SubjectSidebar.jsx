@@ -17,6 +17,7 @@ export default function SubjectSidebar({
 
   return (
       <div
+        data-pane-id="subjects"
         style={{
           width: "188px",
           borderRight: `1px solid ${C.bdr}`,
