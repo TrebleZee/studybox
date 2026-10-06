@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { isUnreadable, saveJson, subscribe } from "./localStore.js";
+import { isUnreadable, loadText, removeKey, saveJson, subscribe } from "./localStore.js";
 import { storedSchemaIsNewer } from "./migrations.js";
 
 // Key order doesn't matter when asking "did the merge add anything?".
@@ -19,25 +19,30 @@ const canonical = (value) =>
 // (storedSchemaIsNewer): a key this build has not changed is left exactly as
 // stored, and is only written once the user changes it here.
 //
+// `placeholder(value)`, if given, says the value is a stand-in that isn't the
+// user's data yet (the onboarding defaults, N10): it is never written, and a
+// stored value is removed instead, so loading the key gives the stand-in back.
+//
 // `load` reads and normalizes the stored value. When another tab changes the
 // key, it is loaded again and, if `merge(local, theirs)` is given, merged with
 // this tab's value; otherwise theirs replaces it. Only a merge that adds
 // something theirs lacks is written back, so tabs never echo each other's
 // writes: an external change costs at most one write here.
-export default function usePersistedState(key, load, merge) {
+export default function usePersistedState(key, load, merge, placeholder) {
   const [value, setValue] = useState(load);
   const loaded = useRef(value);
   const fromOutside = useRef(undefined);
-  const latest = useRef({ load, merge });
+  const latest = useRef({ load, merge, placeholder });
 
   useEffect(() => {
-    latest.current = { load, merge };
+    latest.current = { load, merge, placeholder };
   });
 
   useEffect(() => {
     if (value === fromOutside.current) return;
     if (value === loaded.current && (isUnreadable(key) || storedSchemaIsNewer())) return;
-    saveJson(key, value);
+    if (!latest.current.placeholder?.(value)) saveJson(key, value);
+    else if (loadText(key)) removeKey(key);
   }, [key, value]);
 
   useEffect(
