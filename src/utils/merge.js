@@ -33,10 +33,11 @@ import { childKey, deletedAt, mergeTombstones, subtaskKey } from "./tombstones.j
 // time, so where two copies differ on those the winner is arbitrary (but the
 // same on every device); and the order of subjects and topics can differ
 // between copies that hold the same records. With three or more copies and a
-// deleted subject, the result can also depend on merge order: a pairwise
-// merge that drops the subject forgets that copy's rename and its own topics,
-// and a third copy can then bring the subject back without them. Two-copy
-// merges are unaffected. Sync avoids this by keeping deleted rows server-side.
+// deleted subject or topic, the result can also depend on merge order: a
+// pairwise merge that drops the subject (or topic) forgets that copy's rename
+// and its own topics (or subtasks), and a third copy can then bring it back
+// without them. Two-copy merges are unaffected. Sync avoids this by keeping
+// deleted rows server-side.
 
 const stamp = (record) => record?.updatedAt || "";
 
@@ -115,10 +116,20 @@ const pickOwn = (a, b, lists) => {
 
 // A topic's own fields come whole from the winning copy; its subtasks merge
 // one by one (N19), each removed by its own tombstone unless edited since.
+// An unstamped subtask was last changed by a build before N19 (this build
+// stamps every subtask it adds or edits), and such a build stamped the topic
+// instead and wrote no subtask tombstone. So an unstamped subtask belongs to
+// its topic copy's version: on the copy whose topic is strictly older it is
+// dropped, and the later topic copy decides it, as before N19 (review B-R1
+// on #52). The winner's topic stamp is never older than the other's, so only
+// the other side is filtered; equal topic stamps keep the plain union. The
+// merged topic carries the later stamp, so this stays associative.
 const mergeTopic = (a, b, subjectId, tombstones) => {
   const winner = pickOwn(a, b, ["subtasks"]);
   const other = winner === a ? b : a;
-  const subtasks = mergeById(winner.subtasks || [], other.subtasks || [], pick).filter((subtask) =>
+  const otherSubtasks =
+    stamp(other) < stamp(winner) ? (other.subtasks || []).filter((subtask) => stamp(subtask)) : other.subtasks || [];
+  const subtasks = mergeById(winner.subtasks || [], otherSubtasks, pick).filter((subtask) =>
     survives(subtask, tombstones, "subtasks", subtaskKey(subjectId, winner.id, subtask.id))
   );
   // Normalized topics always have the list; a bare one doesn't gain it.
