@@ -186,6 +186,46 @@ describe("normalizeSubjects", () => {
   });
 });
 
+// N19: subtasks carry optional stamps like topics. The normalizer keeps valid
+// ones, drops invalid ones and never invents them; ids are never rewritten.
+describe("subtask records", () => {
+  const T = "2026-10-06T09:00:00.000Z";
+  it("keeps valid subtask stamps, drops invalid ones and never invents any", () => {
+    const [subject] = normalizeSubjects([
+      {
+        id: "x",
+        topics: [
+          {
+            id: "t",
+            name: "T",
+            subtasks: [
+              { id: "st-1", name: "a", done: true, createdAt: T, updatedAt: T },
+              { id: "st-2", name: "b", updatedAt: "yesterday", createdAt: 5 },
+              { id: "st-3", name: "c" },
+              { name: "no id" },
+            ],
+          },
+        ],
+      },
+    ]);
+    expect(subject.topics[0].subtasks).toEqual([
+      { id: "st-1", name: "a", done: true, createdAt: T, updatedAt: T },
+      { id: "st-2", name: "b", done: false },
+      { id: "st-3", name: "c", done: false },
+      // Missing ids were already filled in deterministically before N19.
+      { id: "t-st3", name: "no id", done: false },
+    ]);
+    expect(normalizeSubjects(JSON.parse(JSON.stringify([subject])))).toEqual([subject]);
+  });
+
+  it("leaves pre-N19 subtasks byte-identical", () => {
+    const stored = [{ id: "x", name: "X", color: "#111111", topics: [{ id: "t", name: "T", done: false, subtasks: [{ id: "t-st0", name: "a", done: false }] }] }];
+    const once = normalizeSubjects(stored);
+    expect(JSON.stringify(once[0].topics[0].subtasks)).toBe(JSON.stringify(stored[0].topics[0].subtasks));
+    expect(isUntouchedDefaultSubjects(JSON.parse(JSON.stringify(normalizeSubjects(defaultSubjects()))))).toBe(true);
+  });
+});
+
 describe("normalizeSessions", () => {
   it("returns [] for non-arrays", () => {
     expect(normalizeSessions(null)).toEqual([]);

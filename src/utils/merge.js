@@ -1,5 +1,5 @@
 import { buildInitialGame, normalizeGame, settleLegacyXP } from "./gameLogic.js";
-import { childKey, deletedAt, mergeTombstones } from "./tombstones.js";
+import { childKey, deletedAt, mergeTombstones, subtaskKey } from "./tombstones.js";
 
 // Deterministic merge of two copies of a user's data (schema v3), using only
 // what is on the records: ids, updatedAt and tombstones. The result is the
@@ -17,14 +17,17 @@ import { childKey, deletedAt, mergeTombstones } from "./tombstones.js";
 //   "superset of keys wins" rule would not be one, since two copies with
 //   incomparable key sets would fall to the content compare and could form a
 //   cycle with a third. For subjects the order is taken over the subject's
-//   own fields (see ownFields), which a merge leaves exactly as the winner's.
+//   own fields (see pickOwn), which a merge leaves exactly as the winner's;
+//   for topics, over the topic without its subtasks.
 // - A tombstone removes a record unless the record was edited after the
 //   deletion.
 // - A subject's own fields, its topics and its milestones merge separately,
 //   so ticking a topic on one device and renaming the subject on another
-//   both survive.
-// - A deleted subject stays deleted unless it, or anything in it, was edited
-//   after the deletion: work done since is never thrown away by a merge.
+//   both survive. Likewise a topic's own fields and its subtasks (N19), so a
+//   subtask added on one device survives a tick of its topic on another.
+// - A deleted subject or topic stays deleted unless it, or anything in it,
+//   was edited after the deletion: work done since is never thrown away by a
+//   merge.
 //
 // Known limits (see instruction.md): records from before v3 have no edit
 // time, so where two copies differ on those the winner is arbitrary (but the
@@ -58,12 +61,14 @@ const dedupe = (list) => {
   return byId.size === list.length ? list : [...byId.values()];
 };
 
+const latestStamp = (records) => records.reduce((latest, record) => (stamp(record) > latest ? stamp(record) : latest), "");
+
+// The latest edit to a topic or one of its subtasks.
+const topicActivity = (topic) => latestStamp([topic, ...(topic.subtasks || [])]);
+
 // The latest edit to a subject or anything inside it.
 const lastActivity = (subject) =>
-  [subject, ...(subject.topics || []), ...(subject.milestones || [])].reduce(
-    (latest, record) => (stamp(record) > latest ? stamp(record) : latest),
-    ""
-  );
+  latestStamp([subject, ...(subject.milestones || []), ...(subject.topics || []).flatMap((topic) => [topic, ...(topic.subtasks || [])])]);
 
 // Union by id. The winner's order comes first, then anything only the other
 // side has, in that side's order.
@@ -86,11 +91,10 @@ const mergeById = (winnerRaw, otherRaw, combine) => {
   return merged;
 };
 
-// A subject's own fields, without the two lists that merge separately.
-const ownFields = (subject) => {
-  const fields = { ...subject };
-  delete fields.topics;
-  delete fields.milestones;
+// A record without the lists that merge separately.
+const without = (record, keys) => {
+  const fields = { ...record };
+  keys.forEach((key) => delete fields[key]);
   return fields;
 };
 
@@ -102,18 +106,33 @@ const ownFields = (subject) => {
 // whole record, so the side never decides: the winner's topic order comes
 // first, and two tabs that each preferred their own copy would write back to
 // each other forever.
-const pickSubject = (a, b) => {
-  const [ownA, ownB] = [ownFields(a), ownFields(b)];
+// Topics are picked the same way, on their fields without `subtasks`.
+const pickOwn = (a, b, lists) => {
+  const [ownA, ownB] = [without(a, lists), without(b, lists)];
   if (JSON.stringify(ownA) !== JSON.stringify(ownB)) return pick(ownA, ownB) === ownA ? a : b;
   return JSON.stringify(a) >= JSON.stringify(b) ? a : b;
 };
 
-const mergeSubject = (a, b, tombstones) => {
-  const winner = pickSubject(a, b);
+// A topic's own fields come whole from the winning copy; its subtasks merge
+// one by one (N19), each removed by its own tombstone unless edited since.
+const mergeTopic = (a, b, subjectId, tombstones) => {
+  const winner = pickOwn(a, b, ["subtasks"]);
   const other = winner === a ? b : a;
-  const topics = mergeById(winner.topics || [], other.topics || [], pick).filter((topic) =>
-    survives(topic, tombstones, "topics", childKey(winner.id, topic.id))
+  const subtasks = mergeById(winner.subtasks || [], other.subtasks || [], pick).filter((subtask) =>
+    survives(subtask, tombstones, "subtasks", subtaskKey(subjectId, winner.id, subtask.id))
   );
+  return { ...winner, subtasks };
+};
+
+const mergeSubject = (a, b, tombstones) => {
+  const winner = pickOwn(a, b, ["topics", "milestones"]);
+  const other = winner === a ? b : a;
+  const topics = mergeById(winner.topics || [], other.topics || [], (x, y) => mergeTopic(x, y, winner.id, tombstones))
+    .map((topic) => mergeTopic(topic, topic, winner.id, tombstones))
+    .filter((topic) => {
+      const removed = deletedAt(tombstones, "topics", childKey(winner.id, topic.id));
+      return !removed || topicActivity(topic) > removed;
+    });
   const milestones = mergeById(winner.milestones || [], other.milestones || [], pick).filter((milestone) =>
     survives(milestone, tombstones, "milestones", childKey(winner.id, milestone.id))
   );

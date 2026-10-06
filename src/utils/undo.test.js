@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_GAME } from "./gameLogic.js";
 import { mergeData } from "./merge.js";
-import { addTombstone, childKey, emptyTombstones, removeTombstone } from "./tombstones.js";
+import { addTombstone, childKey, emptyTombstones, removeTombstone, subtaskKey } from "./tombstones.js";
 import { describeDeletion, restoreBeforeMerge, restoreDeletion, unchangedSinceMerge } from "./undo.js";
 
 describe("unchangedSinceMerge", () => {
@@ -216,6 +216,36 @@ describe("undoing a merge", () => {
       ["s2", "Physics"],
     ]);
     expect(otherTab.subjects.some((s) => s.id === "art")).toBe(true);
+  });
+
+  // N19: subtasks merge one by one, so re-stamping their topic is not enough.
+  it("wins back subtasks the merge changed or deleted in a tab that already took the merge", () => {
+    const st = (id, extra = {}) => ({ id, name: id, done: false, ...extra });
+    const topic = { id: "t1", name: "Algebra", done: false, subtasks: [st("a"), st("b", { updatedAt: "2026-09-10T09:00:00.000Z" })] };
+    const before = { subjects: [{ id: "maths", name: "Maths", topics: [topic] }], sessions: [], tombstones: emptyTombstones(), game: DEFAULT_GAME };
+    const file = {
+      subjects: [{ id: "maths", name: "Maths", topics: [{ ...topic, subtasks: [st("a", { done: true, updatedAt: fileAt }), st("c", { updatedAt: fileAt })] }] }],
+      sessions: [],
+      tombstones: addTombstone(emptyTombstones(), "subtasks", subtaskKey("maths", "t1", "b"), fileAt),
+      game: DEFAULT_GAME,
+    };
+    const after = mergeData(before, file);
+    expect(after.subjects[0].topics[0].subtasks.map((s) => [s.id, s.done])).toEqual([["a", true], ["c", false]]);
+
+    const restored = restoreBeforeMerge({ before, after }, undoMergeAt);
+    expect(restored.subjects[0].topics[0].subtasks).toEqual([
+      { ...st("a"), updatedAt: undoMergeAt },
+      { ...st("b"), updatedAt: undoMergeAt },
+    ]);
+    const otherTab = mergeData(after, { ...restored, tombstones: after.tombstones });
+    // Only c, which only the file had, comes back (maintainer decision, 2026-10-05).
+    expect(otherTab.subjects[0].topics[0].subtasks.map((s) => [s.id, s.done])).toEqual([["a", false], ["b", false], ["c", false]]);
+  });
+
+  it("leaves a topic whose subtasks the merge didn't change exactly as it was", () => {
+    const { before, after } = setup();
+    const restored = restoreBeforeMerge({ before, after }, undoMergeAt);
+    expect(restored.subjects[0].topics[1]).toBe(before.subjects[0].topics[1]);
   });
 
   it("stamps past the merged copy when the file's stamp is in the future", () => {

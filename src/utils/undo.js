@@ -1,5 +1,5 @@
 import { nowIso, touch } from "./records.js";
-import { addTombstone, childKey, deletedAt, removeTombstone } from "./tombstones.js";
+import { addTombstone, childKey, deletedAt, removeTombstone, subtaskKey } from "./tombstones.js";
 
 // Undo for deletes. Before a record is deleted, describeDeletion notes where
 // it was and any tombstone it already had; restoreDeletion puts it back at
@@ -120,6 +120,17 @@ const restampChanged = (list, mergedList, tombstoneOf, now) => {
   });
 };
 
+// Subtasks merge one by one (N19), so re-stamping a topic doesn't win its
+// subtasks back: each one the merge changed or removed is re-stamped too.
+const restampSubtasks = (subjectId, topics, mergedTopics, tombstones, now) => {
+  const merged = byId(mergedTopics);
+  return topics.map((topic) => {
+    const tombstoneOf = (id) => deletedAt(tombstones, "subtasks", subtaskKey(subjectId, topic.id, id));
+    const subtasks = restampChanged(topic.subtasks || [], merged.get(topic.id)?.subtasks, tombstoneOf, now);
+    return subtasks.every((subtask, index) => subtask === topic.subtasks[index]) ? topic : { ...topic, subtasks };
+  });
+};
+
 // The state to put back on Undo merge (N8). Records only the file had are
 // left out but not tombstoned (maintainer decision, 2026-10-05): with another
 // tab open they come back from it, and a later merge of that file, or sync
@@ -130,7 +141,7 @@ export const restoreBeforeMerge = ({ before, after }, now = nowIso()) => {
   const subjects = before.subjects.map((subject) => {
     const merged = mergedSubjects.get(subject.id);
     const child = (kind) => (id) => deletedAt(tombstones, kind, childKey(subject.id, id));
-    const topics = restampChanged(subject.topics, merged?.topics, child("topics"), now);
+    const topics = restampSubtasks(subject.id, restampChanged(subject.topics, merged?.topics, child("topics"), now), merged?.topics, tombstones, now);
     const milestones = subject.milestones && restampChanged(subject.milestones, merged?.milestones, child("milestones"), now);
     const fieldsChanged = !merged || !same(ownFields(subject), ownFields(merged));
     const restored = { ...subject, topics, ...(milestones ? { milestones } : {}) };
