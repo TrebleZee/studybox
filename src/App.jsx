@@ -35,6 +35,7 @@ import { mergeData } from "./utils/merge.js";
 import { convertTopicToMilestone } from "./utils/milestones.js";
 import { newId, nowIso, stampNew, touch } from "./utils/records.js";
 import { addTombstone, childKey, mergeTombstones } from "./utils/tombstones.js";
+import { replaceData } from "./utils/replace.js";
 import { canUndoImport, stateAfterRestore, stateBeforeImport } from "./utils/undo.js";
 import { THEMES } from "./utils/themes.js";
 
@@ -56,13 +57,15 @@ export default function StudyBox() {
   const [tombstones, setTombstones] = usePersistedState(STORAGE_KEYS.tombstones, loaders.tombstones, mergeTombstones);
   const merge = tabMerges(tombstones);
   const [themeId, setThemeId] = usePersistedState(STORAGE_KEYS.theme, loaders.theme);
-  const [subjects, setSubjects] = usePersistedState(STORAGE_KEYS.subjects, loaders.subjects, merge.subjects);
+  const [onboarded, setOnboarded] = usePersistedState(STORAGE_KEYS.onboarded, loaders.onboarded);
   const [sessions, setSessions] = usePersistedState(STORAGE_KEYS.sessions, loaders.sessions, merge.sessions);
+  // Until onboarding is dismissed, the untouched defaults are a placeholder and are not stored (N10).
+  const placeholder = (list) => !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(list);
+  const [subjects, setSubjects] = usePersistedState(STORAGE_KEYS.subjects, loaders.subjects, merge.subjects, placeholder);
   const [asanaCfg, setAsanaCfg] = usePersistedState(STORAGE_KEYS.asana, loaders.asana);
   const [asanaStats, setAsanaStats] = usePersistedState(STORAGE_KEYS.asanaStats, loaders.asanaStats);
   const [game, setGame] = usePersistedState(STORAGE_KEYS.game, loaders.game, merge.game);
   const entomb = (kind, id) => setTombstones((prev) => addTombstone(prev, kind, id));
-  const [onboarded, setOnboarded] = usePersistedState(STORAGE_KEYS.onboarded, loaders.onboarded);
   const templateRequest = useRef(0);
   // The unlogged session's note, tags and timed topic are saved alongside the
   // timer so a reload doesn't lose them.
@@ -131,8 +134,7 @@ export default function StudyBox() {
   const timedSubject = subjects.find((subject) => subject.id === timedSubjectId);
   const timingAsana = asanaEnabled && timedSubjectId === asanaCfg.id;
   const sessionInProgress = running || displaySecs > 0;
-  const needsOnboarding =
-    !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
+  const needsOnboarding = placeholder(subjects);
   const { undo, noteDeletion, noteTimerReset, undoDelete, clearUndo } = useUndoDelete({
     ...{ subjects, sessions, tombstones, setSubjects, setSessions, setTombstones, timerBusy: sessionInProgress || timer.elsewhere },
     onRestore: ({ id, selected, timed, timer: reset, topicId }) => {
@@ -398,7 +400,7 @@ export default function StudyBox() {
         setBackupMessage({ type: "success", text, undo: { kind: "merge", before, after: merged } });
         return { ok: true };
       }
-      const after = stateAfterRestore(restored, { subjects, sessions, game, themeId });
+      const after = stateAfterRestore(restored, { subjects, sessions, tombstones, game, themeId }, { placeholder: needsOnboarding });
       setData(after);
       if (restored.subjects) setSel(after.subjects[0]?.id ?? null);
       setThemeId(after.themeId);
@@ -429,21 +431,21 @@ export default function StudyBox() {
     setBackupMessage({ type: "success", text: offer.kind === "restore" ? "Restore undone." : "Merge undone." });
   };
 
-  // Onboarding's "Choose my subjects": the picked subjects replace the
-  // untouched placeholder list.
-  const startWithSubjects = (list) => {
-    const chosen = buildNewSubjects(list);
-    templateRequest.current += 1;
-    setSubjects(chosen);
-    setSel(chosen[0]?.id ?? null);
+  // Onboarding's choices replace the subjects, tombstoning what they remove unless it's the placeholder (N10).
+  const replaceSubjects = (list) => {
+    const next = replaceData({ subjects, sessions, tombstones }, { subjects: list }, { placeholder: needsOnboarding });
+    setSubjects(next.subjects);
+    setTombstones(next.tombstones);
+    setSel(list[0]?.id ?? null);
     setOnboarded(true);
   };
-
+  const startWithSubjects = (list) => {
+    templateRequest.current += 1;
+    replaceSubjects(buildNewSubjects(list));
+  };
   const startBlank = () => {
     templateRequest.current += 1;
-    setSubjects([]);
-    setSel(null);
-    setOnboarded(true);
+    replaceSubjects([]);
   };
 
   // Catalogue-backed templates load their spec chunks on demand, so this is
@@ -456,9 +458,7 @@ export default function StudyBox() {
       const template = await subjectsForTemplate(templateId);
       if (request !== templateRequest.current) return { ok: true };
       if (!template.length) return { ok: false, error: "That template couldn't be loaded." };
-      setSubjects(template);
-      setSel(template[0].id);
-      setOnboarded(true);
+      replaceSubjects(template);
       return { ok: true };
     } catch {
       return { ok: false, error: "That template couldn't be loaded. Check your connection and try again." };

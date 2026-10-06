@@ -44,6 +44,17 @@ describe("tab merges", () => {
     expect(subjects(local, local.filter((s) => s.id !== "maths")).some((s) => s.id === "maths")).toBe(false);
   });
 
+  // N10: the untouched onboarding defaults are nobody's data. A tab still on
+  // them takes what the other tab replaced them with, rather than adding them back.
+  it("takes the other tab's subjects while this tab only has the untouched defaults", () => {
+    const { subjects } = tabMerges(emptyTombstones());
+    const defaults = loaders.subjects();
+    expect(isUntouchedDefaultSubjects(defaults)).toBe(true);
+    expect(subjects(defaults, [])).toEqual([]);
+    const ticked = defaults.map((s, i) => (i ? s : { ...s, topics: [{ ...s.topics[0], done: true, updatedAt: "2026-09-14T09:00:00.000Z" }, ...s.topics.slice(1)] }));
+    expect(subjects(ticked, []).map((s) => s.id)).toEqual(defaults.map((s) => s.id));
+  });
+
   it("changes nothing when both tabs agree, so nothing is written back", () => {
     const { subjects, sessions, game } = tabMerges(emptyTombstones());
     const subjectList = loaders.subjects();

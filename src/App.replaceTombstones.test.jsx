@@ -42,8 +42,11 @@ const deliver = () => {
 const openTabs = () => [within(render(<App />).container), within(render(<App />).container)];
 const stored = (key) => JSON.parse(localStorage.getItem(key));
 const subjectIds = () => (stored(STORAGE_KEYS.subjects) || []).map((subject) => subject.id);
-const shownSubjects = (tab) =>
-  tab.queryAllByRole("button").filter((button) => /\(\d+\/\d+\)|^Delete subject/.test(button.textContent));
+// Tab B shows none of the placeholder subjects, and the replacing ones.
+const showsOnly = (tab, name) => {
+  expect(tab.queryByText(/Further Maths/)).toBeNull();
+  expect(tab.getAllByText(name).length).toBeGreaterThan(0);
+};
 const loggedIn = (tab) => {
   fireEvent.click(tab.getByRole("button", { name: "Log" }));
   const count = tab.queryAllByRole("button", { name: /^Edit session / }).length;
@@ -185,7 +188,26 @@ describe("onboarding with a second tab on the onboarding screen (N10)", () => {
     expect(ids.some((id) => defaultSubjects().some((s) => s.id === id))).toBe(false);
     noSubjectTombstones();
     expect(b.queryByRole("button", { name: /Start blank/ })).toBeNull();
-    expect(shownSubjects(a).length).toBe(shownSubjects(b).length);
+    [a, b].forEach((tab) => showsOnly(tab, /English Language/));
+  });
+
+  it("Choose my subjects leaves only the chosen subjects in both tabs", async () => {
+    const [a, b] = openTabs();
+    queued.splice(0);
+
+    fireEvent.click(a.getByRole("button", { name: /Choose my subjects/ }));
+    fireEvent.click(a.getByRole("radio", { name: "GCSE" }));
+    fireEvent.click(within(a.getByRole("list", { name: "Subjects" })).getByRole("button", { name: /^English Language/ }));
+    fireEvent.click(within(a.getByRole("list", { name: "Exam boards" })).getByRole("button", { name: /^AQA/ }));
+    fireEvent.click(await a.findByRole("button", { name: /Add to my subjects/ }, { timeout: 5000 }));
+    fireEvent.click(await a.findByRole("button", { name: "Finish (1)" }));
+    await waitFor(() => expect(a.queryByRole("button", { name: /Choose my subjects/ })).toBeNull());
+    deliver();
+
+    expect(stored(STORAGE_KEYS.subjects).map((s) => [s.board, s.spec])).toEqual([["AQA", "8700"]]);
+    noSubjectTombstones();
+    expect(b.queryByRole("button", { name: /Start blank/ })).toBeNull();
+    [a, b].forEach((tab) => showsOnly(tab, /English Language/));
   });
 
   it("restore from onboarding leaves only the file's subjects in both tabs", async () => {
@@ -198,6 +220,6 @@ describe("onboarding with a second tab on the onboarding screen (N10)", () => {
 
     expect(subjectIds()).toEqual(["bio"]);
     noSubjectTombstones();
-    [a, b].forEach((tab) => expect(tab.getAllByRole("button", { name: /Biology/ }).length).toBeGreaterThan(0));
+    [a, b].forEach((tab) => showsOnly(tab, /Biology/));
   });
 });

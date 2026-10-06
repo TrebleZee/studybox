@@ -255,24 +255,29 @@ describe("undoing a restore", () => {
     game: { ...DEFAULT_GAME, totalXP: 500, legacyXP: null },
     themeId: "light",
   };
-  const after = stateAfterRestore(file, before);
+  const restoredAt = "2026-09-14T11:02:00.000Z";
+  const after = stateAfterRestore(file, before, { now: restoredAt });
   const offer = { kind: "restore", before, after };
 
   it("takes everything from the file, keeping what's here for parts it doesn't carry", () => {
-    expect(after.subjects).toBe(file.subjects);
+    expect(after.subjects).toEqual(file.subjects);
+    expect(after.sessions).toEqual(file.sessions);
     expect(after.themeId).toBe("light");
     expect(after.game.legacyXP).toBe(500 - 20);
-    const partial = stateAfterRestore({ sessions: [] }, before);
+    // What the file removed is tombstoned (N10).
+    expect(after.tombstones).toEqual(addTombstone(emptyTombstones(), "sessions", "only-here", restoredAt));
+    const partial = stateAfterRestore({ sessions: [] }, before, { now: restoredAt });
     expect(partial.subjects).toBe(before.subjects);
     expect(partial.game).toBe(before.game);
     expect(partial.themeId).toBe("dark");
-    expect(partial.tombstones).toEqual(emptyTombstones());
+    expect(Object.keys(partial.tombstones.sessions)).toEqual(["mine", "only-here"]);
   });
 
-  it("is offered while nothing has changed, and after another tab merges its own records back in", () => {
+  it("is offered while nothing has changed, and after another tab takes the restore", () => {
     expect(canUndoImport(offer, after)).toBe(true);
     const echo = { ...mergeData(after, before, nowMs), themeId: "light" };
-    expect(echo.sessions.map((s) => s.id).sort()).toEqual(["file-only", "mine", "only-here"]);
+    // The other tab's records don't come back (N10).
+    expect(echo.sessions.map((s) => s.id).sort()).toEqual(["file-only", "mine"]);
     expect(unchangedSinceRestore(offer, echo, nowMs)).toBe(true);
     // ...in any order.
     expect(unchangedSinceRestore(offer, { ...echo, sessions: [...echo.sessions].reverse() }, nowMs)).toBe(true);
@@ -319,30 +324,50 @@ describe("undoing a restore", () => {
     expect(unchangedSinceRestore(skewedOffer, echo, nowMs)).toBe(true);
   });
 
-  it("puts back what was here, re-stamping only what the file had another copy of", () => {
+  it("puts back what was here, re-stamping only what the file had another copy of or removed", () => {
     const restored = stateBeforeImport(offer, after, undoneAt);
     expect(restored.themeId).toBe("dark");
     expect(restored.onboarded).toBe(true);
     expect(restored.game).toBe(game);
-    expect(restored.sessions).toEqual([{ ...before.sessions[0], updatedAt: undoneAt }, before.sessions[1]]);
+    // The restore's tombstones are gone again.
+    expect(restored.tombstones).toBe(before.tombstones);
+    expect(restored.sessions).toEqual(before.sessions.map((s) => ({ ...s, updatedAt: undoneAt })));
     expect(restored.subjects).toEqual([{ ...subject, updatedAt: undoneAt }]);
     // The re-stamped copies win against the file's in a tab that took the restore.
     const otherTab = mergeData(after, before, nowMs);
     const settled = mergeData(otherTab, restored, nowMs);
     expect(settled.sessions.find((s) => s.id === "mine").note).toBe("mine");
+    expect(settled.sessions.some((s) => s.id === "only-here")).toBe(true);
     expect(settled.subjects[0].name).toBe("Maths");
   });
 
-  it("leaves a record the restore simply dropped exactly as it was", () => {
-    const dropped = stateAfterRestore({ subjects: [], sessions: [] }, before);
+  it("re-stamps a record the restore removed past the tombstone it wrote, so it wins in a tab that took the restore", () => {
+    const dropped = stateAfterRestore({ subjects: [], sessions: [] }, before, { now: restoredAt });
+    expect(dropped.tombstones.subjects).toEqual({ maths: restoredAt });
     const restored = stateBeforeImport({ kind: "restore", before, after: dropped }, dropped, undoneAt);
+    expect(restored.subjects).toEqual([{ ...subject, updatedAt: undoneAt }]);
+    expect(restored.sessions).toEqual(before.sessions.map((s) => ({ ...s, updatedAt: undoneAt })));
+    expect(restored.tombstones).toBe(before.tombstones);
+    const settled = mergeData(dropped, restored, nowMs);
+    expect(settled.subjects.map((s) => s.id)).toEqual(["maths"]);
+    expect(settled.sessions.map((s) => s.id).sort()).toEqual(["mine", "only-here"]);
+  });
+
+  it("leaves untouched placeholder subjects the restore replaced exactly as they were", () => {
+    const placeholder = { ...before, sessions: [] };
+    const dropped = stateAfterRestore({ subjects: [] }, placeholder, { placeholder: true, now: restoredAt });
+    expect(dropped.tombstones).toEqual(emptyTombstones());
+    const restored = stateBeforeImport({ kind: "restore", before: placeholder, after: dropped }, dropped, undoneAt);
     expect(restored.subjects).toEqual(before.subjects);
-    expect(restored.sessions).toEqual(before.sessions);
   });
 
   it("re-stamps a record the file tombstoned, past its tombstone", () => {
     const tombstoned = stateAfterRestore(
-      { subjects: [subject], sessions: [], tombstones: addTombstone(emptyTombstones(), "sessions", "mine", undoneAt) },
+      {
+        subjects: [subject],
+        sessions: [before.sessions[1]],
+        tombstones: addTombstone(emptyTombstones(), "sessions", "mine", undoneAt),
+      },
       before
     );
     const restored = stateBeforeImport({ kind: "restore", before, after: tombstoned }, tombstoned, at);

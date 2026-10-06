@@ -67,8 +67,9 @@ const start = async () => {
   return { user, subjects, before: snapshot() };
 };
 
-// Storage as it was, except that each record the file had another copy of is
-// stamped as edited now, so it wins in a tab that already took the restore (N8).
+// Storage as it was, except that each record the file had another copy of, or
+// that the restore removed (and so tombstoned, N10), is stamped as edited now,
+// so it wins in a tab that already took the restore (N8).
 const withoutStampsOf = (snap, ids) =>
   Object.fromEntries(
     Object.entries(snap).map(([key, text]) => [
@@ -97,12 +98,14 @@ describe("undo restore", () => {
 
     await waitFor(() => expect(screen.getByText("Restore undone.")).toBeTruthy());
     const now = snapshot();
-    const changed = [subjects[0].id, "s-mine"];
+    // Every record here was either another copy of the file's or removed by the restore.
+    const changed = [...subjects.map((s) => s.id), "s-mine", "s-only-here"];
     expect(withoutStampsOf(now, changed)).toEqual(withoutStampsOf(before, changed));
-    // Records the file didn't have another copy of are byte-identical, stamps included.
-    const others = JSON.parse(now["sb-subjects"]).slice(1);
-    expect(JSON.stringify(others)).toBe(JSON.stringify(JSON.parse(before["sb-subjects"]).slice(1)));
-    expect(JSON.parse(now["sb-sessions"])[1]).toEqual(JSON.parse(before["sb-sessions"])[1]);
+    // The tombstones the restore wrote are gone again: byte-identical.
+    expect(now["sb-tombstones"]).toBe(before["sb-tombstones"]);
+    // Records inside them that the restore neither replaced nor removed keep their stamps.
+    const topicsOf = (snap) => JSON.stringify(JSON.parse(snap["sb-subjects"]).map((s) => s.topics));
+    expect(topicsOf(now)).toBe(topicsOf(before));
     // The re-stamped ones moved forward.
     changed.forEach((id) => {
       const find = (snap) =>
@@ -112,17 +115,25 @@ describe("undo restore", () => {
     expect(screen.queryByRole("button", { name: "Undo restore" })).toBeNull();
   });
 
-  it("is byte-identical when the file shares no record with this device", async () => {
-    const { user, before } = await start();
+  it("removes the restore's tombstones and changes nothing but the stamps of what it removed", async () => {
+    const { user, subjects, before } = await start();
     await goTo(user, "Settings");
     await restore(
       user,
       backupFile({ subjects: [{ id: "other", name: "Other", color: "#123456", topics: [] }], sessions: [] })
     );
     await waitFor(() => expect(snapshot()).not.toEqual(before));
+    expect(Object.keys(JSON.parse(localStorage.getItem("sb-tombstones")).sessions).sort()).toEqual([
+      "s-gone",
+      "s-mine",
+      "s-only-here",
+    ]);
 
     await user.click(screen.getByRole("button", { name: "Undo restore" }));
-    await waitFor(() => expect(snapshot()).toEqual(before));
+    await waitFor(() => expect(screen.getByText("Restore undone.")).toBeTruthy());
+    const removed = [...subjects.map((s) => s.id), "s-mine", "s-only-here"];
+    await waitFor(() => expect(withoutStampsOf(snapshot(), removed)).toEqual(withoutStampsOf(before, removed)));
+    expect(snapshot()["sb-tombstones"]).toBe(before["sb-tombstones"]);
   });
 
   // N9 (#50): normalizers now keep fields a newer build added, on both sides.
@@ -150,7 +161,11 @@ describe("undo restore", () => {
     await waitFor(() => expect(JSON.parse(localStorage.getItem("sb-subjects"))[0].sharedWith).toEqual(["x"]));
 
     await user.click(screen.getByRole("button", { name: "Undo restore" }));
-    await waitFor(() => expect(snapshot()).toEqual(before));
+    // Everything here was removed by the restore, so only its stamps move (N10).
+    const removed = [...stored.map((s) => s.id), ...sessions.map((s) => s.id)];
+    await waitFor(() => expect(withoutStampsOf(snapshot(), removed)).toEqual(withoutStampsOf(before, removed)));
+    expect(JSON.parse(localStorage.getItem("sb-subjects"))[0].order).toBe(3);
+    expect(JSON.parse(localStorage.getItem("sb-sessions")).every((s) => s.topicId === "t-here")).toBe(true);
   });
 
   it("is withdrawn once anything changes after the restore, so later work survives", async () => {
@@ -170,7 +185,7 @@ describe("undo restore", () => {
     URL.createObjectURL = vi.fn(() => "blob:test");
     URL.revokeObjectURL = vi.fn();
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
-    const { user, before } = await start();
+    const { user, subjects, before } = await start();
     await goTo(user, "Settings");
     await restore(user, backupFile({ subjects: [{ id: "other", name: "Other", color: "#123456", topics: [] }], sessions: [] }));
     await waitFor(() => expect(snapshot()).not.toEqual(before));
@@ -178,7 +193,8 @@ describe("undo restore", () => {
     await user.click(screen.getByRole("button", { name: "Download backup" }));
     expect(screen.getByText("Backup downloaded.")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Undo restore" }));
-    await waitFor(() => expect(snapshot()).toEqual(before));
+    const removed = [...subjects.map((s) => s.id), "s-mine", "s-only-here"];
+    await waitFor(() => expect(withoutStampsOf(snapshot(), removed)).toEqual(withoutStampsOf(before, removed)));
     click.mockRestore();
   });
 
@@ -228,7 +244,9 @@ describe("undo restore", () => {
     const user = userEvent.setup();
     renderApp({ onboarded: false });
     expect(await screen.findByText("Welcome to StudyBox")).toBeTruthy();
-    await waitFor(() => expect(localStorage.getItem("sb-subjects")).not.toBeNull());
+    await waitFor(() => expect(localStorage.getItem("sb-game")).not.toBeNull());
+    // The placeholder defaults are not stored before onboarding is dismissed (N10).
+    expect(localStorage.getItem("sb-subjects")).toBeNull();
     const before = snapshot();
 
     await user.upload(
@@ -240,6 +258,7 @@ describe("undo restore", () => {
 
     await user.click(screen.getByRole("button", { name: "Undo restore" }));
     expect(await screen.findByText("Welcome to StudyBox")).toBeTruthy();
+    // Byte-identical: the placeholders left no tombstones, and are not stored again.
     await waitFor(() => expect(snapshot()).toEqual(before));
   });
 });
