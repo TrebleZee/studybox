@@ -12,6 +12,10 @@ Both runs reported the same R1 from different scenarios (A: another tab restores
 
 - **Round 2 (re-check of the fix commit feb88e3 only):** VERDICT clean, no findings. The guard reads stored `onboarded`, which every way another tab can finish onboarding sets; the same-tab ticket still covers same-tab races; with blocked storage the template applies as before. Confirmed the test fails without the guard (subjects overwritten and the other tab's tombstone dropped) and passes with it.
 
+- **Round 3 (after #52, subtask records, N19):** the repo owner's merger session merged master with #52 into this branch (78ea89d) and found, in a blocking comment on #55, that `replaceData` didn't tombstone subtasks: a stamped subtask a restore, Start blank or template dropped from a kept topic came back on the next merge. Fixed test-first in b3f905a (two two-tab tests and two `replaceData` unit tests, all red) and 210fda5 (`replaceData` tombstones each dropped subtask of a kept topic, `subtasks` kind with `subtaskKey`, and settles each subtask on its own and the topic on its own fields, as they merge since #52; #52's echo test now expects the N10 behaviour). Two new independent runs reviewed `4e1c51b..HEAD`, conflict resolutions in 78ea89d included:
+  - **Run C:** VERDICT clean, no findings. Read `replace.js`, `merge.js`, `tombstones.js` and `undo.js` in full and ran a throwaway 20,000-case fuzz (deleted afterwards) with stamped and unstamped topics and subtasks and random tombstones on both sides: merging the pre-restore state with the restore gives exactly the restored records; Undo restore then a merge brings back every pre-restore subject, topic and subtask; `unchangedSinceRestore` stays true on the echo. 0 failures in each.
+  - **Run D:** VERDICT clean, no findings. Node probes comparing 78ea89d's `replace.js` with the fix through `mergeData`: dropped stamped subtasks, the file's older subtask copy, unstamped subtasks under older, equal and newer topic stamps, and restore, echo, Undo, merge (whole topic and whole subject dropped too) all correct. Noted, not a finding: the STATUS A3 row written in 78ea89d already called A3.1 merged with a version; it now says open as #55, since the version is set at merge time.
+
 ## Findings
 
 | ID | Severity | Category | File | Summary | Outcome |
@@ -25,4 +29,4 @@ Both runs reported the same R1 from different scenarios (A: another tab restores
 
 ## Checks
 
-lint pass · test pass (849 tests, 68 files, after merging #56) · build pass (main bundle 896.43 kB, gzip 265.43 kB)
+lint pass · test pass (898 tests, after merging master with #58 and #59) · build pass (main bundle 896.43 kB, gzip 265.43 kB)
