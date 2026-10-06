@@ -19,3 +19,7 @@ None. Both findings were in the diff; the remaining mixed-version and three-copy
 ## Checks
 
 lint pass · test pass (846 tests, 65 files) · build pass (main bundle 895.74 kB, gzip 265.28 kB)
+
+## Round 2
+
+Verdict: clean. An independent `release-reviewer` (Opus) reviewed the fix commits only (`git diff c96f515..5caa350`): B-R1's rule in `mergeTopic` held under 6000 extra fuzz runs (commutativity, idempotence, re-merge with an input, four three-copy orders; mixed stamped and unstamped subtasks, unstamped topics, equal stamps, extra fields, subtask tombstones) with no failure; data this build writes is unaffected (every subtask add and toggle is stamped, every delete tombstoned); Undo merge and Undo restore still win back a subtask the merge dropped, because its topic is re-stamped; A-R1's pinned test and docs match the code. No findings.
