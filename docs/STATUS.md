@@ -2,18 +2,18 @@
 
 The one page to read to know where StudyBox is: what changed recently, how far through the plan it is, and what needs someone to act. It is kept current by the workflow. Every PR updates it (see the `git-workflow` skill, step 2b), and every readiness pass refreshes the progress section. `src/statusDoc.test.js` fails if the version below disagrees with `package.json`.
 
-Last updated: 2026-10-05
+Last updated: 2026-10-06
 
 ## Current state
 
 | | |
 | --- | --- |
-| Current version | 1.19.0 |
-| Latest tag on GitHub | v1.19.0 |
+| Current version | 1.19.2 |
+| Latest tag on GitHub | v1.19.2 |
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `661e26a` (1.17.2) at the time of the 5 Oct scope review |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
-| Open PRs | [#49](https://github.com/TrebleZee/studybox/pull/49) one tab owns the running timer (N12, draft), [#50](https://github.com/TrebleZee/studybox/pull/50) older builds never strip newer fields (N9, draft) |
+| Open PRs | drafts: [#52](https://github.com/TrebleZee/studybox/pull/52) subtasks merge as records (N19), [#55](https://github.com/TrebleZee/studybox/pull/55) replacing data writes tombstones (N10) |
 | Checks on `master` | Lint, test (711 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
 
 ## Recent changes
@@ -22,7 +22,13 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#56](https://github.com/TrebleZee/studybox/pull/56) | Applying an update in one window never reloads another that is busy (a session timed there, an undo on offer, an open edit): it shows the update banner and reloads once idle | N18 | v1.19.2 |
+| [#54](https://github.com/TrebleZee/studybox/pull/54) | A session whose subject was deleted (here, in another tab, or before undoing a Reset) is never logged under another subject: the timer says so and asks which subject to log it under | N15 | v1.19.1 |
+| [#53](https://github.com/TrebleZee/studybox/pull/53) | Orchestration stops using Fable: Opus is the top tier and Critical work gets two independent reviews. No user-facing change | none | none |
+| [#51](https://github.com/TrebleZee/studybox/pull/51) | Orchestration: the merger and the launcher can be separate sessions, and a lane is repurposed as soon as its PR merges. No user-facing change | none | none |
 | [#48](https://github.com/TrebleZee/studybox/pull/48) | Restore from file can be undone: "Undo restore" puts back the subjects, sessions, game, theme and selection from before the restore | N11 | v1.19.0 |
+| [#49](https://github.com/TrebleZee/studybox/pull/49) | With several tabs open, one tab owns the running timer: a tab opened mid-session no longer clones it, so a session logged in one tab can't come back as a duplicate after a reload | N12 | v1.19.0 |
+| [#50](https://github.com/TrebleZee/studybox/pull/50) | Data written by a newer build is no longer stripped by an older one: unknown fields and tombstone kinds are kept, and nothing is rewritten on mount when a newer build wrote it. No user-facing change today | N9 | v1.19.0 |
 | [#47](https://github.com/TrebleZee/studybox/pull/47) | "Undo merge" no longer disappears when another open tab only re-saves records this tab already has; fixes a flaky two-tab test | C14 | v1.18.1 |
 | [#46](https://github.com/TrebleZee/studybox/pull/46) | Resetting the timer with time on it shows "Reset timer. Undo", which brings back the elapsed time, subject and timed topic | N22 | v1.18.0 |
 | [#45](https://github.com/TrebleZee/studybox/pull/45) | Stored data that can't be read is left as it was, with a banner and a backup that carries it, instead of being silently replaced; a browser that blocks storage no longer stops the app starting | N16, N17 | v1.17.4 |
@@ -58,8 +64,8 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed, re-planned as A2 and A3 |
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
-| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0), A2.3b (#47, v1.18.1), A2.7 (#49) and A2.4 (#48, v1.19.0) merged; A2.8 (#54, N15) ready for merge; every lane open except 9 |
-| A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | A3.2 (#50) merged; A3.1 (N10) open as #55; A3.3 (N19) open as #52 |
+| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0), A2.3b (#47, v1.18.1), A2.7 (#49, v1.19.0), A2.4 (#48, v1.19.0), A2.8 (#54, v1.19.1) and A2.10 (#56, v1.19.2) merged; every lane open except 9 |
+| A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | A3.2 (#50, N9, v1.19.0) merged; A3.1 (N10) open as #55; A3.3 (N19) open as #52 |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
 | G | Keyboard (C3 now includes the Asana row), offline PDF import, bundle size | 30 Nov to 11 Dec | Not started |
@@ -79,7 +85,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 | 1 | Confirm the scope answer: A2 and A3 continue; Phase C's V2-only branches (`feat/record-order`, `feat/session-local-day`) wait for the 25 Oct decision; no new process PRs until the 6 Nov exit check apart from C13 and C10 | 5 of the last 7 merged PRs were process or docs, while the V2 blockers haven't moved | 9 Oct |
 | 2 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up); not confirmed done | 9 Oct |
 | 3 | B1/V1 check-in: write down which of the four decisions have an answer and how many users have been asked | If none has an answer by then, 25 Oct isn't credible and the plan should say so early | 15 Oct |
-| 4 | On real devices: the installed PWA beside a browser tab (including a session timed in one and the other opened: it should say the session is being timed in another window, and Continue here should move it); reminders on an Android phone; a backup download on Safari or an iPhone | Not testable from a session (N1 check, N20, N25; N25 decides A2.12) | 23 Oct |
+| 4 | On real devices: the installed PWA beside a browser tab (including a session timed in one and the other opened: it should say the session is being timed in another window, and Continue here should move it; after a deploy, updating in one while the other is timing should show the banner there, not reload it); reminders on an Android phone; a backup download on Safari or an iPhone | Not testable from a session (N1 check, N18, N20, N25; N25 decides A2.12) | 23 Oct |
 | 5 | The four design-gate decisions (data controller and account holder, minimum age and assurance, Online Safety Act scope, reminders for signed-in users), plus whether Asana task names may sit in account-scope session tags (keep, device-only or drop) | Gates the backend spike and 2.0 (B1); decides `fix/asana-session-tags` (N27) | 25 Oct |
 | 6 | Five-user feedback round, including devices used and whether anyone wants friends features | Gates 2.0 and 2.x and sets N20's urgency (V1) | 25 Oct |
 | 7 | Make the design gate doc (`claude/v2-design-gate.md`) available to the exit check | Missing for three passes, so B1's wording has never been checked against it | 6 Nov |
@@ -92,8 +98,9 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 
 1. Lane 2: A3.1 `fix/replace-writes-tombstones` (N10) is #55, for the coordinator to merge; that empties lane 2.
 2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
-3. Lane 1: A3.3 `fix/subtask-records` (N19) once A3.2 (#50) is live; A3.2's unknown-field and unknown-tombstone-kind carry-through is what lets an older build keep subtask stamps and `subtasks` tombstones.
-4. Open now: A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
+3. Lane 1: A3.3 `fix/subtask-records` (N19, draft #52); A3.2 (#50) is live in v1.19.0; A3.2's unknown-field and unknown-tombstone-kind carry-through is what lets an older build keep subtask stamps and `subtasks` tombstones.
+4. Open now: A2.6 (lane 4), A2.11 (lane 5), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check. Lane 6 is empty (A2.10 merged in #56).
+5. Test flakes seen only under full-suite load (each passes when run alone): `App.multiTab.test.jsx` "restores every pre-merge record in both tabs" (C14's test, failed once in a full run on 6 Oct), `App.undoRestore.test.jsx` "undoes a restore made from onboarding" (clicks Settings before the async restore finishes; about 1 in 10; fixed in #55, which waits for the restore) `AddSubjectCard.test.jsx` "keeps the title chooser visible after a failed load" and `App.appUpdate.test.jsx` "doesn't reload a tab holding Undo merge, even back on the planner" (once in three full runs on 6 Oct, while #56 was merging). CI is required, so each can block a merge: one small `fix/` for the four.
 
 ## Known risks
 
@@ -106,4 +113,5 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 - **The Asana task name is saved in the session's tags** (N27), and so in every backup.
 - **A session with an invalid date can't be edited** (N28). Only hand-edited or foreign backups carry one.
 - **Only builds from #50 on keep fields a newer build wrote** (N9). An install still on an older build strips them on its next write until it updates, so `feat/record-order` waits two weeks after #50 is live, and V2 sync will need a minimum client version.
+- **A window kept open through an update runs the old version until it reloads** (#56, by design for N18). Updating in one window no longer reloads another that is mid-session, mid-edit or holding an undo; that window shows the update banner and reloads once it is idle. Until then, opening a subject from the catalogue there can fail to load (its file belongs to the old version); **Update now** fixes it.
 - **Stored data that can't be read is kept only until the next change to it** (N16, by design). The app leaves it in storage and says so, with a backup that carries it as stored; the user's next change to that data replaces it.

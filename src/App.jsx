@@ -155,10 +155,6 @@ export default function StudyBox() {
     clearUndo();
   };
   const saveFailed = useSaveFailure();
-  const appUpdate = useAppUpdate({
-    sessionInProgress,
-    idle: view === "planner" && !needsOnboarding,
-  });
 
   // The timed topic is only saved while a session is in progress; outside one
   // the expanded topic is just navigation.
@@ -418,6 +414,7 @@ export default function StudyBox() {
   const offer = backupMessage?.undo;
   const current = useMemo(() => ({ subjects, sessions, tombstones, game, themeId }), [subjects, sessions, tombstones, game, themeId]);
   const canUndo = useMemo(() => canUndoImport(offer, current), [offer, current]); // not on every timer tick (R2)
+  const appUpdate = useAppUpdate({ busy: sessionInProgress || Boolean(undo) || canUndo, idle: view === "planner" && !needsOnboarding });
   const undoImport = () => {
     if (!canUndo) return;
     const before = stateBeforeImport(offer, current);

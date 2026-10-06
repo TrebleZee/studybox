@@ -40,5 +40,7 @@ export default defineConfig({
     clearMocks: true,
     restoreMocks: true,
     testTimeout: 15000,
+    // Lets App.appUpdate.test.jsx run the real register client with workbox-window mocked.
+    server: { deps: { inline: ['vite-plugin-pwa'] } },
   },
 })

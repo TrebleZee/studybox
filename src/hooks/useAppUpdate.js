@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
-import { applyUpdate, isUpdateReady, subscribeToUpdates } from "../pwa/updateStore.js";
+import { applyUpdate, subscribeToUpdates, updateState } from "../pwa/updateStore.js";
 
 const RETRY_MS = 30 * 1000;
 
@@ -31,21 +31,23 @@ const hasUnsavedInput = () => {
 };
 
 // Applies a downloaded update (which reloads the page) as soon as it's safe:
-// no study session in progress, the app idle on the planner (not settings or
-// onboarding, whose forms aren't saved), no dialog open and no unsaved text.
-// Until then the caller shows a banner so the user can update by choice.
-export default function useAppUpdate({ sessionInProgress, idle }) {
-  const updateReady = useSyncExternalStore(subscribeToUpdates, isUpdateReady);
+// nothing busy (a study session timed here, an undo on offer), the app idle on
+// the planner (not settings or onboarding, whose forms aren't saved), no
+// dialog open and no unsaved text. The same rule decides when a tab reloads
+// after another tab applied the update (N18). Until then the caller shows a
+// banner so the user can update by choice.
+export default function useAppUpdate({ busy, idle }) {
+  const state = useSyncExternalStore(subscribeToUpdates, updateState);
 
   useEffect(() => {
-    if (!updateReady || sessionInProgress || !idle) return undefined;
+    if (state === "none" || busy || !idle) return undefined;
     const tryApply = () => {
       if (!document.querySelector('[role="dialog"]') && !hasUnsavedInput()) applyUpdate();
     };
     tryApply();
     const retry = setInterval(tryApply, RETRY_MS);
     return () => clearInterval(retry);
-  }, [updateReady, sessionInProgress, idle]);
+  }, [state, busy, idle]);
 
-  return { updateReady, applyNow: applyUpdate };
+  return { updateReady: state !== "none", applyNow: applyUpdate };
 }
