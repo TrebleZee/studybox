@@ -43,6 +43,8 @@ export const buildCss = (C) => `
       .theme-list { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
       .theme-list > button { margin-bottom: 0 !important; }
       .settings-grid { grid-template-columns: minmax(0, 1fr) !important; }
+      .del, .del-sess, .edit-sess { opacity: 0.6 !important; }
+      .del:focus-visible, .del-sess:focus-visible, .edit-sess:focus-visible { opacity: 1 !important; }
       .analysis-controls { flex-wrap: wrap; }
       .analysis-root { padding: 14px 12px !important; }
     }

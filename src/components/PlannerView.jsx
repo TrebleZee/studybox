@@ -39,12 +39,17 @@ export default function PlannerView({
             ["subjects", "Subjects"],
             ["topics", "Topics"],
             ["timer", timer.displaySecs > 0 ? `Timer ${timer.running ? "▶" : "⏸"} ${fmt(timer.displaySecs)}` : "Timer"],
-          ].map(([id, label]) => (
+          ].map(([id, baseLabel]) => {
+            // The timer pane's alerts are hidden with it: flag them on its button.
+            const alert = id === "timer" && (timer.orphaned || timer.elsewhere);
+            const label = alert ? `${baseLabel} !` : baseLabel;
+            return (
             <button
               key={id}
               type="button"
               className="nb"
               aria-pressed={pane === id}
+              aria-label={alert ? `${baseLabel}, needs attention` : undefined}
               onClick={() => setPane(id)}
               style={{
                 border: "none",
@@ -59,7 +64,8 @@ export default function PlannerView({
             >
               {label}
             </button>
-          ))}
+            );
+          })}
         </div>
       )}
       <SubjectSidebar

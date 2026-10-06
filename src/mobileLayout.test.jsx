@@ -78,6 +78,11 @@ describe("mobile layout (N29)", () => {
     }
   });
 
+  it("reveals the hover-only edit and delete controls on narrow screens", () => {
+    const narrow = buildCss(THEMES[0].colors).split("@media (max-width: 720px)")[1];
+    expect(narrow).toMatch(/\.del, \.del-sess, \.edit-sess \{ opacity: 0\.6 !important/);
+  });
+
   it("keeps the desktop planner exactly as it was: no switch, every pane shown", () => {
     stubMatchMedia(false);
     renderApp();
