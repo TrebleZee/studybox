@@ -13,7 +13,7 @@ Last updated: 2026-10-06
 | Production | studybox-sigma.vercel.app, deployed from `master` @ `661e26a` (1.17.2) at the time of the 5 Oct scope review |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
-| Open PRs | [#55](https://github.com/TrebleZee/studybox/pull/55) replacing data writes tombstones (N10): needs subtask tombstones after #52 before it can merge |
+| Open PRs | drafts: [#55](https://github.com/TrebleZee/studybox/pull/55) replacing data writes tombstones (N10; needs subtask tombstones after #52), [#61](https://github.com/TrebleZee/studybox/pull/61) status page post-merge rule (C13) |
 | Checks on `master` | Lint, test (711 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
 
 ## Recent changes
@@ -22,6 +22,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#60](https://github.com/TrebleZee/studybox/pull/60) | `drafts/` is ignored again, so spec PDF text dumped by `draft-spec --dump-text` can't be committed by accident. No user-facing change | C10 | none |
 | [#59](https://github.com/TrebleZee/studybox/pull/59) | Reminders work on Android: Chrome there no longer crashes the app when a streak or milestone reminder is due; reminders are shown through the service worker instead | N20 | v1.19.5 |
 | [#58](https://github.com/TrebleZee/studybox/pull/58) | Editing a session keeps its seconds: saving without changing the hours or minutes no longer turns a 45 s session into 0 s (and 0 XP) or 25m59s into 25m | N21 | v1.19.4 |
 | [#52](https://github.com/TrebleZee/studybox/pull/52) | Subtasks merge as records: a subtask added or deleted on one copy (another tab, or a merged file) is no longer lost or brought back when the other copy edits its topic | N19 | v1.19.3 |
@@ -67,7 +68,7 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed, re-planned as A2 and A3 |
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
-| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0), A2.3b (#47, v1.18.1), A2.7 (#49, v1.19.0), A2.4 (#48, v1.19.0), A2.8 (#54, v1.19.1), A2.10 (#56, v1.19.2) A2.6 (#58, v1.19.4) and A2.11 (#59, v1.19.5) merged; every lane open except 9 |
+| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0), A2.3b (#47, v1.18.1), A2.7 (#49, v1.19.0), A2.4 (#48, v1.19.0), A2.8 (#54, v1.19.1), A2.10 (#56, v1.19.2), A2.6 (#58, v1.19.4), A2.11 (#59, v1.19.5), and `chore/ignore-drafts` (#60) merged; every lane open except 9 |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | A3.2 (#50, N9, v1.19.0) and A3.3 (#52, N19, v1.19.3) merged; A3.1 not started |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
@@ -85,7 +86,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 
 | # | Action | Why | By |
 | --- | --- | --- | --- |
-| 1 | Confirm the scope answer: A2 and A3 continue; Phase C's V2-only branches (`feat/record-order`, `feat/session-local-day`) wait for the 25 Oct decision; no new process PRs until the 6 Nov exit check apart from C13 and C10 | 5 of the last 7 merged PRs were process or docs, while the V2 blockers haven't moved | 9 Oct |
+| 1 | Confirm the scope answer: A2 and A3 continue; Phase C's V2-only branches (`feat/record-order`, `feat/session-local-day`) wait for the 25 Oct decision; no new process PRs until the 6 Nov exit check apart from C13 | 5 of the last 7 merged PRs were process or docs, while the V2 blockers haven't moved | 9 Oct |
 | 2 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up); not confirmed done | 9 Oct |
 | 3 | B1/V1 check-in: write down which of the four decisions have an answer and how many users have been asked | If none has an answer by then, 25 Oct isn't credible and the plan should say so early | 15 Oct |
 | 4 | On real devices: the installed PWA beside a browser tab (including a session timed in one and the other opened: it should say the session is being timed in another window, and Continue here should move it; after a deploy, updating in one while the other is timing should show the banner there, not reload it); reminders on an Android phone (grant permission, have a streak at risk after 8pm or a milestone due within 3 days: the reminder should show once and the app must not crash; check what a tap does); a backup download on Safari or an iPhone | Not testable from a session (N1 check, N18, N20, N25; N25 decides A2.12) | 23 Oct |
