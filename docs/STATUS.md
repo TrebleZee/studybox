@@ -58,7 +58,7 @@ From `docs/readiness/2026-10-05-scope-review.md` (which amends the Phase A exit 
 | A | Stop losing data (N1, N2, N3, N4, N6, N7, C4) | 5 to 18 Oct | Done 5 Oct; exit check failed, re-planned as A2 and A3 |
 | M | Maintainer: tags, N8 decision, plan approval, required CI | 6 to 9 Oct | Done 5 Oct |
 | M2 | Maintainer: scope confirmation, B1/V1 check-in, device checks, design gate doc | 5 Oct to 6 Nov | Not started |
-| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0), A2.3b (#47, v1.18.1), A2.7 (#49) and A2.4 (#48, v1.19.0) merged; A2.8 (#54, N15) ready for merge; every lane open except 9 |
+| A2 | Fix today's data loss (N11, N22, N21, N12, N15, N16, N17, N18, N20, N25, C10, C13; N26 and N27 docs) | 6 to 23 Oct | A2.1 (#39, v1.17.2), A2.2 (#41), A2.3 (#42, v1.17.3), A2.9 (#45, v1.17.4), A2.5 (#46, v1.18.0), A2.3b (#47, v1.18.1), A2.7 (#49) and A2.4 (#48, v1.19.0) merged; A2.8 (#54, N15) ready for merge; A2.10 (#56, N18) open; every lane open except 9 |
 | A3 | Sync-safe replacing and old clients (N10, N9, N19), then exit check | 26 Oct to 6 Nov | A3.2 (N9) open as #50, ready for the coordinator; A3.1 and A3.3 not started |
 | B | Design-gate decisions (B1, now including Asana data, N27) and five-user feedback (V1) | check-in 15 Oct, decide 25 Oct | Maintainer's; no progress recorded |
 | C | Shape the client for sync (record actions, record order, import bounds with N28, session local day N26, Asana tags N27) | 9 to 27 Nov | Blocked on the A3 exit check; V2-only branches also on the 25 Oct decision |
@@ -79,7 +79,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 | 1 | Confirm the scope answer: A2 and A3 continue; Phase C's V2-only branches (`feat/record-order`, `feat/session-local-day`) wait for the 25 Oct decision; no new process PRs until the 6 Nov exit check apart from C13 and C10 | 5 of the last 7 merged PRs were process or docs, while the V2 blockers haven't moved | 9 Oct |
 | 2 | Paste `docs/project-instructions.md` into the Claude project's instructions | Agents can't edit project settings (C4 follow-up); not confirmed done | 9 Oct |
 | 3 | B1/V1 check-in: write down which of the four decisions have an answer and how many users have been asked | If none has an answer by then, 25 Oct isn't credible and the plan should say so early | 15 Oct |
-| 4 | On real devices: the installed PWA beside a browser tab (including a session timed in one and the other opened: it should say the session is being timed in another window, and Continue here should move it); reminders on an Android phone; a backup download on Safari or an iPhone | Not testable from a session (N1 check, N20, N25; N25 decides A2.12) | 23 Oct |
+| 4 | On real devices: the installed PWA beside a browser tab (including a session timed in one and the other opened: it should say the session is being timed in another window, and Continue here should move it; after a deploy, updating in one while the other is timing should show the banner there, not reload it); reminders on an Android phone; a backup download on Safari or an iPhone | Not testable from a session (N1 check, N18, N20, N25; N25 decides A2.12) | 23 Oct |
 | 5 | The four design-gate decisions (data controller and account holder, minimum age and assurance, Online Safety Act scope, reminders for signed-in users), plus whether Asana task names may sit in account-scope session tags (keep, device-only or drop) | Gates the backend spike and 2.0 (B1); decides `fix/asana-session-tags` (N27) | 25 Oct |
 | 6 | Five-user feedback round, including devices used and whether anyone wants friends features | Gates 2.0 and 2.x and sets N20's urgency (V1) | 25 Oct |
 | 7 | Make the design gate doc (`claude/v2-design-gate.md`) available to the exit check | Missing for three passes, so B1's wording has never been checked against it | 6 Nov |
@@ -93,7 +93,7 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 1. Lane 2: A2.4 `feat/undo-restore` (N11) is #48, ready to merge; then A3.1. C14 is fixed (#47, v1.18.1).
 2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
 3. Lane 1: A3.3 `fix/subtask-records` (N19) once A3.2 (#50) is live; A3.2's unknown-field and unknown-tombstone-kind carry-through is what lets an older build keep subtask stamps and `subtasks` tombstones.
-4. Open now: A2.6 (lane 4), A2.11 (lane 5), A2.10 (lane 6), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check.
+4. Open now: A2.6 (lane 4), A2.11 (lane 5), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check. Lane 6: A2.10 (N18) is #56; the lane is empty once it merges.
 
 ## Known risks
 
@@ -106,4 +106,5 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 - **The Asana task name is saved in the session's tags** (N27), and so in every backup.
 - **A session with an invalid date can't be edited** (N28). Only hand-edited or foreign backups carry one.
 - **Only builds from #50 on keep fields a newer build wrote** (N9). An install still on an older build strips them on its next write until it updates, so `feat/record-order` waits two weeks after #50 is live, and V2 sync will need a minimum client version.
+- **A window kept open through an update runs the old version until it reloads** (#56, by design for N18). Updating in one window no longer reloads another that is mid-session, mid-edit or holding an undo; that window shows the update banner and reloads once it is idle. Until then, opening a subject from the catalogue there can fail to load (its file belongs to the old version); **Update now** fixes it.
 - **Stored data that can't be read is kept only until the next change to it** (N16, by design). The app leaves it in storage and says so, with a backup that carries it as stored; the user's next change to that data replaces it.

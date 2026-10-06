@@ -170,15 +170,14 @@ describe("an update applied in another tab (N18)", () => {
 
   it("reloads a tab once it is no longer busy", async () => {
     const user = userEvent.setup();
+    localStorage.setItem("sb-timer", JSON.stringify({ elapsed: 120, startedAt: null, timedSubjectId: "physics" }));
     renderApp();
-    await user.click(screen.getByRole("button", { name: "Start" }));
     await updateWaiting();
     appliedElsewhere();
     expect(reloaded()).toBe(false);
 
-    await user.click(screen.getByRole("button", { name: "Pause" }));
-    expect(reloaded()).toBe(false);
     await user.click(screen.getByRole("button", { name: "Log Session" }));
     await waitFor(() => expect(reload).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(localStorage.getItem("sb-sessions"))).toHaveLength(1);
   });
 });

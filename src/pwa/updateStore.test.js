@@ -2,8 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   applyUpdate,
   isUpdateReady,
+  markUpdateActive,
   markUpdateReady,
+  registerUpdates,
   subscribeToUpdates,
+  updateState,
   watchForUpdates,
 } from "./updateStore.js";
 
@@ -24,6 +27,59 @@ describe("update store", () => {
 
   it("does nothing when applied with no update pending", () => {
     expect(() => applyUpdate()).not.toThrow();
+  });
+});
+
+// N18: the register client calls onNeedReload in every open tab once any tab
+// applies the update.
+describe("an update taking control of the page", () => {
+  const register = () => {
+    const reload = vi.fn();
+    const updateSW = vi.fn();
+    let options;
+    registerUpdates(
+      (opts) => {
+        options = opts;
+        return updateSW;
+      },
+      { reload }
+    );
+    return { reload, updateSW, options };
+  };
+
+  it("hands the reload to the store instead of the register client", () => {
+    const { options } = register();
+    expect(options.onNeedReload).toBe(markUpdateActive);
+  });
+
+  it("reloads at once a tab that applied the update itself", () => {
+    const { reload, updateSW, options } = register();
+    options.onNeedRefresh();
+    applyUpdate();
+    expect(updateSW).toHaveBeenCalledWith(true);
+    expect(reload).not.toHaveBeenCalled();
+
+    options.onNeedReload();
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves another tab running, marked active, and reloads it when it applies", () => {
+    const { reload, updateSW, options } = register();
+    const listener = vi.fn();
+    subscribeToUpdates(listener);
+    options.onNeedRefresh();
+    expect(updateState()).toBe("ready");
+
+    options.onNeedReload();
+    expect(reload).not.toHaveBeenCalled();
+    expect(updateState()).toBe("active");
+    expect(isUpdateReady()).toBe(true);
+    expect(listener).toHaveBeenCalledTimes(2);
+
+    // The new version already controls the page, so there's nothing to skip.
+    applyUpdate();
+    expect(updateSW).not.toHaveBeenCalled();
+    expect(reload).toHaveBeenCalledTimes(1);
   });
 });
 
