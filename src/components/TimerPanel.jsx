@@ -319,6 +319,7 @@ export default function TimerPanel({
               placeholder="Add tag"
               style={{
                 flex: 1,
+                minWidth: 0,
                 background: C.s2,
                 border: `1px solid ${C.bdr2}`,
                 borderRadius: "6px",

@@ -7,6 +7,7 @@ import PlannerView from "./components/PlannerView.jsx";
 import SettingsView from "./components/SettingsView.jsx";
 import TopBar from "./components/TopBar.jsx";
 import SaveFailedBanner from "./components/SaveFailedBanner.jsx";
+import BottomBars from "./components/BottomBars.jsx";
 import UndoBar from "./components/UndoBar.jsx";
 import UpdateBanner from "./components/UpdateBanner.jsx";
 import useAppUpdate from "./hooks/useAppUpdate.js";
@@ -588,8 +589,7 @@ export default function StudyBox() {
         </>
       )}
 
-      {undo && <UndoBar C={C} name={undo.name} message={undo.message} onUndo={undoDelete} onDismiss={clearUndo} raised={appUpdate.updateReady} />}
-      {appUpdate.updateReady && <UpdateBanner C={C} onUpdate={appUpdate.applyNow} />}
+      <BottomBars>{undo && <UndoBar C={C} name={undo.name} message={undo.message} onUndo={undoDelete} onDismiss={clearUndo} />}{appUpdate.updateReady && <UpdateBanner C={C} onUpdate={appUpdate.applyNow} />}</BottomBars>
     </div>
   );
 }

@@ -3,10 +3,8 @@ export default function UpdateBanner({ C, onUpdate }) {
     <div
       role="status"
       style={{
-        position: "fixed",
-        bottom: "16px",
-        left: "50%",
-        transform: "translateX(-50%)",
+        pointerEvents: "auto",
+        boxSizing: "border-box",
         display: "flex",
         alignItems: "center",
         gap: "10px",
@@ -17,8 +15,7 @@ export default function UpdateBanner({ C, onUpdate }) {
         boxShadow: "0 4px 16px rgba(0, 0, 0, 0.35)",
         fontSize: "12px",
         color: C.txt,
-        zIndex: 1000,
-        maxWidth: "calc(100vw - 32px)",
+        maxWidth: "100%",
       }}
     >
       <span>A new version of StudyBox is ready. Your timer is saved, so it's safe to update.</span>
