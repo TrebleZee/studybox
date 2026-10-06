@@ -9,8 +9,8 @@ describe("useAppUpdate", () => {
     document.body.innerHTML = "";
   });
 
-  const setup = (sessionInProgress, idle = true) =>
-    renderHook((props) => useAppUpdate(props), { initialProps: { sessionInProgress, idle } });
+  const setup = (busy, idle = true) =>
+    renderHook((props) => useAppUpdate(props), { initialProps: { busy, idle } });
 
   const addField = (tag, value, attrs = {}) => {
     const field = document.createElement(tag);
@@ -30,7 +30,7 @@ describe("useAppUpdate", () => {
     act(() => vi.advanceTimersByTime(60 * 1000));
     expect(apply).not.toHaveBeenCalled();
 
-    rerender({ sessionInProgress: false, idle: true });
+    rerender({ busy: false, idle: true });
     expect(apply).toHaveBeenCalledTimes(1);
   });
 
@@ -90,7 +90,7 @@ describe("useAppUpdate", () => {
     act(() => vi.advanceTimersByTime(60 * 1000));
     expect(apply).not.toHaveBeenCalled();
 
-    rerender({ sessionInProgress: false, idle: true });
+    rerender({ busy: false, idle: true });
     expect(apply).toHaveBeenCalledTimes(1);
   });
 

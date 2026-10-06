@@ -19,7 +19,7 @@ StudyBox is a lightweight study planner and revision timer built with React and 
 - Includes a built-in timer for focused study sessions, showing the selected topic (or Asana task) underneath
 - Logs each session with duration, date, subject, tags, and an optional note
 - Shows progress and time summaries per subject
-- Works offline as a PWA once installed, and updates itself while open without interrupting a study session
+- Works offline as a PWA once installed, and updates itself while open without interrupting a study session, an edit or an undo, in any open window
 - Shows the running version (e.g. `v1.17.1`) next to the StudyBox name on every screen
 - Can nudge you in the evening with a browser notification if today's streak is still unlogged
 - Tracks milestones such as NEA deadlines, required practicals and spoken language endorsements, with due dates, overdue highlighting and a browser reminder three days before; catalogue specs come with their milestones, and an "NEA" topic can be turned into a milestone with one confirmed click
@@ -118,7 +118,7 @@ npm test
 
 StudyBox includes PWA support through `vite-plugin-pwa`. On a supported browser, you can install it to the home screen or launch it in a standalone window.
 
-An open app checks for a new version every 15 minutes and whenever it comes back to the foreground. A new version installs itself (with a reload) as soon as no study session is in progress and the app is idle on the planner with nothing half-typed; otherwise (mid-session, in Settings or onboarding, or with an unsaved form) a banner offers **Update now** instead. The running timer, its topic, the session note and tags are saved locally, so a reload or refresh never loses a session. A timer left running in an app that was closed more than 12 hours ago comes back paused at the time it was last seen running, so a forgotten session isn't logged as days of study.
+An open app checks for a new version every 15 minutes and whenever it comes back to the foreground. A new version installs itself (with a reload) as soon as no study session is being timed in that window, no undo is on offer (a delete, a timer Reset, Undo merge or Undo restore) and the app is idle on the planner with nothing half-typed; otherwise (mid-session, holding an undo, in Settings or onboarding, or with an unsaved form or an open edit) a banner offers **Update now** instead. Updating in one window never reloads another that is busy: it shows the banner and reloads once it is idle. The running timer, its topic, the session note and tags are saved locally, so a reload or refresh never loses a session. A timer left running in an app that was closed more than 12 hours ago comes back paused at the time it was last seen running, so a forgotten session isn't logged as days of study.
 
 ## Tech stack
 
