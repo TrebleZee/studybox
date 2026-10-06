@@ -1,20 +1,21 @@
 import { nowIso, touch } from "./records.js";
-import { addTombstone, childKey, deletedAt, emptyTombstones, mergeTombstones } from "./tombstones.js";
+import { addTombstone, childKey, deletedAt, emptyTombstones, mergeTombstones, subtaskKey } from "./tombstones.js";
 
 // Replacing data (N10): Restore from file, Start blank, Use template and
 // Choose my subjects put whole new lists in place of what is here. A merge
 // (another tab now, sync later) must end with only the new lists, so:
 //
 // - every record they remove is tombstoned (a subject, a topic or milestone
-//   of a subject they keep, a session), unless it is one of the untouched
+//   of a subject they keep, a subtask of a topic they keep, a session), unless it is one of the untouched
 //   placeholder defaults (`placeholder`), which were never the user's data and
 //   must leave nothing a fresh device would push;
 // - the tombstones here are kept, merged with any the new data carries, so
 //   replacing with a file from before tombstones (pre-v3) forgets no delete;
 // - a record they put in place that another copy could beat (this device's
 //   own copy, if it is as new or newer, or a tombstone at or after its stamp)
-//   is stamped as edited now, past both, so it wins in every tab. Anything
-//   else keeps its stamps exactly.
+//   is stamped as edited now, past both, so it wins in every tab. A topic is
+//   judged on its own fields and each subtask on its own, as they merge
+//   (N19). Anything else keeps its stamps exactly.
 //
 // current: { subjects, sessions, tombstones }; next: any of { subjects,
 // sessions, tombstones }. A list next doesn't carry is left as it is.
@@ -53,13 +54,32 @@ const settle = (record, existing, removed, now, fields = (r) => r) => {
   return beaten || buried ? touch(record, stampPast([stamp(existing), removed, stamp(record)], now)) : record;
 };
 
+const topicFields = (topic) => {
+  const fields = { ...topic };
+  delete fields.subtasks;
+  return fields;
+};
+
+// The latest edit to a subject or anything inside it, as the merge reckons it.
 const lastActivity = (subject) =>
-  [subject, ...(subject.topics || []), ...(subject.milestones || [])].reduce(
+  [subject, ...(subject.milestones || []), ...(subject.topics || []).flatMap((topic) => [topic, ...(topic.subtasks || [])])].reduce(
     (latest, record) => (stamp(record) > latest ? stamp(record) : latest),
     ""
   );
 
 const CHILD_KINDS = ["topics", "milestones"];
+
+// A topic put in place: each subtask settles on its own, then the topic on its own fields.
+const settleTopic = (topic, mine, subjectId, tombstones, now) => {
+  const theirs = byId(mine?.subtasks);
+  const subtasks = Array.isArray(topic.subtasks)
+    ? topic.subtasks.map((subtask) =>
+        settle(subtask, theirs.get(subtask.id), deletedAt(tombstones, "subtasks", subtaskKey(subjectId, topic.id, subtask.id)), now)
+      )
+    : topic.subtasks;
+  const settled = subtasks === topic.subtasks || subtasks.every((x, i) => x === topic.subtasks[i]) ? topic : { ...topic, subtasks };
+  return settle(settled, mine, deletedAt(tombstones, "topics", childKey(subjectId, topic.id)), now, topicFields);
+};
 
 const replaceSubjects = (current, next, tombstones, placeholder, now) => {
   const here = placeholder ? new Map() : byId(current);
@@ -73,6 +93,12 @@ const replaceSubjects = (current, next, tombstones, placeholder, now) => {
         (id) => (result = addTombstone(result, kind, childKey(subject.id, id), now))
       )
     );
+    const myTopics = byId(mine?.topics);
+    (subject.topics || []).forEach((topic) =>
+      missingFrom(myTopics.get(topic.id)?.subtasks, byId(topic.subtasks)).forEach(
+        (id) => (result = addTombstone(result, "subtasks", subtaskKey(subject.id, topic.id, id), now))
+      )
+    );
   });
   const subjects = next.map((subject) => {
     const mine = here.get(subject.id);
@@ -80,7 +106,9 @@ const replaceSubjects = (current, next, tombstones, placeholder, now) => {
       CHILD_KINDS.filter((kind) => Array.isArray(subject[kind])).map((kind) => {
         const theirs = byId(mine?.[kind]);
         const list = subject[kind].map((child) =>
-          settle(child, theirs.get(child.id), deletedAt(result, kind, childKey(subject.id, child.id)), now)
+          kind === "topics"
+            ? settleTopic(child, theirs.get(child.id), subject.id, result, now)
+            : settle(child, theirs.get(child.id), deletedAt(result, kind, childKey(subject.id, child.id)), now)
         );
         return [kind, list];
       })

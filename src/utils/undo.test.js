@@ -313,17 +313,19 @@ describe("undoing a restore", () => {
     expect(unchangedSinceRestore(offer, { ...echo, sessions: [...echo.sessions].reverse() }, nowMs)).toBe(true);
   });
 
-  // N19: an echo merges subtasks one by one, so its topic can hold this
-  // copy's own fields with subtasks from both. Each part is still a copy.
-  it("is offered after an echo that combines subtasks from before and from the file", () => {
+  // N19: an echo merges subtasks one by one. The restore tombstones the
+  // subtasks it drops (N10), so the other tab's copies don't come back, and
+  // the echo of what the restore left keeps the offer.
+  it("is offered after an echo, without the subtasks the restore dropped", () => {
     const st = (id, extra = {}) => ({ id, name: id, done: false, ...extra });
     const withSubtasks = (subtasks, extra = {}) => [{ ...subject, ...extra, topics: [{ ...subject.topics[0], subtasks }] }];
-    const mine = { ...before, subjects: withSubtasks([st("a"), st("gone")]) };
+    const mine = { ...before, subjects: withSubtasks([st("a", { updatedAt: at }), st("gone")]) };
     const theirs = { ...file, subjects: withSubtasks([st("b", { updatedAt: later })], { name: "Renamed", updatedAt: later }) };
-    const restoredState = stateAfterRestore(theirs, mine);
+    const restoredState = stateAfterRestore(theirs, mine, { now: restoredAt });
+    expect(Object.keys(restoredState.tombstones.subtasks).sort()).toEqual([subtaskKey("maths", "t1", "a"), subtaskKey("maths", "t1", "gone")]);
     const subtaskOffer = { kind: "restore", before: mine, after: restoredState };
     const echo = { ...mergeData(restoredState, mine, nowMs), themeId: "light" };
-    expect(echo.subjects[0].topics[0].subtasks.map((x) => x.id)).toEqual(["b", "a", "gone"]);
+    expect(echo.subjects[0].topics[0].subtasks.map((x) => x.id)).toEqual(["b"]);
     expect(unchangedSinceRestore(subtaskOffer, echo, nowMs)).toBe(true);
     // A subtask ticked, added or deleted since still withdraws it.
     const edit = (subtasks, tombstones = echo.tombstones) => ({
@@ -331,14 +333,21 @@ describe("undoing a restore", () => {
       tombstones,
       subjects: [{ ...echo.subjects[0], topics: [{ ...echo.subjects[0].topics[0], subtasks }] }],
     });
-    const [b, a2, gone] = echo.subjects[0].topics[0].subtasks;
+    const [b] = echo.subjects[0].topics[0].subtasks;
     [
-      edit([b, { ...a2, done: true, updatedAt: undoneAt }, gone]),
-      edit([b, a2, gone, st("new", { updatedAt: undoneAt })]),
-      edit([b, a2], addTombstone(echo.tombstones, "subtasks", subtaskKey("maths", "t1", "gone"), undoneAt)),
+      edit([{ ...b, done: true, updatedAt: undoneAt }]),
+      edit([b, st("new", { updatedAt: undoneAt })]),
+      edit([], addTombstone(echo.tombstones, "subtasks", subtaskKey("maths", "t1", "b"), undoneAt)),
     ].forEach((state) => expect(unchangedSinceRestore(subtaskOffer, state, nowMs)).toBe(false));
     // A subtask tombstone alone (from a tab that deleted it) withdraws it too.
     expect(unchangedSinceRestore(subtaskOffer, { ...echo, tombstones: addTombstone(echo.tombstones, "subtasks", "x::y::z", undoneAt) }, nowMs)).toBe(false);
+    // Undo restore removes the subtask tombstones and re-stamps the dropped subtasks past them.
+    const undone = stateBeforeImport(subtaskOffer, echo, undoneAt);
+    expect(undone.tombstones).toBe(mine.tombstones);
+    expect(undone.subjects[0].topics[0].subtasks.map((x) => [x.id, x.updatedAt])).toEqual([["a", undoneAt], ["gone", undoneAt]]);
+    const settled = mergeData(echo, undone, nowMs);
+    // "b" was only in the file: Undo doesn't tombstone it (maintainer decision, 2026-10-05).
+    expect(settled.subjects[0].topics[0].subtasks.map((x) => x.id).sort()).toEqual(["a", "b", "gone"]);
   });
 
   it("is withdrawn by anything new: a session, an edit, a delete or a theme change", () => {
