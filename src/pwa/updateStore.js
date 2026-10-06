@@ -23,6 +23,21 @@ export const markUpdateReady = (applyFn) => {
 
 export const applyUpdate = () => apply?.();
 
+// Registers the service worker (main.jsx passes vite-plugin-pwa's registerSW)
+// and feeds its update events into this store.
+export const registerUpdates = (registerSW) => {
+  const updateSW = registerSW({
+    immediate: true,
+    onNeedRefresh() {
+      markUpdateReady(() => updateSW(true));
+    },
+    onRegisteredSW(_swUrl, registration) {
+      watchForUpdates(registration);
+    },
+  });
+  return updateSW;
+};
+
 // Test-only: forget any pending update between tests.
 export const resetUpdateStore = () => {
   ready = false;
