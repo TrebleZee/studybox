@@ -236,7 +236,7 @@ const MILESTONE_KEYS = new Set(["id", "name", "kind", "due", "done", "catalogueM
 const TOPIC_KEYS = new Set([
   "id", "name", "done", "subtasks", "catalogueTopicId", "paper", "higherOnly", "keepAsTopic", "createdAt", "updatedAt",
 ]);
-const SUBTASK_KEYS = new Set(["id", "name", "done"]);
+const SUBTASK_KEYS = new Set(["id", "name", "done", "createdAt", "updatedAt"]);
 const SESSION_KEYS = new Set([
   "id", "subjectId", "subjectName", "subjectColor", "duration", "date", "note", "tags", "createdAt", "updatedAt",
 ]);
@@ -440,6 +440,8 @@ export const normalizeSubject = (subject, index = 0) => {
             : `${isRecordId(topic?.id) ? topic.id : topicIndex}-st${subtaskIndex}`,
           name: text(subtask?.name) || "Untitled subtask",
           done: Boolean(subtask?.done),
+          // Optional stamps (N19), never invented: subtasks merge as records.
+          ...keepStamps(subtask),
           ...unknownFields(subtask, SUBTASK_KEYS),
         })
       ),

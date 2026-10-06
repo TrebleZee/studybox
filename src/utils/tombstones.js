@@ -5,6 +5,9 @@ import { isTimestamp, nowIso } from "./records.js";
 // `deletedAt` flag on each record, so no view ever has to filter deleted rows
 // out, and a merge can still tell "deleted here" from "never existed here".
 
+// Always present. Other kinds are kept only while they hold an entry: the
+// "subtasks" kind (N19), and any kind a newer build adds (N9). That keeps
+// stored tombstones and backups without a subtask delete exactly as before.
 export const TOMBSTONE_KINDS = ["subjects", "topics", "milestones", "sessions"];
 
 export const emptyTombstones = () => ({ subjects: {}, topics: {}, milestones: {}, sessions: {} });
@@ -12,15 +15,19 @@ export const emptyTombstones = () => ({ subjects: {}, topics: {}, milestones: {}
 // Topics and milestones are only unique within their subject.
 export const childKey = (subjectId, childId) => `${subjectId}::${childId}`;
 
+// Subtasks only within their topic. Their kind is their own, so a key can
+// never be mistaken for a topic's or a milestone's.
+export const subtaskKey = (subjectId, topicId, subtaskId) => childKey(childKey(subjectId, topicId), subtaskId);
+
 const isMap = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
 const cleanKind = (entries) =>
   Object.fromEntries(Object.entries(entries).filter(([id, deletedAt]) => id && isTimestamp(deletedAt)));
 
-// A record kind this build doesn't know (N9): a newer build's deletes, kept
-// so this build never forgets them. Only id -> timestamp maps qualify, so
-// they merge by the same rule as the known kinds; empty ones are dropped so
-// the known shape stays exactly emptyTombstones().
+// Any kind beyond the four: subtasks, or a record kind this build doesn't
+// know (N9), a newer build's deletes, kept so this build never forgets them.
+// Only id -> timestamp maps qualify, so they merge by the same rule as the
+// four; empty ones are dropped so the shape stays exactly emptyTombstones().
 const unknownKinds = (input) =>
   Object.keys(input).filter(
     (kind) => kind !== "__proto__" && !TOMBSTONE_KINDS.includes(kind) && isMap(input[kind])
