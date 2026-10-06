@@ -6,6 +6,7 @@ import {
   emptyTombstones,
   mergeTombstones,
   normalizeTombstones,
+  subtaskKey,
 } from "./tombstones.js";
 
 const T1 = "2026-10-05T09:00:00.000Z";
@@ -21,6 +22,20 @@ describe("tombstones", () => {
 
   it("key topics and milestones by their subject", () => {
     expect(childKey("physics", "ph0")).toBe("physics::ph0");
+  });
+
+  // N19: subtask deletes have their own kind, present only while it holds one.
+  it("key subtasks by subject and topic, in a kind of their own", () => {
+    expect(subtaskKey("physics", "ph0", "st-1")).toBe("physics::ph0::st-1");
+    expect(emptyTombstones()).toEqual({ subjects: {}, topics: {}, milestones: {}, sessions: {} });
+    const deleted = addTombstone(emptyTombstones(), "subtasks", subtaskKey("physics", "ph0", "st-1"), T1);
+    expect(deletedAt(deleted, "subtasks", "physics::ph0::st-1")).toBe(T1);
+    expect(deletedAt(deleted, "topics", "physics::ph0::st-1")).toBeNull();
+    expect(normalizeTombstones(JSON.parse(JSON.stringify(deleted)))).toEqual(deleted);
+    expect(mergeTombstones(emptyTombstones(), deleted)).toEqual(deleted);
+    // Stored tombstones without a subtask delete keep exactly their old shape.
+    expect(normalizeTombstones({ ...emptyTombstones(), subtasks: {} })).toEqual(emptyTombstones());
+    expect(mergeTombstones(emptyTombstones(), emptyTombstones())).toEqual(emptyTombstones());
   });
 
   it("normalize untrusted input down to id -> timestamp pairs", () => {
