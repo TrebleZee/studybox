@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { dateKey } from "../utils/gameLogic.js";
 import { milestonesToRemind } from "../utils/reminders.js";
 import showReminder from "../utils/showReminder.js";
-import { loadJson, saveJson, STORAGE_KEYS } from "../store/index.js";
+import { loadJson, removeKey, saveJson, STORAGE_KEYS } from "../store/index.js";
 
 const CHECK_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -36,11 +36,19 @@ export default function useMilestoneReminder(subjects) {
       }
       if (Notification.permission !== "granted") return;
 
+      // Marked first so a second check can't double up while it is shown; a
+      // reminder that couldn't be shown gives the day back.
       saveJson(STORAGE_KEYS.lastMilestoneReminder, dateKey(now));
       const [first] = due;
-      showReminder(due.length === 1 ? `${first.name} is due soon` : `${due.length} milestones are due soon`, {
+      const shown = showReminder(due.length === 1 ? `${first.name} is due soon` : `${due.length} milestones are due soon`, {
         body: due.map((milestone) => `${milestone.subjectName}: ${milestone.name} (${milestone.due})`).join("\n"),
         tag: "studybox-milestone-reminder",
+      });
+      shown.then((ok) => {
+        if (!ok) {
+          if (lastReminderDate == null) removeKey(STORAGE_KEYS.lastMilestoneReminder);
+          else saveJson(STORAGE_KEYS.lastMilestoneReminder, lastReminderDate);
+        }
       });
     };
 

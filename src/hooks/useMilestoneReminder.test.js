@@ -130,6 +130,8 @@ describe("useMilestoneReminder", () => {
       expect(() => renderHook(() => useMilestoneReminder(subjects("2027-05-12")))).not.toThrow();
       await vi.advanceTimersByTimeAsync(0);
       expect(showNotification).toHaveBeenCalledTimes(1);
+      // a reminder that couldn't be shown gives the day back
+      expect(localStorage.getItem("sb-last-milestone-reminder")).toBeNull();
     });
   });
 });

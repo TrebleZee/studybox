@@ -124,6 +124,8 @@ describe("useStreakReminder", () => {
       expect(() => renderHook(() => useStreakReminder(atRiskGame()))).not.toThrow();
       await vi.advanceTimersByTimeAsync(0);
       expect(showNotification).toHaveBeenCalledTimes(1);
+      // a reminder that couldn't be shown gives the day back
+      expect(localStorage.getItem("sb-last-streak-reminder")).toBeNull();
     });
   });
 });
