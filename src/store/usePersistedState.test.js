@@ -51,3 +51,22 @@ describe("usePersistedState and a newer stored schema (N9)", () => {
     expect(storedSchemaIsNewer()).toBe(false);
   });
 });
+
+// N10: a placeholder value (the onboarding defaults) is never written, and a
+// stored value is removed when the state goes back to the placeholder.
+describe("usePersistedState with a placeholder", () => {
+  const isPlaceholder = (value) => value.length === 0;
+
+  it("doesn't write the placeholder on mount", () => {
+    renderHook(() => usePersistedState(KEY, () => [], undefined, isPlaceholder));
+    expect(stored()).toBeNull();
+  });
+
+  it("writes real data, and removes the key when the state goes back to the placeholder", () => {
+    const { result } = renderHook(() => usePersistedState(KEY, () => [], undefined, isPlaceholder));
+    act(() => result.current[1]([{ id: "a" }]));
+    expect(stored()).toBe(JSON.stringify([{ id: "a" }]));
+    act(() => result.current[1]([]));
+    expect(stored()).toBeNull();
+  });
+});

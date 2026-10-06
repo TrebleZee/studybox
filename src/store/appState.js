@@ -2,7 +2,7 @@ import { normalizeAsanaConfig } from "../services/asanaClient.js";
 import { BACKUP_VERSION, buildBackup } from "../utils/backup.js";
 import { buildInitialGame, normalizeGame } from "../utils/gameLogic.js";
 import { mergeGameStates, mergeSessionLists, mergeSubjectLists } from "../utils/merge.js";
-import { normalizeSessions, normalizeSubjects } from "../utils/subjects.js";
+import { isUntouchedDefaultSubjects, normalizeSessions, normalizeSubjects } from "../utils/subjects.js";
 import { mergeTombstones, normalizeTombstones } from "../utils/tombstones.js";
 import { loadJson, STORAGE_KEYS, unreadableText } from "./localStore.js";
 
@@ -77,7 +77,10 @@ export const storedBackup = () => withUnreadable(rawOrBuiltBackup());
 export const tabMerges = (localTombstones) => {
   const tombstones = () => mergeTombstones(localTombstones, loaders.tombstones());
   return {
-    subjects: (local, theirs) => normalizeSubjects(mergeSubjectLists(local, theirs, tombstones())),
+    // The untouched placeholder defaults are nobody's data (N10): a tab still
+    // holding them takes the other tab's subjects rather than adding them back.
+    subjects: (local, theirs) =>
+      isUntouchedDefaultSubjects(local) ? theirs : normalizeSubjects(mergeSubjectLists(local, theirs, tombstones())),
     sessions: (local, theirs) => normalizeSessions(mergeSessionLists(local, theirs, tombstones())),
     game: (local, theirs) =>
       normalizeGame(mergeGameStates(local, theirs, loaders.sessions(), loaders.subjects())),
