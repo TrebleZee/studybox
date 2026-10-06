@@ -430,3 +430,120 @@ describe("undo with a second tab open", () => {
     );
   });
 });
+
+// N11: Undo restore with a second tab open. That tab merges what it had back
+// into the restore (N10, until replacing writes tombstones) and writes it
+// here; the offer must survive that echo, and Undo must hold in both tabs.
+describe("undo restore with a second tab open", () => {
+  const at = (day) => `2026-09-${day}T10:00:00.000Z`;
+  const sessionOf = (id, note, stamp) => ({
+    id,
+    subjectId: "maths",
+    subjectName: "Maths",
+    subjectColor: "#4f8cff",
+    duration: 600,
+    date: at(13),
+    note,
+    tags: [],
+    createdAt: at(13),
+    updatedAt: stamp,
+  });
+  const preRestore = () => [sessionOf("sess-edited", "mine", at(13)), sessionOf("sess-kept", "keep me", at(13))];
+
+  const restoreIn = async (tab) => {
+    const before = stored(STORAGE_KEYS.subjects);
+    const topic = before[0].topics[0];
+    const file = {
+      version: 3,
+      // The wrong backup: newer copies of a topic and a session, a session
+      // this device never had, and none of this device's other records.
+      subjects: [{ ...before[0], topics: [{ ...topic, done: true, updatedAt: at(20) }] }],
+      sessions: [sessionOf("sess-edited", "theirs", at(20)), sessionOf("sess-file", "only in the file", at(20))],
+      themeId: "light",
+    };
+    fireEvent.click(tab.getByRole("button", { name: "Settings" }));
+    fireEvent.change(tab.getByLabelText("Restore backup file"), {
+      target: { files: [new File([JSON.stringify(file)], "backup.json", { type: "application/json" })] },
+    });
+    await tab.findByRole("button", { name: "Undo restore" });
+    await act(async () => {});
+    return { before, topic };
+  };
+
+  it("stays offered after the other tab merges its records back in", async () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(preRestore()));
+    const [a, b] = openTabs();
+    queued.splice(0);
+    await restoreIn(a);
+    deliver();
+
+    // Tab B kept its own records (N10) and wrote them back here.
+    expect(stored(STORAGE_KEYS.sessions).some((s) => s.id === "sess-kept")).toBe(true);
+    expect(loggedIn(b)).toBe(3);
+    expect(a.getByRole("button", { name: "Undo restore" })).toBeTruthy();
+  });
+
+  it("restores every pre-restore record in both tabs", async () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(preRestore()));
+    const [a, b] = openTabs();
+    const theme = localStorage.getItem(STORAGE_KEYS.theme);
+    queued.splice(0);
+    const { before, topic } = await restoreIn(a);
+    deliver();
+    expect(stored(STORAGE_KEYS.sessions).find((s) => s.id === "sess-edited").note).toBe("theirs");
+
+    fireEvent.click(a.getByRole("button", { name: "Undo restore" }));
+    expect(a.getByText("Restore undone.")).toBeTruthy();
+    deliver();
+    // Tab B writes again from its own state: the pre-restore records must hold there too.
+    fireEvent.click(b.getAllByRole("checkbox")[1]);
+    deliver();
+
+    const sessions = stored(STORAGE_KEYS.sessions);
+    expect(sessions.find((s) => s.id === "sess-edited").note).toBe("mine");
+    expect(sessions.find((s) => s.id === "sess-kept")?.note).toBe("keep me");
+    const subjects = stored(STORAGE_KEYS.subjects);
+    expect(subjects.map((s) => s.id)).toEqual(before.map((s) => s.id));
+    expect(subjects[0].topics.find((t) => t.id === topic.id).done).toBe(false);
+    expect(localStorage.getItem(STORAGE_KEYS.theme)).toBe(theme);
+    // Records only the file had are not deleted (as for Undo merge, maintainer
+    // decision 2026-10-05): with another tab open they come back from it.
+    expect(sessions.some((s) => s.id === "sess-file")).toBe(true);
+    [a, b].forEach((tab) => expect(loggedIn(tab)).toBe(3));
+  });
+
+  // Known limit: the game has no edit stamps and tabs merge it by taking the
+  // larger streak and legacy XP, so with another tab open Undo restore can't
+  // take back a bigger streak the file brought (Undo merge can't either).
+  // Kept as a known limit (maintainer decision, 2026-10-05); pinned so a fix shows up here.
+  it("keeps the file's bigger streak when another tab is open (known limit)", async () => {
+    const [a] = openTabs();
+    queued.splice(0);
+    const today = new Date().toISOString().slice(0, 10);
+    const game = { currentStreak: 40, longestStreak: 40, lastStudyDate: today, totalXP: 4000, legacyXP: 4000 };
+    fireEvent.click(a.getByRole("button", { name: "Settings" }));
+    fireEvent.change(a.getByLabelText("Restore backup file"), {
+      target: { files: [new File([JSON.stringify({ version: 3, sessions: [], game })], "backup.json")] },
+    });
+    await a.findByRole("button", { name: "Undo restore" });
+    await act(async () => {});
+    deliver();
+
+    fireEvent.click(a.getByRole("button", { name: "Undo restore" }));
+    deliver();
+    expect(stored(STORAGE_KEYS.game)).toMatchObject({ currentStreak: 40, legacyXP: 4000 });
+  });
+
+  it("is withdrawn when the other tab changes something", async () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify(preRestore()));
+    const [a, b] = openTabs();
+    queued.splice(0);
+    await restoreIn(a);
+    deliver();
+
+    fireEvent.click(b.getAllByRole("checkbox")[1]);
+    deliver();
+
+    expect(a.queryByRole("button", { name: "Undo restore" })).toBeNull();
+  });
+});

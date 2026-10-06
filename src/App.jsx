@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AnalysisPanel from "./components/AnalysisPanel.jsx";
 import EditSessionModal from "./components/EditSessionModal.jsx";
 import LogView from "./components/LogView.jsx";
@@ -18,8 +18,8 @@ import useSpaceToggle from "./hooks/useSpaceToggle.js";
 import useUndoDelete from "./hooks/useUndoDelete.js";
 import { buildCss } from "./utils/appCss.js";
 import { buildBackup, downloadBackup, parseBackup, readFileText } from "./utils/backup.js";
-import { timedTopic } from "./utils/sessionDraft.js";
-import { applyLoggedSession, deriveXP, settleLegacyXP, streakExpiry, validateStreak } from "./utils/gameLogic.js";
+import { draftFields, timedTopic } from "./utils/sessionDraft.js";
+import { applyLoggedSession, deriveXP, streakExpiry, validateStreak } from "./utils/gameLogic.js";
 import { loaders, tabMerges } from "./store/appState.js";
 import { loadJson, removeKey, saveJson, STORAGE_KEYS, usePersistedState } from "./store/index.js";
 import {
@@ -34,8 +34,8 @@ import { subjectsForTemplate } from "./utils/catalogue.js";
 import { mergeData } from "./utils/merge.js";
 import { convertTopicToMilestone } from "./utils/milestones.js";
 import { newId, nowIso, stampNew, touch } from "./utils/records.js";
-import { addTombstone, childKey, emptyTombstones, mergeTombstones, subtaskKey } from "./utils/tombstones.js";
-import { restoreBeforeMerge, unchangedSinceMerge } from "./utils/undo.js";
+import { addTombstone, childKey, mergeTombstones, subtaskKey } from "./utils/tombstones.js";
+import { canUndoImport, stateAfterRestore, stateBeforeImport } from "./utils/undo.js";
 import { THEMES } from "./utils/themes.js";
 
 const mapSubject = (subjects, id, fn) =>
@@ -76,12 +76,8 @@ export default function StudyBox() {
   const [view, setView] = useState("planner");
   const [asanaTask, setAsanaTask] = useState(null);
   const [expandedTopic, setExpandedTopic] = useState(() => restoredTopic?.topicId ?? null);
-  const [note, setNote] = useState(() =>
-    typeof savedDraft?.note === "string" ? savedDraft.note : ""
-  );
-  const [sessionTags, setSessionTags] = useState(() =>
-    Array.isArray(savedDraft?.tags) ? savedDraft.tags.filter((tag) => typeof tag === "string") : []
-  );
+  const [note, setNote] = useState(() => draftFields(savedDraft).note);
+  const [sessionTags, setSessionTags] = useState(() => draftFields(savedDraft).tags);
   const [editingSession, setEditingSession] = useState(null);
   const [backupMessage, setBackupMessage] = useState(null);
 
@@ -122,8 +118,12 @@ export default function StudyBox() {
   const canTime = asanaSelected || Boolean(sub);
 
   const timer = useTimer({
-    canTime,
-    defaultSubjectId: asanaSelected ? asanaCfg.id : sub?.id ?? null,
+    ...{ canTime, defaultSubjectId: asanaSelected ? asanaCfg.id : sub?.id ?? null },
+    onAdopt: () => {
+      const draft = draftFields(loadJson(STORAGE_KEYS.sessionDraft, null));
+      setNote(draft.note);
+      setSessionTags(draft.tags);
+    },
   });
   useStreakReminder(game);
   useMilestoneReminder(subjects);
@@ -134,7 +134,7 @@ export default function StudyBox() {
   const needsOnboarding =
     !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
   const { undo, noteDeletion, noteTimerReset, undoDelete, clearUndo } = useUndoDelete({
-    ...{ subjects, sessions, tombstones, setSubjects, setSessions, setTombstones, timerBusy: sessionInProgress },
+    ...{ subjects, sessions, tombstones, setSubjects, setSessions, setTombstones, timerBusy: sessionInProgress || timer.elsewhere },
     onRestore: ({ id, selected, timed, timer: reset, topicId }) => {
       if (reset) timer.restore(reset);
       // Undoing a Reset brings its timed topic back the way a reload does.
@@ -161,12 +161,13 @@ export default function StudyBox() {
   // the expanded topic is just navigation.
   const draftTopicId = sessionInProgress && timedSubject ? expandedTopic : null;
   useEffect(() => {
+    if (timer.elsewhere) return;
     if (!note && !sessionTags.length && !draftTopicId) {
       removeKey(STORAGE_KEYS.sessionDraft);
     } else {
       saveJson(STORAGE_KEYS.sessionDraft, { note, tags: sessionTags, topicId: draftTopicId });
     }
-  }, [note, sessionTags, draftTopicId]);
+  }, [note, sessionTags, draftTopicId, timer.elsewhere]);
 
   useSpaceToggle(() => (running ? timer.pause() : timer.start()));
 
@@ -363,7 +364,14 @@ export default function StudyBox() {
   const exportData = () => {
     const backup = buildBackup({ subjects, sessions, themeId, game, tombstones });
     downloadBackup(backup);
-    setBackupMessage({ type: "success", text: "Backup downloaded." });
+    setBackupMessage((message) => ({ type: "success", text: "Backup downloaded.", undo: message?.undo }));
+  };
+
+  const setData = (data) => {
+    setSubjects(data.subjects);
+    setSessions(data.sessions);
+    setTombstones(data.tombstones);
+    setGame(data.game);
   };
 
   // Restore replaces everything with the file. Merge ({ merge: true }) folds
@@ -373,37 +381,28 @@ export default function StudyBox() {
     try {
       const restored = parseBackup(await readFileText(file));
       templateRequest.current += 1;
+      // Undo is offered only while nothing has changed since (utils/undo.js).
+      const before = { subjects, sessions, tombstones, game, themeId, onboarded, sel, timedSubjectId };
       if (merge) {
         const theirs = { subjects: restored.subjects ?? [], sessions: restored.sessions ?? [] };
         const incoming = { ...theirs, tombstones: restored.tombstones, game: restored.game ?? game };
         const merged = mergeData({ subjects, sessions, tombstones, game }, incoming);
-        setSubjects(merged.subjects);
-        setSessions(merged.sessions);
-        setTombstones(merged.tombstones);
-        setGame(merged.game);
+        setData(merged);
         if (!merged.subjects.some((subject) => subject.id === sel)) setSel(merged.subjects[0]?.id ?? null);
         if (timedSubjectId && !merged.subjects.some((subject) => subject.id === timedSubjectId)) {
           timer.setTimedSubjectId(null);
         }
         setOnboarded(true);
-        // Undo is offered only while nothing has changed since (utils/undo.js).
-        const before = { subjects, sessions, tombstones, game, sel, timedSubjectId };
         const text = "Backup merged with the data on this device.";
-        setBackupMessage({ type: "success", text, undo: { before, after: merged } });
+        setBackupMessage({ type: "success", text, undo: { kind: "merge", before, after: merged } });
         return { ok: true };
       }
-      setTombstones(restored.tombstones ?? emptyTombstones());
-      if (restored.subjects) {
-        setSubjects(restored.subjects);
-        setSel(restored.subjects[0]?.id ?? null);
-      }
-      if (restored.sessions) setSessions(restored.sessions);
-      if (restored.themeId) setThemeId(restored.themeId);
-      if (restored.game) {
-        setGame(settleLegacyXP(restored.game, restored.sessions ?? sessions, restored.subjects ?? subjects));
-      }
+      const after = stateAfterRestore(restored, { subjects, sessions, game, themeId });
+      setData(after);
+      if (restored.subjects) setSel(after.subjects[0]?.id ?? null);
+      setThemeId(after.themeId);
       setOnboarded(true);
-      setBackupMessage({ type: "success", text: "Backup restored." });
+      setBackupMessage({ type: "success", text: "Backup restored.", undo: { kind: "restore", before, after } });
       return { ok: true };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to read backup file.";
@@ -412,19 +411,21 @@ export default function StudyBox() {
     }
   };
 
-  const canUndoMerge = unchangedSinceMerge(backupMessage?.undo?.after, { subjects, sessions, tombstones, game });
-  const undoMerge = () => {
-    if (!canUndoMerge) return;
-    const before = restoreBeforeMerge(backupMessage.undo);
-    setSubjects(before.subjects);
-    setSessions(before.sessions);
-    setTombstones(before.tombstones);
-    setGame(before.game);
+  // Undo merge or Undo restore (N11), beside the import's message.
+  const offer = backupMessage?.undo;
+  const current = useMemo(() => ({ subjects, sessions, tombstones, game, themeId }), [subjects, sessions, tombstones, game, themeId]);
+  const canUndo = useMemo(() => canUndoImport(offer, current), [offer, current]); // not on every timer tick (R2)
+  const undoImport = () => {
+    if (!canUndo) return;
+    const before = stateBeforeImport(offer, current);
+    setData(before);
+    setThemeId(before.themeId);
+    setOnboarded(before.onboarded);
     setSel(before.sel);
-    // Selecting or timing a subject doesn't withdraw the offer, so a timer on a subject only the merge added is cleared.
+    // Selecting or timing a subject doesn't withdraw the offer, so a timer on a subject only the import added is cleared.
     const timedGone = timedSubjectId && !before.subjects.some((subject) => subject.id === timedSubjectId);
     if (before.timedSubjectId || timedGone) timer.setTimedSubjectId(before.timedSubjectId ?? null);
-    setBackupMessage({ type: "success", text: "Merge undone." });
+    setBackupMessage({ type: "success", text: offer.kind === "restore" ? "Restore undone." : "Merge undone." });
   };
 
   // Onboarding's "Choose my subjects": the picked subjects replace the
@@ -516,8 +517,7 @@ export default function StudyBox() {
                 color: timerColor,
                 label: timerLabel,
                 highlightedSubjectId: asanaSelected ? null : sub?.id ?? null,
-                start: timer.start,
-                pause: timer.pause,
+                ...{ start: timer.start, pause: timer.pause, elsewhere: timer.elsewhere, takeOver: timer.takeOver },
                 reset: () => noteTimerReset(timer.reset(), { topicId: draftTopicId }),
               }}
               session={{
@@ -573,7 +573,7 @@ export default function StudyBox() {
               onExport={exportData}
               onImport={importData}
               onMerge={(file) => importData(file, { merge: true })}
-              onUndoMerge={canUndoMerge ? undoMerge : undefined}
+              onUndoImport={canUndo ? undoImport : undefined}
             />
           )}
 

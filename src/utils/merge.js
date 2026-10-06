@@ -121,7 +121,8 @@ const mergeTopic = (a, b, subjectId, tombstones) => {
   const subtasks = mergeById(winner.subtasks || [], other.subtasks || [], pick).filter((subtask) =>
     survives(subtask, tombstones, "subtasks", subtaskKey(subjectId, winner.id, subtask.id))
   );
-  return { ...winner, subtasks };
+  // Normalized topics always have the list; a bare one doesn't gain it.
+  return winner.subtasks || other.subtasks ? { ...winner, subtasks } : winner;
 };
 
 const mergeSubject = (a, b, tombstones) => {

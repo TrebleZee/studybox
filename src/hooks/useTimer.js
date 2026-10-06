@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { loadJson, removeKey, saveJson, STORAGE_KEYS } from "../store/index.js";
+import { loadJson, removeKey, saveJson, STORAGE_KEYS, subscribe } from "../store/index.js";
 import { fmt } from "../utils/format.js";
+import { newId } from "../utils/records.js";
 
 const nonNegative = (value) => (Number.isFinite(value) && value >= 0 ? value : null);
 
@@ -11,11 +12,34 @@ const nonNegative = (value) => (Number.isFinite(value) && value >= 0 ? value : n
 const MAX_RESUME_MS = 12 * 60 * 60 * 1000;
 const EARLIEST_START = Date.UTC(2020, 0, 1);
 
+// One tab owns a timer with time on it (N12). The owner stamps the saved
+// timer with its tab id (`owner`) and a heartbeat (`heldAt`): every tick while
+// it runs, every HEARTBEAT_MS while it's paused. Another tab leaves a timer
+// alone while its owner's heartbeat is younger than STALE_MS (background tabs
+// can be throttled to a tick a minute), so there's never a second writer to
+// put a logged session back. A page that closes or reloads releases its timer
+// (`owner: null`) on pagehide or unmount: the reloading page takes it straight back, and
+// any other open tab only after RELEASE_GRACE_MS, in case it was a reload.
+const HEARTBEAT_MS = 10 * 1000;
+const STALE_MS = 3 * 60 * 1000;
+const RELEASE_GRACE_MS = 5 * 1000;
+const POLL_MS = 5 * 1000;
+
+const hasTime = (saved) => nonNegative(saved?.startedAt) !== null || nonNegative(saved?.elapsed) > 0;
+
+// Whether the saved timer is a live session another tab owns. A timer saved
+// before owners existed, or with nothing on it, is nobody's.
+export const ownedElsewhere = (saved, tabId, now, graceMs = 0) => {
+  if (!hasTime(saved) || saved.owner === tabId) return false;
+  const heldAt = nonNegative(saved.heldAt);
+  if (heldAt === null || heldAt > now) return false;
+  return now - heldAt < (typeof saved.owner === "string" ? STALE_MS : graceMs);
+};
+
 // The timer is saved so a reload (an app update, a refresh, a closed tab)
 // resumes the session instead of losing it. `lastSeenAt` is a heartbeat
 // written while the timer runs, marking when the app was last open.
-const loadSavedTimer = (now) => {
-  const saved = loadJson(STORAGE_KEYS.timer, null);
+const savedTimer = (saved, now) => {
   const elapsed = nonNegative(saved?.elapsed) ?? 0;
   const timedSubjectId = typeof saved?.timedSubjectId === "string" ? saved.timedSubjectId : null;
   const startedAt = nonNegative(saved?.startedAt);
@@ -34,35 +58,114 @@ const loadSavedTimer = (now) => {
   return { elapsed: seenSecs ?? elapsed, startedAt: null, timedSubjectId };
 };
 
+const IDLE = { elapsed: 0, startedAt: null, timedSubjectId: null };
+
 // The timer is anchored to a Date.now() start timestamp rather than counting
 // ticks, so a backgrounded tab or a throttled interval can't make it drift.
-export default function useTimer({ canTime, defaultSubjectId }) {
-  const [saved] = useState(() => loadSavedTimer(Date.now()));
-  const [elapsed, setElapsed] = useState(saved.elapsed);
-  const [startedAt, setStartedAt] = useState(saved.startedAt);
+export default function useTimer({ canTime, defaultSubjectId, onAdopt }) {
+  const [tabId] = useState(() => newId("tab"));
+  const [initial] = useState(() => {
+    const saved = loadJson(STORAGE_KEYS.timer, null);
+    const now = Date.now();
+    return ownedElsewhere(saved, tabId, now) ? { ...IDLE, elsewhere: true } : { ...savedTimer(saved, now), elsewhere: false };
+  });
+  const [elapsed, setElapsed] = useState(initial.elapsed);
+  const [startedAt, setStartedAt] = useState(initial.startedAt);
   const [now, setNow] = useState(() => Date.now());
-  const [timedSubjectId, setTimedSubjectId] = useState(saved.timedSubjectId);
-  const intervalRef = useRef();
+  const [timedSubjectId, setTimedSubjectId] = useState(initial.timedSubjectId);
+  // Another tab owns the session in progress: this tab shows it as elsewhere
+  // and never writes the timer until it's free or the user continues it here.
+  const [elsewhere, setElsewhere] = useState(initial.elsewhere);
+  const written = useRef(null);
 
   const running = startedAt !== null;
   const lastSeenAt = running ? now : null;
+  const holding = !elsewhere && (running || elapsed > 0);
+  const heldAt = holding ? now : null;
+
+  const take = (state, isElsewhere) => {
+    setElapsed(state.elapsed);
+    setStartedAt(state.startedAt);
+    setTimedSubjectId(state.timedSubjectId);
+    setNow(Date.now());
+    setElsewhere(isElsewhere);
+  };
+  // Taking the saved timer from another tab (it was freed, or continued here)
+  // tells the app, so the session's note and tags come with it.
+  const adopt = (saved) => {
+    take(savedTimer(saved, Date.now()), false);
+    onAdopt?.();
+  };
+  const yieldTimer = () => take(IDLE, true);
 
   useEffect(() => {
-    if (startedAt === null && elapsed === 0 && timedSubjectId === null) {
+    if (elsewhere) {
+      written.current = null;
+    } else if (startedAt === null && elapsed === 0 && timedSubjectId === null) {
+      written.current = null;
       removeKey(STORAGE_KEYS.timer);
     } else {
-      saveJson(STORAGE_KEYS.timer, { elapsed, startedAt, timedSubjectId, lastSeenAt });
+      written.current = { elapsed, startedAt, timedSubjectId, lastSeenAt, owner: tabId, heldAt };
+      saveJson(STORAGE_KEYS.timer, written.current);
     }
-  }, [elapsed, startedAt, timedSubjectId, lastSeenAt]);
+  }, [elapsed, startedAt, timedSubjectId, lastSeenAt, heldAt, elsewhere, tabId]);
+
+  // The latest handlers for the listeners below, which subscribe once.
+  const handlers = useRef({});
+  useEffect(() => {
+    handlers.current = {
+      // Ticks the display while running, beats the heartbeat while paused,
+      // and while the session is elsewhere checks whether its owner has gone.
+      tick: () => {
+        const at = Date.now();
+        if (!elsewhere) return setNow(at);
+        const saved = loadJson(STORAGE_KEYS.timer, null);
+        if (!ownedElsewhere(saved, tabId, at, RELEASE_GRACE_MS)) adopt(saved);
+      },
+      // Another tab's write: one that now owns a session takes it from this
+      // tab (it was continued there); the timer being cleared frees this tab.
+      change: (saved) => {
+        if (saved === undefined) {
+          if (elsewhere) adopt(null);
+        } else if (typeof saved?.owner === "string" && saved.owner !== tabId && hasTime(saved)) {
+          if (!elsewhere) yieldTimer();
+        }
+      },
+      // Closing or reloading releases the timer; coming back from the
+      // back/forward cache takes it again unless another tab has since.
+      release: () => {
+        if (written.current) saveJson(STORAGE_KEYS.timer, { ...written.current, owner: null });
+      },
+      reclaim: (event) => {
+        if (!event.persisted || !written.current) return;
+        if (ownedElsewhere(loadJson(STORAGE_KEYS.timer, null), tabId, Date.now())) yieldTimer();
+        else saveJson(STORAGE_KEYS.timer, written.current);
+      },
+    };
+  });
+
+  const tickMs = running ? 500 : elsewhere ? POLL_MS : holding ? HEARTBEAT_MS : null;
+  useEffect(() => {
+    if (tickMs === null) return undefined;
+    const interval = setInterval(() => handlers.current.tick(), tickMs);
+    return () => clearInterval(interval);
+  }, [tickMs]);
 
   useEffect(() => {
-    if (startedAt !== null) {
-      intervalRef.current = setInterval(() => setNow(Date.now()), 500);
-    } else {
-      clearInterval(intervalRef.current);
-    }
-    return () => clearInterval(intervalRef.current);
-  }, [startedAt]);
+    const unsubscribe = subscribe((change) => {
+      if (change.type === "external" && change.key === STORAGE_KEYS.timer) handlers.current.change(change.value);
+    });
+    const release = () => handlers.current.release();
+    const reclaim = (event) => handlers.current.reclaim(event);
+    window.addEventListener("pagehide", release);
+    window.addEventListener("pageshow", reclaim);
+    return () => {
+      unsubscribe();
+      release();
+      window.removeEventListener("pagehide", release);
+      window.removeEventListener("pageshow", reclaim);
+    };
+  }, []);
 
   useEffect(() => {
     if (!running) return undefined;
@@ -78,7 +181,7 @@ export default function useTimer({ canTime, defaultSubjectId }) {
   }, [running, displaySecs]);
 
   const start = () => {
-    if (!canTime) return;
+    if (!canTime || elsewhere) return;
     if (!timedSubjectId) setTimedSubjectId(defaultSubjectId);
     const startTime = Date.now();
     setNow(startTime);
@@ -100,7 +203,9 @@ export default function useTimer({ canTime, defaultSubjectId }) {
 
   // Puts a reset timer back at the time it had. A timer that was running
   // carries on from there, so the gap before Undo isn't counted as study.
+  // Never while another tab owns a session: that would make two writers.
   const restore = (state) => {
+    if (elsewhere) return;
     const restartAt = Date.now();
     setElapsed(state.elapsed);
     setTimedSubjectId(state.timedSubjectId);
@@ -108,5 +213,8 @@ export default function useTimer({ canTime, defaultSubjectId }) {
     setStartedAt(state.running ? restartAt - state.elapsed * 1000 : null);
   };
 
-  return { running, displaySecs, timedSubjectId, setTimedSubjectId, start, pause, reset, restore };
+  // Moves the session another tab owns to this one; that tab lets it go.
+  const takeOver = () => adopt(loadJson(STORAGE_KEYS.timer, null));
+
+  return { running, displaySecs, timedSubjectId, setTimedSubjectId, start, pause, reset, restore, elsewhere, takeOver };
 }
