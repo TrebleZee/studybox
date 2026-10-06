@@ -28,7 +28,7 @@ Each worker's model is set by the riskiest branch it will run before reporting b
 
 | Tier | Model (session id / subagent alias) | Use for | Examples in StudyBox |
 | --- | --- | --- | --- |
-| **Critical** | `claude-fable-5-1` / `fable` | Changes to the stored data model, merge semantics, tombstones or anything a sync engine will replicate, where a wrong fix silently corrupts or drops records on every device and no test catches the whole space. | Unknown-field preservation (N9), replace actions writing tombstones (N10), subtasks as records (N19), schema migrations, record order, the readiness audit |
+| **Critical** | `claude-opus-5-5` / `opus`, with two independent reviews | Changes to the stored data model, merge semantics, tombstones or anything a sync engine will replicate, where a wrong fix silently corrupts or drops records on every device and no test catches the whole space. | Unknown-field preservation (N9), replace actions writing tombstones (N10), subtasks as records (N19), schema migrations, record order, the readiness audit |
 | **High** | `claude-opus-5-5` / `opus` | Anything else that can lose, duplicate or misattribute a user's data, or touches the store layer, normalizers, undo, `App.jsx` record handlers, the service-worker update path or security headers. Also the coordinator, every review and every plan. | Storage guards (N16/N17), undo restore (N11), timer ownership (N12), orphaned timer subject (N15), update reload guard (N18), `release-reviewer`, `release-fixer`, `readiness-planner` |
 | **Standard** | `claude-sonnet-5-5` / `sonnet` | A fix confined to one component or hook, no stored-data shape change, a reproducing test is straightforward. | Session edit keeps seconds (N21), Android reminders (N20), docs-only updates |
 | **Mechanical** | `claude-haiku-4-5-20251001` / `haiku` | No product code: config, ignore files, release notes, link fixes. | `chore/ignore-drafts` (C10), `release-publisher` |
@@ -36,10 +36,12 @@ Each worker's model is set by the riskiest branch it will run before reporting b
 Rules that override the table:
 
 - **The tier is the highest any branch in the run needs.** A lane whose queue goes A2.9 (High) → A3.2 (Critical) runs at Critical, or the worker stops after A2.9 and the coordinator launches A3.2 separately.
-- **Review at least one tier up from the author, never below Opus.** Every branch written by a Standard or Mechanical worker gets a `release-reviewer` pass even when it is a `fix/` (which normally skips the gate). Critical branches are reviewed with `release-reviewer` run as `fable` (Agent tool `model: "fable"`).
-- **Escalate, never silently downgrade.** If a worker hits a Stop-and-ask condition, fails CI twice on the same cause, or its review returns a `high` or `critical` finding, archive it and relaunch the lane one tier up with what it learned. Only the maintainer lowers a tier.
+- **Reviews run on Opus, never on a smaller model than the author's.** Every branch written by a Standard or Mechanical worker gets a `release-reviewer` pass even when it is a `fix/` (which normally skips the gate). Critical branches get `release-reviewer` **twice, independently** (two separate Agent calls on `opus`; the second is not shown the first's findings), and `release-fixer` takes both sets of findings.
+- **Escalate, never silently downgrade.** If a worker hits a Stop-and-ask condition, fails CI twice on the same cause, or its review returns a `high` or `critical` finding, archive it and relaunch the lane one tier up with what it learned (at the top tier, Opus, escalation means a fresh Opus worker plus the second independent review, and the PR states it). Only the maintainer lowers a tier.
 - **Severity is a floor.** A ledger `high` or `critical` finding is never worked below High.
 - Record the tier and model in the worker's draft PR body ("Model: claude-opus-5-5, tier High") so the choice is reviewable.
+
+**No Fable.** This account has no usage credits for Claude Fable, so Fable is never used for workers, reviews or agents (maintainer decision, 2026-10-06). Opus is the top tier, and Critical work makes up the difference with the second independent review. Only the maintainer reinstates Fable.
 
 Model ids change: check the session's model list (or the `claude-api` skill) before launching, and update this table in a `chore/` PR when the line-up moves.
 
