@@ -119,6 +119,8 @@ export default function PlannerView({
         displaySecs={timer.displaySecs}
         canTime={timer.canTime}
         elsewhere={timer.elsewhere}
+        orphaned={timer.orphaned}
+        onChooseSubject={timer.chooseSubject}
         timerColor={timer.color}
         timerLabel={timer.label}
         highlightedSubjectId={timer.highlightedSubjectId}

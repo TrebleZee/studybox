@@ -63,6 +63,7 @@ If you have a live streak and haven't logged a session by 8pm local time, StudyB
 - Pick how to start (your exact specs, a template, or blank); more subjects can be added later from **Settings > Add Subject**, from the catalogue, by hand or from a spec PDF
 - In the **Planner**, type a topic name and press **Add** to add it to the selected subject
 - Press **Start** (or Space) to time a session, then **Log Session** to save it
+- If the subject being timed is deleted mid-session (here or in another window), the timer says so and keeps the time; pick a subject to log it under, or Reset to discard it
 - Study away!
 
 ## Development

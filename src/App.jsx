@@ -131,6 +131,7 @@ export default function StudyBox() {
   const timedSubject = subjects.find((subject) => subject.id === timedSubjectId);
   const timingAsana = asanaEnabled && timedSubjectId === asanaCfg.id;
   const sessionInProgress = running || displaySecs > 0;
+  const orphaned = sessionInProgress && !timedSubject && !timingAsana; // its subject was deleted (N15)
   const needsOnboarding =
     !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects);
   const { undo, noteDeletion, noteTimerReset, undoDelete, clearUndo } = useUndoDelete({
@@ -291,7 +292,7 @@ export default function StudyBox() {
       updateTopicSubtasks(topicId, (subtasks) => subtasks.filter((st) => st.id !== subtaskId)),
 
     logSession: () => {
-      if (!displaySecs || !canTime) return;
+      if (!displaySecs || !canTime || orphaned) return;
 
       setGame((g) => applyLoggedSession(g, new Date()));
 
@@ -339,7 +340,6 @@ export default function StudyBox() {
     entomb("subjects", id);
     setSubjects(next);
     if (sel === id) setSel(next[0]?.id || null);
-    if (timedSubjectId === id) timer.setTimedSubjectId(null);
   };
 
   const updateAsanaCfg = (patch) => {
@@ -518,7 +518,7 @@ export default function StudyBox() {
                 color: timerColor,
                 label: timerLabel,
                 highlightedSubjectId: asanaSelected ? null : sub?.id ?? null,
-                ...{ start: timer.start, pause: timer.pause, elsewhere: timer.elsewhere, takeOver: timer.takeOver },
+                ...{ start: timer.start, pause: timer.pause, elsewhere: timer.elsewhere, takeOver: timer.takeOver, orphaned, chooseSubject: timer.setTimedSubjectId },
                 reset: () => noteTimerReset(timer.reset(), { topicId: draftTopicId }),
               }}
               session={{
