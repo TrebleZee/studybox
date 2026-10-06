@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { dateKey } from "../utils/gameLogic.js";
 import { milestonesToRemind } from "../utils/reminders.js";
+import showReminder from "../utils/showReminder.js";
 import { loadJson, saveJson, STORAGE_KEYS } from "../store/index.js";
 
 const CHECK_INTERVAL_MS = 5 * 60 * 1000;
@@ -20,7 +21,7 @@ export default function useMilestoneReminder(subjects) {
   useEffect(() => {
     if (typeof Notification === "undefined") return undefined;
 
-    const check = () => {
+    const run = () => {
       const now = new Date();
       const lastReminderDate = loadJson(STORAGE_KEYS.lastMilestoneReminder, null);
       const due = milestonesToRemind(subjectsRef.current, { now, lastReminderDate });
@@ -29,7 +30,7 @@ export default function useMilestoneReminder(subjects) {
       if (Notification.permission === "default") {
         if (!askedThisSessionRef.current) {
           askedThisSessionRef.current = true;
-          Notification.requestPermission().catch(() => {});
+          Promise.resolve(Notification.requestPermission()).catch(() => {});
         }
         return;
       }
@@ -37,17 +38,20 @@ export default function useMilestoneReminder(subjects) {
 
       saveJson(STORAGE_KEYS.lastMilestoneReminder, dateKey(now));
       const [first] = due;
-      const notification = new Notification(
-        due.length === 1 ? `${first.name} is due soon` : `${due.length} milestones are due soon`,
-        {
-          body: due.map((milestone) => `${milestone.subjectName}: ${milestone.name} (${milestone.due})`).join("\n"),
-          tag: "studybox-milestone-reminder",
-        }
-      );
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
+      showReminder(due.length === 1 ? `${first.name} is due soon` : `${due.length} milestones are due soon`, {
+        body: due.map((milestone) => `${milestone.subjectName}: ${milestone.name} (${milestone.due})`).join("\n"),
+        tag: "studybox-milestone-reminder",
+      });
+    };
+
+    // A reminder is never worth losing the app over: nothing may throw out of
+    // the effect, the interval or the visibility handler.
+    const check = () => {
+      try {
+        run();
+      } catch {
+        // Notifications unavailable or refused; try again at the next check.
+      }
     };
 
     check();

@@ -76,4 +76,54 @@ describe("useStreakReminder", () => {
     expect(MockNotification.requestPermission).not.toHaveBeenCalled();
     expect(MockNotification.instances).toHaveLength(0);
   });
+
+  it("stays up when requestPermission throws or returns nothing (older browsers)", () => {
+    MockNotification.requestPermission.mockImplementationOnce(() => undefined);
+    expect(() => renderHook(() => useStreakReminder(atRiskGame()))).not.toThrow();
+    MockNotification.requestPermission.mockImplementationOnce(() => {
+      throw new TypeError("nope");
+    });
+    expect(() => renderHook(() => useStreakReminder(atRiskGame()))).not.toThrow();
+  });
+
+  describe("where new Notification is not allowed (Android)", () => {
+    class IllegalNotification {
+      static permission = "granted";
+      static requestPermission = vi.fn(() => Promise.resolve("granted"));
+      constructor() {
+        throw new TypeError("Illegal constructor");
+      }
+    }
+    const showNotification = vi.fn(() => Promise.resolve());
+
+    beforeEach(() => {
+      showNotification.mockClear();
+      vi.stubGlobal("Notification", IllegalNotification);
+      vi.stubGlobal("navigator", { serviceWorker: { ready: Promise.resolve({ showNotification }) } });
+    });
+
+    it("keeps the app up and shows the reminder through the service worker once", async () => {
+      expect(() => renderHook(() => useStreakReminder(atRiskGame()))).not.toThrow();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(showNotification).toHaveBeenCalledTimes(1);
+      expect(localStorage.getItem("sb-last-streak-reminder")).not.toBeNull();
+
+      await vi.advanceTimersByTimeAsync(6 * 60 * 1000);
+      expect(showNotification).toHaveBeenCalledTimes(1);
+    });
+
+    it("stays up when there is no service worker either", async () => {
+      vi.stubGlobal("navigator", {});
+      expect(() => renderHook(() => useStreakReminder(atRiskGame()))).not.toThrow();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(showNotification).not.toHaveBeenCalled();
+    });
+
+    it("stays up when the service worker refuses", async () => {
+      showNotification.mockRejectedValueOnce(new TypeError("nope"));
+      expect(() => renderHook(() => useStreakReminder(atRiskGame()))).not.toThrow();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(showNotification).toHaveBeenCalledTimes(1);
+    });
+  });
 });

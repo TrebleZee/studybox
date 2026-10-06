@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { dateKey, isStreakAtRisk } from "../utils/gameLogic.js";
 import { shouldShowStreakReminder } from "../utils/reminders.js";
+import showReminder from "../utils/showReminder.js";
 import { loadJson, saveJson, STORAGE_KEYS } from "../store/index.js";
 
 const CHECK_INTERVAL_MS = 5 * 60 * 1000;
@@ -18,7 +19,7 @@ export default function useStreakReminder(game) {
   useEffect(() => {
     if (typeof Notification === "undefined") return undefined;
 
-    const check = () => {
+    const run = () => {
       const currentGame = gameRef.current;
       const now = new Date();
 
@@ -27,7 +28,7 @@ export default function useStreakReminder(game) {
         // per app session, so a "not now" dismissal isn't re-nagged.
         if (!askedThisSessionRef.current && isStreakAtRisk(currentGame, now.getTime())) {
           askedThisSessionRef.current = true;
-          Notification.requestPermission().catch(() => {});
+          Promise.resolve(Notification.requestPermission()).catch(() => {});
         }
         return;
       }
@@ -38,14 +39,20 @@ export default function useStreakReminder(game) {
       if (!shouldShowStreakReminder(currentGame, { now, lastReminderDate })) return;
 
       saveJson(STORAGE_KEYS.lastStreakReminder, dateKey(now));
-      const notification = new Notification("Your streak is waiting", {
+      showReminder("Your streak is waiting", {
         body: `You're on a ${currentGame.currentStreak}-day streak. Log a session today to keep it going.`,
         tag: "studybox-streak-reminder",
       });
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
+    };
+
+    // A reminder is never worth losing the app over: nothing may throw out of
+    // the effect, the interval or the visibility handler.
+    const check = () => {
+      try {
+        run();
+      } catch {
+        // Notifications unavailable or refused; try again at the next check.
+      }
     };
 
     check();

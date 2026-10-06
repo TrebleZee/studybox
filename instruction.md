@@ -135,7 +135,7 @@ These rules exist so two copies of a user's data can be merged using only what i
 - Pure helpers live in `src/utils/milestones.js`: `daysUntil` / `isOverdue` / `dueLabel` treat due dates as local calendar days (Europe/London users see a milestone as due today all day, across midnight and clock changes); `allMilestones` flattens subjects sorted by due date, undated last; `neaTopicCandidates` / `convertTopicToMilestone` handle NEA topics.
 - `src/components/MilestoneStrip.jsx` sits above the topic list in the planner: every subject's milestones, soonest first, overdue ones highlighted, with add / edit / complete / delete inline (its form state lives in the strip). Completed milestones sit behind a toggle.
 - A topic whose name matches `/NEA/i` gets a "Convert to milestone" offer. It is opt-in and two-step: the topic stays until the user confirms, and the confirm text says how many subtasks will be deleted with it. "Keep as topic" sets `keepAsTopic: true` on the topic, so the offer stays gone across views, reloads and backups. Never convert silently.
-- Reminder: `milestonesToRemind` / `shouldShowMilestoneReminder` in `src/utils/reminders.js` pick milestones that are not done, dated, and due between today and 3 days ahead (overdue ones don't re-notify), at most once per local day via `sb-last-milestone-reminder`. `src/hooks/useMilestoneReminder.js` mirrors the streak reminder's Notification flow (permission asked at most once per app session and only when something is due soon; silent when denied or unsupported).
+- Reminder: `milestonesToRemind` / `shouldShowMilestoneReminder` in `src/utils/reminders.js` pick milestones that are not done, dated, and due between today and 3 days ahead (overdue ones don't re-notify), at most once per local day via `sb-last-milestone-reminder`. `src/hooks/useMilestoneReminder.js` mirrors the streak reminder's Notification flow (permission asked at most once per app session and only when something is due soon; silent when denied or unsupported; shown through `showReminder`, and nothing in either hook can throw out of its effect).
 
 ## Exam dates and pacing
 
@@ -151,7 +151,7 @@ These rules exist so two copies of a user's data can be merged using only what i
 - Client-side only, via the browser Notification API - no push server, so it only fires while the app is open.
 - The at-risk condition (`isStreakAtRisk` in `src/utils/gameLogic.js`) reuses `validateStreak`; don't duplicate streak-lapse logic elsewhere.
 - Timing (evening threshold, once-per-day gating) is a separate pure function, `shouldShowStreakReminder` in `src/utils/reminders.js`, so it stays unit-testable without the Notification API.
-- `src/hooks/useStreakReminder.js` is the only place that touches `Notification` directly: it requests permission at most once per app session and only when the streak is actually at risk that day, and stays silent if permission is denied or `Notification` doesn't exist.
+- `src/utils/showReminder.js` is where a reminder is shown, shared with the milestone reminder: `new Notification` first, and `navigator.serviceWorker.ready` → `registration.showNotification` when the constructor throws (Chrome on Android: "Illegal constructor"); it never throws. `src/hooks/useStreakReminder.js` is the only place that asks for permission for the streak: it requests permission at most once per app session and only when the streak is actually at risk that day, and stays silent if permission is denied or `Notification` doesn't exist.
 
 ## Editing guidance
 
