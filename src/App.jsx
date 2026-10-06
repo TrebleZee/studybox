@@ -34,7 +34,7 @@ import { subjectsForTemplate } from "./utils/catalogue.js";
 import { mergeData } from "./utils/merge.js";
 import { convertTopicToMilestone } from "./utils/milestones.js";
 import { newId, nowIso, stampNew, touch } from "./utils/records.js";
-import { addTombstone, childKey, mergeTombstones } from "./utils/tombstones.js";
+import { addTombstone, childKey, mergeTombstones, subtaskKey } from "./utils/tombstones.js";
 import { canUndoImport, stateAfterRestore, stateBeforeImport } from "./utils/undo.js";
 import { THEMES } from "./utils/themes.js";
 
@@ -188,10 +188,12 @@ export default function StudyBox() {
     if (sub) setSubjects((prev) => mapSubject(prev, sub.id, fn));
   };
 
+  // Subtasks are records (N19): an edit stamps the subtask, not its topic.
   const updateTopicSubtasks = (topicId, updater) =>
-    updateCurrentSubject((subject) =>
-      mapTopic(subject, topicId, (topic) => ({ ...topic, subtasks: updater(topic.subtasks) }))
-    );
+    updateCurrentSubject((subject) => ({
+      ...subject,
+      topics: subject.topics.map((t) => (t.id === topicId ? { ...t, subtasks: updater(t.subtasks) } : t)),
+    }));
 
   const actions = {
     selectSubject: (id) => {
@@ -273,19 +275,16 @@ export default function StudyBox() {
       }));
     },
     toggleSubtask: (topicId, subtaskId) =>
-      updateTopicSubtasks(topicId, (subtasks) =>
-        subtasks.map((st) => (st.id === subtaskId ? { ...st, done: !st.done } : st))
-      ),
+      updateTopicSubtasks(topicId, (subtasks) => subtasks.map((st) => (st.id === subtaskId ? touch({ ...st, done: !st.done }) : st))),
     addSubtask: (topicId, name) => {
       const subtaskName = name.trim();
       if (!subtaskName) return;
-      updateTopicSubtasks(topicId, (subtasks) => [
-        ...subtasks,
-        { id: newId("st"), name: subtaskName, done: false },
-      ]);
+      updateTopicSubtasks(topicId, (subtasks) => [...subtasks, stampNew({ id: newId("st"), name: subtaskName, done: false })]);
     },
-    deleteSubtask: (topicId, subtaskId) =>
-      updateTopicSubtasks(topicId, (subtasks) => subtasks.filter((st) => st.id !== subtaskId)),
+    deleteSubtask: (topicId, subtaskId) => {
+      if (sub) entomb("subtasks", subtaskKey(sub.id, topicId, subtaskId));
+      updateTopicSubtasks(topicId, (subtasks) => subtasks.filter((st) => st.id !== subtaskId));
+    },
 
     logSession: () => {
       if (!displaySecs || !canTime || orphaned) return;

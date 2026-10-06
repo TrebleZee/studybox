@@ -1,7 +1,7 @@
 import { settleLegacyXP } from "./gameLogic.js";
 import { mergeData } from "./merge.js";
 import { nowIso, touch } from "./records.js";
-import { addTombstone, childKey, deletedAt, emptyTombstones, removeTombstone, TOMBSTONE_KINDS } from "./tombstones.js";
+import { addTombstone, childKey, deletedAt, emptyTombstones, removeTombstone, subtaskKey, TOMBSTONE_KINDS } from "./tombstones.js";
 
 // Undo for deletes. Before a record is deleted, describeDeletion notes where
 // it was and any tombstone it already had; restoreDeletion puts it back at
@@ -126,6 +126,17 @@ const restampChanged = (list, mergedList, tombstoneOf, now) => {
   });
 };
 
+// Subtasks merge one by one (N19), so re-stamping a topic doesn't win its
+// subtasks back: each one the merge changed or removed is re-stamped too.
+const restampSubtasks = (subjectId, topics, mergedTopics, tombstones, now) => {
+  const merged = byId(mergedTopics);
+  return topics.map((topic) => {
+    const tombstoneOf = (id) => deletedAt(tombstones, "subtasks", subtaskKey(subjectId, topic.id, id));
+    const subtasks = restampChanged(topic.subtasks || [], merged.get(topic.id)?.subtasks, tombstoneOf, now);
+    return subtasks.every((subtask, index) => subtask === topic.subtasks[index]) ? topic : { ...topic, subtasks };
+  });
+};
+
 // The state to put back on Undo merge (N8). Records only the file had are
 // left out but not tombstoned (maintainer decision, 2026-10-05): with another
 // tab open they come back from it, and a later merge of that file, or sync
@@ -136,7 +147,7 @@ export const restoreBeforeMerge = ({ before, after }, now = nowIso()) => {
   const subjects = before.subjects.map((subject) => {
     const merged = mergedSubjects.get(subject.id);
     const child = (kind) => (id) => deletedAt(tombstones, kind, childKey(subject.id, id));
-    const topics = restampChanged(subject.topics, merged?.topics, child("topics"), now);
+    const topics = restampSubtasks(subject.id, restampChanged(subject.topics, merged?.topics, child("topics"), now), merged?.topics, tombstones, now);
     const milestones = subject.milestones && restampChanged(subject.milestones, merged?.milestones, child("milestones"), now);
     const removed = deletedAt(tombstones, "subjects", subject.id);
     const fieldsChanged = merged ? !same(ownFields(subject), ownFields(merged)) : !!removed;
@@ -157,8 +168,8 @@ export const restoreBeforeMerge = ({ before, after }, now = nowIso()) => {
 // Records are compared by content, not by a last-write-wins merge (R1): a file
 // stamped ahead of this device's clock would otherwise win against every edit
 // made since, and Undo restore would silently discard them. Every session,
-// subject's own fields, topic, milestone and tombstone here must be exactly a
-// copy from before the restore or from the file. The game has no stamps and
+// subject's own fields, topic's own fields, subtask, milestone and tombstone
+// here must be exactly a copy from before the restore or from the file. The game has no stamps and
 // tabs merge it by taking the larger values, so it alone is compared by
 // merging; XP is derived, so totalXP is left out.
 const withoutTotal = (game) => ({ ...game, totalXP: null });
@@ -188,6 +199,18 @@ const copiesOf = (lists) => {
 };
 const allKnown = (list = [], copies) => list.every((record) => copies.get(record.id)?.has(canonical(record)));
 const subjectIn = (data, id) => data.subjects.find((subject) => subject.id === id);
+// A merge combines a topic's own fields from one copy with subtasks from
+// both (N19), so a topic is known when its fields are, and each subtask is.
+const topicFields = (topic) => {
+  const fields = { ...topic };
+  delete fields.subtasks;
+  return fields;
+};
+const topicsKnown = (topics = [], knownLists) =>
+  allKnown(topics.map(topicFields), copiesOf(knownLists.map((list) => list.map(topicFields)))) &&
+  topics.every((topic) =>
+    allKnown(topic.subtasks, copiesOf(knownLists.map((list) => list.find((known) => known.id === topic.id)?.subtasks || [])))
+  );
 
 const recordsKnown = (state, sources) => {
   if (!allKnown(state.sessions, copiesOf(sources.map((source) => source.sessions)))) return false;
@@ -196,12 +219,12 @@ const recordsKnown = (state, sources) => {
     if (!subjectFields.get(subject.id)?.has(canonical(ownFields(subject)))) return false;
     const known = sources.map((source) => subjectIn(source, subject.id)).filter(Boolean);
     return (
-      allKnown(subject.topics, copiesOf(known.map((copy) => copy.topics || []))) &&
+      topicsKnown(subject.topics, known.map((copy) => copy.topics || [])) &&
       allKnown(subject.milestones, copiesOf(known.map((copy) => copy.milestones || [])))
     );
   });
   if (!subjectsKnown) return false;
-  return TOMBSTONE_KINDS.every((kind) =>
+  return [...TOMBSTONE_KINDS, "subtasks"].every((kind) =>
     Object.entries(state.tombstones?.[kind] || {}).every(([id, time]) =>
       sources.some((source) => deletedAt(source.tombstones, kind, id) === time)
     )

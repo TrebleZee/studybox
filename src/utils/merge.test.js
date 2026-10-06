@@ -320,6 +320,305 @@ describe("mergeData", () => {
   });
 });
 
+// N19: subtasks are records. They merge one by one inside their topic, carry
+// their own stamps and are deleted by their own tombstones (kind "subtasks",
+// keyed subject::topic::subtask), so an edit to the topic on one copy no
+// longer decides which copy's subtasks survive.
+describe("subtasks merge as records (N19)", () => {
+  const st = (id, extra = {}) => ({ id, name: id, done: false, ...extra });
+  const stKey = (subjectId, topicId, subtaskId) => childKey(childKey(subjectId, topicId), subtaskId);
+  const physics = (subtasks, topicExtra = {}, subjectExtra = {}) =>
+    subject("physics", [topic("t1", { subtasks, ...topicExtra })], subjectExtra);
+  const subtasksOf = (data) => data.subjects[0].topics[0].subtasks;
+  const both = (a, b) => [merge(a, b), merge(b, a)];
+
+  it("keeps a subtask added on one copy when the other ticks the topic, in both orders", () => {
+    // The auditor's scenario: A adds a subtask offline, B ticks the topic.
+    const a = copy({ subjects: [physics([st("s1"), st("s2", { createdAt: at(5), updatedAt: at(5) })])] });
+    const b = copy({ subjects: [physics([st("s1")], { done: true, updatedAt: at(6) })] });
+    both(a, b).forEach((merged) => {
+      expect(ids(subtasksOf(merged))).toEqual(["s1", "s2"]);
+      expect(merged.subjects[0].topics[0].done).toBe(true);
+    });
+    expect(merge(a, b)).toEqual(merge(b, a));
+  });
+
+  it("keeps a subtask added on one copy when the other ticked the topic first, in both orders", () => {
+    const a = copy({ subjects: [physics([st("s1"), st("s2", { createdAt: at(7), updatedAt: at(7) })])] });
+    const b = copy({ subjects: [physics([st("s1")], { done: true, updatedAt: at(6) })] });
+    both(a, b).forEach((merged) => {
+      expect(ids(subtasksOf(merged))).toEqual(["s1", "s2"]);
+      expect(merged.subjects[0].topics[0].done).toBe(true);
+    });
+  });
+
+  it("keeps subtasks added to the same topic on both copies", () => {
+    const a = copy({ subjects: [physics([st("s1"), st("from-a", { updatedAt: at(5) })])] });
+    const b = copy({ subjects: [physics([st("s1"), st("from-b", { updatedAt: at(4) })])] });
+    both(a, b).forEach((merged) => expect(ids(subtasksOf(merged)).sort()).toEqual(["from-a", "from-b", "s1"]));
+    expect(merge(a, b)).toEqual(merge(b, a));
+  });
+
+  it("takes the later edit per subtask, so a tick here and a tick there both survive", () => {
+    const a = copy({ subjects: [physics([st("s1", { done: true, updatedAt: at(5) }), st("s2")])] });
+    const b = copy({ subjects: [physics([st("s1"), st("s2", { done: true, updatedAt: at(6) })], { name: "Kinematics", updatedAt: at(7) })] });
+    both(a, b).forEach((merged) => {
+      expect(subtasksOf(merged).map((s) => s.done)).toEqual([true, true]);
+      expect(merged.subjects[0].topics[0].name).toBe("Kinematics");
+    });
+  });
+
+  it("does not bring back a subtask deleted on one copy when merged with an older copy, in both orders", () => {
+    // The older copy ticked the topic before the delete; the delete stamps nothing on the topic.
+    const older = copy({ subjects: [physics([st("s1"), st("s2", { updatedAt: at(3) })], { done: true, updatedAt: at(4) })] });
+    const deleted = copy({
+      subjects: [physics([st("s1")])],
+      tombstones: addTombstone(emptyTombstones(), "subtasks", stKey("physics", "t1", "s2"), at(5)),
+    });
+    both(older, deleted).forEach((merged) => {
+      expect(ids(subtasksOf(merged))).toEqual(["s1"]);
+      expect(merged.subjects[0].topics[0].done).toBe(true);
+      expect(merged.tombstones.subtasks).toEqual({ [stKey("physics", "t1", "s2")]: at(5) });
+    });
+    expect(merge(older, deleted)).toEqual(merge(deleted, older));
+  });
+
+  it("keeps a subtask that was edited after the other copy deleted it", () => {
+    const edited = copy({ subjects: [physics([st("s1"), st("s2", { done: true, updatedAt: at(8) })])] });
+    const deleted = copy({
+      subjects: [physics([st("s1")])],
+      tombstones: addTombstone(emptyTombstones(), "subtasks", stKey("physics", "t1", "s2"), at(5)),
+    });
+    both(edited, deleted).forEach((merged) => expect(ids(subtasksOf(merged))).toEqual(["s1", "s2"]));
+  });
+
+  it("does not confuse the same subtask id in two topics or two subjects", () => {
+    const a = copy({
+      subjects: [
+        subject("physics", [topic("t1", { subtasks: [st("x")] }), topic("t2", { subtasks: [st("x")] })]),
+        subject("maths", [topic("t1", { subtasks: [st("x")] })]),
+      ],
+    });
+    const b = copy({ tombstones: addTombstone(emptyTombstones(), "subtasks", stKey("physics", "t1", "x"), at(4)) });
+    both(a, b).forEach((merged) => {
+      const [phys, maths] = ["physics", "maths"].map((id) => merged.subjects.find((s) => s.id === id));
+      expect(phys.topics.map((t) => ids(t.subtasks))).toEqual([[], ["x"]]);
+      expect(ids(maths.topics[0].subtasks)).toEqual(["x"]);
+    });
+  });
+
+  it("does not let a subtask tombstone touch a topic or milestone with the same key", () => {
+    const a = copy({
+      subjects: [
+        subject("physics", [topic("t1", { subtasks: [st("s1")] })], {
+          milestones: [{ id: "t1", name: "NEA", kind: "nea", due: null, done: false }],
+        }),
+      ],
+    });
+    const b = copy({ tombstones: addTombstone(emptyTombstones(), "subtasks", childKey("physics", "t1"), at(4)) });
+    both(a, b).forEach((merged) => {
+      expect(ids(merged.subjects[0].topics)).toEqual(["t1"]);
+      expect(ids(merged.subjects[0].milestones)).toEqual(["t1"]);
+      expect(ids(subtasksOf(merged))).toEqual(["s1"]);
+    });
+  });
+
+  it("keeps a deleted topic, and a deleted subject, whose subtasks were worked on after the deletion", () => {
+    const worked = copy({ subjects: [physics([st("s1", { done: true, updatedAt: at(9) }), st("s2")])] });
+    const topicGone = copy({ tombstones: addTombstone(emptyTombstones(), "topics", childKey("physics", "t1"), at(5)) });
+    const subjectGone = copy({ tombstones: addTombstone(emptyTombstones(), "subjects", "physics", at(5)) });
+    [...both(worked, topicGone), ...both(worked, subjectGone)].forEach((merged) => {
+      expect(ids(subtasksOf(merged))).toEqual(["s1", "s2"]);
+      expect(subtasksOf(merged)[0].done).toBe(true);
+    });
+    // Subtask edits from before the deletion don't bring it back.
+    const stale = copy({ subjects: [physics([st("s1", { done: true, updatedAt: at(4) })])] });
+    expect(merge(stale, topicGone).subjects[0].topics).toEqual([]);
+    expect(merge(stale, subjectGone).subjects).toEqual([]);
+  });
+
+  it("keeps a subtask's unknown fields, and gives a stamp tie to the copy with more fields", () => {
+    const full = copy({ subjects: [physics([st("s1", { weight: 2, updatedAt: at(3) }), st("s2", { weight: 1 })])] });
+    const stripped = copy({ subjects: [physics([st("s1", { updatedAt: at(3) }), st("s2")])] });
+    both(full, stripped).forEach((merged) => expect(subtasksOf(merged).map((s) => s.weight)).toEqual([2, 1]));
+    expect(merge(full, stripped)).toEqual(merge(stripped, full));
+    expect(merge(full, stripped).subjects).toEqual(full.subjects);
+
+    const newer = copy({ subjects: [physics([st("s1", { name: "Renamed", updatedAt: at(4) })])] });
+    both(full, newer).forEach((merged) => {
+      expect(subtasksOf(merged)[0]).not.toHaveProperty("weight");
+      expect(subtasksOf(merged)[1].weight).toBe(1);
+    });
+  });
+
+  it("gives the same records whatever order three copies are merged in", () => {
+    const a = copy({
+      subjects: [physics([st("s1", { done: true, updatedAt: at(5) }), st("a-only", { updatedAt: at(4), weight: 1 })])],
+    });
+    const b = copy({
+      subjects: [physics([st("s1"), st("b-only")], { done: true, updatedAt: at(6) })],
+      tombstones: addTombstone(emptyTombstones(), "subtasks", stKey("physics", "t1", "a-only"), at(3)),
+    });
+    const c = copy({
+      subjects: [physics([st("s1", { name: "tie", weight: 3 }), st("c-only", { updatedAt: at(7) })], { name: "Moments" })],
+      tombstones: addTombstone(emptyTombstones(), "subtasks", stKey("physics", "t1", "b-only"), at(8)),
+    });
+    const flat = (data) => ({
+      tombstones: data.tombstones,
+      subjects: data.subjects.map((s) => ({
+        ...s,
+        topics: s.topics.map((t) => ({ ...t, subtasks: [...t.subtasks].sort((x, y) => (x.id < y.id ? -1 : 1)) })),
+      })),
+    });
+    const orders = [
+      merge(merge(a, b), c),
+      merge(a, merge(b, c)),
+      merge(merge(c, a), b),
+      merge(merge(b, c), a),
+      merge(c, merge(a, b)),
+    ].map(flat);
+    orders.forEach((result) => expect(result).toEqual(orders[0]));
+    const [result] = orders;
+    expect(result.subjects[0].topics[0]).toMatchObject({ done: true, name: "t1" });
+    expect(ids(result.subjects[0].topics[0].subtasks)).toEqual(["a-only", "c-only", "s1"]);
+    expect(result.subjects[0].topics[0].subtasks.find((s) => s.id === "s1").done).toBe(true);
+  });
+
+  it("is idempotent with subtasks, stamps and subtask tombstones", () => {
+    const a = copy({
+      subjects: [physics([st("s1", { done: true, updatedAt: at(5), weight: 2 }), st("s2")], { updatedAt: at(4) })],
+      tombstones: addTombstone(emptyTombstones(), "subtasks", stKey("physics", "t1", "gone"), at(6)),
+    });
+    const once = merge(a, a);
+    expect(once.subjects).toEqual(a.subjects);
+    expect(once.tombstones).toEqual(a.tombstones);
+    expect(merge(once, once)).toEqual(once);
+  });
+
+  it("two profiles converge on subtasks through backup files", () => {
+    const laptop = copy({
+      subjects: [physics([st("s1", { done: true, updatedAt: at(10) }), st("laptop", { updatedAt: at(11) }), st("s3")])],
+      tombstones: addTombstone(emptyTombstones(), "subtasks", stKey("physics", "t1", "phone-old"), at(12)),
+    });
+    const phone = copy({
+      subjects: [physics([st("s1"), st("phone-old", { updatedAt: at(9) }), st("phone", { updatedAt: at(13) }), st("s3")], { done: true, updatedAt: at(14) })],
+      tombstones: addTombstone(emptyTombstones(), "subtasks", stKey("physics", "t1", "s3"), at(15)),
+    });
+    const exported = (profile) => {
+      const restored = parseBackup(JSON.stringify(buildBackup({ ...profile, themeId: "midnight" })));
+      return { subjects: restored.subjects, sessions: restored.sessions, tombstones: restored.tombstones, game: restored.game };
+    };
+    const onLaptop = merge(laptop, exported(phone));
+    const onPhone = merge(phone, exported(laptop));
+    expect(onLaptop).toEqual(onPhone);
+    const t1 = onLaptop.subjects[0].topics[0];
+    expect(t1.done).toBe(true);
+    expect(ids(t1.subtasks).sort()).toEqual(["laptop", "phone", "s1"]);
+    expect(t1.subtasks.find((s) => s.id === "s1").done).toBe(true);
+    expect(merge(exported(onLaptop), exported(onPhone))).toEqual(onLaptop);
+  });
+
+  // Review B-R1 on #52: a build before N19 writes no subtask stamp or
+  // tombstone; it stamps the topic. An unstamped subtask therefore belongs to
+  // its topic copy's version, and the later-stamped topic copy decides it, as
+  // on master. Subtasks this build stamps are unaffected.
+  describe("unstamped subtasks follow their topic's stamp (B-R1)", () => {
+    const stamped = st("a", { createdAt: at(1), updatedAt: at(1) });
+
+    it("does not bring back a subtask an older build deleted, in both orders", () => {
+      const newer = copy({ subjects: [physics([stamped, st("b")], { updatedAt: at(1) })] });
+      const oldBuild = copy({ subjects: [physics([stamped], { updatedAt: at(5) })] });
+      both(newer, oldBuild).forEach((merged) => expect(ids(subtasksOf(merged))).toEqual(["a"]));
+      expect(merge(newer, oldBuild)).toEqual(merge(oldBuild, newer));
+    });
+
+    it("keeps an older build's untick of an unstamped subtask, in both orders", () => {
+      const newer = copy({ subjects: [physics([stamped, st("b", { name: "B", done: true })], { updatedAt: at(1) })] });
+      const oldBuild = copy({ subjects: [physics([stamped, st("b", { name: "B", done: false })], { updatedAt: at(5) })] });
+      both(newer, oldBuild).forEach((merged) => expect(subtasksOf(merged)[1]).toEqual(st("b", { name: "B", done: false })));
+      expect(merge(newer, oldBuild)).toEqual(merge(oldBuild, newer));
+    });
+
+    it("still unions unstamped subtasks when the topic stamps are equal", () => {
+      const left = copy({ subjects: [physics([st("x")], { updatedAt: at(3) })] });
+      const right = copy({ subjects: [physics([st("y")], { updatedAt: at(3) })] });
+      both(left, right).forEach((merged) => expect(ids(subtasksOf(merged)).sort()).toEqual(["x", "y"]));
+    });
+
+    it("never drops a stamped subtask for an older topic copy", () => {
+      const added = copy({ subjects: [physics([st("new", { createdAt: at(4), updatedAt: at(4) })], { updatedAt: at(1) })] });
+      const ticked = copy({ subjects: [physics([], { done: true, updatedAt: at(6) })] });
+      both(added, ticked).forEach((merged) => expect(ids(subtasksOf(merged))).toEqual(["new"]));
+    });
+
+    // Property test: random copies mixing stamped and unstamped subtasks,
+    // different topic stamps and subtask tombstones. Commutative, idempotent
+    // and the same records for every order three copies meet in.
+    it("stays commutative, idempotent and three-copy order-independent", () => {
+      let seed = 52;
+      const rand = () => {
+        seed = (seed * 1103515245 + 12345) % 2147483648;
+        return seed / 2147483648;
+      };
+      const choose = (options) => options[Math.floor(rand() * options.length)];
+      const withStamp = (record, value) => (value ? { ...record, updatedAt: value } : record);
+      const randomCopy = () => {
+        const subtasks = ["s1", "s2", "s3", "s4"]
+          .filter(() => rand() > 0.3)
+          .map((id) => withStamp(st(id, { name: choose(["a", "b"]), done: rand() > 0.5 }), choose([null, null, at(2), at(4), at(6)])));
+        let tombstones = emptyTombstones();
+        ["s1", "s2", "s3", "s4"].forEach((id) => {
+          if (rand() < 0.2) tombstones = addTombstone(tombstones, "subtasks", stKey("physics", "t1", id), choose([at(3), at(5)]));
+        });
+        const topicFields = withStamp({ name: choose(["t1", "Moments"]) }, choose([null, at(3), at(5)]));
+        return copy({ subjects: [physics(subtasks, topicFields)], tombstones });
+      };
+      const flat = (data) => ({
+        tombstones: data.tombstones,
+        subjects: data.subjects.map((s) => ({
+          ...s,
+          topics: s.topics.map((t) => ({ ...t, subtasks: [...t.subtasks].sort((x, y) => (x.id < y.id ? -1 : 1)) })),
+        })),
+      });
+      for (let run = 0; run < 300; run += 1) {
+        const [a, b, c] = [randomCopy(), randomCopy(), randomCopy()];
+        expect(flat(merge(a, b))).toEqual(flat(merge(b, a)));
+        const once = merge(a, b);
+        expect(merge(once, once).subjects).toEqual(once.subjects);
+        const results = [
+          merge(merge(a, b), c),
+          merge(a, merge(b, c)),
+          merge(merge(a, c), b),
+          merge(merge(b, c), a),
+          merge(merge(c, a), b),
+          merge(c, merge(a, b)),
+          merge(b, merge(a, c)),
+        ].map(flat);
+        results.forEach((result) => expect(result).toEqual(results[0]));
+      }
+    });
+  });
+
+  // Review A-R1 on #52, a known limit pinned so a change to it is deliberate
+  // (see instruction.md): a subtask edited after its topic's deletion brings
+  // the topic back (work done since is never thrown away), so with three
+  // copies the result can depend on merge order, as for a deleted subject.
+  it("can forget one copy's topic rename when three copies meet around a deleted topic", () => {
+    const deleted = copy({ tombstones: addTombstone(emptyTombstones(), "topics", childKey("physics", "t1"), at(5)) });
+    const worked = copy({ subjects: [physics([st("y", { updatedAt: at(8) })], { name: "Old", updatedAt: at(1) })] });
+    const renamed = copy({ subjects: [physics([st("x", { updatedAt: at(3) })], { name: "Renamed", updatedAt: at(3) })] });
+
+    const dropFirst = merge(merge(deleted, renamed), worked).subjects[0].topics[0];
+    const reviveFirst = merge(deleted, merge(worked, renamed)).subjects[0].topics[0];
+    expect(dropFirst.name).toBe("Old");
+    expect(ids(dropFirst.subtasks)).toEqual(["y"]);
+    expect(reviveFirst.name).toBe("Renamed");
+    expect(ids(reviveFirst.subtasks).sort()).toEqual(["x", "y"]);
+    // Either way the work done after the deletion survives.
+    [dropFirst, reviveFirst].forEach((result) => expect(result.subtasks.find((s) => s.id === "y")).toBeTruthy());
+  });
+});
+
 // The readiness plan's Phase 1 exit test: two browser profiles export,
 // merge and re-import each other's data deterministically, using only the
 // fields on the records. If this holds offline, sync is a transport problem.
