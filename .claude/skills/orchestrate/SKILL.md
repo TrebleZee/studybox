@@ -28,7 +28,7 @@ Each worker's model is set by the riskiest branch it will run before reporting b
 
 | Tier | Model (session id / subagent alias) | Use for | Examples in StudyBox |
 | --- | --- | --- | --- |
-| **Critical** | `claude-fable-5-1` / `fable` | Changes to the stored data model, merge semantics, tombstones or anything a sync engine will replicate, where a wrong fix silently corrupts or drops records on every device and no test catches the whole space. | Unknown-field preservation (N9), replace actions writing tombstones (N10), subtasks as records (N19), schema migrations, record order, the readiness audit |
+| **Critical** | `claude-opus-5-5` / `opus`, with two independent reviews | Changes to the stored data model, merge semantics, tombstones or anything a sync engine will replicate, where a wrong fix silently corrupts or drops records on every device and no test catches the whole space. | Unknown-field preservation (N9), replace actions writing tombstones (N10), subtasks as records (N19), schema migrations, record order, the readiness audit |
 | **High** | `claude-opus-5-5` / `opus` | Anything else that can lose, duplicate or misattribute a user's data, or touches the store layer, normalizers, undo, `App.jsx` record handlers, the service-worker update path or security headers. Also the coordinator, every review and every plan. | Storage guards (N16/N17), undo restore (N11), timer ownership (N12), orphaned timer subject (N15), update reload guard (N18), `release-reviewer`, `release-fixer`, `readiness-planner` |
 | **Standard** | `claude-sonnet-5-5` / `sonnet` | A fix confined to one component or hook, no stored-data shape change, a reproducing test is straightforward. | Session edit keeps seconds (N21), Android reminders (N20), docs-only updates |
 | **Mechanical** | `claude-haiku-4-5-20251001` / `haiku` | No product code: config, ignore files, release notes, link fixes. | `chore/ignore-drafts` (C10), `release-publisher` |
@@ -36,10 +36,12 @@ Each worker's model is set by the riskiest branch it will run before reporting b
 Rules that override the table:
 
 - **The tier is the highest any branch in the run needs.** A lane whose queue goes A2.9 (High) → A3.2 (Critical) runs at Critical, or the worker stops after A2.9 and the coordinator launches A3.2 separately.
-- **Review at least one tier up from the author, never below Opus.** Every branch written by a Standard or Mechanical worker gets a `release-reviewer` pass even when it is a `fix/` (which normally skips the gate). Critical branches are reviewed with `release-reviewer` run as `fable` (Agent tool `model: "fable"`).
-- **Escalate, never silently downgrade.** If a worker hits a Stop-and-ask condition, fails CI twice on the same cause, or its review returns a `high` or `critical` finding, archive it and relaunch the lane one tier up with what it learned. Only the maintainer lowers a tier.
+- **Reviews run on Opus, never on a smaller model than the author's.** Every branch written by a Standard or Mechanical worker gets a `release-reviewer` pass even when it is a `fix/` (which normally skips the gate). Critical branches get `release-reviewer` **twice, independently** (two separate Agent calls on `opus`; the second is not shown the first's findings), and `release-fixer` takes both sets of findings.
+- **Escalate, never silently downgrade.** If a worker hits a Stop-and-ask condition, fails CI twice on the same cause, or its review returns a `high` or `critical` finding, archive it and relaunch the lane one tier up with what it learned (at the top tier, Opus, escalation means a fresh Opus worker plus the second independent review, and the PR states it). Only the maintainer lowers a tier.
 - **Severity is a floor.** A ledger `high` or `critical` finding is never worked below High.
 - Record the tier and model in the worker's draft PR body ("Model: claude-opus-5-5, tier High") so the choice is reviewable.
+
+**No Fable.** This account has no usage credits for Claude Fable, so Fable is never used for workers, reviews or agents (maintainer decision, 2026-10-06). Opus is the top tier, and Critical work makes up the difference with the second independent review. Only the maintainer reinstates Fable.
 
 Model ids change: check the session's model list (or the `claude-api` skill) before launching, and update this table in a `chore/` PR when the line-up moves.
 
@@ -72,7 +74,15 @@ Workers stop at a ready PR: green CI, review gate done, the PR body listing the 
 - Merge in the order PRs become ready, except that a branch another lane waits for goes first.
 - After each merge, tell the other live workers whose files overlapped (`send_message`: "master moved; merge origin/master before you mark ready").
 - **Tags from a cloud coordinator:** cloud sessions here can't push tags. Collect the exact `git tag -a … && git push origin …` commands in Needs actioning and in the report, and don't merge a second versioned PR on top of an untagged one: the next version would be computed from the stale tag. Chores can still merge.
-- When a lane's queue has another branch and its worker is idle, `send_message` it the next item (same model rules), or archive it and launch a fresh one if its context is long.
+- **Split coordination.** The merger can be a different session from the launcher: for example, the maintainer's local session merges and tags (it can push tags), while a cloud session launches and watches. Agree on one merger, and say in every worker prompt who it is. The launcher then never merges; it subscribes to every worker PR so that the merge wakes it.
+- **Repurpose a lane the moment its PR merges.** When a lane's PR merges, whoever merged it:
+  1. archive that lane's worker (`archive_session`);
+  2. check the lane's next item: unclaimed, and its **Waits for** met now that this PR is live;
+  3. if it can start, launch a fresh worker for it at once, with the model the lanes table gives it (a fresh session, not the old one, so it starts from the new `master` with a clean context);
+  4. if it can't start yet, give the slot to the highest-priority startable item in a lane with no live worker (a `high` finding first, then whatever unblocks another lane), keeping to at most 3 workers;
+  5. tell live workers whose files overlapped the merged PR to merge `origin/master`.
+
+  Never wait for the next scheduled check-in to do this: the merge event is the trigger.
 
 ## 5. Finish
 

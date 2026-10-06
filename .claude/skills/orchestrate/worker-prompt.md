@@ -11,7 +11,7 @@ You are a worker session on StudyBox (`TrebleZee/studybox`), started by a coordi
 **Closes:** <ledger ids>
 **Lane:** <n>: <lane name>. Main files: <files from the Parallel lanes table>. Don't edit files outside them except the shared docs (`docs/STATUS.md`, `docs/readiness/findings.md`, `instruction.md`, `README.md`), and there only the lines about your change.
 **Model and tier:** <model id>, <tier>. Put this line in your PR body.
-**Review:** <"Run the review gate (git-workflow step 3b)" | "Run the review gate, with release-reviewer as model fable" | "This is a fix/ written below Opus: run release-reviewer once anyway (step 3b, steps 1-3) and fix what it finds">.
+**Review:** <"Run the review gate (git-workflow step 3b)" | "Critical tier: run release-reviewer twice, independently (two Agent calls on opus, the second not shown the first's findings), then release-fixer with both" | "This is a fix/ written below Opus: run release-reviewer once anyway (step 3b, steps 1-3) and fix what it finds">.
 
 Do this:
 
