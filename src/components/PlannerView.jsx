@@ -118,6 +118,7 @@ export default function PlannerView({
         running={timer.running}
         displaySecs={timer.displaySecs}
         canTime={timer.canTime}
+        elsewhere={timer.elsewhere}
         timerColor={timer.color}
         timerLabel={timer.label}
         highlightedSubjectId={timer.highlightedSubjectId}
@@ -130,6 +131,7 @@ export default function PlannerView({
         onStart={timer.start}
         onPause={timer.pause}
         onReset={timer.reset}
+        onTakeOver={timer.takeOver}
         onLog={actions.logSession}
       />
     </div>

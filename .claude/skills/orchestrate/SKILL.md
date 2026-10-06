@@ -74,7 +74,15 @@ Workers stop at a ready PR: green CI, review gate done, the PR body listing the 
 - Merge in the order PRs become ready, except that a branch another lane waits for goes first.
 - After each merge, tell the other live workers whose files overlapped (`send_message`: "master moved; merge origin/master before you mark ready").
 - **Tags from a cloud coordinator:** cloud sessions here can't push tags. Collect the exact `git tag -a … && git push origin …` commands in Needs actioning and in the report, and don't merge a second versioned PR on top of an untagged one: the next version would be computed from the stale tag. Chores can still merge.
-- When a lane's queue has another branch and its worker is idle, `send_message` it the next item (same model rules), or archive it and launch a fresh one if its context is long.
+- **Split coordination.** The merger can be a different session from the launcher: for example, the maintainer's local session merges and tags (it can push tags), while a cloud session launches and watches. Agree on one merger, and say in every worker prompt who it is. The launcher then never merges; it subscribes to every worker PR so that the merge wakes it.
+- **Repurpose a lane the moment its PR merges.** When a lane's PR merges, whoever merged it:
+  1. archive that lane's worker (`archive_session`);
+  2. check the lane's next item: unclaimed, and its **Waits for** met now that this PR is live;
+  3. if it can start, launch a fresh worker for it at once, with the model the lanes table gives it (a fresh session, not the old one, so it starts from the new `master` with a clean context);
+  4. if it can't start yet, give the slot to the highest-priority startable item in a lane with no live worker (a `high` finding first, then whatever unblocks another lane), keeping to at most 3 workers;
+  5. tell live workers whose files overlapped the merged PR to merge `origin/master`.
+
+  Never wait for the next scheduled check-in to do this: the merge event is the trigger.
 
 ## 5. Finish
 

@@ -19,7 +19,7 @@ export default function SettingsView({
   onExport,
   onImport,
   onMerge,
-  onUndoMerge,
+  onUndoImport,
 }) {
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
@@ -49,7 +49,7 @@ export default function SettingsView({
           onExport={onExport}
           onImport={onImport}
           onMerge={onMerge}
-          onUndoMerge={onUndoMerge}
+          onUndoImport={onUndoImport}
         />
 
         <Card C={C} style={{ marginTop: "12px" }}>

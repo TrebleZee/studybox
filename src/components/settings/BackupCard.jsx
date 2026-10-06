@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { Card, SectionLabel } from "./ui.jsx";
 
 const outlineButton = (C) => ({
@@ -11,7 +12,8 @@ const outlineButton = (C) => ({
   cursor: "pointer",
 });
 
-export default function BackupCard({ C, message, onExport, onImport, onMerge, onUndoMerge }) {
+export default function BackupCard({ C, message, onExport, onImport, onMerge, onUndoImport }) {
+  const messageId = useId();
   return (
     <Card C={C} style={{ marginTop: "12px" }}>
       <SectionLabel C={C}>Backup &amp; Restore</SectionLabel>
@@ -76,22 +78,27 @@ export default function BackupCard({ C, message, onExport, onImport, onMerge, on
         so check anything you changed on both devices before then.
       </div>
       {message && (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "10px" }}>
-          <div
-            role={message.type === "error" ? "alert" : "status"}
-            style={{ fontSize: "11px", color: message.type === "error" ? "#f87171" : C.txt }}
-          >
+        // A success and its Undo are one status, so the offer is announced with
+        // the message; Space on the button presses it rather than toggling the
+        // timer (data-own-keys).
+        <div
+          role={message.type === "error" ? "alert" : "status"}
+          aria-labelledby={messageId}
+          data-own-keys=""
+          style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "10px" }}
+        >
+          <div id={messageId} style={{ fontSize: "11px", color: message.type === "error" ? "#f87171" : C.txt }}>
             {message.text}
           </div>
-          {/* App passes onUndoMerge only while nothing has changed since the merge. */}
-          {message.undo && onUndoMerge && (
+          {/* App passes onUndoImport only while nothing has changed since the merge or restore. */}
+          {message.undo && onUndoImport && (
             <button
               type="button"
               className="nb"
-              onClick={onUndoMerge}
+              onClick={onUndoImport}
               style={{ ...outlineButton(C), padding: "4px 10px", fontSize: "11px" }}
             >
-              Undo merge
+              {message.undo.kind === "restore" ? "Undo restore" : "Undo merge"}
             </button>
           )}
         </div>
