@@ -1,6 +1,6 @@
 # StudyBox status
 
-The one page to read to know where StudyBox is: what changed recently, how far through the plan it is, and what needs someone to act. It is kept current by the workflow. Every PR updates it (see the `git-workflow` skill, step 2b), and every readiness pass refreshes the progress section. `src/statusDoc.test.js` fails if the version below disagrees with `package.json`.
+The one page to read to know where StudyBox is: what changed recently, how far through the plan it is, and what needs someone to act. It is kept current by the workflow. Every PR updates it (see the `git-workflow` skill, step 2b), and every readiness pass refreshes the progress section. It states only what is true once the PR that writes it has merged: tags, releases, production, open PRs and check state happen after the merge, so they live on GitHub and Vercel, not here (`git-workflow` step 4g). `src/statusDoc.test.js` fails if the version below disagrees with `package.json` or if one of those rows comes back.
 
 Last updated: 2026-10-06
 
@@ -9,12 +9,8 @@ Last updated: 2026-10-06
 | | |
 | --- | --- |
 | Current version | 1.19.5 |
-| Latest tag on GitHub | v1.19.5 |
-| Production | studybox-sigma.vercel.app, deployed from `master` @ `661e26a` (1.17.2) at the time of the 5 Oct scope review |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
-| Open PRs | [#55](https://github.com/TrebleZee/studybox/pull/55) replacing data writes tombstones (N10): needs subtask tombstones after #52 before it can merge |
-| Checks on `master` | Lint, test (711 tests), build: green. "Lint, test, build" is a required check (ruleset 23821221) |
 
 ## Recent changes
 
@@ -22,6 +18,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#61](https://github.com/TrebleZee/studybox/pull/61) | The status page stops going stale on merge: it states only what is true once its PR has merged (no production sha, open PRs, tag or check-state rows), and the post-merge checks moved into the git-workflow skill. No user-facing change | C13 | none |
 | [#59](https://github.com/TrebleZee/studybox/pull/59) | Reminders work on Android: Chrome there no longer crashes the app when a streak or milestone reminder is due; reminders are shown through the service worker instead | N20 | v1.19.5 |
 | [#58](https://github.com/TrebleZee/studybox/pull/58) | Editing a session keeps its seconds: saving without changing the hours or minutes no longer turns a 45 s session into 0 s (and 0 XP) or 25m59s into 25m | N21 | v1.19.4 |
 | [#52](https://github.com/TrebleZee/studybox/pull/52) | Subtasks merge as records: a subtask added or deleted on one copy (another tab, or a merged file) is no longer lost or brought back when the other copy edits its topic | N19 | v1.19.3 |
@@ -100,7 +97,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 Work the goal's **Parallel lanes**: one session per lane, each in its own worktree, claiming its item with a draft PR (git-workflow step 1). To run them as separate full sessions, a coordinator uses the `orchestrate` skill (at most 3 workers; the lanes table gives each one's model by risk). The maintainer's local session merges and tags; the cloud coordinator launches workers and starts each lane's next item as soon as its PR merges.
 
 1. Lane 2: A3.1 (A2.4 merged in #48, v1.19.0).
-2. Lane 8: `chore/status-post-merge` (C13), merged on its own by 9 Oct.
+2. Lane 8: C13 closed by `chore/status-post-merge` (#61); nothing further in the lane.
 3. Lane 1: A3.3 `fix/subtask-records` (N19) merged in #52 (v1.19.3). It also touches `restoreBeforeMerge` and the Undo restore echo check in `src/utils/undo.js` (lane 2's file, merged with #48 on the branch) so both undos still hold for subtasks. Next in lane 1: Phase C `fix/bound-imported-values`, after the A3.4 exit check.
 4. Open now: A2.11 (lane 5), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check. Lane 6 is empty (A2.10 merged in #56).
 5. Test flakes seen only under full-suite load (each passes when run alone): `App.multiTab.test.jsx` "restores every pre-merge record in both tabs" (C14's test, failed once in a full run on 6 Oct), `App.undoRestore.test.jsx` "undoes a restore made from onboarding" (clicks Settings before the async restore finishes; about 1 in 10) `AddSubjectCard.test.jsx` "keeps the title chooser visible after a failed load" and `App.appUpdate.test.jsx` "doesn't reload a tab holding Undo merge, even back on the planner" (once in three full runs on 6 Oct, while #56 was merging). CI is required, so each can block a merge: one small `fix/` for the four.

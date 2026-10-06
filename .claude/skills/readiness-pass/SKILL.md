@@ -40,7 +40,7 @@ Rewrite `.claude/commands/goal.md` so it describes the phase the plan says is ne
 
 ## 4b. Refresh the status page
 
-Update `docs/STATUS.md` from the report: the readiness line in **Current state**, the whole **Progress against the plan** table (phases, dates and state from the new plan), **Needs actioning** (the report's maintainer items with their dates, and the agent's next branches), and **Known risks** (open findings a user would notice today). It goes in the same PR.
+Update `docs/STATUS.md` from the report: the readiness line in **Current state**, the whole **Progress against the plan** table (phases, dates and state from the new plan), **Needs actioning** (the report's maintainer items with their dates, and the agent's next branches), and **Known risks** (open findings a user would notice today). It goes in the same PR. Write only what is true once that PR has merged: no production sha, open PRs, latest tag, check state or "merge this PR", and none in the ledger header either. Those are post-merge facts, checked on GitHub and Vercel in `git-workflow` step 4g (`src/statusDoc.test.js` enforces it).
 
 ## 5. Open the PR and stop
 

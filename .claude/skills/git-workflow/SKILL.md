@@ -64,9 +64,9 @@ While working:
 At merge time (step 4, after syncing with `origin/master`):
 
 - **Recent changes:** add one row at the top for this PR: what changed for the user (or "no user-facing change"), the ledger ids it closes, and the version it will be tagged (or "none" for `chore/`). Keep the table to roughly the last dozen rows.
-- **Current state:** the version (must equal `package.json`; `src/statusDoc.test.js` checks it), open PRs, the latest tag, and `Last updated`.
+- **Current state:** the version (must equal `package.json`; `src/statusDoc.test.js` checks it) and `Last updated`.
 
-After merging and tagging (step 4), if something didn't happen as planned (a tag that couldn't be pushed, a release not published), add it to Needs actioning in the next PR or a `chore/` follow-up. Never leave the page claiming something that isn't true.
+**The rule: STATUS states only what is true once the PR that writes it has merged.** The PR is written before it merges, so anything that becomes true after (the latest tag, the release, the production commit, which PRs are open, whether a check is green or required, "merge this PR") is false by the time anyone reads it. Don't write those on the page; `src/statusDoc.test.js` fails on an "Open PRs", "Production", "Latest tag" or "Checks on" row, a production sha or "merge this PR" wording. They live on GitHub (`gh pr list`, `git ls-remote --tags origin`, the Releases page) and Vercel, and step 4g is where they get checked. `docs/readiness/findings.md`'s header follows the same rule.
 
 ## 3. Classify the change and mark the PR ready
 
@@ -155,6 +155,8 @@ If the push is refused because the tag exists, another session raced you: don't 
 Then spawn the `release-publisher` agent with `v<new-version>` to publish the GitHub release for it. If it reports other tags with no release, let it backfill those too.
 
 **f. Clean up.** Leave the worktree (`ExitWorktree`, or `git worktree remove <path>` from another checkout) so its branch name is free.
+
+**g. Post-merge check (the merger's step).** Whoever runs the merge (the maintainer's merger session) checks what the PR could not state, on GitHub, and writes none of it into STATUS: the tag exists on `origin` and points at the squash commit, the release is published, CI on the merge commit is green, and the deployment is live (Vercel). If something didn't happen as planned (a tag that couldn't be pushed, a release not published, a red `master`), add it to **Needs actioning** in the next PR or a `chore/` follow-up, worded as an action still to do (never as a status like "production is at X"), and delete the line when it's done.
 
 ## 4b. When a coordinator is running the lanes
 
