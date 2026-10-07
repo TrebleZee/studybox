@@ -254,6 +254,8 @@ describe("undo merge with a second tab open", () => {
       target: { files: [new File([JSON.stringify(file)], "other.json", { type: "application/json" })] },
     });
     await a.findByRole("button", { name: "Undo merge" });
+    // Let this tab save the merge before the other tab hears of anything.
+    await act(async () => {});
     deliver();
     expect(stored(STORAGE_KEYS.sessions).find((s) => s.id === "sess-edited").note).toBe("theirs");
 
