@@ -116,4 +116,26 @@ describe("mobile layout (N29)", () => {
     const narrow = css.slice(css.indexOf("@media (max-width: 720px)"));
     expect(narrow).toMatch(/input, textarea, select \{[^}]*font-size: 16px/);
   });
+
+  it("makes the timer pane scroll as one page on narrow screens (N29 follow-up)", () => {
+    const css = buildCss(THEMES[0].colors);
+    const narrow = css.slice(css.indexOf("@media (max-width: 720px)"));
+    const rule = (selector) => {
+      const start = narrow.indexOf(`${selector} {`);
+      expect(start, `${selector} rule`).toBeGreaterThan(-1);
+      return narrow.slice(start, narrow.indexOf("}", start));
+    };
+    const scroller = rule('.pv > [data-pane-id="timer"]');
+    expect(scroller).toMatch(/overflow-y: auto !important/);
+    expect(scroller).toMatch(/overscroll-behavior: contain/);
+    expect(rule('.pv > [data-pane-id="timer"] > *')).toMatch(/flex-shrink: 0 !important/);
+    expect(rule(".hours-list")).toMatch(/flex: none !important[^}]*overflow: visible !important/);
+    // Desktop keeps the inner scroll area.
+    expect(css.slice(0, css.indexOf("@media (max-width: 720px)"))).not.toMatch(/hours-list/);
+  });
+
+  it("tags the Hours by Subject list so the narrow block can release it", () => {
+    renderApp();
+    expect(pane("timer").querySelector(".hours-list")).toBeTruthy();
+  });
 });

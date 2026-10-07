@@ -2,13 +2,13 @@
 
 The one page to read to know where StudyBox is: what changed recently, how far through the plan it is, and what needs someone to act. It is kept current by the workflow. Every PR updates it (see the `git-workflow` skill, step 2b), and every readiness pass refreshes the progress section. It states only what is true once the PR that writes it has merged: tags, releases, production, open PRs and check state happen after the merge, so they live on GitHub and Vercel, not here (`git-workflow` step 4g). `src/statusDoc.test.js` fails if the version below disagrees with `package.json` or if one of those rows comes back.
 
-Last updated: 2026-10-06
+Last updated: 2026-10-07
 
 ## Current state
 
 | | |
 | --- | --- |
-| Current version | 1.19.7 |
+| Current version | 1.19.8 |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
 
@@ -18,6 +18,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#67](https://github.com/TrebleZee/studybox/pull/67) | On a phone, the timer pane scrolls as a whole, so Log Session and the Hours list are reachable on short screens | N29 (follow-up) | v1.19.8 |
 | [#65](https://github.com/TrebleZee/studybox/pull/65) | Version 1.19.7 for #63 and #64, which merged without one. No user-facing change | none | none |
 | [#64](https://github.com/TrebleZee/studybox/pull/64) | On a phone, the undo bar and the update banner stack instead of overlapping, and the timer's tag row no longer gets clipped | N29 (follow-up) | v1.19.7 |
 | [#63](https://github.com/TrebleZee/studybox/pull/63) | Every view is usable on a phone: the planner's columns stack, hover-only controls show on touch, and timer alerts are flagged when switching panes | N29 | v1.19.7 |
@@ -97,7 +98,7 @@ Tick an item off by deleting it in the next PR that touches this file, and note 
 | 7 | Make the design gate doc (`claude/v2-design-gate.md`) available to the exit check | Missing for three passes, so B1's wording has never been checked against it | 6 Nov |
 | 8 | Optional: turn off the Vercel Toolbar on preview deployments | Previews log one expected CSP error for it; production is unaffected | any time |
 | 9 | Decide whether the timer Reset undo (#46) should survive an accidental restart: today pressing Start or Space after Reset withdraws the offer at once, so Undo can never overwrite a new session. Options: fold the new seconds into the restored session, or let Undo replace a session under a few seconds | Review finding R1 on #46 (`docs/reviews/feat-undo-timer-reset.md`); not in the goal, so not decided by an agent | any time |
-| 11 | On a real phone (iPhone Safari and Android Chrome, in the browser and as the installed PWA): every view fits without sideways scrolling, the top bar isn't clipped, Log Session is reachable with the address bar showing, focusing a field doesn't zoom the page, and the planner's Subjects / Topics / Timer switch works with a timer running | Only checked in desktop Chromium at 375 and 390 px (N29) | any time |
+| 11 | On a real phone (iPhone Safari and Android Chrome, in the browser and as the installed PWA): every view fits without sideways scrolling, the top bar isn't clipped, Log Session is reachable with the address bar showing, focusing a field doesn't zoom the page, and the planner's Subjects / Topics / Timer switch works with a timer running, and each pane scrolls to its last control (Log Session on the Timer pane) on a short screen | Only checked in emulated Chromium at 360 to 390 px wide and 560 to 844 px tall (N29) | any time |
 
 ### Agent (next steps)
 
