@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { isUntouchedDefaultSubjects } from "../utils/subjects.js";
+import { defaultSubjects, isUntouchedDefaultSubjects, normalizeSubjects } from "../utils/subjects.js";
 import { addTombstone, emptyTombstones } from "../utils/tombstones.js";
-import { loaders, storedBackup, tabMerges } from "./appState.js";
+import { latestAccountData, loaders, storedBackup, tabMerges } from "./appState.js";
 import { STORAGE_KEYS } from "./localStore.js";
 
 const session = (id, updatedAt = "2026-09-13T10:00:00.000Z") => ({
@@ -83,5 +83,48 @@ describe("storedBackup", () => {
 
   it("has no unreadable field when everything parses", () => {
     expect(storedBackup()).not.toHaveProperty("unreadable");
+  });
+});
+
+// R1 from #66's review: an import builds on this, after its file read.
+describe("latestAccountData", () => {
+  const local = (over = {}) => ({
+    subjects: [],
+    sessions: [session("mine")],
+    tombstones: emptyTombstones(),
+    game: loaders.game(),
+    themeId: "midnight",
+    onboarded: true,
+    ...over,
+  });
+
+  it("folds in what another tab stored since this state was captured", () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify([session("mine"), session("theirs")]));
+    localStorage.setItem(STORAGE_KEYS.theme, JSON.stringify("paper"));
+    const latest = latestAccountData(local());
+    expect(latest.sessions.map((s) => s.id).sort()).toEqual(["mine", "theirs"]);
+    expect(latest.themeId).toBe("paper");
+  });
+
+  it("keeps this tab's deletes and records the store doesn't have yet", () => {
+    localStorage.setItem(STORAGE_KEYS.sessions, JSON.stringify([session("deleted-here")]));
+    const tombstones = addTombstone(emptyTombstones(), "sessions", "deleted-here");
+    const latest = latestAccountData(local({ tombstones }));
+    expect(latest.sessions.map((s) => s.id)).toEqual(["mine"]);
+    expect(latest.tombstones.sessions["deleted-here"]).toBeTruthy();
+  });
+
+  it("adds nothing from a missing or unreadable key (no placeholder subjects)", () => {
+    expect(latestAccountData(local()).subjects).toEqual([]);
+    localStorage.setItem(STORAGE_KEYS.subjects, "{not json");
+    expect(latestAccountData(local()).subjects).toEqual([]);
+  });
+
+  it("says when this tab still holds only the untouched onboarding placeholder", () => {
+    const placeholder = normalizeSubjects(defaultSubjects());
+    const fresh = local({ subjects: placeholder, sessions: [], onboarded: false });
+    expect(latestAccountData(fresh).placeholder).toBe(true);
+    localStorage.setItem(STORAGE_KEYS.onboarded, "true"); // another tab finished onboarding
+    expect(latestAccountData(fresh)).toMatchObject({ onboarded: true, placeholder: false });
   });
 });

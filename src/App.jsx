@@ -21,7 +21,7 @@ import { buildCss } from "./utils/appCss.js";
 import { buildBackup, downloadBackup, parseBackup, readFileText } from "./utils/backup.js";
 import { draftFields, timedTopic } from "./utils/sessionDraft.js";
 import { applyLoggedSession, deriveXP, streakExpiry, validateStreak } from "./utils/gameLogic.js";
-import { loaders, tabMerges } from "./store/appState.js";
+import { latestAccountData, loaders, tabMerges } from "./store/appState.js";
 import { loadJson, removeKey, saveJson, STORAGE_KEYS, usePersistedState } from "./store/index.js";
 import {
   addUniqueTag,
@@ -380,12 +380,12 @@ export default function StudyBox() {
     try {
       const restored = parseBackup(await readFileText(file));
       templateRequest.current += 1;
-      // Undo is offered only while nothing has changed since (utils/undo.js).
-      const before = { subjects, sessions, tombstones, game, themeId, onboarded, sel, timedSubjectId };
+      // What's here now, another tab's saves during the read included (R1); Undo is offered only while it's unchanged (utils/undo.js).
+      const before = { ...latestAccountData({ subjects, sessions, tombstones, game, themeId, onboarded }), sel, timedSubjectId };
       if (merge) {
         const theirs = { subjects: restored.subjects ?? [], sessions: restored.sessions ?? [] };
-        const incoming = { ...theirs, tombstones: restored.tombstones, game: restored.game ?? game };
-        const merged = mergeData({ subjects, sessions, tombstones, game }, incoming);
+        const incoming = { ...theirs, tombstones: restored.tombstones, game: restored.game ?? before.game };
+        const merged = mergeData(before, incoming);
         setData(merged);
         if (!merged.subjects.some((subject) => subject.id === sel)) setSel(merged.subjects[0]?.id ?? null);
         if (timedSubjectId && !merged.subjects.some((subject) => subject.id === timedSubjectId)) {
@@ -396,7 +396,7 @@ export default function StudyBox() {
         setBackupMessage({ type: "success", text, undo: { kind: "merge", before, after: merged } });
         return { ok: true };
       }
-      const after = stateAfterRestore(restored, { subjects, sessions, tombstones, game, themeId }, { placeholder: needsOnboarding });
+      const after = stateAfterRestore(restored, before, { placeholder: before.placeholder });
       setData(after);
       if (restored.subjects) setSel(after.subjects[0]?.id ?? null);
       setThemeId(after.themeId);
