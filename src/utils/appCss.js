@@ -35,6 +35,9 @@ export const buildCss = (C) => `
       .topbar-stats button { min-height: 36px; }
       .pv { flex-direction: column !important; }
       .pv > [data-pane-id] { flex: 1 1 0 !important; width: auto !important; min-height: 0; border: none !important; }
+      .pv > [data-pane-id="timer"] { overflow-y: auto !important; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+      .pv > [data-pane-id="timer"] > * { flex-shrink: 0 !important; }
+      .hours-list { flex: none !important; overflow: visible !important; }
       .pane-switch { display: flex; gap: 4px; padding: 6px 10px; flex: 0 0 auto; }
       .pane-switch > button { flex: 1 1 0; min-height: 40px; }
       .split { flex-direction: column !important; overflow-y: auto !important; }
