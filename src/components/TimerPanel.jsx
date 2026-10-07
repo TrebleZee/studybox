@@ -402,7 +402,7 @@ export default function TimerPanel({
       >
         Hours by Subject
       </div>
-      <div style={{ flex: 1, overflowY: "auto", paddingBottom: "8px" }}>
+      <div className="hours-list" style={{ flex: 1, overflowY: "auto", paddingBottom: "8px" }}>
         {subjects.map((subject) => (
           <div
             key={subject.id}
