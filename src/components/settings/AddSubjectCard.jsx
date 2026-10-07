@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { findSpec, loadSpec, subjectFromSpec } from "../../utils/catalogue.js";
 import { extractPdfText, generateSubjectDraftFromPdfText } from "../../utils/specImport.js";
 import {
@@ -45,7 +45,19 @@ export default function AddSubjectCard({ C, subjects = [], onAddSubject }) {
     (subjectMeta.spec || "").trim().toUpperCase() === catalogueMatch.subject.spec;
   const useCatalogueTopics = matchApplies && topicSource === "catalogue";
 
+  // Each upload or title choice takes the next number; a result whose number
+  // is no longer current (a newer request, Clear, add, unmount) is dropped.
+  const requestRef = useRef(0);
+  useEffect(
+    () => () => {
+      requestRef.current += 1;
+    },
+    []
+  );
+
   const resetImport = () => {
+    requestRef.current += 1;
+    setSpecImporting(false);
     setSpecFileName("");
     setSpecError("");
     setSpecTopics([]);
@@ -115,13 +127,16 @@ export default function AddSubjectCard({ C, subjects = [], onAddSubject }) {
   };
 
   const chooseTitle = async (entry) => {
+    const request = ++requestRef.current;
     setTitleError("");
     try {
       const spec = await loadSpec(entry.id);
       if (!spec) throw new Error("missing");
+      if (request !== requestRef.current) return;
       setTitleChoices([]);
       applyCatalogueSpec(spec);
     } catch {
+      if (request !== requestRef.current) return;
       // Shown next to the buttons, which stay visible so the student can retry.
       setTitleError("That specification couldn't be loaded. Check your connection and try again.");
     }
@@ -130,12 +145,15 @@ export default function AddSubjectCard({ C, subjects = [], onAddSubject }) {
   const handleSpecUpload = async (file) => {
     if (!file) return;
 
-    setSpecImporting(true);
     resetImport();
+    const request = requestRef.current;
+    const isCurrent = () => request === requestRef.current;
+    setSpecImporting(true);
     setSpecFileName(file.name);
 
     try {
       const text = await extractPdfText(file);
+      if (!isCurrent()) return;
       const draft = generateSubjectDraftFromPdfText(text, file.name);
       setSpecTopics(draft.topics || []);
 
@@ -154,6 +172,7 @@ export default function AddSubjectCard({ C, subjects = [], onAddSubject }) {
       }
 
       const spec = await catalogueSpecFor(draft.specCode);
+      if (!isCurrent()) return;
       if (spec) {
         applyCatalogueSpec(spec);
         return;
@@ -172,9 +191,9 @@ export default function AddSubjectCard({ C, subjects = [], onAddSubject }) {
         ...(draft.specCode ? { spec: draft.specCode.spec } : {}),
       });
     } catch (error) {
-      setSpecError(error instanceof Error ? error.message : "Unable to read PDF spec.");
+      if (isCurrent()) setSpecError(error instanceof Error ? error.message : "Unable to read PDF spec.");
     } finally {
-      setSpecImporting(false);
+      if (isCurrent()) setSpecImporting(false);
     }
   };
 
