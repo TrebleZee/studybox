@@ -14,18 +14,32 @@ const PDF_TEXT = {
   "aqa-timetable.pdf": "AQA A-LEVEL ITALIAN (7682) timetable. AQA components (7682, 7367, 7182) on the same day.",
 };
 
+// A PDF's read can be held pending the same way (keyed by file name).
+const readHolds = new Map();
+
 vi.mock("../../utils/specImport.js", async (importOriginal) => ({
   ...(await importOriginal()),
-  extractPdfText: vi.fn(async (file) => PDF_TEXT[file.name]),
+  extractPdfText: vi.fn(async (file) => {
+    if (readHolds.has(file.name)) await readHolds.get(file.name);
+    return PDF_TEXT[file.name];
+  }),
 }));
 
 // loadSpec can be told to fail once, to simulate an uncached chunk offline.
 const loadFailures = { remaining: 0 };
+// ...or to hold a spec's load pending until the test releases it (a slow chunk).
+const loadHolds = new Map();
+const holdLoad = (id) => {
+  let release;
+  loadHolds.set(id, new Promise((resolve) => (release = resolve)));
+  return release;
+};
 vi.mock("../../utils/catalogue.js", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
     loadSpec: vi.fn(async (id) => {
+      if (loadHolds.has(id)) await loadHolds.get(id);
       if (loadFailures.remaining > 0) {
         loadFailures.remaining -= 1;
         throw new Error("offline");
@@ -43,6 +57,8 @@ describe("AddSubjectCard spec import", () => {
   let user;
 
   beforeEach(() => {
+    loadHolds.clear();
+    readHolds.clear();
     onAddSubject = vi.fn();
     user = userEvent.setup();
     render(<AddSubjectCard C={C} onAddSubject={onAddSubject} />);
@@ -164,5 +180,56 @@ describe("AddSubjectCard spec import", () => {
     expect(subject.spec).toBeNull();
     expect(subject.specName ?? null).toBeNull();
     expect(subject.tier).toBeNull();
+  });
+
+  it("ignores a slow title load that a newer title choice has overtaken", async () => {
+    await upload("aqa-art.pdf");
+    const releaseSlow = holdLoad("aqa-7202");
+    await user.click(screen.getByRole("button", { name: "Fine art (7202)" }));
+    await user.click(screen.getByRole("button", { name: /\(7201\)/ }));
+    await waitFor(() => expect(screen.getByRole("radio", { name: /AQA A-level Art/ })).toBeTruthy());
+    expect((screen.getByLabelText("Spec code")).value).toBe("7201");
+
+    releaseSlow();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.getByLabelText("Spec code").value).toBe("7201");
+  });
+
+  it("ignores a slow catalogue load that a newer upload has overtaken", async () => {
+    const releaseSlow = holdLoad("aqa-8300");
+    await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("aqa-maths.pdf"));
+    await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("ocr-cs.pdf"));
+    await waitFor(() => expect(screen.getByText("Loaded ocr-cs.pdf.")).toBeTruthy());
+
+    releaseSlow();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.getByText("Loaded ocr-cs.pdf.")).toBeTruthy();
+    await user.click(screen.getByLabelText("Create subject"));
+    expect(onAddSubject.mock.calls[0][0]).toMatchObject({ board: "OCR", spec: "J277", name: "Computer Science" });
+  });
+
+  it("ignores a slow load once the import has been cleared", async () => {
+    const releaseSlow = holdLoad("aqa-8300");
+    await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("aqa-maths.pdf"));
+    await user.click(screen.getByRole("button", { name: /clear/i }));
+    releaseSlow();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.queryByRole("radio")).toBeNull();
+    expect(screen.getByLabelText("Spec code").value).toBe("");
+  });
+
+  it("ignores a slow PDF read that a newer upload has overtaken", async () => {
+    let releaseSlow;
+    readHolds.set("aqa-art.pdf", new Promise((resolve) => (releaseSlow = resolve)));
+    await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("aqa-art.pdf"));
+    await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("aqa-maths.pdf"));
+    await waitFor(() => expect(screen.getByText("Loaded aqa-maths.pdf.")).toBeTruthy());
+
+    releaseSlow();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.getByText("Loaded aqa-maths.pdf.")).toBeTruthy();
+    expect(screen.queryByText(/This specification covers/)).toBeNull();
+    await user.click(screen.getByLabelText("Create subject"));
+    expect(onAddSubject.mock.calls[0][0]).toMatchObject({ board: "AQA", spec: "8300" });
   });
 });

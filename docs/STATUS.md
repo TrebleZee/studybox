@@ -8,7 +8,7 @@ Last updated: 2026-10-07
 
 | | |
 | --- | --- |
-| Current version | 1.19.8 |
+| Current version | 1.19.10 |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
 
@@ -18,6 +18,8 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#69](https://github.com/TrebleZee/studybox/pull/69) | Merge and Restore from file no longer overwrite, or leave out of their undo, a change another open tab saved while the file was being read | R1 (#66 review) | v1.19.10 |
+| [#68](https://github.com/TrebleZee/studybox/pull/68) | Adding a subject from a spec PDF: a slow PDF read or catalogue load can no longer overwrite a newer upload or title choice, or refill the form after Clear | R2 (#66 review) | v1.19.9 |
 | [#66](https://github.com/TrebleZee/studybox/pull/66) | Tests no longer fail at random under a loaded CPU: async test waits get a 10 s deadline. No user-facing change (test-only, so no tag) | none | none |
 | [#67](https://github.com/TrebleZee/studybox/pull/67) | On a phone, the timer pane scrolls as a whole, so Log Session and the Hours list are reachable on short screens | N29 (follow-up) | v1.19.8 |
 | [#65](https://github.com/TrebleZee/studybox/pull/65) | Version 1.19.7 for #63 and #64, which merged without one. No user-facing change | none | none |
@@ -109,7 +111,6 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 2. Lane 8: C13 closed by `chore/status-post-merge` (#61); nothing further in the lane.
 3. Lane 1: A3.3 `fix/subtask-records` (N19) merged in #52 (v1.19.3). It also touches `restoreBeforeMerge` and the Undo restore echo check in `src/utils/undo.js` (lane 2's file, merged with #48 on the branch) so both undos still hold for subtasks. Next in lane 1: Phase C `fix/bound-imported-values`, after the A3.4 exit check.
 4. Open now: A2.11 (lane 5), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check. Lane 6 is empty (A2.10 merged in #56).
-5. An older bug found by #66's review, for its own `fix/` branch (R1, the stale Merge and Restore from file, is fixed by `fix/merge-file-stale-state`): (R2) `chooseTitle` / `handleSpecUpload` in `src/components/settings/AddSubjectCard.jsx` don't check a slow `loadSpec` result is still current, so a late load can overwrite a newer upload.
 
 ## Known risks
 
