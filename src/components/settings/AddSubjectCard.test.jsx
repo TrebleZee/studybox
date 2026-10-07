@@ -220,14 +220,15 @@ describe("AddSubjectCard spec import", () => {
 
   it("ignores a slow PDF read that a newer upload has overtaken", async () => {
     let releaseSlow;
-    readHolds.set("sqa-history.pdf", new Promise((resolve) => (releaseSlow = resolve)));
-    await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("sqa-history.pdf"));
+    readHolds.set("aqa-art.pdf", new Promise((resolve) => (releaseSlow = resolve)));
+    await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("aqa-art.pdf"));
     await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("aqa-maths.pdf"));
     await waitFor(() => expect(screen.getByText("Loaded aqa-maths.pdf.")).toBeTruthy());
 
     releaseSlow();
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(screen.getByText("Loaded aqa-maths.pdf.")).toBeTruthy();
+    expect(screen.queryByText(/This specification covers/)).toBeNull();
     await user.click(screen.getByLabelText("Create subject"));
     expect(onAddSubject.mock.calls[0][0]).toMatchObject({ board: "AQA", spec: "8300" });
   });
