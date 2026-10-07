@@ -18,6 +18,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#70](https://github.com/TrebleZee/studybox/pull/70) | Readiness pass: the A3.4 exit check passed; the goal moves to Phase C1 (stop losing data, round 3) and Phase G. No user-facing change | C15 | none |
 | [#69](https://github.com/TrebleZee/studybox/pull/69) | Merge and Restore from file no longer overwrite, or leave out of their undo, a change another open tab saved while the file was being read | R1 (#66 review) | v1.19.10 |
 | [#68](https://github.com/TrebleZee/studybox/pull/68) | Adding a subject from a spec PDF: a slow PDF read or catalogue load can no longer overwrite a newer upload or title choice, or refill the form after Clear | R2 (#66 review) | v1.19.9 |
 | [#66](https://github.com/TrebleZee/studybox/pull/66) | Tests no longer fail at random under a loaded CPU: async test waits get a 10 s deadline. No user-facing change (test-only, so no tag) | none | none |
