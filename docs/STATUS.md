@@ -8,7 +8,7 @@ Last updated: 2026-10-07
 
 | | |
 | --- | --- |
-| Current version | 1.19.8 |
+| Current version | 1.19.9 |
 | Current goal | `.claude/commands/goal.md`: Phases A2 and A3, amended by the scope review |
 | Readiness | Scope review on 2026-10-05: on track against the plan and within V1 scope in code, but not moving towards V2 (B1, V1 not started). Open: 3 `high` (N9, N10, N11), 2 `blocker`. Report: `docs/readiness/2026-10-05-scope-review.md` |
 
@@ -18,6 +18,7 @@ Newest first. One line per merged PR: what changed for the user (or "no user-fac
 
 | PR | Change | Closes | Version |
 | --- | --- | --- | --- |
+| [#68](https://github.com/TrebleZee/studybox/pull/68) | Adding a subject from a spec PDF: a slow PDF read or catalogue load can no longer overwrite a newer upload or title choice, or refill the form after Clear | R2 (#66 review) | v1.19.9 |
 | [#66](https://github.com/TrebleZee/studybox/pull/66) | Tests no longer fail at random under a loaded CPU: async test waits get a 10 s deadline. No user-facing change (test-only, so no tag) | none | none |
 | [#67](https://github.com/TrebleZee/studybox/pull/67) | On a phone, the timer pane scrolls as a whole, so Log Session and the Hours list are reachable on short screens | N29 (follow-up) | v1.19.8 |
 | [#65](https://github.com/TrebleZee/studybox/pull/65) | Version 1.19.7 for #63 and #64, which merged without one. No user-facing change | none | none |
