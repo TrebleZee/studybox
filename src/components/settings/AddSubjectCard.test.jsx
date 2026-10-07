@@ -14,9 +14,15 @@ const PDF_TEXT = {
   "aqa-timetable.pdf": "AQA A-LEVEL ITALIAN (7682) timetable. AQA components (7682, 7367, 7182) on the same day.",
 };
 
+// A PDF's read can be held pending the same way (keyed by file name).
+const readHolds = new Map();
+
 vi.mock("../../utils/specImport.js", async (importOriginal) => ({
   ...(await importOriginal()),
-  extractPdfText: vi.fn(async (file) => PDF_TEXT[file.name]),
+  extractPdfText: vi.fn(async (file) => {
+    if (readHolds.has(file.name)) await readHolds.get(file.name);
+    return PDF_TEXT[file.name];
+  }),
 }));
 
 // loadSpec can be told to fail once, to simulate an uncached chunk offline.
@@ -52,6 +58,7 @@ describe("AddSubjectCard spec import", () => {
 
   beforeEach(() => {
     loadHolds.clear();
+    readHolds.clear();
     onAddSubject = vi.fn();
     user = userEvent.setup();
     render(<AddSubjectCard C={C} onAddSubject={onAddSubject} />);
@@ -209,5 +216,19 @@ describe("AddSubjectCard spec import", () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(screen.queryByRole("radio")).toBeNull();
     expect(screen.getByLabelText("Spec code").value).toBe("");
+  });
+
+  it("ignores a slow PDF read that a newer upload has overtaken", async () => {
+    let releaseSlow;
+    readHolds.set("sqa-history.pdf", new Promise((resolve) => (releaseSlow = resolve)));
+    await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("sqa-history.pdf"));
+    await user.upload(screen.getByLabelText("Import subject specification PDF"), pdf("aqa-maths.pdf"));
+    await waitFor(() => expect(screen.getByText("Loaded aqa-maths.pdf.")).toBeTruthy());
+
+    releaseSlow();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(screen.getByText("Loaded aqa-maths.pdf.")).toBeTruthy();
+    await user.click(screen.getByLabelText("Create subject"));
+    expect(onAddSubject.mock.calls[0][0]).toMatchObject({ board: "AQA", spec: "8300" });
   });
 });
