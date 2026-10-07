@@ -109,7 +109,7 @@ Work the goal's **Parallel lanes**: one session per lane, each in its own worktr
 2. Lane 8: C13 closed by `chore/status-post-merge` (#61); nothing further in the lane.
 3. Lane 1: A3.3 `fix/subtask-records` (N19) merged in #52 (v1.19.3). It also touches `restoreBeforeMerge` and the Undo restore echo check in `src/utils/undo.js` (lane 2's file, merged with #48 on the branch) so both undos still hold for subtasks. Next in lane 1: Phase C `fix/bound-imported-values`, after the A3.4 exit check.
 4. Open now: A2.11 (lane 5), `chore/ignore-drafts` then `chore/document-known-gaps` (lane 7). Lane 9 (A2.12) after the Safari check. Lane 6 is empty (A2.10 merged in #56).
-5. Two older bugs found by #66's review, each for its own `fix/` branch: (R1) `importData` in `src/App.jsx` builds a Merge from file from state captured before `await readFileText(file)`, so a change another tab saves while the file is read can be overwritten, and lost if that tab then closes; (R2) `chooseTitle` / `handleSpecUpload` in `src/components/settings/AddSubjectCard.jsx` don't check a slow `loadSpec` result is still current, so a late load can overwrite a newer upload.
+5. An older bug found by #66's review, for its own `fix/` branch (R1, the stale Merge and Restore from file, is fixed by `fix/merge-file-stale-state`): (R2) `chooseTitle` / `handleSpecUpload` in `src/components/settings/AddSubjectCard.jsx` don't check a slow `loadSpec` result is still current, so a late load can overwrite a newer upload.
 
 ## Known risks
 

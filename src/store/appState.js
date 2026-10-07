@@ -4,7 +4,7 @@ import { buildInitialGame, normalizeGame } from "../utils/gameLogic.js";
 import { mergeGameStates, mergeSessionLists, mergeSubjectLists } from "../utils/merge.js";
 import { isUntouchedDefaultSubjects, normalizeSessions, normalizeSubjects } from "../utils/subjects.js";
 import { mergeTombstones, normalizeTombstones } from "../utils/tombstones.js";
-import { loadJson, STORAGE_KEYS, unreadableText } from "./localStore.js";
+import { isUnreadable, loadJson, loadText, STORAGE_KEYS, unreadableText } from "./localStore.js";
 
 const K = STORAGE_KEYS;
 
@@ -84,5 +84,36 @@ export const tabMerges = (localTombstones) => {
     sessions: (local, theirs) => normalizeSessions(mergeSessionLists(local, theirs, tombstones())),
     game: (local, theirs) =>
       normalizeGame(mergeGameStates(local, theirs, loaders.sessions(), loaders.subjects())),
+  };
+};
+
+// This tab's account data as it stands now: `local` (state an async action
+// captured before it awaited, so possibly a change behind) with what is stored
+// folded in, the way usePersistedState folds in another tab's change. Merge
+// and Restore from file build on this once the file is read, so a change
+// another tab saved during the read is neither overwritten nor left out of
+// the undo (R1 from #66's review). Theme and onboarded take the stored value,
+// as tabs do (onboarded only once set).
+export const latestAccountData = (local) => {
+  const merge = tabMerges(local.tombstones);
+  // A key that is missing or doesn't parse has nothing to add: its loader
+  // would give defaults (the placeholder subjects), not another tab's data.
+  const withStored = (key, load, mine, fold) => {
+    if (!loadText(key)) return mine;
+    const theirs = load();
+    return isUnreadable(key) ? mine : fold(mine, theirs);
+  };
+  const subjects = withStored(K.subjects, loaders.subjects, local.subjects, merge.subjects);
+  const sessions = withStored(K.sessions, loaders.sessions, local.sessions, merge.sessions);
+  const onboarded = Boolean(local.onboarded || loaders.onboarded());
+  return {
+    subjects,
+    sessions,
+    tombstones: withStored(K.tombstones, loaders.tombstones, local.tombstones, mergeTombstones),
+    game: withStored(K.game, loaders.game, local.game, merge.game),
+    themeId: loadJson(K.theme, local.themeId),
+    onboarded,
+    // Still the untouched onboarding defaults, which nobody's data replaces (N10).
+    placeholder: !onboarded && sessions.length === 0 && isUntouchedDefaultSubjects(subjects),
   };
 };
